@@ -1,0 +1,43 @@
+.shiny-notification {
+             position: fixed;
+             top: calc(10%);
+             left: calc(40%);
+             }
+
+#accessdata {
+  background: none;
+  border: 0;
+}
+
+#accessdata .node {
+  color: blue;
+}
+
+#noaccessdata {
+  background: none;
+  border: 0;
+}
+
+#noaccessdata .node {
+  color: dimgray;
+}
+
+#helpNew {
+  background: none;
+  border: 0;
+}
+
+#helpNew {
+  background: none;
+  border: 0;
+  width: 15px;
+}
+
+.top-options {
+  height: 300px;
+}
+
+.forceInline {
+   display: inline-block;
+  vertical-align:top;
+}
