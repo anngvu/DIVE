@@ -160,25 +160,23 @@ shinyServer(function(input, output, session) {
   
 #-- PAGE 3 ----------------------------------------------------------------------------------------#
   
-  updateSelectizeInput(session, "Glist", "Custom gene list", choices = names(GENES), 
+  updateSelectizeInput(session, "Glist", "Selected gene list", choices = names(GENES), 
                        selected = character(0), options = list(maxItems = 20), server = T)
   
   output$volcanos <- renderPlotly({
-    .gx <- gx
-    .px1 <- px1
-    .px2 <- px2
-    a.gx.T1D <- a.px1 <- a.px2.T1D <- a.px2.AAB <- NULL
-    if(length(input$Glist)) { 
+    pal2 <- pal[c(1,3,6)]
+    # a.gx.T1D <- a.px1 <- a.px2.T1D <- a.px2.AAB <- NULL
+    if(input$highlight & length(isolate(input$Glist))) { 
         genes <- GENES[input$Glist]
         # There's a bug in Plotly that prevents using this option:
         # a.gx.T1D <- gx[Entrez %in% genes, .(Diff.T1DvsHC, nlogP.T1DvsHC, Gene)]
-        # a.gx.T1D <- list(x = a.gx.T1D$Diff.T1DvsHC, y = a.gx.T1D$nlogP.T1DvsHC, xref = "x", yref = "y", 
+        # a.gx.T1D <- list(x = a.gx.T1D$Diff.T1DvsHC, y = a.gx.T1D$nlogP.T1DvsHC, xref = "x", yref = "y",
         #                  text = a.gx.T1D$Gene, showarrow = T, arrowhead = 7)
         # 
         # a.px1 <- px1[Entrez %in% genes | Entrez.2 %in% genes, .(Difference, nlogP, Protein)]
         # a.px1 <- list(x = a.px1$Difference, y = a.px1$nlogP, xref = "x1", yref = "y1",
         #               text = a.px1$Protein, showarrow = T, arrowhead = 7)
-        #   
+        # 
         # a.px2.T1D <- px2[Entrez %in% genes, .(Diff.T1DvsHC, nlogP.T1DvsHC, Protein)]
         # a.px2.T1D <- list(x = a.px2.T1D$Diff.T1DvsHC, y = a.px2.T1D$nlogP.T1DvsHC, xref = "x2", yref = "y2",
         #                   text = a.px2.T1D$Protein, showarrow = T, arrowhead = 7)
@@ -186,40 +184,60 @@ shinyServer(function(input, output, session) {
         # a.px2.AAB <- px2[Entrez %in% genes, .(Diff.AABvsHC, nlogP.AABvsHC, Protein)]
         # a.px2.AAB <- list(x = a.px2.AAB$Diff.AABvsHC, y = a.px2.AAB$nlogP.AABvsHC, xref = "x3", yref = "y3",
         #                   text = a.px2.AAB$Protein, showarrow = T, arrowhead = 7)
-        
-      .gx[, Highlight := Entrez %in% genes]
-      .gx[Highlight == T, Label := "X"]
-      .px1[, Highlight := Entrez %in% genes | Entrez.2 %in% genes]
-      .px1[Highlight == T, Label := "X"]
-      .px2[, Highlight := Entrez %in% genes]
-      .px2[Highlight == T, Label := "X"]
-      pal <- c("#A69EB0FF", "#00FF83FF", "yellow2", "darkorchid1", "royalblue1", "violetred1", "black")
+        gx[!Entrez %in% genes, c("Color", "Text") := list("Genes", "")]
+        gx[Entrez %in% genes,  c("Color", "Text") := list("Selected genes", Gene)]
+        px1[!Entrez %in% genes, c("Color", "Text") := list("Genes", "")]
+        px1[Entrez %in% genes,  c("Color", "Text") := list("Selected genes", Protein)]
+        px2[!Entrez %in% genes, c("Color", "Text") := list("Genes", "")]
+        px2[Entrez %in% genes,  c("Color", "Text") := list("Selected genes", Protein)]
+        pal <- pal2 <- c("gray", "red")
     } else {
-      .gx[, Highlight := F]
-      .px1[, Highlight := F]
-      .px2[, Highlight := F]
+      gx[, Color := Label]
+      px1[, Color := Label]
+      px2[, Color := Label]
     }
-    
-    gx.T1D <- plot_ly(data = .gx, x = ~Diff.T1DvsHC, y = ~nlogP.T1DvsHC, text = ~Gene, type="scatter", mode = "markers",
-                  color = ~factor(Label), symbol = ~Highlight, symbols = c("circle", "square"), colors = pal[c(1,3,6)], showlegend = FALSE) %>%
-                  layout(annotations = a.gx.T1D)
-    px1 <- plot_ly(data = .px1, x = ~Difference, y = ~nlogP, text = ~Protein, type="scatter", mode = "markers",
-                   color = ~factor(Label), colors = pal[c(1,3,6)], showlegend = FALSE) %>%
-                   layout(annotations = a.px1)
-    px2.T1D <- plot_ly(data = .px2, x = ~Diff.T1DvsHC, y = ~nlogP.T1DvsHC, text = ~Protein, type="scatter", mode = "markers",
-                       color = ~Label, colors = pal, legendgroup = ~Label, showlegend = FALSE) %>%
-                       layout(annotations = a.px2.T1D)
-    px2.AAB <- plot_ly(data = .px2, x = ~Diff.AABvsHC, y = ~nlogP.AABvsHC, text = ~Protein, type="scatter", mode = "markers",
-                       color = ~Label, colors = pal, legendgroup = ~Label) %>%
-                       layout(plot_bgcolor = "#F7F7F7FF", legend = list(orientation = 'h', bgcolor = "#F7F7F7FF"))
-    p <- subplot(gx.T1D, px1, px2.T1D, px2.AAB) 
-    if(F) {
-      gx.AAB <- plot_ly(data = .gx, x = ~Diff.AABvsHC, y = ~(nlogP.unadj.AABvsHC), text = ~Gene, type="scatter", mode = "markers", 
-                        color = pal[1], showlegend = FALSE) %>%
-        layout(title ="Volcano Plot")
-      p <- subplot(gx.AAB, gx.T1D, px1, px2.T1D, px2.AAB, shareX = F, shareY = F) 
+    volcanos <- list()
+    if("gx.T1D" %in% input$activeVolcano) {
+      volcanos$gx.T1D <- plot_ly(data = gx, x = ~Diff.T1DvsHC, y = ~nlogP.T1DvsHC, type="scatter", mode = "markers",
+                        hoverinfo = "text", text = ~paste("Gene: ", Gene, "<br>-log(adjusted P): ", nlogP.T1DvsHC, "<br>Difference: ", Diff.T1DvsHC),
+                        color = ~Color, colors = pal2, #textfont = list(color = "#000000"), textposition = "top center",
+                        showlegend = FALSE) %>% 
+                        layout(xaxis = list(title = "Difference (T1D-HC) | Transcriptomics | Pancreas"), yaxis = list(title= "-log(adjusted P)"))
     }
-    p
+    if("px1" %in% input$activeVolcano) {
+      volcanos$px1 <- plot_ly(data = px1, x = ~Difference, y = ~nlogP, type="scatter", mode = "markers",
+                     hoverinfo = "text", text = ~paste("Protein: ", Protein, "<br>Gene: ", Gene, "<br>-log(adjusted P): ", nlogP, "<br>Difference: ", Difference),
+                     color = ~Color, colors = pal2, #textfont = list(color = "#000000"), textposition = "top center",
+                     showlegend = FALSE) %>% 
+                     layout(xaxis = list(title = "Difference (T1D-HC) | Proteomics | Exocrine"), yaxis = list(title = "-log(adjusted P)"))
+    }
+    if("px2.T1D" %in% input$activeVolcano) {
+      volcanos$px2.T1D <- plot_ly(data = px2, x = ~Diff.T1DvsHC, y = ~nlogP.T1DvsHC, type="scatter", mode = "markers",
+                         hoverinfo = "text", text = ~paste("Protein: ", Protein, "<br>Gene: ", Gene, "<br>-log(adjusted P): ", nlogP.T1DvsHC, "<br>Difference: ", Diff.T1DvsHC),
+                         color = ~Color, colors = pal, #textfont = list(color = "#000000"), textposition = "top center",
+                         legendgroup = ~Label, showlegend = FALSE) %>% 
+                         layout(xaxis = list(title = "Difference (T1D-HC) | Proteomics | Endocrine"), yaxis = list(title = "-log(adjusted P)"))
+    }
+    if("px2.AAB" %in% input$activeVolcano) {
+      volcanos$px2.AAB <- plot_ly(data = px2, x = ~Diff.AABvsHC, y = ~nlogP.AABvsHC, type="scatter", mode = "markers",
+                         hoverinfo = "text", text = ~paste("Protein: ", Protein, "<br>Gene: ", Gene, "<br>-log(adjusted P): ", nlogP.AABvsHC, "<br>Difference: ", Diff.AABvsHC),
+                         color = ~Color, colors = pal, #textfont = list(color = "#000000"), textposition = "top center", 
+                         legendgroup = ~Color) %>% 
+                         layout(xaxis = list(title = "Difference (AAB-HC) | Proteomics | Endocrine"), yaxis = list(title = "-log(adjusted P)"))
+    }
+    if("gx.AAB" %in% input$activeVolcano) { # Option for showing plot of AABvsHC transcriptomics volcano for UN-adjusted P-values
+      volcanos$gx.AAB <- plot_ly(data = gx, x = ~Diff.AABvsHC, y = ~(nlogP.unadj.AABvsHC), type="scatter", mode = "markers",
+                        text = ~paste("Gene: ", Gene, "<br>-log(un-adjusted P): ", nlogP.unadj.AABvsHC, "<br>Difference: ", Diff.AABvsHC),
+                        color = ~Color, colors = pal2, showlegend = FALSE) %>%
+                        layout(xaxis = list(title = "Difference (AAB-HC) | Transcriptomics | Pancreas"), yaxis = list(title= "-log(UN-ADJUSTED P)"))
+      subplot(volcanos, titleX = T, titleY = T) %>%
+        layout(plot_bgcolor = "#F7F7F7FF", legend = list(x = 0, y = 1.2, orientation = "h", bgcolor = "#F7F7F7FF"))
+    } else if(length(plots)) {
+      subplot(volcanos, titleX = T)  %>%
+        layout(yaxis = list(title = "-log(adjusted P)"), plot_bgcolor = "#F7F7F7FF", legend = list(x = 0, y = 1.2, orientation = "h", bgcolor = "#F7F7F7FF"))
+    } else {
+      return(NULL)
+    }
   })
 
 
