@@ -20,26 +20,30 @@ shinyUI(navbarPage("nPOD DIVE", id = "main", selected = "intro",
 #-- PAGE 2 ----------------------------------------------------------------------------------------#
   tabPanel("2D", value = "page-2", fluidPage(
            fluidRow(
+             column(1,
+                    br(),
+                    actionButton("helpCorrelation", "Help/Info")
+             ),
              column(1, 
-                    numericInput("n_minimum", HTML("min. N for <i>r</i>"), min = 2, max = NA, step = 1, val = 5, width = "80px")
+                    numericInput("minimumN", HTML("min. N for <i>r</i>"), min = 2, max = NA, step = 1, val = 5, width = "80px")
              ),
              column(2, 
-                    selectizeInput("var_exclude", "Exclude variables from correlation matrix", cdata.vars, multiple = T)
+                    selectizeInput("varExclude", "Exclude variables from correlation matrix", cdata.vars, multiple = T)
              ),
              # column(1, 
              #        br(),
-             #        actionButton("reset_vars", "Reset")
+             #        actionButton("varReset", "Reset")
              # ),
              column(3, 
-                    div(class = "forceInline", br(), actionButton("helpNew", "", icon = icon("question-circle"))),
-                    div(class = "forceInline", fileInput("newdata", "", multiple = FALSE, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
+                    div(class = "forceInline", br(), actionButton("helpUpload", "", icon = icon("question-circle"))),
+                    div(class = "forceInline", fileInput("dataUpload", "", multiple = FALSE, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
                                   buttonLabel = "My data...", placeholder = "Upload data for comparison"))
              ),
              column(4, 
                     selectizeInput("drilldown", "Drill down to data points for V1 or V1 x V2:", 
                                    choices = c("", unique(corM$Var1)), selected = "", options = list(maxItems = 2))
              ),
-             column(2, 
+             column(1, 
                     conditionalPanel("input.drilldown",
                                      selectInput("colorby", "Color data points by", choices = names(cdata)[!names(cdata) %in% "ID"], selected = "donorType", width = "200px"),
                                      checkboxInput("plotsmooth", "Add smooth"))
@@ -54,44 +58,46 @@ shinyUI(navbarPage("nPOD DIVE", id = "main", selected = "intro",
           )),
 
 #-- PAGE 3 ----------------------------------------------------------------------------------------#
-  tabPanel("3D", value = "page-3",
-           fluidRow(
-            column(1, 
-                   actionButton("volcanoInfo", "Help/Info")
-            ),
-            column(11,
-                   checkboxGroupInput("activeVolcano", "Showing data for:", 
-                                      choiceNames = c("Transcriptomics|AAB vs HC (Yip et et. unpublished)", "Transcriptomics|T1D vs HC (Yip et et. unpublished)", 
-                                                       "Proteomics|T1D vs HC (Liu et al. 2015)", "Proteomics|T1D vs HC (Nyawidle et al. 2016)", "Proteomics| AAB vs HC (Nyawidle et al. 2016)"),
-                                      choiceValues = c("gx.AAB", "gx.T1D", "px1", "px2.T1D", "px2.AAB"),
-                                      selected = c("gx.T1D", "px1", "px2.T1D", "px2.AAB"),
-                                      inline = T)
-            )),
-           hr(),
+  tabPanel("HD", value = "page-3",
            fluidRow(class = "top-options",
              column(2,
-                    selectizeInput("Glist", "Selected genes list", choices = NULL, selected = NULL, options = list(maxItems = 20))
-             ),
-             column(1,
                     br(),
-                    actionButton("highlight", "Highlight selected")
+                    actionButton("helpVolcano", "Help/Info"),
+                    actionButton("viewVolcano", "Show/Hide Volcano(s)")
+             ),       
+             column(2,
+                    selectizeInput("Glist", "Selected genes (proteins) list", choices = NULL, selected = NULL, options = list(maxItems = 20))
              ),
              column(2,
-                    radioButtons("GorR", "Or get genes/gene products annotated to:", choices = c("Gene Ontology", "Reactome"),
-                                 selected = "Gene Ontology", inline = T)
+                    actionButton("highlight", "Highlight selected"),
+                    actionButton("volcanoReset", "Reset"),
+                    helpText("Note: Expression may not be available in all data.")
              ),
-             column(2,
-                    selectizeInput("GOReactq", "GO term", choices = NULL, selected = NULL)
-             ),
-             column(3,
+             column(2, align="right", 
+                    radioButtons("GorR", "Or genes/gene products annotated to:", choices = c("Gene Ontology", "Reactome"),
+                                 selected = "Gene Ontology", inline = T),
                     conditionalPanel(condition = "input.GorR == 'Gene Ontology'",
-                                     checkboxGroupInput("BPCCMP", "GO branch",
-                                                               choices = c("Biological Process" = "BP", "Cellular Component" = "CC", "Molecular Function" = "MF"),
-                                                               selected = "BP", inline = T))
+                                     radioButtons("BPCCMP", "GO branch",
+                                                  choices = c("Biological Process" = "BP", "Cellular Component" = "CC", "Molecular Function" = "MF"),
+                                                  selected = "BP", inline = T))
              ),
              column(2,
-                    selectizeInput("Plist", "Phenotype/clinical variables", choices = unique(Columns$MPOLabel), selected = "", options = list(maxItems = 20))
+                    selectizeInput("GOReactq", "GO Term", choices = NULL, selected = NULL)
+             ),
+             column(2,
+                    selectizeInput("Plist", "Phenotype/clinical variable(s)", choices = unique(Columns$MPOLabel), selected = "", options = list(maxItems = 20))
           )),
+          fluidRow(
+            column(12,
+                   conditionalPanel("input.viewVolcano%2==1",
+                     checkboxGroupInput("activeVolcano", "Showing data for:", 
+                                        choiceNames = c("Transcriptomics | AAB-HC (Yip et et. unpublished)", "Transcriptomics | T1D-HC (Yip et et. unpublished)", 
+                                                        "Proteomics | T1D-HC (Liu et al. 2016)", "Proteomics | T1D-HC (Nyalwidhe et al. 2017)", "Proteomics | AAB-HC (Nyawidle et al. 2016)"),
+                                        choiceValues = c("gx.AAB", "gx.T1D", "px1", "px2.T1D", "px2.AAB"),
+                                        selected = c("gx.T1D", "px1", "px2.T1D", "px2.AAB"),
+                                        inline = T)
+                   )
+            )),
           fluidRow(
             column(12, 
                    withSpinner(plotlyOutput("volcanos"), type = 4, color = "gray"))

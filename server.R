@@ -17,7 +17,33 @@ shinyServer(function(input, output, session) {
     updateNavbarPage(session, "main", selected = "source-data")
   })
   
+  # Help events -------------------------------------------------
+  # Intro.js demo
+  
+  
+  # -------------------------------------------------------------
+  
 #-- PAGE 2 ----------------------------------------------------------------------------------------#
+  
+  # Help events -------------------------------------------------
+  observeEvent(input$helpUpload, {
+    showModal(modalDialog(
+      title = "Uploading data",
+      includeHTML("uploading_data.html"),
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  
+  observeEvent(input$helpCorrelation, {
+    showModal(modalDialog(
+      title = "Exploring correlations with old and new data",
+      HTML(""),
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  # -------------------------------------------------------------
   
   #  Correlations
   output$corM <- renderPlotly({
@@ -27,7 +53,7 @@ shinyServer(function(input, output, session) {
     tmp <- round(cor(tmp, use = "pairwise.complete.obs"), 2)
     # Newly imported variables are labeled in red
     #labcolors <- ifelse(unique(tmp$Var1) %in% cdata.vars, "black", "red")
-    #n <- input$n_minimum
+    #n <- input$minimumN
     #tmp$value[tmp$n < n] <- NA  
     # p <- ggplot(tmp, aes(x = Var1, y = Var2, fill = value)) + geom_tile() +
     #   theme_classic() +
@@ -44,60 +70,23 @@ shinyServer(function(input, output, session) {
     p
   })
   
-  observeEvent(input$var_exclude, {
+  observeEvent(input$varExclude, {
     corr <- plotdata$corr.last.state
-    corr <- corr[!corr$Var1 %in% input$var_exclude, ]
-    corr <- corr[!corr$Var2 %in% input$var_exclude, ]
+    corr <- corr[!corr$Var1 %in% input$varExclude, ]
+    corr <- corr[!corr$Var2 %in% input$varExclude, ]
     plotdata$corr <- corr
   })
   
-  observeEvent(input$reset_vars, {
+  observeEvent(input$varReset, {
     plotdata$corr <- plotdata$corr.last.state
-    updateSelectizeInput(session, "var_exclude", "Exclude variables from correlation matrix", selected = character(0))
+    updateSelectizeInput(session, "varExclude", "Exclude variables from correlation matrix", selected = character(0))
   })
-  
-  fluidRow(
-    column(1, 
-           numericInput("n_minimum", HTML("min. N for <i>r</i>"), min = 2, max = NA, step = 1, val = 5)
-    ),
-    column(3, 
-           selectizeInput("var_exclude", "Exclude variables from correlation matrix", cdata.vars, multiple = T)
-    ),
-    column(1, 
-           br(),
-           actionButton("reset_vars", "Reset")
-    ),
-    column(4, 
-           div(class = "forceInline", 
-               fileInput("newdata", "", multiple = FALSE, accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
-                         buttonLabel = "My data...", placeholder = "Upload data for comparison")),
-           div(class = "forceInline", br(), actionButton("helpNew", "", icon = icon("question-circle")))
-    ),
-    column(3, 
-           selectizeInput("drilldown", "Drill down to data points for V1 or V1 x V2:", 
-                          choices = c("", unique(corM$Var1)), selected = "", options = list(maxItems = 2))
-    ),
-    column(12, align = "center",
-           plotlyOutput("corM")
-    )
-  )
-  
-  # Help
-  observeEvent(input$helpNew, {
-    showModal(modalDialog(
-      title = "Uploading data",
-      HTML("<strong>What kind of data</strong><br>This works for simple data that can be formatted as a table. For high-throughput, image, or other complex data, please contact us or go to (OFFICIAL PROCESS TBD)<br><br><strong>Format</strong><br>The table should have a first column named 'ID' with nPOD case IDs, which we use as the key for joining data.<br><br><strong>Data confidentiality</strong><br>Note that this DOES NOT automatically save your data within our server. To officially contribute your data, go to (OFFICIAL PROCESS TBD)"),
-      easyClose = TRUE,
-      footer = NULL
-    ))
-  })
-  
 
-  observeEvent(input$newdata, {
-    newdata <- fread(input$newdata$datapath, header = T)
-    names(newdata) <- make.names(names(newdata))
-    plotdata$newdata <- newdata
-    newacc <- merge(cdata, newdata, by.x = "ID", by.y = names(newdata)[1], all = T)
+  observeEvent(input$dataUpload, {
+    dataUpload <- fread(input$dataUpload$datapath, header = T)
+    names(dataUpload) <- make.names(names(dataUpload))
+    plotdata$dataUpload <- dataUpload
+    newacc <- merge(cdata, dataUpload, by.x = "ID", by.y = names(dataUpload)[1], all = T)
     plotdata$acc <- newacc
     newcorrs <- melt(cor(newacc[, -c("ID", "donorType", "CR.gender", "CR.ethnic", "CR.COD", "CR.ABO")], use = "pairwise.complete.obs"))
     n <- melt(crossprod(as.matrix(newacc[, lapply(.SD, function(x) as.integer(!is.na(x))), .SDcols = !c("ID", "donorType", "CR.gender", "CR.ethnic", "CR.COD", "CR.ABO")])))
@@ -106,7 +95,7 @@ shinyServer(function(input, output, session) {
     plotdata$corr.last.state <- newcorrs
     updateSelectizeInput(session, "drilldown", "Drill down to data points for V1, or V1 x V2:", choices = c("", unique(newcorrs$Var1)),
                          selected = newcorrs$Var1[1], options = list(maxItems = 2))
-    updateSelectizeInput(session, "var_exclude", "Exclude variables from correlation matrix", 
+    updateSelectizeInput(session, "varExclude", "Exclude variables from correlation matrix", 
                          choices = names(newacc)[!names(newacc) %in% c("ID", "donorType", "CR.gender", "CR.ethnic", "CR.COD", "CR.ABO")])
     updateSelectInput(session, "colorby", "Color data points by", choices = names(newacc)[!names(newacc) %in% "ID"], selected = "donorType")
   })
@@ -160,9 +149,22 @@ shinyServer(function(input, output, session) {
   
 #-- PAGE 3 ----------------------------------------------------------------------------------------#
   
+  # Help events -------------------------------------------------
+  observeEvent(input$helpVolcano, {
+    showModal(modalDialog(
+      title = "Volcano help",
+      HTML(""),
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  # -------------------------------------------------------------
+  
+  # Menu update
   updateSelectizeInput(session, "Glist", "Selected gene list", choices = names(GENES), 
                        selected = character(0), options = list(maxItems = 20), server = T)
   
+  # Volcano render
   output$volcanos <- renderPlotly({
     pal2 <- pal[c(1,3,6)]
     # a.gx.T1D <- a.px1 <- a.px2.T1D <- a.px2.AAB <- NULL
@@ -232,14 +234,13 @@ shinyServer(function(input, output, session) {
                         layout(xaxis = list(title = "Difference (AAB-HC) | Transcriptomics | Pancreas"), yaxis = list(title= "-log(UN-ADJUSTED P)"))
       subplot(volcanos, titleX = T, titleY = T) %>%
         layout(plot_bgcolor = "#F7F7F7FF", legend = list(x = 0, y = 1.2, orientation = "h", bgcolor = "#F7F7F7FF"))
-    } else if(length(plots)) {
+    } else if(length(volcanos)) {
       subplot(volcanos, titleX = T)  %>%
-        layout(yaxis = list(title = "-log(adjusted P)"), plot_bgcolor = "#F7F7F7FF", legend = list(x = 0, y = 1.2, orientation = "h", bgcolor = "#F7F7F7FF"))
+        layout(yaxis = list(title = "-log(adjusted P)"), plot_bgcolor = "#F7F7F7FF", legend = list(x = 0, y = 1.1, orientation = "h", bgcolor = "#FFFFFF"))
     } else {
       return(NULL)
     }
   })
-
 
 #-- PAGE 5 ----------------------------------------------------------------------------------------#
   
