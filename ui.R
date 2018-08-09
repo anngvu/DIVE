@@ -5,7 +5,7 @@ shinyUI(navbarPage("nPOD DIVE", id = "main", selected = "intro",
                    theme = shinytheme("lumen"), tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
                    
 #-- PAGE 1 ----------------------------------------------------------------------------------------#                 
-  tabPanel("Connections in Investigations", value = "intro",
+  tabPanel("Connections in Investigations", value = "intro", icon = icon("connectdevelop"),
            fluidRow(
              column(8,
                     visNetworkOutput("network", height = "750px"),
@@ -18,11 +18,11 @@ shinyUI(navbarPage("nPOD DIVE", id = "main", selected = "intro",
            )),
 
 #-- PAGE 2 ----------------------------------------------------------------------------------------#
-  tabPanel("2D", value = "page-2", fluidPage(
+  tabPanel("2D", value = "page-2", icon = icon("cube"), fluidPage(
            fluidRow(
              column(1,
                     br(),
-                    actionButton("helpCorrelation", "Help/Info")
+                    actionButton("helpCorrelation", "", icon = icon("info-circle"))
              ),
              column(1, 
                     numericInput("minimumN", HTML("min. N for <i>r</i>"), min = 2, max = NA, step = 1, val = 5, width = "80px")
@@ -47,7 +47,7 @@ shinyUI(navbarPage("nPOD DIVE", id = "main", selected = "intro",
                     conditionalPanel("input.drilldown",
                                      selectInput("colorby", "Color data points by", choices = names(cdata)[!names(cdata) %in% "ID"], selected = "donorType", width = "200px"),
                                      checkboxInput("plotsmooth", "Add smooth"))
-             )),
+             ),
            fluidRow(
              column(8, align = "center",
                     plotlyOutput("corM")
@@ -55,26 +55,24 @@ shinyUI(navbarPage("nPOD DIVE", id = "main", selected = "intro",
              column(4, 
                     plotlyOutput("scatter")
              ))
-          )),
+          ))),
 
 #-- PAGE 3 ----------------------------------------------------------------------------------------#
-  tabPanel("HD", value = "page-3",
+  tabPanel("HD", value = "page-3", icon = icon("cubes"),
            fluidRow(class = "top-options",
-             column(2,
+             column(1,
                     br(),
-                    actionButton("helpVolcano", "Help/Info"),
-                    actionButton("viewVolcano", "Show/Hide Volcano(s)")
+                    actionButton("helpVolcano", "", icon = icon("info-circle")),
+                    actionButton("viewVolcano", "Plots", icon = icon("eye-slash"))
              ),       
-             column(2,
-                    selectizeInput("Glist", "Selected genes (proteins) list", choices = NULL, selected = NULL, options = list(maxItems = 20))
+             column(3,
+                    div(class = "forceInline", selectizeInput("Glist", "Genes (proteins) of interest", choices = NULL, selected = NULL, options = list(maxItems = 20))),
+                    div(class = "forceInline", br(), actionButton("highlight", "", icon = icon("line-chart"))),
+                    div(class = "forceInline", br(), actionButton("volcanoReset", "Reset")),
+                    helpText("Note: Expression values may not be available in all datasets.")
              ),
-             column(2,
-                    actionButton("highlight", "Highlight selected"),
-                    actionButton("volcanoReset", "Reset"),
-                    helpText("Note: Expression may not be available in all data.")
-             ),
-             column(2, align="right", 
-                    radioButtons("GorR", "Or genes/gene products annotated to:", choices = c("Gene Ontology", "Reactome"),
+             column(3, align="right", 
+                    radioButtons("GorR", "Look up genes (proteins) involved in a process/pathway with:", choices = c("Gene Ontology", "Reactome"),
                                  selected = "Gene Ontology", inline = T),
                     conditionalPanel(condition = "input.GorR == 'Gene Ontology'",
                                      radioButtons("BPCCMP", "GO branch",
@@ -82,15 +80,20 @@ shinyUI(navbarPage("nPOD DIVE", id = "main", selected = "intro",
                                                   selected = "BP", inline = T))
              ),
              column(2,
-                    selectizeInput("GOReactq", "GO Term", choices = NULL, selected = NULL)
+                    div(class = "forceInline", selectizeInput("GOReactq", "Choose term", choices = NULL, selected = NULL, width = "240px")),
+                    div(class = "forceInline", br(), actionButton("On", "", icon = icon("line-chart"))),
+                    helpText("Only terms with at least one annotation shown.")
              ),
-             column(2,
-                    selectizeInput("Plist", "Phenotype/clinical variable(s)", choices = unique(Columns$MPOLabel), selected = "", options = list(maxItems = 20))
+             column(3, style="border-left: 1px solid lightgray",
+                    div(class = "forceInline", selectizeInput("Clist", "Phenotype/clinical variable(s)", choices = character(0), 
+                                                              selected = "", options = list(placeholder = "select genes first", maxItems = 20), width = "240px")),
+                    div(class = "forceInline", br(), actionButton("clistAdd", "", icon = icon("line-chart"))),
+                    helpText("See gene/protein expression values relative to phenotype/clinical data.")
           )),
           fluidRow(
             column(12,
                    conditionalPanel("input.viewVolcano%2==1",
-                     checkboxGroupInput("activeVolcano", "Showing data for:", 
+                     checkboxGroupInput("activeVolcano", "Show/hide volcano plots:", 
                                         choiceNames = c("Transcriptomics | AAB-HC (Yip et et. unpublished)", "Transcriptomics | T1D-HC (Yip et et. unpublished)", 
                                                         "Proteomics | T1D-HC (Liu et al. 2016)", "Proteomics | T1D-HC (Nyalwidhe et al. 2017)", "Proteomics | AAB-HC (Nyawidle et al. 2016)"),
                                         choiceValues = c("gx.AAB", "gx.T1D", "px1", "px2.T1D", "px2.AAB"),
@@ -112,7 +115,7 @@ shinyUI(navbarPage("nPOD DIVE", id = "main", selected = "intro",
   tabPanel("Stories", value = "stories"),
 
 #-- PAGE 5 ----------------------------------------------------------------------------------------#
-  tabPanel("Source Data", value = "source-data",
+  tabPanel("Source Data", value = "source-data", icon = icon("database"),
            checkboxInput("filterDT", "Only display sources where individual-level data is readily available.", value = T, width = 500),
            DT::dataTableOutput("sourceDT")
           )

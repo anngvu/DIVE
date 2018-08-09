@@ -11,22 +11,13 @@ library(reshape2)
 ## BioPortal key
 bpkey <- "4e941848-9247-4b38-a68a-fc6f235cb4e6"
 
-load("Data/xm.Rdata")
 load("Ontology/db.Rdata")
-
-########## GO/Reactome Term Lookup #########################################################################
-
-filterGOTerms <- function(BP.CC.MF) {
-  terms <- GOTerm[GOOntology %in% BP.CC.MF]
-  terms <- setNames(names(terms), terms)
-  terms
-}
 
 ########## GO lookup  ######################################################################### 
 
 go2genes <- function(GOID) {
   entrez <- NULL
-  go2 <- tryCatch(AnnotationDbi::select(org.Hs.eg.db, GOID, c("SYMBOL", "ENTREZID"), "GOALL"), error = function(e) return())
+  go2 <- tryCatch(AnnotationDbi::select(org.Hs.eg.db, GOID, c("SYMBOL", "ENTREZID"), "GO"), error = function(e) return())
   if(!is.null(go2)) {
     # accEvidence <- c("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "IBA", "IBD", "RCA", "IC")
     # go2genes <- go2genes[go2genes$EVIDENCEALL %in% accEvidence, ]
@@ -62,10 +53,7 @@ path2genes <- function(PATHID) {
 # NAT2 6102 -1.002683200        HC
 genes2xm <- function(entrez, dataformat = "long") {
   group <- unlist(mapply(rep, c("No diabetes", "Autoab Pos", "T1D"), c(7,6,10)))
-  # match row indices using our vector of entrez ids
-  ri <- entrez[entrez %in% row.names(xm)]
-  if(!length(ri)) return(NULL) 
-  xm2 <- xm[match(ri, row.names(xm)), ]
+  
   if(dataformat != "long") { # assume "wide"
     if (length(ri) > 1) xm2 <- t(xm2) # vector becomes a one-column data.frame when coerced; t() not needed
     xm2 <- as.data.frame(xm2)
