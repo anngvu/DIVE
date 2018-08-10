@@ -102,14 +102,14 @@ shinyUI(navbarPage("nPOD DIVE", id = "main", selected = "intro",
                    )
             )),
           fluidRow(
-            column(12, 
-                   withSpinner(plotlyOutput("volcanos"), type = 4, color = "gray"))
-          ),
-          fluidRow(
             column(12,
-                   plotlyOutput("xGOReact")
-          )
+                   withSpinner(plotlyOutput("volcanos"), type = 4, color = "gray")
           )),
+          fluidRow(
+            column(12, style="margin-top: 50px;",
+                   plotlyOutput("parallel"))
+          )
+          ),
 
 #-- PAGE 4 ----------------------------------------------------------------------------------------#
   tabPanel("Stories", value = "stories"),

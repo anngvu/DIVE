@@ -9,6 +9,7 @@ library(plotly)
 
 #-- SET-UP:data -----------------------------------------------------------------------------------#
 
+load("Data/cdata.Rdata")
 load("Data/dtM.Rdata")
 load("Data/accM.Rdata")
 load("Data/network.Rdata")
@@ -16,7 +17,6 @@ load("Data/gx.Rdata")
 load("Data/px1.Rdata")
 load("Data/px2.Rdata")
 load("Ontology/GOBP.Rdata")
-cdata <- fread("Data/cdata.txt")
 corM <- fread("Data/corM.txt")
 Columns <- fread("Data/Columns.txt")
 

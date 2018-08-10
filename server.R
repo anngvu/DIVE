@@ -185,8 +185,8 @@ shinyServer(function(input, output, session) {
     genes <- NULL
     
     # Handle requests from GO/Reactome drop-down selection
-    
-    if(length(input$GOReactq)) {
+    genesOn <- isolate(input$GOReactq)
+    if(input$On & length(genesOn)) {
       GorR <- isolate(input$GorR)
       if(GorR == "Gene Ontology") {
           genes <- go2genes(isolate(input$GOReactq))
@@ -251,7 +251,7 @@ shinyServer(function(input, output, session) {
       volcanos$px2.T1D <- plot_ly(data = px2, x = ~Diff.T1DvsHC, y = ~nlogP.T1DvsHC, type="scatter", mode = "markers",
                          hoverinfo = "text", text = ~paste("Protein: ", Protein, "<br>Gene: ", Gene, "<br>-log(adjusted p): ", nlogP.T1DvsHC, "<br>Difference: ", Diff.T1DvsHC),
                          color = ~Color, colors = pal, #textfont = list(color = "#000000"), textposition = "top center",
-                         legendgroup = ~Label, showlegend = FALSE) %>% 
+                         showlegend = FALSE) %>% 
                          layout(xaxis = list(title = "Difference (T1D-HC) | Proteomics | Endocrine"), yaxis = list(title = "-log(adjusted p)"))
     }
     if("px2.AAB" %in% input$activeVolcano) {
@@ -276,11 +276,42 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  output$multi <- renderPlotly({
-    plot_ly()
-    
+  output$parallel <- renderPlotly({
+    genes <- isolate(input$Glist)  
+    if(input$highlight & length(genes)) {
+      genes <- GENES[genes]
+      xdata <- gx[Entrez %in% genes, c(1:23, 24)] # cols 1-23 = donor values, 24 = Gene name
+      genes <- xdata$Gene
+      if(!length(genes)) return(NULL)
+      xdata <- xdata[, data.table(t(.SD), keep.rownames = T), .SDcols = 1:23]
+      setnames(xdata, c("ID", make.names(genes)))
+      xdata[, ID := as.numeric(ID)]
+      cvar <- "Cpeptide"
+      xdata <- merge(xdata, cdata[, c("ID", "donor.type", cvar), with = F], by = "ID", all.x = T, all.y = F)
+      xdata[, donor.type := factor(donor.type, levels = c("No diabetes", "Autoab Pos", "T1D"))]
+      xdata <- xdata[order(donor.type)]
+      xdata[, ID := factor(ID, levels = ID)]
+      ylim <- xdata[, c(min(.SD) - 0.5, max(.SD) + 0.5), .SDcols = names(xdata)[!names(xdata) %in% c("ID", "donor.type", cvar)] ]
+      xdata[, ID2 := c(paste0("HC", 1:7), paste0("AAB", 1:6), paste0("T1D", 1:10))]
+      p <- plot_ly(data = xdata)
+      for(g in names(xdata)[!names(xdata) %in% c("ID", "ID2", "donor.type", cvar)]) {
+                p <- p %>% add_trace(name = gsub(".", "-", g, fixed = T), x = ~ID, y = as.formula(paste0("~", g)), type = "scatter", mode = "lines", yaxis = "y")
+      }
+      # Add phenotype/clinical layer
+      p <- p %>% add_trace(x = ~ID, y = as.formula(paste0("~", cvar)), type = "bar", name = cvar, yaxis = "y2",  marker = list(color = "lightgray"))
+      
+      # The rest of the plot
+      p <- p %>% layout(xaxis = list(title = "Case", showticklabels = F), 
+                        yaxis = list(side = "left", title = "log2 Normalized Expression", range = ylim, showgrid = FALSE),
+                        yaxis2 = list(side = "right", overlaying = "y", title = cvar))
+      p <- p %>% add_annotations(x = xdata[donor.type == "No diabetes", ID], y = rep(ylim[1], 7), text = xdata[donor.type == "No diabetes", ID2], 
+                                     xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "#264E86")) %>% 
+                 add_annotations(x = xdata[donor.type == "Autoab Pos", ID], y = rep(ylim[1], 6), text = xdata[donor.type == "Autoab Pos", ID2], 
+                        xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "orange")) %>% 
+                 add_annotations(x = xdata[donor.type == "T1D", ID], y = rep(ylim[1], 10), text = xdata[donor.type == "T1D", ID2], 
+                        xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "red"))
+    }
   })
-  
 
 #-- PAGE 5 ----------------------------------------------------------------------------------------#
   
