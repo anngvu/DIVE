@@ -1,0 +1,5 @@
+ID	Ki67.Ins.cells	CK19.Ins.cells	CF_grade	Ins	Syn	CFTR_mut
+6404	X	X	X	X	X	X
+6136	X	X	X	X	X	X
+6105	X	X	X	X	X	X
+6398	X	X	X	X	X	X

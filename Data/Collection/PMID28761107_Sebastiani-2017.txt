@@ -1,0 +1,7 @@
+ID	miRs.Treg.PLN	miRs.Treg.PB	miR125.Treg.PB	miR125.Treg.PLN	miR125.Tconv.PB	miR125.Tconv.PLN	CCL2.Ins	CCL2.Gcg
+6098	X	X	X	X	X	X	X	X
+6153	X	X	X	X	X	X	X	X
+6024	X	X	X	X	X	X	X	X
+6174	X	X	X	X	X	X	X	X
+6052	X	X	X	X	X	X	X	X
+6113	X	X	X	X	X	X	X	X

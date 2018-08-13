@@ -13,7 +13,7 @@ bpkey <- "4e941848-9247-4b38-a68a-fc6f235cb4e6"
 
 load("Ontology/db.Rdata")
 
-########## GO lookup  ######################################################################### 
+#-- GO lookup  ----------------------------------------------------------------------------------------#
 
 go2genes <- function(GOID) {
   entrez <- NULL
@@ -26,7 +26,7 @@ go2genes <- function(GOID) {
   return(entrez)
 }
 
-########## Reactome lookup  ######################################################################### 
+#-- Reactome lookup ------------------------------------------------------------------------------------#
 
 path2genes <- function(PATHID) {
   entrez <- NULL
@@ -42,29 +42,51 @@ path2genes <- function(PATHID) {
   return(entrez)
 }
 
-########## Expression Matrix subsetting #########################################################################
+#-- xdata ----------------------------------------------------------------------------------------#
 
-# From expression matrix, returns a subsetted data.frame in long format given a NAMED vector of gene entrez ids (names = symbols), e.g.:
-# Gene   ID   Expression DonorType
-# INS 6102 -2.218647500        HC
-# PEX1 6102 -0.315356730        HC
-# A1BG 6102 -0.768768900        HC
-# NAT1 6102  0.913388970        HC
-# NAT2 6102 -1.002683200        HC
-genes2xm <- function(entrez, dataformat = "long") {
-  group <- unlist(mapply(rep, c("No diabetes", "Autoab Pos", "T1D"), c(7,6,10)))
-  
-  if(dataformat != "long") { # assume "wide"
-    if (length(ri) > 1) xm2 <- t(xm2) # vector becomes a one-column data.frame when coerced; t() not needed
-    xm2 <- as.data.frame(xm2)
-    colnames(xm2) <- make.names(names(ri))
-    xm2$DonorType <- as.numeric(factor(group, levels = c("No diabetes", "Autoab Pos", "T1D")))
-  } else {
-    xm2$Gene <- names(ri)
-    xm2 <- reshape2::melt(xm2, id.vars = "Gene", variable.name = "ID", value.name = "Expression")
-    xm2$DonorType <- factor(rep(group, each = length(ri))) 
-  }
-  return(xm2)
+gxGet <- function(genes) {
+  xdata <- gx[Entrez %in% genes, c(1:23, 24)] # cols 1-23 = donor values, 24 = Gene name
+  genes <- xdata$Gene
+  if(!length(genes)) return(NULL)
+  xdata <- xdata[, data.table(t(.SD), keep.rownames = T), .SDcols = 1:23]
+  setnames(xdata, c("ID", make.names(genes)))
+  xdata[, ID := as.numeric(ID)]
+  xdata <- xdataMerge(xdata)
+  xdata[, ID2 := c(paste0("HC", 1:7), paste0("AAB", 1:6), paste0("T1D", 1:10))]
+  return(xdata)
+}
+
+px1Get <- function(genes) {
+  xdata <- px1[Entrez %in% genes, c("6029", "6057", "6096", "6172", "6174", "6195", "6196", "6051", "6211", "6212", "Gene")]
+  genes <- xdata$Gene
+  if(!length(genes)) return(NULL)
+  xdata <- xdata[, data.table(t(.SD), keep.rownames = T), .SDcols = 1:10]
+  setnames(xdata, c("ID", make.names(genes)))
+  xdata[, ID := as.numeric(ID)]
+  xdata <- xdataMerge(xdata)
+  xdata[, ID2 := c(paste0("HC", 1:5), paste0("T1D", 1:5))]
+  return(xdata)
+}
+
+px2Get <- function(genes) {
+  xdata <- px1[Entrez %in% genes, c("6029", "6057", "6096", "6172", "6174", "6195", "6196", "6051", "6211", "6212", "Gene")]
+  genes <- xdata$Gene
+  if(!length(genes)) return(NULL)
+  xdata <- xdata[, data.table(t(.SD), keep.rownames = T), .SDcols = 1:10]
+  setnames(xdata, c("ID", make.names(genes)))
+  xdata[, ID := as.numeric(ID)]
+  xdata <- xdataMerge(xdata)
+  xdata[, ID2 := c(paste0("HC", 1:5), paste0("T1D", 1:5))]
+  return(xdata)
+}
+
+# Merge with cdata
+xdataMerge <- function(xdata, cvars = Columns[Source %in% c("Aab", "Demographics", "DiabetesInfo", "HLA"), Variable]) {
+  xdata <- merge(xdata, cdata[, c("ID", "donor.type", cvars), with = F], by = "ID", all.x = T, all.y = F)
+  xdata[, donor.type := factor(donor.type, levels = c("No diabetes", "Autoab Pos", "T1D"))]
+  xdata <- xdata[order(donor.type)]
+  xdata[, ID := factor(ID, levels = ID)]
+  return(xdata)
 }
 
 # Return only genes that show significant differences in expression; number of genes significantly different

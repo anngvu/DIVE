@@ -6,8 +6,8 @@ library(shiny)
 #--------------------------------------------------------------------------------------------------#
 
 shinyServer(function(input, output, session) {
-   
-#-- PAGE 1 ----------------------------------------------------------------------------------------#
+  
+  #-- PAGE 1 ----------------------------------------------------------------------------------------#
   
   output$network <- renderVisNetwork({
     g %>% visIgraphLayout(randomSeed = 88) %>% visOptions(highlightNearest = TRUE)
@@ -23,7 +23,7 @@ shinyServer(function(input, output, session) {
   
   # -------------------------------------------------------------
   
-#-- PAGE 2 ----------------------------------------------------------------------------------------#
+  #-- PAGE 2 ----------------------------------------------------------------------------------------#
   
   # Help events -------------------------------------------------
   observeEvent(input$helpUpload, {
@@ -81,7 +81,7 @@ shinyServer(function(input, output, session) {
     plotdata$corr <- plotdata$corr.last.state
     updateSelectizeInput(session, "varExclude", "Exclude variables from correlation matrix", selected = character(0))
   })
-
+  
   observeEvent(input$dataUpload, {
     dataUpload <- fread(input$dataUpload$datapath, header = T)
     names(dataUpload) <- make.names(names(dataUpload))
@@ -147,7 +147,7 @@ shinyServer(function(input, output, session) {
     }
   })
   
-#-- PAGE 3 ----------------------------------------------------------------------------------------#
+  #-- PAGE 3 ----------------------------------------------------------------------------------------#
   
   # Help events -------------------------------------------------
   observeEvent(input$helpVolcano, {
@@ -167,9 +167,9 @@ shinyServer(function(input, output, session) {
   # Update GO/Reactome drop-down
   observeEvent(input$GorR, {
     branch <- switch(input$BPCCMP,
-      BP = setNames(GO.BP$GO, paste0(GO.BP$GOTerm, " (", GO.BP$Count, ")")),
-      MF = "",
-      CC = ""
+                     BP = setNames(GO.BP$GO, paste0(GO.BP$GOTerm, " (", GO.BP$Count, ")")),
+                     MF = "",
+                     CC = ""
     )
     if(input$GorR == "Gene Ontology") {
       updateSelectizeInput(session, "GOReactq", "GO term", choices = branch, selected = character(0), server = TRUE)
@@ -178,94 +178,82 @@ shinyServer(function(input, output, session) {
     }
   })
   
+  observeEvent(input$Ont, {
+    genesOn <- isolate(input$GOReactq)
+    if(length(genesOn)) {
+      GorR <- isolate(input$GorR)
+      if(GorR == "Gene Ontology") {
+        plotdata$genes <- go2genes(genesOn)
+      } else {
+        path <- unlist(PATHS[(isolate(input$GOReactq))])
+        plotdata$genes <- path2genes(path)
+      }
+    }
+  })
+  
+  observeEvent(input$highlight, {
+    genesIn <- isolate(input$Glist)
+    if(length(genesIn)) { #
+      plotdata$genes <- GENES[genesIn]
+    }
+  })
+  
+  observeEvent(input$resetVolcano, {
+    plotdata$genes <- NULL
+  })
+  
   # Volcano render
   output$volcanos <- renderPlotly({
     pal2 <- pal[c(1,3,6)]
-    # a.gx.T1D <- a.px1 <- a.px2.T1D <- a.px2.AAB <- NULL
-    genes <- NULL
-    
-    # Handle requests from GO/Reactome drop-down selection
-    genesOn <- isolate(input$GOReactq)
-    if(input$On & length(genesOn)) {
-      GorR <- isolate(input$GorR)
-      if(GorR == "Gene Ontology") {
-          genes <- go2genes(isolate(input$GOReactq))
-      } else {
-        path <- unlist(PATHS[(isolate(input$GOReactq))])
-          genes <- path2genes(path)
-      }
-    }
-    
-    # Handle requests from entered gene list
-    genesIn <- isolate(input$Glist)  
-    if(input$highlight & length(genesIn)) { 
-        genes <- GENES[genesIn]
-        # There's a bug in Plotly that prevents using annotations:
-        # a.gx.T1D <- gx[Entrez %in% genes, .(Diff.T1DvsHC, nlogP.T1DvsHC, Gene)]
-        # a.gx.T1D <- list(x = a.gx.T1D$Diff.T1DvsHC, y = a.gx.T1D$nlogP.T1DvsHC, xref = "x", yref = "y",
-        #                  text = a.gx.T1D$Gene, showarrow = T, arrowhead = 7)
-        # 
-        # a.px1 <- px1[Entrez %in% genes | Entrez.2 %in% genes, .(Difference, nlogP, Protein)]
-        # a.px1 <- list(x = a.px1$Difference, y = a.px1$nlogP, xref = "x1", yref = "y1",
-        #               text = a.px1$Protein, showarrow = T, arrowhead = 7)
-        # 
-        # a.px2.T1D <- px2[Entrez %in% genes, .(Diff.T1DvsHC, nlogP.T1DvsHC, Protein)]
-        # a.px2.T1D <- list(x = a.px2.T1D$Diff.T1DvsHC, y = a.px2.T1D$nlogP.T1DvsHC, xref = "x2", yref = "y2",
-        #                   text = a.px2.T1D$Protein, showarrow = T, arrowhead = 7)
-        # 
-        # a.px2.AAB <- px2[Entrez %in% genes, .(Diff.AABvsHC, nlogP.AABvsHC, Protein)]
-        # a.px2.AAB <- list(x = a.px2.AAB$Diff.AABvsHC, y = a.px2.AAB$nlogP.AABvsHC, xref = "x3", yref = "y3",
-        #                   text = a.px2.AAB$Protein, showarrow = T, arrowhead = 7)
-    }
-    
+    genes <- plotdata$genes
     if(!is.null(genes)) {
-        gx[!Entrez %in% genes, c("Color", "Text") := list("Genes/proteins", "")]
-        gx[Entrez %in% genes,  c("Color", "Text") := list("Genes/proteins of interest", Gene)]
-        px1[!Entrez %in% genes, c("Color", "Text") := list("Genes/proteins", "")]
-        px1[Entrez %in% genes,  c("Color", "Text") := list("Genes/proteins of interest", Protein)]
-        px2[!Entrez %in% genes, c("Color", "Text") := list("Genes/proteins", "")]
-        px2[Entrez %in% genes,  c("Color", "Text") := list("Genes/proteins of interest", Protein)]
-        pal <- pal2 <- c("gray", "red")
+      gx[!Entrez %in% genes, c("Color", "Text") := list("Genes/proteins", "")]
+      gx[Entrez %in% genes,  c("Color", "Text") := list("Genes/proteins of interest", Gene)]
+      px1[!Entrez %in% genes, c("Color", "Text") := list("Genes/proteins", "")]
+      px1[Entrez %in% genes,  c("Color", "Text") := list("Genes/proteins of interest", Protein)]
+      px2[!Entrez %in% genes, c("Color", "Text") := list("Genes/proteins", "")]
+      px2[Entrez %in% genes,  c("Color", "Text") := list("Genes/proteins of interest", Protein)]
+      pal <- pal2 <- c("gray", "red")
     } else {
       gx[, Color := Label]
       px1[, Color := Label]
       px2[, Color := Label]
     }
-    
     volcanos <- list()
     if("gx.T1D" %in% input$activeVolcano) {
       volcanos$gx.T1D <- plot_ly(data = gx, x = ~Diff.T1DvsHC, y = ~nlogP.T1DvsHC, type="scatter", mode = "markers",
-                        hoverinfo = "text", text = ~paste("Gene: ", Gene, "<br>-log(adjusted p): ", nlogP.T1DvsHC, "<br>Difference: ", Diff.T1DvsHC),
-                        color = ~Color, colors = pal2, #textfont = list(color = "#000000"), textposition = "top center",
-                        showlegend = FALSE) %>% 
-                        layout(xaxis = list(title = "Difference (T1D-HC) | Transcriptomics | Pancreas"), yaxis = list(title= "-log(adjusted p)"))
+                                 hoverinfo = "text", text = ~paste("Gene: ", Gene, "<br>-log(adjusted p): ", nlogP.T1DvsHC, "<br>Difference: ", Diff.T1DvsHC),
+                                 color = ~Color, colors = pal2, #textfont = list(color = "#000000"), textposition = "top center",
+                                 showlegend = FALSE) %>% 
+        layout(xaxis = list(title = "Difference (T1D-HC) | Transcriptomics | Pancreas"), yaxis = list(title= "-log(adjusted p)"))
     }
     if("px1" %in% input$activeVolcano) {
       volcanos$px1 <- plot_ly(data = px1, x = ~Difference, y = ~nlogP, type="scatter", mode = "markers",
-                     hoverinfo = "text", text = ~paste("Protein: ", Protein, "<br>Gene: ", Gene, "<br>-log(adjusted p): ", nlogP, "<br>Difference: ", Difference),
-                     color = ~Color, colors = pal2, #textfont = list(color = "#000000"), textposition = "top center",
-                     showlegend = FALSE) %>% 
-                     layout(xaxis = list(title = "Difference (T1D-HC) | Proteomics | Exocrine"), yaxis = list(title = "-log(adjusted p)"))
+                              hoverinfo = "text", text = ~paste("Protein: ", Protein, "<br>Gene: ", Gene, "<br>-log(adjusted p): ", nlogP, "<br>Difference: ", Difference),
+                              color = ~Color, colors = pal2, #textfont = list(color = "#000000"), textposition = "top center",
+                              showlegend = FALSE) %>% 
+        layout(xaxis = list(title = "Difference (T1D-HC) | Proteomics | Exocrine"), yaxis = list(title = "-log(adjusted p)"))
     }
     if("px2.T1D" %in% input$activeVolcano) {
       volcanos$px2.T1D <- plot_ly(data = px2, x = ~Diff.T1DvsHC, y = ~nlogP.T1DvsHC, type="scatter", mode = "markers",
-                         hoverinfo = "text", text = ~paste("Protein: ", Protein, "<br>Gene: ", Gene, "<br>-log(adjusted p): ", nlogP.T1DvsHC, "<br>Difference: ", Diff.T1DvsHC),
-                         color = ~Color, colors = pal, #textfont = list(color = "#000000"), textposition = "top center",
-                         showlegend = FALSE) %>% 
-                         layout(xaxis = list(title = "Difference (T1D-HC) | Proteomics | Endocrine"), yaxis = list(title = "-log(adjusted p)"))
+                                  hoverinfo = "text", text = ~paste("Protein: ", Protein, "<br>Gene: ", Gene, "<br>-log(adjusted p): ", nlogP.T1DvsHC, "<br>Difference: ", Diff.T1DvsHC),
+                                  color = ~Color, colors = pal, #textfont = list(color = "#000000"), textposition = "top center",
+                                  showlegend = FALSE) %>% 
+        layout(xaxis = list(title = "Difference (T1D-HC) | Proteomics | Endocrine"), yaxis = list(title = "-log(adjusted p)"))
     }
     if("px2.AAB" %in% input$activeVolcano) {
       volcanos$px2.AAB <- plot_ly(data = px2, x = ~Diff.AABvsHC, y = ~nlogP.AABvsHC, type="scatter", mode = "markers",
-                         hoverinfo = "text", text = ~paste("Protein: ", Protein, "<br>Gene: ", Gene, "<br>-log(adjusted p): ", nlogP.AABvsHC, "<br>Difference: ", Diff.AABvsHC),
-                         color = ~Color, colors = pal, #textfont = list(color = "#000000"), textposition = "top center", 
-                         legendgroup = ~Color) %>% 
-                         layout(xaxis = list(title = "Difference (AAB-HC) | Proteomics | Endocrine"), yaxis = list(title = "-log(adjusted p)"))
+                                  hoverinfo = "text", text = ~paste("Protein: ", Protein, "<br>Gene: ", Gene, "<br>-log(adjusted p): ", nlogP.AABvsHC, "<br>Difference: ", Diff.AABvsHC),
+                                  color = ~Color, colors = pal, #textfont = list(color = "#000000"), textposition = "top center", 
+                                  legendgroup = ~Color) %>% 
+        layout(xaxis = list(title = "Difference (AAB-HC) | Proteomics | Endocrine"), yaxis = list(title = "-log(adjusted p)"))
     }
+    
     if("gx.AAB" %in% input$activeVolcano) { # Option for showing plot of AABvsHC transcriptomics volcano for UN-adjusted p-values
       gx.AAB <- plot_ly(data = gx, x = ~Diff.AABvsHC, y = ~(nlogP.unadj.AABvsHC), type="scatter", mode = "markers",
                         text = ~paste("Gene: ", Gene, "<br>-log(un-adjusted p): ", nlogP.unadj.AABvsHC, "<br>Difference: ", Diff.AABvsHC),
                         color = ~Color, colors = pal2, showlegend = FALSE) %>%
-                        layout(xaxis = list(title = "Difference (AAB-HC) | Transcriptomics | Pancreas"), yaxis = list(title= "-log(NON-adjusted p)"))
+        layout(xaxis = list(title = "Difference (AAB-HC) | Transcriptomics | Pancreas"), yaxis = list(title= "-log(NON-adjusted p)"))
       subplot(gx.AAB, volcanos, titleX = T, titleY = T) %>%
         layout(plot_bgcolor = "#F7F7F7FF", legend = list(x = 0, y = 1.2, orientation = "h", bgcolor = "#F7F7F7FF"))
     } else if(length(volcanos)) {
@@ -277,43 +265,35 @@ shinyServer(function(input, output, session) {
   })
   
   output$parallel <- renderPlotly({
-    genes <- isolate(input$Glist)  
-    if(input$highlight & length(genes)) {
-      genes <- GENES[genes]
-      xdata <- gx[Entrez %in% genes, c(1:23, 24)] # cols 1-23 = donor values, 24 = Gene name
-      genes <- xdata$Gene
-      if(!length(genes)) return(NULL)
-      xdata <- xdata[, data.table(t(.SD), keep.rownames = T), .SDcols = 1:23]
-      setnames(xdata, c("ID", make.names(genes)))
-      xdata[, ID := as.numeric(ID)]
-      cvar <- "Cpeptide"
-      xdata <- merge(xdata, cdata[, c("ID", "donor.type", cvar), with = F], by = "ID", all.x = T, all.y = F)
-      xdata[, donor.type := factor(donor.type, levels = c("No diabetes", "Autoab Pos", "T1D"))]
-      xdata <- xdata[order(donor.type)]
-      xdata[, ID := factor(ID, levels = ID)]
-      ylim <- xdata[, c(min(.SD) - 0.5, max(.SD) + 0.5), .SDcols = names(xdata)[!names(xdata) %in% c("ID", "donor.type", cvar)] ]
-      xdata[, ID2 := c(paste0("HC", 1:7), paste0("AAB", 1:6), paste0("T1D", 1:10))]
-      p <- plot_ly(data = xdata)
-      for(g in names(xdata)[!names(xdata) %in% c("ID", "ID2", "donor.type", cvar)]) {
-                p <- p %>% add_trace(name = gsub(".", "-", g, fixed = T), x = ~ID, y = as.formula(paste0("~", g)), type = "scatter", mode = "lines", yaxis = "y")
-      }
-      # Add phenotype/clinical layer
-      p <- p %>% add_trace(x = ~ID, y = as.formula(paste0("~", cvar)), type = "bar", name = cvar, yaxis = "y2",  marker = list(color = "lightgray"))
-      
-      # The rest of the plot
-      p <- p %>% layout(xaxis = list(title = "Case", showticklabels = F), 
-                        yaxis = list(side = "left", title = "log2 Normalized Expression", range = ylim, showgrid = FALSE),
-                        yaxis2 = list(side = "right", overlaying = "y", title = cvar))
-      p <- p %>% add_annotations(x = xdata[donor.type == "No diabetes", ID], y = rep(ylim[1], 7), text = xdata[donor.type == "No diabetes", ID2], 
-                                     xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "#264E86")) %>% 
-                 add_annotations(x = xdata[donor.type == "Autoab Pos", ID], y = rep(ylim[1], 6), text = xdata[donor.type == "Autoab Pos", ID2], 
-                        xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "orange")) %>% 
-                 add_annotations(x = xdata[donor.type == "T1D", ID], y = rep(ylim[1], 10), text = xdata[donor.type == "T1D", ID2], 
-                        xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "red"))
+    genes <- plotdata$genes
+    cvars <- input$Clist
+    if(!length(genes) | !length(cvars)) return(NULL)
+    xdata <- switch(input$whichX,
+                    gx = gxGet(genes),
+                    px1 = px1Get(genes),
+                    px2 = px2Get(genes)
+    )
+    xdata <- xdata[, c("ID", "ID2", "donor.type", cvars), with = F]
+    p <- plot_ly(data = xdata)
+    # Add a trace for each gene
+    for(g in names(xdata)[!names(xdata) %in% c("ID", "ID2", "donor.type", cvars)]) {
+      p <- p %>% add_trace(name = gsub(".", "-", g, fixed = T), x = ~ID, y = as.formula(paste0("~", g)), type = "scatter", mode = "lines", yaxis = "y")
     }
+    # Add phenotype/clinical layer
+    p <- p %>% add_trace(x = ~ID, y = as.formula(paste0("~", cvars)), type = "bar", name = cvars, yaxis = "y2",  marker = list(color = "lightgray"))
+    p <- p %>% layout(xaxis = list(title = "Case", showticklabels = F), 
+                      yaxis = list(side = "left", title = "log2 Normalized Expression", range = ylim, showgrid = FALSE),
+                      yaxis2 = list(side = "right", overlaying = "y"))
+    p <- p %>% add_annotations(x = xdata[donor.type == "No diabetes", ID], y = rep(ylim[1], 7), text = xdata[donor.type == "No diabetes", ID2], 
+                               xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "#264E86")) %>% 
+      add_annotations(x = xdata[donor.type == "Autoab Pos", ID], y = rep(ylim[1], 6), text = xdata[donor.type == "Autoab Pos", ID2], 
+                      xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "orange")) %>% 
+      add_annotations(x = xdata[donor.type == "T1D", ID], y = rep(ylim[1], 10), text = xdata[donor.type == "T1D", ID2], 
+                      xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "red"))
+    p
   })
-
-#-- PAGE 5 ----------------------------------------------------------------------------------------#
+  
+  #-- PAGE 5 ----------------------------------------------------------------------------------------#
   
   output$sourceDT <- DT::renderDataTable({
     show <- Columns[, .(Source, Contributors, IndividualLevelData, MPOLabel, Variable, Description, Relevance, Method, Note, DataSource, DataSourceLink)]
