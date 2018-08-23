@@ -46,46 +46,48 @@ path2genes <- function(PATHID) {
 
 gxGet <- function(genes) {
   xdata <- gx[Entrez %in% genes, c(1:23, 24)] # cols 1-23 = donor values, 24 = Gene name
+  xdata <- xdata[!duplicated(Gene)] 
   genes <- xdata$Gene
   if(!length(genes)) return(NULL)
   xdata <- xdata[, data.table(t(.SD), keep.rownames = T), .SDcols = 1:23]
   setnames(xdata, c("ID", make.names(genes)))
   xdata[, ID := as.numeric(ID)]
-  xdata <- xdataMerge(xdata)
   xdata[, ID2 := c(paste0("HC", 1:7), paste0("AAB", 1:6), paste0("T1D", 1:10))]
   return(xdata)
 }
 
 px1Get <- function(genes) {
   xdata <- px1[Entrez %in% genes, c("6029", "6057", "6096", "6172", "6174", "6195", "6196", "6051", "6211", "6212", "Gene")]
+  xdata <- xdata[!duplicated(Gene)] 
   genes <- xdata$Gene
   if(!length(genes)) return(NULL)
   xdata <- xdata[, data.table(t(.SD), keep.rownames = T), .SDcols = 1:10]
   setnames(xdata, c("ID", make.names(genes)))
   xdata[, ID := as.numeric(ID)]
-  xdata <- xdataMerge(xdata)
   xdata[, ID2 := c(paste0("HC", 1:5), paste0("T1D", 1:5))]
   return(xdata)
 }
 
 px2Get <- function(genes) {
   xdata <- px1[Entrez %in% genes, c("6029", "6057", "6096", "6172", "6174", "6195", "6196", "6051", "6211", "6212", "Gene")]
+  xdata <- xdata[!duplicated(Gene)] # TO DO: for other datasets?
   genes <- xdata$Gene
   if(!length(genes)) return(NULL)
   xdata <- xdata[, data.table(t(.SD), keep.rownames = T), .SDcols = 1:10]
   setnames(xdata, c("ID", make.names(genes)))
   xdata[, ID := as.numeric(ID)]
-  xdata <- xdataMerge(xdata)
   xdata[, ID2 := c(paste0("HC", 1:5), paste0("T1D", 1:5))]
   return(xdata)
 }
 
 # Merge with cdata
-xdataMerge <- function(xdata, cvars = Columns[Source %in% c("Aab", "Demographics", "DiabetesInfo", "HLA"), Variable]) {
-  xdata <- merge(xdata, cdata[, c("ID", "donor.type", cvars), with = F], by = "ID", all.x = T, all.y = F)
+xdataMerge <- function(xdata, cvars) {
+  if(!"donor.type" %in% cvars) cvars <- c(cvars, "donor.type")
+  xdata <- merge(xdata, cdata[, c("ID", cvars), with = F], by = "ID", all.x = T, all.y = F)
   xdata[, donor.type := factor(donor.type, levels = c("No diabetes", "Autoab Pos", "T1D"))]
   xdata <- xdata[order(donor.type)]
   xdata[, ID := factor(ID, levels = ID)]
+  xdata[, ID2 := factor(ID2, levels = ID2)]
   return(xdata)
 }
 

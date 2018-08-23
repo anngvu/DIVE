@@ -16,7 +16,7 @@ load("Data/network.Rdata")
 load("Data/gx.Rdata")
 load("Data/px1.Rdata")
 load("Data/px2.Rdata")
-load("Ontology/GOBP.Rdata")
+load("Ontology/GObranches.Rdata")
 corM <- fread("Data/corM.txt")
 Columns <- fread("Data/Columns.txt")
 
@@ -28,7 +28,7 @@ source("helpers.R")
 
 plotdata <- reactiveValues(corr = corM, acc = cdata, newdata = NULL, corr.last.state = corM, 
                            drilldown = NULL, # pertains to "2D tab"
-                           xgenes = NULL) # pertains to "3D+" tab
+                           genes = NULL) # pertains to "3D+" tab
 fvars <- c("CR.gender", "CR.ethnic", "CR.COD", "CR.ABO") ## TO DO: Should already have data factored in table
 cdata.vars <- names(cdata)[!names(cdata) %in% c("ID", "donorType", fvars)]
 

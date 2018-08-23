@@ -165,11 +165,11 @@ shinyServer(function(input, output, session) {
                        selected = character(0), options = list(maxItems = 20), server = T)
   
   # Update GO/Reactome drop-down
-  observeEvent(input$GorR, {
+  observe({
     branch <- switch(input$BPCCMP,
                      BP = setNames(GO.BP$GO, paste0(GO.BP$GOTerm, " (", GO.BP$Count, ")")),
-                     MF = "",
-                     CC = ""
+                     MF = setNames(GO.MF$GO, paste0(GO.MF$GOTerm, " (", GO.MF$Count, ")")),
+                     CC = setNames(GO.CC$GO, paste0(GO.CC$GOTerm, " (", GO.CC$Count, ")"))
     )
     if(input$GorR == "Gene Ontology") {
       updateSelectizeInput(session, "GOReactq", "GO term", choices = branch, selected = character(0), server = TRUE)
@@ -265,32 +265,45 @@ shinyServer(function(input, output, session) {
   })
   
   output$parallel <- renderPlotly({
-    genes <- plotdata$genes
     cvars <- input$Clist
+    genes <- isolate(plotdata$genes)
     if(!length(genes) | !length(cvars)) return(NULL)
     xdata <- switch(input$whichX,
                     gx = gxGet(genes),
                     px1 = px1Get(genes),
                     px2 = px2Get(genes)
     )
-    xdata <- xdata[, c("ID", "ID2", "donor.type", cvars), with = F]
+    genes <- names(xdata)[!names(xdata) %in% c("ID", "ID2")]
+    xdata <- xdataMerge(xdata, cvars)
     p <- plot_ly(data = xdata)
     # Add a trace for each gene
-    for(g in names(xdata)[!names(xdata) %in% c("ID", "ID2", "donor.type", cvars)]) {
-      p <- p %>% add_trace(name = gsub(".", "-", g, fixed = T), x = ~ID, y = as.formula(paste0("~", g)), type = "scatter", mode = "lines", yaxis = "y")
+    for(g in genes) {
+      p <- p %>% add_trace(name = gsub(".", "-", g, fixed = T), x = ~ID2, y = as.formula(paste0("~", g)), type = "scatter", mode = "lines", yaxis = "y")
     }
     # Add phenotype/clinical layer
-    p <- p %>% add_trace(x = ~ID, y = as.formula(paste0("~", cvars)), type = "bar", name = cvars, yaxis = "y2",  marker = list(color = "lightgray"))
-    p <- p %>% layout(xaxis = list(title = "Case", showticklabels = F), 
-                      yaxis = list(side = "left", title = "log2 Normalized Expression", range = ylim, showgrid = FALSE),
+    p <- p %>% add_trace(x = ~ID2, y = as.formula(paste0("~", cvars)), type = "bar", name = cvars, yaxis = "y2",  opacity = 0.5, marker = list(color = "gray"))
+    p <- p %>% layout(xaxis = list(title = "Case", showticklabels = T),
+                      yaxis = list(side = "left", title = "log2 Normalized Expression", showgrid = FALSE),
                       yaxis2 = list(side = "right", overlaying = "y"))
-    p <- p %>% add_annotations(x = xdata[donor.type == "No diabetes", ID], y = rep(ylim[1], 7), text = xdata[donor.type == "No diabetes", ID2], 
-                               xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "#264E86")) %>% 
-      add_annotations(x = xdata[donor.type == "Autoab Pos", ID], y = rep(ylim[1], 6), text = xdata[donor.type == "Autoab Pos", ID2], 
-                      xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "orange")) %>% 
-      add_annotations(x = xdata[donor.type == "T1D", ID], y = rep(ylim[1], 10), text = xdata[donor.type == "T1D", ID2], 
-                      xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "red"))
+    # p <- p %>% add_annotations(x = xdata[donor.type == "No diabetes", ID], y = rep(ylim[1], 7), text = xdata[donor.type == "No diabetes", ID2],
+    #                            xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "#264E86")) %>%
+    #   add_annotations(x = xdata[donor.type == "Autoab Pos", ID], y = rep(ylim[1], 6), text = xdata[donor.type == "Autoab Pos", ID2],
+    #                   xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "orange")) %>%
+    #   add_annotations(x = xdata[donor.type == "T1D", ID], y = rep(ylim[1], 10), text = xdata[donor.type == "T1D", ID2],
+    #                   xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "red"))
     p
+  })
+  
+  output$debugtable <- renderTable({
+    # cvars <- input$Clist
+    # genes <- isolate(plotdata$genes)
+    # if(!length(genes) | !length(cvars)) return(NULL)
+    # xdata <- switch(input$whichX,
+    #                 gx = gxGet(genes),
+    #                 px1 = px1Get(genes),
+    #                 px2 = px2Get(genes)
+    # )
+    # head(xdata)
   })
   
   #-- PAGE 5 ----------------------------------------------------------------------------------------#

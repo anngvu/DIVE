@@ -68,13 +68,14 @@ shinyUI(
                                       br(),
                                       actionButton("helpVolcano", "", icon = icon("info-circle")),
                                       actionButton("viewVolcano", "", icon = icon("eye-slash")),
-                                      div(class = "forceInline", br(), actionButton("resetVolcano", "Reset"))
+                                      div(class = "forceInline", br(), actionButton("resetVolcano", "Reset", icon = icon("undo")))
                                ),       
                                column(3,
                                       div(class = "forceInline", selectizeInput("Glist", "Genes (proteins) of interest", 
                                                                                 choices = NULL, selected = NULL, 
                                                                                 options = list(maxItems = 20))),
-                                      div(class = "forceInline", br(), actionButton("highlight", "", icon = icon("line-chart"))),
+                                      div(class = "forceInline", br(), actionButton("highlight", "", icon = icon("check"))),
+                                      div(class = "forceInline", br(), actionButton("gSets", "", icon = icon("list"))),
                                       helpText("Note: Expression values may not be available in all datasets.")
                                ),
                                column(2, align="right", 
@@ -89,15 +90,16 @@ shinyUI(
                                column(3,
                                       div(class = "forceInline", selectizeInput("GOReactq", "Choose term", 
                                                                                 choices = NULL, selected = NULL, width = "240px")),
-                                      div(class = "forceInline", br(), actionButton("Ont", "", icon = icon("line-chart"))),
+                                      div(class = "forceInline", br(), actionButton("Ont", "", icon = icon("check"))),
+                                      div(class = "forceInline", br(), actionButton("ontologySets", "", icon = icon("list"))),
                                       helpText("Only terms with at least one annotation shown.")
                                ),
                                column(3, style="border-left: 1px solid lightgray",
                                       div(class = "forceInline", selectizeInput("Clist", "Phenotype/clinical variable(s)", 
-                                                                                choices = Columns[Source %in% c("Aab", "Demographics", "DiabetesInfo", "HLA"), Variable], 
+                                                                                choices = Columns[Source %in% c("Aab", "Demographics", "DiabetesInfo"), Variable], 
                                                                                 selected = character(0), multiple = T, 
                                                                                 options = list(placeholder = "select genes first", maxItems = 3), width = "240px")),
-                                      div(class = "forceInline", br(), actionButton("clistAdd", "", icon = icon("line-chart"))),
+                                      div(class = "forceInline", br(), actionButton("clistAdd", "", icon = icon("check"))),
                                       helpText("See gene/protein expression values relative to phenotype/clinical data.")
                                )),
                       fluidRow(
@@ -124,9 +126,12 @@ shinyUI(
                                             choices = c("Transcriptomics | Pancreas" = "gx", "Proteomics | Exocrine" = "px1", "Proteomics | Endocrine" = "px2"), 
                                             selected = "gx", inline = T)
                         ),
-                        column(12, 
-                               plotlyOutput("parallel"))
-                      )
+                      column(12,
+                               plotlyOutput("parallel")
+                      ),
+                      column(12, 
+                             tableOutput("debugtable"))
+             )
              ),
              
              #-- PAGE 4 ----------------------------------------------------------------------------------------#
@@ -139,7 +144,8 @@ shinyUI(
                       checkboxInput("filterDT", "Only display sources where individual-level data is readily available.", value = T, width = 500),
                       helpText("'Get from original source' link points to the original data in a supplemental file (e.g. in PDF, Excel format), 
                                or to an external database where data has been deposited. 
-                               To facililate re-use, curated data can also be downloaded all at once in universally readable .tsv format."),
+                               To facililate re-use, curated data can also be downloaded all at once (except for some high-throughput datasets) 
+                               as universally readable plain text tab-separated (.tsv) files."),
                       downloadButton("download", label = "Download .tsv Archive"),
                       DT::dataTableOutput("sourceDT")
              )
