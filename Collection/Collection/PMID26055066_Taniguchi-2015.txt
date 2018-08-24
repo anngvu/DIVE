@@ -1,4 +1,4 @@
-ID	CCD1.cat	CCD3.cat
+ID	CCD1.score	CCD3.score
 6075	2	3
 6047	1	2
 6099	1	3

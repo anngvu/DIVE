@@ -1,4 +1,4 @@
-ID	Ins.cat	MHCI.cat	CD8.cat
+ID	Ins.score	MHCI.score	CD8.score
 6047	2	0	0
 6099	2	0	0
 6075	2	0	0

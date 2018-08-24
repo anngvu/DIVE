@@ -1,4 +1,4 @@
-ID	UCN3.cat
+ID	UCN3.score
 6013	3
 6017	2
 6021	3

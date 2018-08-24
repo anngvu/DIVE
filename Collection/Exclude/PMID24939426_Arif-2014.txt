@@ -1,4 +1,4 @@
-ID	CD20.cat
+ID	CD20.score
 6113	1
 6052	1
 6070	0

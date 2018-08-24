@@ -47,10 +47,6 @@ shinyServer(function(input, output, session) {
   
   #  Correlations
   output$corM <- renderPlotly({
-    #tmp <- plotdata$corr
-    tmp <- read.table("Data/cdata2.txt")
-    vars <- names(tmp)
-    tmp <- round(cor(tmp, use = "pairwise.complete.obs"), 2)
     # Newly imported variables are labeled in red
     #labcolors <- ifelse(unique(tmp$Var1) %in% cdata.vars, "black", "red")
     #n <- input$minimumN
@@ -318,5 +314,15 @@ shinyServer(function(input, output, session) {
     setnames(show, c("MPOLabel", "IndividualLevelData", "DataSource", "DataSourceLink"), 
              c("Theme or Area of Interest", "Individual-Level Data", "Source", "Data Source Link"))
   }, escape = FALSE, rownames = F, options = list(dom = 'ftp', pageLength = 7))
+  
+  output$download <- downloadHandler(
+    filename = function() {
+      "Archive.zip"
+    },
+    content = function(file) {
+      file.copy("Collection/Archive.zip", file)
+    },
+    contentType = "application/zip"
+  )
   
 })

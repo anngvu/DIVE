@@ -1,4 +1,4 @@
-ID	BM.cat	IM.cat
+ID	BM.pos	IM.pos
 6024	1	1
 6013	1	1
 6019	1	1

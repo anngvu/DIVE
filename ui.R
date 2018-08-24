@@ -145,8 +145,8 @@ shinyUI(
                       helpText("'Get from original source' link points to the original data in a supplemental file (e.g. in PDF, Excel format), 
                                or to an external database where data has been deposited. 
                                To facililate re-use, curated data can also be downloaded all at once (except for some high-throughput datasets) 
-                               as universally readable plain text tab-separated (.tsv) files."),
-                      downloadButton("download", label = "Download .tsv Archive"),
+                               as a collection of universally readable plain text tab-delimited  files."),
+                      downloadButton("download", label = "Download Archive"),
                       DT::dataTableOutput("sourceDT")
              )
 ))
