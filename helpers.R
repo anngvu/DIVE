@@ -13,6 +13,20 @@ bpkey <- "4e941848-9247-4b38-a68a-fc6f235cb4e6"
 
 load("Ontology/db.Rdata")
 
+#-- Correlations  ----------------------------------------------------------------------------------------#
+# Remove data with 0 variance
+rem0Var <- function(x) sd(na.omit(x)) != 0 
+
+# Return data suitable for running correlations
+data2cor <- function(cdata) {
+  cor.data <- Filter(is.numeric, cdata) # remove nominal category variables
+  cor.data <- cor.data[, !grepl("^ID|_SE$|_SEM$|_SD$", names(cor.data )), with = F]
+  cor.data <- Filter(rem0Var, cor.data)
+  corM <- cor(cor.data, use = "pairwise.complete.obs", method = "spearman")
+  corN <- crossprod(as.matrix(cor.data[, lapply(.SD, function(x) as.integer(!is.na(x)))]))
+  return(list(corM = corM, corN = corN))
+}
+
 #-- GO lookup  ----------------------------------------------------------------------------------------#
 
 go2genes <- function(GOID) {

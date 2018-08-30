@@ -11,9 +11,7 @@ library(plotly)
 #-- SET-UP:data -----------------------------------------------------------------------------------#
 
 load("Data/cdata.Rdata")
-load("Data/corM.Rdata")
-load("Data/dtM.Rdata")
-load("Data/accM.Rdata")
+load("Data/correlations.Rdata")
 load("Data/network.Rdata")
 load("Data/gx.Rdata")
 load("Data/px1.Rdata")
@@ -27,9 +25,9 @@ source("helpers.R")
 
 #-- SET-UP:variables ------------------------------------------------------------------------------#
 
-plotdata <- reactiveValues(corr = corM, acc = cdata, newdata = NULL, corr.last.state = corM, 
+plotdata <- reactiveValues(corr = cor.data, cdata = cdata, newdata = NULL, corr.last.state = cor.data, 
                            drilldown = NULL, # pertains to "2D" view
-                           genes = NULL) # pertains to "HD" view
+                           genes = NULL, xdata = NULL) # pertains to "HD" view
 ppColors <- c("Autoab Pos" = "orange", "Cystic fibrosis" = "aquamarine4", "Gastric Bypass" = "bisque4", 
               "Gestational diabetes" = "deeppink2", "Monogenic Diabetes" = "red4", "No diabetes" = "royalblue2", 
               "Other-Diabetes" = "indianred4", "Other-No Diabetes" = "steelblue2", "T1D" = "red",  

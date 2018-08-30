@@ -48,15 +48,17 @@ shinyServer(function(input, output, session) {
   #  Correlations
   output$corM <- renderPlotly({
     # Newly imported variables are labeled in red
-    corr <- plotdata$corr
+    corr <- plotdata$corr$corM
+    corrN <- plotdata$corr$corN
     # Gray out/remove cor values calculated from less than specified n
-    corr[corN < input$minimumN] <- NA
-    has.n <- apply(corN, 1, max) >= input$minimumN
+    corr[corrN < input$minimumN] <- NA
+    has.n <- apply(corrN, 1, max) >= input$minimumN
     corr <- corr[has.n, has.n]
     p <- plot_ly(x = rownames(corr), y = colnames(corr), z = corr, type = "heatmap", source = "correlation", colorscale = "RdBu",
                  width = 1200, height = 1000) %>%
       layout(xaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = ""), 
-             yaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = ""), plot_bgcolor = "gray")
+             yaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = ""), 
+             plot_bgcolor = "gray")
     p
   })
   
@@ -69,31 +71,30 @@ shinyServer(function(input, output, session) {
  
   observeEvent(input$varReset, {
     plotdata$corr <- plotdata$corr.last.state
-    updateSelectizeInput(session, "varExclude", "Exclude variables from correlation matrix", selected = character(0))
+    updateSelectizeInput(session, "varMenu", "Exclude/keep in correlation matrix:", selected = character(0))
   })
   
-  # observeEvent(input$dataUpload, {
-  #   dataUpload <- fread(input$dataUpload$datapath, header = T)
-  #   names(dataUpload) <- make.names(names(dataUpload))
-  #   plotdata$dataUpload <- dataUpload
-  #   newacc <- merge(cdata, dataUpload, by.x = "ID", by.y = names(dataUpload)[1], all = T)
-  #   plotdata$acc <- newacc
-  #   newcorrs <- melt(cor(newacc[, -c("ID", "donorType", "CR.gender", "CR.ethnic", "CR.COD", "CR.ABO")], use = "pairwise.complete.obs"))
-  #   n <- melt(crossprod(as.matrix(newacc[, lapply(.SD, function(x) as.integer(!is.na(x))), .SDcols = !c("ID", "donorType", "CR.gender", "CR.ethnic", "CR.COD", "CR.ABO")])))
-  #   newcorrs$n <- n$value
-  #   plotdata$corr <- newcorrs
-  #   plotdata$corr.last.state <- newcorrs
-  #   updateSelectizeInput(session, "drilldown", "Drill down to data points for V1, or V1 x V2:", choices = c("", unique(newcorrs$Var1)),
-  #                        selected = newcorrs$Var1[1], options = list(maxItems = 2))
-  #   updateSelectizeInput(session, "varExclude", "Exclude variables from correlation matrix", 
-  #                        choices = names(newacc)[!names(newacc) %in% c("ID", "donorType", "CR.gender", "CR.ethnic", "CR.COD", "CR.ABO")])
-  #   updateSelectInput(session, "colorby", "Color data points by", choices = names(newacc)[!names(newacc) %in% "ID"], selected = "donorType")
-  # })
+  observeEvent(input$dataUpload, {
+    uploaded.data <- fread(input$dataUpload$datapath, header = T)
+    # TO DO: Perform some checks of the data
+    
+    names(uploaded.data) <- make.names(names(uploaded.data))
+    plotdata$uploaded.data <- uploaded.data
+    newdata <- merge(cdata, uploaded.data, by.x = "ID", by.y = names(uploaded.data)[1], all = T)
+    plotdata$cdata <- newdata
+    newcorrs <- data2cor(newdata)
+    plotdata$corr <- plotdata$corr.last.state <- newcorrs
+    newchoices <- rownames(newcorrs$corM)
+    updateSelectizeInput(session, "drilldown", "Drill down to data points for V1, or V1 x V2:", choices = c("", newchoices),
+                         selected = "", options = list(maxItems = 2))
+    updateSelectizeInput(session, "varMenu", "Exclude/keep in correlation matrix:", choices = newchoices)
+    # updateSelectInput(session, "colorby", "Color data points by", choices = newchoices, selected = "donor.type")
+  })
   
   output$scatter <- renderPlotly({
     req(!is.null(input$drilldown))
     drilldown <- input$drilldown
-    tmp <- as.data.frame(plotdata$acc)
+    tmp <- as.data.frame(plotdata$cdata)
     Var1 <- drilldown[1]
     if(length(drilldown) == 2) { # Scatter plot for 2-variable view
       Var2 <- drilldown[2]
@@ -110,8 +111,7 @@ shinyServer(function(input, output, session) {
         p <- p + scale_colour_distiller(palette = "YlOrRd", na.value = "black")
       }
       if(input$plotsmooth) p <- p + stat_smooth(method = "lm")
-      p <- ggplotly(p)
-      p
+      p <- ggplotly(p) 
     } else { # Boxplot for 1-variable view
       tmp <- tmp[!is.na(tmp[[Var1]]), ]
       tmp$donor.type <- factor(tmp$donor.type)
@@ -254,9 +254,9 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  output$parallel <- renderPlotly({
+  observeEvent(input$clistAdd, {
     cvars <- input$Clist
-    genes <- isolate(plotdata$genes)
+    genes <- plotdata$genes
     if(!length(genes) | !length(cvars)) return(NULL)
     xdata <- switch(input$whichX,
                     gx = gxGet(genes),
@@ -265,6 +265,14 @@ shinyServer(function(input, output, session) {
     )
     genes <- names(xdata)[!names(xdata) %in% c("ID", "ID2")]
     xdata <- xdataMerge(xdata, cvars)
+    plotdata$xdata <- list(data = xdata, genes = genes, cvars = cvars)
+  })
+  
+  output$parallel <- renderPlotly({
+    req(!is.null(plotdata$xdata))
+    xdata <- plotdata$xdata$data
+    genes <- plotdata$xdata$genes
+    cvars <- plotdata$xdata$cvars
     p <- plot_ly(data = xdata)
     # Add a trace for each gene
     for(g in genes) {
@@ -282,18 +290,6 @@ shinyServer(function(input, output, session) {
     #   add_annotations(x = xdata[donor.type == "T1D", ID], y = rep(ylim[1], 10), text = xdata[donor.type == "T1D", ID2],
     #                   xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "red"))
     p
-  })
-  
-  output$debugtable <- renderTable({
-    # cvars <- input$Clist
-    # genes <- isolate(plotdata$genes)
-    # if(!length(genes) | !length(cvars)) return(NULL)
-    # xdata <- switch(input$whichX,
-    #                 gx = gxGet(genes),
-    #                 px1 = px1Get(genes),
-    #                 px2 = px2Get(genes)
-    # )
-    # head(xdata)
   })
   
   #-- PAGE 5 ----------------------------------------------------------------------------------------#

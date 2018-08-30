@@ -29,7 +29,8 @@ shinyUI(
                                div(class = "forceInline", numericInput("minimumN", HTML("min. N for <i>r</i>"), min = 2, max = NA, step = 1, val = 5, width = "80px")),
                                HTML("&nbsp"),
                                div(class = "forceInline", selectInput("varMenuOpt", "Filter variables by", choices = c("Variable name", "Variable category", "Parent publication"), width = "150px")),
-                               div(class = "forceInline", selectizeInput("varMenu", "Exclude/keep in correlation matrix:", colnames(corM), multiple = T, width = "300px")),
+                               div(class = "forceInline", selectizeInput("varMenu", "Exclude/keep in correlation matrix:", colnames(corM), multiple = T, 
+                                                                         options= list(placeholder = "select..."), width = "300px")),
                                div(class = "forceInline", br(), actionButton("varExclude", "Exclude")),
                                div(class = "forceInline", br(), actionButton("varKeep", "Keep")),
                                div(class = "forceInline", br(), actionButton("varReset", "Reset", icon = icon("undo"))) 
@@ -40,25 +41,25 @@ shinyUI(
                                                                     buttonLabel = "My data..", placeholder = "upload comparison data")),
                                div(class = "forceInline", br(), actionButton("helpUpload", "", icon = icon("question-circle"), width = "10px"))
                         ),
-                        column(2, 
+                        column(4, 
                                selectizeInput("drilldown", "Drill down to data points for V1 or V1 x V2:", 
-                                              choices = c("", colnames(corM)), selected = "", options = list(maxItems = 2))
-                        ),
-                        column(2, 
-                               conditionalPanel("input.drilldown",
-                                                selectInput("colorby", "Color data points by", 
-                                                            choices = names(cdata)[!names(cdata) %in% "ID"], 
-                                                            selected = "donor.type", width = "200px"),
-                                                checkboxInput("plotsmooth", "Add smooth"))
-                        ),
+                                              choices = c("", colnames(corM)), selected = "", options = list(maxItems = 2), width = "300px")
+                        )),
                         fluidRow(
-                          column(8, align = "center",
+                          column(8, align = "left",
                                  plotlyOutput("corM")
                           ),
-                          column(4, align = "center",
+                          column(4,
+                                  conditionalPanel("input.drilldown",
+                                                   div(class = "forceInline", 
+                                                       selectInput("colorby", "Color data points by", 
+                                                                   choices = names(cdata)[!names(cdata) %in% "ID"], 
+                                                                   selected = "donor.type", width = "200px")),
+                                                   div(class = "forceInline", br(), actionButton("switchXY", "Switch XY axes", icon = icon("arrows-h"))),
+                                                   checkboxInput("plotsmooth", "Add smooth")),
                                  plotlyOutput("scatter")
                           ))
-                      ))),
+                      )),
              
              #-- PAGE 3 ----------------------------------------------------------------------------------------#
              tabPanel("HD", value = "page-3", # icon = icon("cubes"),
@@ -127,9 +128,7 @@ shinyUI(
                         ),
                       column(12,
                                plotlyOutput("parallel")
-                      ),
-                      column(12, 
-                             tableOutput("debugtable"))
+                      )
              )
              ),
              
