@@ -48,53 +48,47 @@ shinyServer(function(input, output, session) {
   #  Correlations
   output$corM <- renderPlotly({
     # Newly imported variables are labeled in red
-    #labcolors <- ifelse(unique(tmp$Var1) %in% cdata.vars, "black", "red")
-    #n <- input$minimumN
-    #tmp$value[tmp$n < n] <- NA  
-    # p <- ggplot(tmp, aes(x = Var1, y = Var2, fill = value)) + geom_tile() +
-    #   theme_classic() +
-    #   theme(text = element_text(size = 12), axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, color = labcolors),
-    #         axis.text.y = element_text(color = labcolors),
-    #         panel.background = element_rect(fill = "gray")) +
-    #         scale_fill_distiller(palette = "RdBu")
-    # p <- ggplotly(p, width = 900, height = 750, source = "correlation")
-    p <- plot_ly(x = vars, y = vars, z = tmp, key = tmp, 
-                 type = "heatmap", source = "correlation", colorscale = "RdBu",
-                 width = 900, height = 750) %>%
-      layout(xaxis = list(title = "", showgrid = F), 
-             yaxis = list(title = "", showgrid = F), plot_bgcolor = "lightgray")
+    corr <- plotdata$corr
+    # Gray out/remove cor values calculated from less than specified n
+    corr[corN < input$minimumN] <- NA
+    has.n <- apply(corN, 1, max) >= input$minimumN
+    corr <- corr[has.n, has.n]
+    p <- plot_ly(x = rownames(corr), y = colnames(corr), z = corr, type = "heatmap", source = "correlation", colorscale = "RdBu",
+                 width = 1200, height = 1000) %>%
+      layout(xaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = ""), 
+             yaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = ""), plot_bgcolor = "gray")
     p
   })
   
   observeEvent(input$varExclude, {
     corr <- plotdata$corr.last.state
-    corr <- corr[!corr$Var1 %in% input$varExclude, ]
-    corr <- corr[!corr$Var2 %in% input$varExclude, ]
+    vars <- isolate(input$varMenu)
+    corr <- corr[!rownames(corr) %in% vars, !colnames(corr) %in% vars]
     plotdata$corr <- corr
   })
-  
+ 
   observeEvent(input$varReset, {
     plotdata$corr <- plotdata$corr.last.state
     updateSelectizeInput(session, "varExclude", "Exclude variables from correlation matrix", selected = character(0))
   })
   
-  observeEvent(input$dataUpload, {
-    dataUpload <- fread(input$dataUpload$datapath, header = T)
-    names(dataUpload) <- make.names(names(dataUpload))
-    plotdata$dataUpload <- dataUpload
-    newacc <- merge(cdata, dataUpload, by.x = "ID", by.y = names(dataUpload)[1], all = T)
-    plotdata$acc <- newacc
-    newcorrs <- melt(cor(newacc[, -c("ID", "donorType", "CR.gender", "CR.ethnic", "CR.COD", "CR.ABO")], use = "pairwise.complete.obs"))
-    n <- melt(crossprod(as.matrix(newacc[, lapply(.SD, function(x) as.integer(!is.na(x))), .SDcols = !c("ID", "donorType", "CR.gender", "CR.ethnic", "CR.COD", "CR.ABO")])))
-    newcorrs$n <- n$value
-    plotdata$corr <- newcorrs
-    plotdata$corr.last.state <- newcorrs
-    updateSelectizeInput(session, "drilldown", "Drill down to data points for V1, or V1 x V2:", choices = c("", unique(newcorrs$Var1)),
-                         selected = newcorrs$Var1[1], options = list(maxItems = 2))
-    updateSelectizeInput(session, "varExclude", "Exclude variables from correlation matrix", 
-                         choices = names(newacc)[!names(newacc) %in% c("ID", "donorType", "CR.gender", "CR.ethnic", "CR.COD", "CR.ABO")])
-    updateSelectInput(session, "colorby", "Color data points by", choices = names(newacc)[!names(newacc) %in% "ID"], selected = "donorType")
-  })
+  # observeEvent(input$dataUpload, {
+  #   dataUpload <- fread(input$dataUpload$datapath, header = T)
+  #   names(dataUpload) <- make.names(names(dataUpload))
+  #   plotdata$dataUpload <- dataUpload
+  #   newacc <- merge(cdata, dataUpload, by.x = "ID", by.y = names(dataUpload)[1], all = T)
+  #   plotdata$acc <- newacc
+  #   newcorrs <- melt(cor(newacc[, -c("ID", "donorType", "CR.gender", "CR.ethnic", "CR.COD", "CR.ABO")], use = "pairwise.complete.obs"))
+  #   n <- melt(crossprod(as.matrix(newacc[, lapply(.SD, function(x) as.integer(!is.na(x))), .SDcols = !c("ID", "donorType", "CR.gender", "CR.ethnic", "CR.COD", "CR.ABO")])))
+  #   newcorrs$n <- n$value
+  #   plotdata$corr <- newcorrs
+  #   plotdata$corr.last.state <- newcorrs
+  #   updateSelectizeInput(session, "drilldown", "Drill down to data points for V1, or V1 x V2:", choices = c("", unique(newcorrs$Var1)),
+  #                        selected = newcorrs$Var1[1], options = list(maxItems = 2))
+  #   updateSelectizeInput(session, "varExclude", "Exclude variables from correlation matrix", 
+  #                        choices = names(newacc)[!names(newacc) %in% c("ID", "donorType", "CR.gender", "CR.ethnic", "CR.COD", "CR.ABO")])
+  #   updateSelectInput(session, "colorby", "Color data points by", choices = names(newacc)[!names(newacc) %in% "ID"], selected = "donorType")
+  # })
   
   output$scatter <- renderPlotly({
     req(!is.null(input$drilldown))
@@ -107,12 +101,12 @@ shinyServer(function(input, output, session) {
       p <- ggplot(tmp, aes_string(x = Var1, y = Var2)) + 
         geom_point(aes_string(color = input$colorby), size = 2, position = position_jitter(width = 0.05, height = 0.05)) + 
         labs(title = paste0("n = ", nrow(tmp))) +
-        theme_minimal()
-      if(input$colorby == "donorType") {
+        theme_bw()
+      if(input$colorby == "donor.type") {
         p <- p + scale_colour_manual(values = ppColors)
-      } else if(input$colorby %in% fvars) {
-        p <- p + scale_color_d3("category20")
-      } else {
+      } else if(grepl("grp$|cat$", input$colorby)) { # if is a categorical variable
+        # p <- p + scale_color_d3("category20")
+      } else { # interval variable
         p <- p + scale_colour_distiller(palette = "YlOrRd", na.value = "black")
       }
       if(input$plotsmooth) p <- p + stat_smooth(method = "lm")
@@ -120,10 +114,10 @@ shinyServer(function(input, output, session) {
       p
     } else { # Boxplot for 1-variable view
       tmp <- tmp[!is.na(tmp[[Var1]]), ]
-      tmp$donorType <- factor(tmp$donorType)
-      p <- ggplot(tmp, aes_string(x = "donorType", y = Var1)) +
+      tmp$donor.type <- factor(tmp$donor.type)
+      p <- ggplot(tmp, aes_string(x = "donor.type", y = Var1)) +
         geom_boxplot() + 
-        geom_point(aes(fill = donorType), size = 2, position = position_jitter(width = 0.05, height = 0.05)) +
+        geom_point(aes(fill = donor.type), size = 2, position = position_jitter(width = 0.05, height = 0.05)) +
         scale_colour_manual(values = ppColors) +
         labs(title = paste0("n = ", nrow(tmp))) +
         theme_minimal()

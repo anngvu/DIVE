@@ -25,38 +25,37 @@ shinyUI(
                                br(),
                                actionButton("helpCorrelation", "", icon = icon("info-circle"))
                         ),
-                        column(1, 
-                               numericInput("minimumN", HTML("min. N for <i>r</i>"), min = 2, max = NA, step = 1, val = 5, width = "80px")
+                        column(5,
+                               div(class = "forceInline", numericInput("minimumN", HTML("min. N for <i>r</i>"), min = 2, max = NA, step = 1, val = 5, width = "80px")),
+                               HTML("&nbsp"),
+                               div(class = "forceInline", selectInput("varMenuOpt", "Filter variables by", choices = c("Variable name", "Variable category", "Parent publication"), width = "150px")),
+                               div(class = "forceInline", selectizeInput("varMenu", "Exclude/keep in correlation matrix:", colnames(corM), multiple = T, width = "300px")),
+                               div(class = "forceInline", br(), actionButton("varExclude", "Exclude")),
+                               div(class = "forceInline", br(), actionButton("varKeep", "Keep")),
+                               div(class = "forceInline", br(), actionButton("varReset", "Reset", icon = icon("undo"))) 
                         ),
                         column(2, 
-                               selectizeInput("varExclude", "Exclude variables from correlation matrix", cdata.vars, multiple = T)
-                        ),
-                        # column(1, 
-                        #        br(),
-                        #        actionButton("varReset", "Reset")
-                        # ),
-                        column(3, 
-                               div(class = "forceInline", br(), actionButton("helpUpload", "", icon = icon("question-circle"))),
-                               div(class = "forceInline", fileInput("dataUpload", "", multiple = FALSE, 
+                               div(class = "forceInline", fileInput("dataUpload", "", multiple = FALSE, width = "250px", 
                                                                     accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
-                                                                    buttonLabel = "My data...", placeholder = "Upload data for comparison"))
+                                                                    buttonLabel = "My data..", placeholder = "upload comparison data")),
+                               div(class = "forceInline", br(), actionButton("helpUpload", "", icon = icon("question-circle"), width = "10px"))
                         ),
-                        column(4, 
+                        column(2, 
                                selectizeInput("drilldown", "Drill down to data points for V1 or V1 x V2:", 
-                                              choices = c("", unique(corM$Var1)), selected = "", options = list(maxItems = 2))
+                                              choices = c("", colnames(corM)), selected = "", options = list(maxItems = 2))
                         ),
-                        column(1, 
+                        column(2, 
                                conditionalPanel("input.drilldown",
                                                 selectInput("colorby", "Color data points by", 
                                                             choices = names(cdata)[!names(cdata) %in% "ID"], 
-                                                            selected = "donorType", width = "200px"),
+                                                            selected = "donor.type", width = "200px"),
                                                 checkboxInput("plotsmooth", "Add smooth"))
                         ),
                         fluidRow(
                           column(8, align = "center",
                                  plotlyOutput("corM")
                           ),
-                          column(4, 
+                          column(4, align = "center",
                                  plotlyOutput("scatter")
                           ))
                       ))),
@@ -142,10 +141,11 @@ shinyUI(
              #-- PAGE 5 ----------------------------------------------------------------------------------------#
              tabPanel("Source Data", value = "source-data", # icon = icon("database"),
                       checkboxInput("filterDT", "Only display sources where individual-level data is readily available.", value = T, width = 500),
-                      helpText("'Get from original source' link points to the original data in a supplemental file (e.g. in PDF, Excel format), 
-                               or to an external database where data has been deposited. 
+                      helpText("'Get from original source' link points to the original data in a supplemental file 
+                               or to an external database where data has been deposited. The original sources can provide more detail about
+                               methodology, definitions and other metadata, but are in a variety of formats not universally machine-readable (e.g. PDF, Excel). 
                                To facililate re-use, curated data can also be downloaded all at once (except for some high-throughput datasets) 
-                               as a collection of universally readable plain text tab-delimited  files."),
+                               as a collection of plain text tab-delimited  files."),
                       downloadButton("download", label = "Download Archive"),
                       DT::dataTableOutput("sourceDT")
              )
