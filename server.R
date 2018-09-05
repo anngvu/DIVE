@@ -43,15 +43,48 @@ shinyServer(function(input, output, session) {
       footer = NULL
     ))
   })
-  # -------------------------------------------------------------
   
+  # Menu events -------------------------------------------------
+  
+  observe({
+    opt <- input$varMenuOpt
+    if(opt == "variable") {
+      updateSelectizeInput(session, "varMenu", "Exclude/keep in correlation matrix:", colnames(plotdata$corr$corM))
+    } else if(opt == "category") {
+      
+    } else {
+      AuthYr <- unique(gsub("_.*$", "", colnames(plotdata$corr$corM)))
+      AuthYr <- sapply(AuthYr, function(s) paste0(substr(s, 1, nchar(s)-2), " et al. 20", substr(s, nchar(s)-1, nchar(s))))
+      AuthYr <- setNames(names(AuthYr), AuthYr)
+      updateSelectizeInput(session, "varMenu", "Exclude/keep in correlation matrix:", AuthYr)
+    }
+  })
+  
+  # observeEvent(input$varExclude, {
+  #   corr <- plotdata$corr.last.state
+  #   vars <- input$varMenu
+  #   corr <- corr[grep(), !colnames(corr) %in% vars]
+  #   plotdata$corr <- corr
+  # })
+  # 
+  # observeEvent(input$varKeep, {
+  #   corr <- plotdata$corr.last.state
+  #   vars <- input$varMenu
+  #   corr <- corr[rownames(corr) %in% vars, colnames(corr) %in% vars]
+  #   plotdata$corr <- corr
+  # })
+  
+  observeEvent(input$varReset, {
+    plotdata$corr <- plotdata$corr.last.state
+    updateSelectizeInput(session, "varMenu", "Exclude/keep in correlation matrix:", selected = character(0))
+  })
+
+  # Plot events ----------------------------------------------------------
   #  Correlations
   output$corM <- renderPlotly({
-    # Newly imported variables are labeled in red
     corr <- plotdata$corr$corM
     corrN <- plotdata$corr$corN
-    # Gray out/remove cor values calculated from less than specified n
-    corr[corrN < input$minimumN] <- NA
+    corr[corrN < input$minimumN] <- NA  # Gray out/remove cor values calculated from less than specified n
     has.n <- apply(corrN, 1, max) >= input$minimumN
     corr <- corr[has.n, has.n]
     p <- plot_ly(x = rownames(corr), y = colnames(corr), z = corr, type = "heatmap", source = "correlation", colorscale = "RdBu",
@@ -60,18 +93,6 @@ shinyServer(function(input, output, session) {
              yaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = ""), 
              plot_bgcolor = "gray")
     p
-  })
-  
-  observeEvent(input$varExclude, {
-    corr <- plotdata$corr.last.state
-    vars <- isolate(input$varMenu)
-    corr <- corr[!rownames(corr) %in% vars, !colnames(corr) %in% vars]
-    plotdata$corr <- corr
-  })
- 
-  observeEvent(input$varReset, {
-    plotdata$corr <- plotdata$corr.last.state
-    updateSelectizeInput(session, "varMenu", "Exclude/keep in correlation matrix:", selected = character(0))
   })
   
   observeEvent(input$dataUpload, {
@@ -99,9 +120,11 @@ shinyServer(function(input, output, session) {
     if(length(drilldown) == 2) { # Scatter plot for 2-variable view
       Var2 <- drilldown[2]
       tmp <- tmp[complete.cases(tmp[, c(Var1, Var2)]), ]
+      if(grepl("grp$|cat$|score$|bin$", Var1)) tmp[[Var1]] <- factor(tmp[[Var1]]) 
+      if(grepl("grp$|cat$|score$|bin$", Var2)) tmp[[Var2]] <- factor(tmp[[Var2]])
       p <- ggplot(tmp, aes_string(x = Var1, y = Var2)) + 
-        geom_point(aes_string(color = input$colorby), size = 2, position = position_jitter(width = 0.05, height = 0.05)) + 
-        labs(title = paste0("n = ", nrow(tmp))) +
+        geom_point(aes_string(color = input$colorby), size = 2) + 
+        labs(title = paste("n =", nrow(tmp))) +
         theme_bw()
       if(input$colorby == "donor.type") {
         p <- p + scale_colour_manual(values = ppColors)
@@ -110,20 +133,26 @@ shinyServer(function(input, output, session) {
       } else { # interval variable
         p <- p + scale_colour_distiller(palette = "YlOrRd", na.value = "black")
       }
+      # if(all(grepl("grp$|cat$|score$|bin$", c(Var1, Var2)))) p <- p %>% facet_wrap() TO DO: better plots for cat x cat vars
       if(input$plotsmooth) p <- p + stat_smooth(method = "lm")
-      p <- ggplotly(p) 
+      if(input$switchXY) p <- p + coord_flip()
+      p <- ggplotly(p)
+      p
     } else { # Boxplot for 1-variable view
       tmp <- tmp[!is.na(tmp[[Var1]]), ]
       tmp$donor.type <- factor(tmp$donor.type)
       p <- ggplot(tmp, aes_string(x = "donor.type", y = Var1)) +
-        geom_boxplot() + 
-        geom_point(aes(fill = donor.type), size = 2, position = position_jitter(width = 0.05, height = 0.05)) +
+        geom_boxplot(outlier.color = NA) + 
+        geom_point(aes(color = donor.type), size = 2, position = position_jitter(width = 0.05, height = 0.05)) +
         scale_colour_manual(values = ppColors) +
-        labs(title = paste0("n = ", nrow(tmp))) +
-        theme_minimal()
+        labs(title = paste("n =", nrow(tmp))) +
+        theme_bw()
       p <- ggplotly(p)
+      p$x$data[[1]]$marker$opacity <- 0 # Manual specification since plotly doesn't translate ggplot settings for boxplot
+      p <- hide_legend(p)
+      if(length(levels(tmp$donor.type)) > 4) p <- p %>% layout(xaxis = list(tickangle = 45))
       p
-    }  
+    } 
   })
   
   observe({
@@ -254,9 +283,10 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  observeEvent(input$clistAdd, {
-    cvars <- input$Clist
-    genes <- plotdata$genes
+  observe({
+    input$clistAdd
+    cvars <- isolate(input$Clist)
+    genes <- isolate(plotdata$genes)
     if(!length(genes) | !length(cvars)) return(NULL)
     xdata <- switch(input$whichX,
                     gx = gxGet(genes),
@@ -274,21 +304,18 @@ shinyServer(function(input, output, session) {
     genes <- plotdata$xdata$genes
     cvars <- plotdata$xdata$cvars
     p <- plot_ly(data = xdata)
-    # Add a trace for each gene
+    # for(g in genes) { # add a trace for each gene
+    #   p <- p %>% add_trace(name = gsub(".", "-", g, fixed = T), x = ~ID2, y = as.formula(paste0("~", g)), type = "scatter", mode = "lines", yaxis = "y")
+    # }
+    # # Add phenotype/clinical layer
+    # p <- p %>% add_trace(x = ~ID2, y = as.formula(paste0("~", cvars)), type = "bar", name = cvars, yaxis = "y2",  opacity = 0.5, marker = list(color = "gray"))
+    # p <- p %>% layout(xaxis = list(title = "Case", showticklabels = T),
+    #                   yaxis = list(side = "left", title = "log2 Normalized Expression", showgrid = FALSE),
+    #                   yaxis2 = list(side = "right", overlaying = "y"))
+    # p
     for(g in genes) {
-      p <- p %>% add_trace(name = gsub(".", "-", g, fixed = T), x = ~ID2, y = as.formula(paste0("~", g)), type = "scatter", mode = "lines", yaxis = "y")
+      p <- p %>% add_trace(x = as.formula(paste0("~", g)), y = as.formula(paste0("~", cvars)), type = "scatter")
     }
-    # Add phenotype/clinical layer
-    p <- p %>% add_trace(x = ~ID2, y = as.formula(paste0("~", cvars)), type = "bar", name = cvars, yaxis = "y2",  opacity = 0.5, marker = list(color = "gray"))
-    p <- p %>% layout(xaxis = list(title = "Case", showticklabels = T),
-                      yaxis = list(side = "left", title = "log2 Normalized Expression", showgrid = FALSE),
-                      yaxis2 = list(side = "right", overlaying = "y"))
-    # p <- p %>% add_annotations(x = xdata[donor.type == "No diabetes", ID], y = rep(ylim[1], 7), text = xdata[donor.type == "No diabetes", ID2],
-    #                            xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "#264E86")) %>%
-    #   add_annotations(x = xdata[donor.type == "Autoab Pos", ID], y = rep(ylim[1], 6), text = xdata[donor.type == "Autoab Pos", ID2],
-    #                   xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "orange")) %>%
-    #   add_annotations(x = xdata[donor.type == "T1D", ID], y = rep(ylim[1], 10), text = xdata[donor.type == "T1D", ID2],
-    #                   xref = "x", yref = "y", showarrow = F, ay = 10, font = list(color = "red"))
     p
   })
   

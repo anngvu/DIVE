@@ -28,8 +28,10 @@ shinyUI(
                         column(5,
                                div(class = "forceInline", numericInput("minimumN", HTML("min. N for <i>r</i>"), min = 2, max = NA, step = 1, val = 5, width = "80px")),
                                HTML("&nbsp"),
-                               div(class = "forceInline", selectInput("varMenuOpt", "Filter variables by", choices = c("Variable name", "Variable category", "Parent publication"), width = "150px")),
-                               div(class = "forceInline", selectizeInput("varMenu", "Exclude/keep in correlation matrix:", colnames(corM), multiple = T, 
+                               div(class = "forceInline", selectInput("varMenuOpt", "Filter variables by", 
+                                                                      choices = c(`variable name` = "variable", `variable category` = "category", `parent source` = "author"), 
+                                                                      width = "150px")),
+                               div(class = "forceInline", selectizeInput("varMenu", "Exclude/keep in correlation matrix:", colnames(cor.data$corM), multiple = T, 
                                                                          options= list(placeholder = "select..."), width = "300px")),
                                div(class = "forceInline", br(), actionButton("varExclude", "Exclude")),
                                div(class = "forceInline", br(), actionButton("varKeep", "Keep")),
@@ -43,7 +45,7 @@ shinyUI(
                         ),
                         column(4, 
                                selectizeInput("drilldown", "Drill down to data points for V1 or V1 x V2:", 
-                                              choices = c("", colnames(corM)), selected = "", options = list(maxItems = 2), width = "300px")
+                                              choices = c("", colnames(cor.data$corM)), selected = "", options = list(maxItems = 2), width = "300px")
                         )),
                         fluidRow(
                           column(8, align = "left",
@@ -55,8 +57,10 @@ shinyUI(
                                                        selectInput("colorby", "Color data points by", 
                                                                    choices = names(cdata)[!names(cdata) %in% "ID"], 
                                                                    selected = "donor.type", width = "200px")),
-                                                   div(class = "forceInline", br(), actionButton("switchXY", "Switch XY axes", icon = icon("arrows-h"))),
-                                                   checkboxInput("plotsmooth", "Add smooth")),
+                                                   HTML("&nbsp"),
+                                                   div(class = "forceInline", br(), actionButton("switchXY", "XY", icon = icon("refresh"))),
+                                                   HTML("&nbsp"),
+                                                   div(class = "forceInline", br(), checkboxInput("plotsmooth", "Add smooth"))),
                                  plotlyOutput("scatter")
                           ))
                       )),
@@ -96,7 +100,7 @@ shinyUI(
                                ),
                                column(3, style="border-left: 1px solid lightgray",
                                       div(class = "forceInline", selectizeInput("Clist", "Phenotype/clinical variable(s)", 
-                                                                                choices = Columns[Source %in% c("Aab", "Demographics", "DiabetesInfo"), Variable], 
+                                                                                choices = Columns[Source %in% c("Aab", "Demographics", "DiabetesInfo", "HLARisk"), Variable], 
                                                                                 selected = character(0), multiple = T, 
                                                                                 options = list(placeholder = "select genes first", maxItems = 3), width = "240px")),
                                       div(class = "forceInline", br(), actionButton("clistAdd", "", icon = icon("check"))),
