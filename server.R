@@ -37,7 +37,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$helpCorrelation, {
     showModal(modalDialog(
-      title = "Exploring correlations with old and new data",
+      title = "Exploring correlations with all data",
       HTML(""),
       easyClose = TRUE,
       footer = NULL
@@ -97,7 +97,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$dataUpload, {
     uploaded.data <- fread(input$dataUpload$datapath, header = T)
-    # TO DO: Perform some checks of the data
+    # TO DO: Perform some checks of file
     
     names(uploaded.data) <- make.names(names(uploaded.data))
     plotdata$uploaded.data <- uploaded.data
@@ -181,7 +181,7 @@ shinyServer(function(input, output, session) {
   
   # Update genes of interest drop-down
   updateSelectizeInput(session, "Glist", "Genes (proteins) of interest", choices = names(GENES), 
-                       selected = character(0), options = list(maxItems = 20), server = T)
+                       selected = character(0), options = list(maxItems = 50), server = T)
   
   # Update GO/Reactome drop-down
   observe({
@@ -195,6 +195,26 @@ shinyServer(function(input, output, session) {
     } else {
       updateSelectizeInput(session, "GOReactq", "Reactome pathway", choices = names(PATHS), selected = character(0), server = TRUE)
     }
+  })
+  
+  observeEvent(input$gSets, {
+    showModal(modalDialog(
+      HTML("<strong>Quick lists</strong><br><li>"),
+      actionLink("T1Dbase", "T1Dbase genes"),
+      helpText("To suggest additional lists, email <>"),
+      HTML("<br><br><strong>Custom list</strong><br>"),
+      helpText("Text file should have one gene per line. (50 max)"),
+      fileInput("listUpload", "", multiple = FALSE, width = "300px", 
+                accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
+                buttonLabel = "My list"),
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  
+  observeEvent(input$T1Dbase, {
+      updateSelectizeInput(session, "Glist", "Genes (proteins) of interest", choices = names(GENES), 
+                         selected = readLines("Data/t1dbase.txt"), options = list(maxItems = 50), server = T)
   })
   
   observeEvent(input$Ont, {
@@ -293,7 +313,7 @@ shinyServer(function(input, output, session) {
                     px1 = px1Get(genes),
                     px2 = px2Get(genes)
     )
-    genes <- names(xdata)[!names(xdata) %in% c("ID", "ID2")]
+    genes <- names(xdata)[!names(xdata) %in% c("ID", "ID2")] # keep track of genes present in returned dataset
     xdata <- xdataMerge(xdata, cvars)
     plotdata$xdata <- list(data = xdata, genes = genes, cvars = cvars)
   })
@@ -314,7 +334,10 @@ shinyServer(function(input, output, session) {
     #                   yaxis2 = list(side = "right", overlaying = "y"))
     # p
     for(g in genes) {
-      p <- p %>% add_trace(x = as.formula(paste0("~", g)), y = as.formula(paste0("~", cvars)), type = "scatter")
+      p <- p %>% add_trace(name = gsub(".", "-", g, fixed = T), x = as.formula(paste0("~", g)), y = as.formula(paste0("~", cvars)),
+                           type = "scatter", mode = "markers", text = ~donor.type, 
+                           # symbol = ~donor.type, symbols = c("circle", "triangle-up", "square"), // plotly needs to resolve combining multiple aesthetics in legend
+                           marker = list(size = 10))
     }
     p
   })

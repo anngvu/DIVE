@@ -40,7 +40,7 @@ shinyUI(
                         column(2, 
                                div(class = "forceInline", fileInput("dataUpload", "", multiple = FALSE, width = "250px", 
                                                                     accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
-                                                                    buttonLabel = "My data..", placeholder = "upload comparison data")),
+                                                                    buttonLabel = "My data", placeholder = "Upload to compare..")),
                                div(class = "forceInline", br(), actionButton("helpUpload", "", icon = icon("question-circle"), width = "10px"))
                         ),
                         column(4, 
@@ -77,7 +77,7 @@ shinyUI(
                                column(3,
                                       div(class = "forceInline", selectizeInput("Glist", "Genes (proteins) of interest", 
                                                                                 choices = NULL, selected = NULL, 
-                                                                                options = list(maxItems = 20))),
+                                                                                options = list(maxItems = 50)), width = "375px"),
                                       div(class = "forceInline", br(), actionButton("highlight", "", icon = icon("check"))),
                                       div(class = "forceInline", br(), actionButton("gSets", "", icon = icon("list"))),
                                       helpText("Note: Expression values may not be available in all datasets.")
@@ -95,7 +95,6 @@ shinyUI(
                                       div(class = "forceInline", selectizeInput("GOReactq", "Choose term", 
                                                                                 choices = NULL, selected = NULL, width = "240px")),
                                       div(class = "forceInline", br(), actionButton("Ont", "", icon = icon("check"))),
-                                      div(class = "forceInline", br(), actionButton("ontologySets", "", icon = icon("list"))),
                                       helpText("Only terms with at least one annotation shown.")
                                ),
                                column(3, style="border-left: 1px solid lightgray",
