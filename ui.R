@@ -17,9 +17,34 @@ shinyUI(
                                includeMarkdown("Intro.Rmd")
                         )
                       )),
-             
              #-- PAGE 2 ----------------------------------------------------------------------------------------#
-             tabPanel("2D", value = "page-2", # icon = icon("cube"), 
+             tabPanel("Data Fusion", value = "data-fusion", # icon = icon("cube"), 
+                      fluidPage(fluidRow(
+                        column(1,
+                               br(),
+                               actionButton("helpFusion", "", icon = icon("info-circle"))
+                        ),
+                        column(5,
+                              ""
+                        ),
+                        column(2, 
+                              ""
+                        ),
+                        column(4, 
+                               ""
+                        )),
+                        fluidRow(
+                          column(8, 
+                                 ""
+                          ),
+                          column(4,
+                                 ""
+                          ))
+                      )),
+             
+             
+             #-- PAGE 3 ----------------------------------------------------------------------------------------#
+             tabPanel("Data Fusion 2", value = "data-fusion-2", # icon = icon("cube"), 
                       fluidPage(fluidRow(
                         column(1,
                                br(),
@@ -65,8 +90,8 @@ shinyUI(
                           ))
                       )),
              
-             #-- PAGE 3 ----------------------------------------------------------------------------------------#
-             tabPanel("HD", value = "page-3", # icon = icon("cubes"),
+             #-- PAGE 4 ----------------------------------------------------------------------------------------#
+             tabPanel("Data Explosion", value = "HD", # icon = icon("cubes"),
                       fluidRow(class = "top-options",
                                column(1,
                                       br(),
@@ -135,12 +160,12 @@ shinyUI(
              )
              ),
              
-             #-- PAGE 4 ----------------------------------------------------------------------------------------#
-             tabPanel("Stories", value = "stories" #icon = icon("asterisk")
+             #-- PAGE 5 ----------------------------------------------------------------------------------------#
+             tabPanel("Case Studies", value = "stories" #icon = icon("asterisk")
                       
              ),
              
-             #-- PAGE 5 ----------------------------------------------------------------------------------------#
+             #-- PAGE 6 ----------------------------------------------------------------------------------------#
              tabPanel("Source Data", value = "source-data", # icon = icon("database"),
                       checkboxInput("filterDT", "Only display sources where individual-level data is readily available.", value = T, width = 500),
                       helpText("'Get from original source' link points to the original data in a supplemental file 
@@ -150,5 +175,10 @@ shinyUI(
                                as a collection of plain text tab-delimited  files."),
                       downloadButton("download", label = "Download Archive"),
                       DT::dataTableOutput("sourceDT")
+             ),
+             
+             #-- PAGE 7 ----------------------------------------------------------------------------------------#
+             tabPanel("Other Tools", value = "other", # icon = icon("database"),
+                     ""
              )
 ))

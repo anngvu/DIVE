@@ -324,15 +324,6 @@ shinyServer(function(input, output, session) {
     genes <- plotdata$xdata$genes
     cvars <- plotdata$xdata$cvars
     p <- plot_ly(data = xdata)
-    # for(g in genes) { # add a trace for each gene
-    #   p <- p %>% add_trace(name = gsub(".", "-", g, fixed = T), x = ~ID2, y = as.formula(paste0("~", g)), type = "scatter", mode = "lines", yaxis = "y")
-    # }
-    # # Add phenotype/clinical layer
-    # p <- p %>% add_trace(x = ~ID2, y = as.formula(paste0("~", cvars)), type = "bar", name = cvars, yaxis = "y2",  opacity = 0.5, marker = list(color = "gray"))
-    # p <- p %>% layout(xaxis = list(title = "Case", showticklabels = T),
-    #                   yaxis = list(side = "left", title = "log2 Normalized Expression", showgrid = FALSE),
-    #                   yaxis2 = list(side = "right", overlaying = "y"))
-    # p
     for(g in genes) {
       p <- p %>% add_trace(name = gsub(".", "-", g, fixed = T), x = as.formula(paste0("~", g)), y = as.formula(paste0("~", cvars)),
                            type = "scatter", mode = "markers", text = ~donor.type, 

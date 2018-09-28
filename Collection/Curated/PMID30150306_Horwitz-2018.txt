@@ -1,4 +1,4 @@
-"ID"	"53BP1.cells.prct"
+"ID"	"beta.53BP1.prct"
 6228	2.73
 6380	1.51
 6362	1.44
