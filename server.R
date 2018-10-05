@@ -1,13 +1,13 @@
 library(shiny)
 
-#-- SET-UP:variables ------------------------------------------------------------------------------#
+#-- SET-UP ----------------------------------------------------------------------------------------#
 
 
 #--------------------------------------------------------------------------------------------------#
 
 shinyServer(function(input, output, session) {
   
-  #-- PAGE 1 ----------------------------------------------------------------------------------------#
+  #-- HOME ----------------------------------------------------------------------------------------#
   
   output$network <- renderVisNetwork({
     g %>% visIgraphLayout(randomSeed = 88) %>% visOptions(highlightNearest = TRUE)
@@ -22,6 +22,63 @@ shinyServer(function(input, output, session) {
   
   
   # -------------------------------------------------------------
+  
+  #-- PAGE 1 ----------------------------------------------------------------------------------------#
+  
+  observeEvent(input$cohortDataUpload, {
+    cohortX <- fread(input$cohortDataUpload$datapath, header = T)
+    cohortdata$cohortX <- cohortX
+    # Data fusion
+    which.donors <- switch(input$matchy,
+                           ND = "No diabetes",
+                           T1D = c("T1D", "T1D Medalist"),
+                           T2D = "T2D",
+                           Aab = "Autoab Pos")
+    npodL <- paste0("nPOD-", input$matchy)
+    npod.subset <- npodX[donor.type %in% which.donors]
+    npod.subset[, donor.type := npodL]
+    cohortL <- ifelse(isolate(input$cohortname) == "", "CohortX", isolate(input$cohortname))
+    cohortX[, donor.type := cohortL]
+    fused <- rbind(npod.subset, cohortX, use.names = T, fill = T)
+    cohortdata$fused <- fused
+  })
+  
+  output$reviewFusion <- renderPrint({
+    fused <- cohortdata$fused
+    if(!is.null(fused)) {
+      print(fused[, c("ID", "donor.type", input$matchon), with = F])
+    }
+  })
+  outputOptions(output, "reviewFusion", suspendWhenHidden = FALSE)
+  
+  output$matchSummary <- renderPrint({
+    if(!is.null(cohortdata$matchresult)) print("")
+  })
+  outputOptions(output, "matchSummary", suspendWhenHidden = FALSE)
+  
+  observeEvent(input$match, {
+    # covariates <- input$matchon
+    # matchformula <- as.formula(paste("donor.type", "~", paste(covariates, collapse = " + ")))
+    # result <- matchit(matchformula, method = "nearest", replace = F, data = fused, caliper = 0.2, ratio = 1)
+    # fused[, donor.type := as.numeric(factor(donor.type, levels = c(npodL, cohortL))) - 1]
+  })
+  
+  output$npodgraph <- renderPlotly({
+    npodgraph
+  })
+  
+  # observe({
+  #   s <- event_data("plotly_click", source = "npodgraph")
+  #   if(length(s)) {
+  #     Var <- s[["x"]]
+  #     Value <- s[["y"]]
+  #     updateSelectizeInput(session, "drilldown", "Drill down to data points for V1, or V1 x V2:", selected = c(Var1, Var2))
+  #   } else {
+  #     return(NULL)
+  #   }
+  # })
+  
+  
   
   #-- PAGE 2 ----------------------------------------------------------------------------------------#
   

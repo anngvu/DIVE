@@ -13,6 +13,8 @@ library(plotly)
 load("Data/cdata.Rdata")
 load("Data/correlations.Rdata")
 load("Data/network.Rdata")
+load("Data/npodgraph.Rdata")
+load("Data/npodX.Rdata")
 load("Data/gx.Rdata")
 load("Data/px1.Rdata")
 load("Data/px2.Rdata")
@@ -25,13 +27,15 @@ source("helpers.R")
 
 #-- SET-UP:variables ------------------------------------------------------------------------------#
 
+cohortdata <- reactiveValues(cohortX = NULL, fused = NULL)
+
 plotdata <- reactiveValues(corr = cor.data, cdata = cdata, newdata = NULL, corr.last.state = cor.data, 
                            drilldown = NULL, # pertains to "2D" view
                            genes = NULL, xdata = NULL) # pertains to "HD" view
 ppColors <- c("Autoab Pos" = "orange", "Cystic fibrosis" = "aquamarine4", "Gastric Bypass" = "bisque4", 
               "Gestational diabetes" = "deeppink2", "Monogenic Diabetes" = "red4", "No diabetes" = "royalblue2", 
               "Other-Diabetes" = "indianred4", "Other-No Diabetes" = "steelblue2", "T1D" = "red",  
-              "T1D Medalist" = "maroon", "T2D" = "mediumvioletred")
+              "T1D Medalist" = "maroon", "T2D" = "purple")
 pal <- c("#A69EB0FF", "#00FF83FF", "yellow2", "darkorchid1", "royalblue1", "violetred1")
 
 

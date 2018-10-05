@@ -18,33 +18,90 @@ shinyUI(
                         )
                       )),
              #-- PAGE 2 ----------------------------------------------------------------------------------------#
-             tabPanel("Data Fusion", value = "data-fusion", # icon = icon("cube"), 
+             navbarMenu("Integrative Data Views",
+             
+             tabPanel("Cohort exploration and sharing", value = "data-fusion-1", # icon = icon("cube"), 
                       fluidPage(fluidRow(
                         column(1,
                                br(),
                                actionButton("helpFusion", "", icon = icon("info-circle"))
                         ),
-                        column(5,
-                              ""
+                        column(1, 
+                               h3("nPOD")
                         ),
                         column(2, 
-                              ""
+                               selectInput("matchy", "Type of matches to get from nPOD", 
+                                           choices = list("No diabetes (negative control)" = c(`No-diabetes donors` = "ND"),
+                                                          "T1D (positive control)" = c(`T1D donors` = "T1D"),
+                                                          "Other" = c(`T2D donors` = "T2D", `Autoantibody-positive donors` = "AAb")))
                         ),
-                        column(4, 
+                        column(2, style="border-right: 1px solid lightgray",
+                               selectizeInput("matchon", "Covariates to match on", 
+                                              choices = c("", "age" , "sex", "race", "BMI", "db.duration", "age.onset", "Cpeptide", "HbA1c", "peak.gluc", 
+                                                          "GADA.pos", "IA2A.pos", "mIAA.pos", "ZnT8A.pos", "AutoAb.count"), selected = "",
+                                              options = list(maxItems = 14, placeholder = "choose...")),
+                               helpText("Missing data reduces the yield of matches; refer to data availability across covariates below.")
+                        ),
+                        column(1,
+                               ""
+                        ),
+                        column(5,
                                ""
                         )),
                         fluidRow(
-                          column(8, 
-                                 ""
+                          column(1,
+                                 br()
                           ),
-                          column(4,
-                                 ""
-                          ))
-                      )),
+                          column(1, style="border-top: 1px solid lightgray;",
+                                 br(),
+                                 h3("CohortX"),
+                                 helpText("(your cohort)")
+                          ),
+                          column(2, style="border-top: 1px solid lightgray;",
+                                 br(),
+                                 textInput("cohortname", "Your cohort name/label (optional)", value = "", placeholder = "e.g. 'DiViD', 'TEDDY', 'pilot'..")
+                          ),
+                          column(2, style="border-right: 1px solid lightgray; border-top: 1px solid lightgray;",
+                                br(),
+                                fileInput("cohortDataUpload", "", multiple = FALSE,
+                                          accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
+                                          buttonLabel = "Data"),
+                                helpText("Factor-encoding and column names in your data must be the same as nPOD's for the selected covariates.")
+                          ),
+                          column(1, style="margin-top: -100px",
+                                 conditionalPanel("output.reviewFusion && !output.matchSummary",
+                                   h4("Data review"),
+                                   helpText("Please check that your upload has undergone proper fusion with nPOD's dataset before running the matching."),
+                                   helpText("Looks good?"),
+                                   actionButton("match", "Match")
+                                 )
+                          ),
+                          column(5, style="margin-top: -100px",
+                                 conditionalPanel("output.reviewFusion && !output.matchSummary",
+                                  verbatimTextOutput("reviewFusion")
+                                 ),
+                                 conditionalPanel("output.matchSummary",
+                                                  h3("Match result summary"),
+                                                  verbatimTextOutput("matchSummary"),
+                                                  br(),
+                                                  br(),
+                                                  downloadButton("downloadmatch", "Export result"),
+                                                  br())
+                                                  
+                          )),
+                        fluidRow(
+                          column(6,
+                               plotlyOutput("npodgraph")
+                          ),
+                          column(6, #style="background-color: lightgray", 
+                                 br()
+                       
+                      ))
+                    )),
              
              
              #-- PAGE 3 ----------------------------------------------------------------------------------------#
-             tabPanel("Data Fusion 2", value = "data-fusion-2", # icon = icon("cube"), 
+             tabPanel("Experimental data", value = "data-fusion-2", # icon = icon("cube"), 
                       fluidPage(fluidRow(
                         column(1,
                                br(),
@@ -89,9 +146,8 @@ shinyUI(
                                  plotlyOutput("scatter")
                           ))
                       )),
-             
              #-- PAGE 4 ----------------------------------------------------------------------------------------#
-             tabPanel("Data Explosion", value = "HD", # icon = icon("cubes"),
+             tabPanel("Experimental data (high-throughput)", value = "HD", # icon = icon("cubes"),
                       fluidRow(class = "top-options",
                                column(1,
                                       br(),
@@ -158,27 +214,27 @@ shinyUI(
                                plotlyOutput("parallel")
                       )
              )
+             )
              ),
-             
              #-- PAGE 5 ----------------------------------------------------------------------------------------#
-             tabPanel("Case Studies", value = "stories" #icon = icon("asterisk")
+             tabPanel("Vignettes", value = "stories" #icon = icon("asterisk")
                       
              ),
              
              #-- PAGE 6 ----------------------------------------------------------------------------------------#
-             tabPanel("Source Data", value = "source-data", # icon = icon("database"),
+             tabPanel("Get Data", value = "source-data", # icon = icon("database"),
                       checkboxInput("filterDT", "Only display sources where individual-level data is readily available.", value = T, width = 500),
                       helpText("'Get from original source' link points to the original data in a supplemental file 
                                or to an external database where data has been deposited. The original sources can provide more detail about
                                methodology, definitions and other metadata, but are in a variety of formats not universally machine-readable (e.g. PDF, Excel). 
                                To facililate re-use, curated data can also be downloaded all at once (except for some high-throughput datasets) 
                                as a collection of plain text tab-delimited  files."),
-                      downloadButton("download", label = "Download Archive"),
+                      downloadButton("download", label = "Download Collection"),
                       DT::dataTableOutput("sourceDT")
              ),
              
              #-- PAGE 7 ----------------------------------------------------------------------------------------#
-             tabPanel("Other Tools", value = "other", # icon = icon("database"),
+             tabPanel("Give Data", value = "give", # icon = icon("database"),
                      ""
              )
 ))

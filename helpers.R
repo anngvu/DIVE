@@ -13,6 +13,9 @@ bpkey <- "4e941848-9247-4b38-a68a-fc6f235cb4e6"
 
 load("Ontology/db.Rdata")
 
+#-- Cohort data fusion -----------------------------------------------------------------------------------#
+
+
 #-- Correlations  ----------------------------------------------------------------------------------------#
 # Remove data with 0 variance
 rem0Var <- function(x) sd(na.omit(x)) != 0 
@@ -105,6 +108,5 @@ xdataMerge <- function(xdata, cvars) {
   return(xdata)
 }
 
-# Return only genes that show significant differences in expression; number of genes significantly different
 
 
