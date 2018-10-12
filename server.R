@@ -3,6 +3,7 @@ library(shiny)
 #-- SET-UP ----------------------------------------------------------------------------------------#
 
 
+
 #--------------------------------------------------------------------------------------------------#
 
 shinyServer(function(input, output, session) {
@@ -20,52 +21,123 @@ shinyServer(function(input, output, session) {
   # Help events -------------------------------------------------
   # Intro.js demo
   
-  
   # -------------------------------------------------------------
   
   #-- PAGE 1 ----------------------------------------------------------------------------------------#
   
   observeEvent(input$cohortDataUpload, {
     cohortX <- fread(input$cohortDataUpload$datapath, header = T)
+    # TO DO: perform data checks
+    
     cohortdata$cohortX <- cohortX
-    # Data fusion
-    which.donors <- switch(input$matchy,
+    cohortdata$matchResult <- NULL
+    # Set initial default matching parameters
+    cohortdata$matchOpts <- guessMatch(names(cohortX))
+  })
+  
+  output$matchUIhelp <- renderUI({
+    req(!is.null(cohortdata$matchOpts))
+    tags$div(class = "matchUI", 
+            HTML("<strong>Data fusion/parameter selection</strong><br>"), 
+            helpText("All covariates guessed as shared by both datasets are used as match parameters, which does not necessarily represent the user-desired default.
+                      Parameters can be adjusted in a drag-and-drop manner, i.e. relocate them to the relevant slot."))
+  })
+  
+  output$matchCovariatesC <- renderUI({
+    cohortdata$cohortX
+    req(!is.null(cohortdata$matchOpts))
+    C <- c("BMI", "db.duration", "age.onset", "Cpeptide", "HbA1c", "peak.gluc", 
+           "GADA.pos", "IA2A.pos", "mIAA.pos", "ZnT8A.pos", "AutoAb.count")
+    tags$div(class = "matchUI", h4("[ clinical ]"), matchUI(C, cohortdata$matchOpts))
+  })
+  
+  output$matchCovariatesD <- renderUI({
+    cohortdata$cohortX
+    req(!is.null(cohortdata$matchOpts))
+    D <- c("age", "sex_Female", "sex_Male", "race_Caucasian", "race_AfricanAmerican", "race_Hispanic.Latino", 
+           "race_Asian", "race_AmericanIndian", "race_Multiracial")
+    tags$div(class = "matchUI", h4("[ demographic ]"), matchUI(D, cohortdata$matchOpts))
+  })
+  
+  output$matchCovariatesX <- renderUI({
+    req(!is.null(cohortdata$matchOpts))
+    covariates <- names(cohortdata$cohortX)
+    used <- cohortdata$matchOpts
+    unused <- setdiff(covariates, used)
+    unused <- unused[unused != "ID"]
+    tags$div(class = "matchUI", h4("[ don't use ]"), 
+            newOrderInput("cvbank", NULL, items = unused, 
+                  connect = paste0("cv", seq_along(cohortdata$matchOpts)), 
+                  item_class = "btn btn-sm unused covariate", width = 100)
+    )
+  })
+  
+  observe({
+     cvs <- paste0("cv", seq_along(cohortdata$matchOpts), "_order")
+     names(cvs) <- names(cohortdata$matchOpts)
+     cohortdata$matchOn <- unlist(lapply(cvs, function(a) input[[a]]))
+  })
+  
+  output$matchOn <- renderPrint({
+    cat(cohortdata$matchOn, sep="\n")
+  })
+  
+  observeEvent(input$match, {
+    removeUI(".matchUI *", multiple = T, immediate = T)
+    cohortX <- cohortdata$cohortX
+    matchOn <- cohortdata$matchOn
+    # Data fusion -- create dataset with required structure
+    which.donors <- switch(input$matchType,
                            ND = "No diabetes",
                            T1D = c("T1D", "T1D Medalist"),
                            T2D = "T2D",
                            Aab = "Autoab Pos")
-    npodL <- paste0("nPOD-", input$matchy)
+    npodL <- paste0("nPOD-", input$matchType)
     npod.subset <- npodX[donor.type %in% which.donors]
     npod.subset[, donor.type := npodL]
-    cohortL <- ifelse(isolate(input$cohortname) == "", "CohortX", isolate(input$cohortname))
+    cohortL <- ifelse(input$cohortname == "", "CohortX", input$cohortname)
     cohortX[, donor.type := cohortL]
+    setnames(cohortX, old = matchOn, new = names(matchOn))
     fused <- rbind(npod.subset, cohortX, use.names = T, fill = T)
-    cohortdata$fused <- fused
+    fused <- fused[ fused[, !Reduce(`|`, lapply(.SD, function(x) is.na(x))), .SDcols = names(matchOn)] ] # remove NAs
+    fused <- fused[, c("ID", "donor.type", names(matchOn)), with = F]
+    cohortdata$fused <- copy(fused)
+    # Do match
+    fused[, donor.type := as.numeric(factor(donor.type, levels = c(npodL, cohortL))) - 1]
+    matchformula <- as.formula(paste("donor.type", "~", paste(names(matchOn), collapse = " + ")))
+    result <- matchit(matchformula, method = "nearest", replace = F, data = fused, caliper = 0.2, ratio = 1)
+    i1 <- as.numeric(result$match.matrix[, 1])
+    i2 <- as.numeric(row.names(result$match.matrix))
+    matched <- fused[c(i1, i2)]
+    matched[, Match := c(fused[c(i2, i1), ID])]
+    # result <- pairmatch(matchformula, data = fused)
+    cohortdata$matchResult <- result
+    cohortdata$matched <- matched
   })
-  
-  output$reviewFusion <- renderPrint({
-    fused <- cohortdata$fused
-    if(!is.null(fused)) {
-      print(fused[, c("ID", "donor.type", input$matchon), with = F])
-    }
-  })
-  outputOptions(output, "reviewFusion", suspendWhenHidden = FALSE)
   
   output$matchSummary <- renderPrint({
-    if(!is.null(cohortdata$matchresult)) print("")
-  })
-  outputOptions(output, "matchSummary", suspendWhenHidden = FALSE)
-  
-  observeEvent(input$match, {
-    # covariates <- input$matchon
-    # matchformula <- as.formula(paste("donor.type", "~", paste(covariates, collapse = " + ")))
-    # result <- matchit(matchformula, method = "nearest", replace = F, data = fused, caliper = 0.2, ratio = 1)
-    # fused[, donor.type := as.numeric(factor(donor.type, levels = c(npodL, cohortL))) - 1]
+    if(is.null(cohortdata$matchResult)) return()
+    cohortdata$matchResult
   })
   
+  output$matchResult <- renderUI({
+    if(is.null(cohortdata$matchResult)) return()
+    cohortdata$matchResult
+    tags$div(verbatimTextOutput("matchSummary"), downloadButton("exportMatch", "Export result"))
+  })
+
   output$npodgraph <- renderPlotly({
     npodgraph
   })
+  
+  output$exportMatch <- downloadHandler(
+    filename = function() {
+      "match_result.csv"
+    },
+    content = function(file) {
+      write.csv(cohortdata$fused, file, row.names = F)
+    }
+  )
   
   # observe({
   #   s <- event_data("plotly_click", source = "npodgraph")
@@ -77,7 +149,6 @@ shinyServer(function(input, output, session) {
   #     return(NULL)
   #   }
   # })
-  
   
   
   #-- PAGE 2 ----------------------------------------------------------------------------------------#
@@ -403,7 +474,7 @@ shinyServer(function(input, output, session) {
              c("Theme or Area of Interest", "Individual-Level Data", "Source", "Data Source Link"))
   }, escape = FALSE, rownames = F, options = list(dom = 'ftp', pageLength = 7))
   
-  output$download <- downloadHandler(
+  output$downloadCollection <- downloadHandler(
     filename = function() {
       "Archive.zip"
     },

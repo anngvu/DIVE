@@ -6,6 +6,7 @@ library(data.table)
 library(DT)
 library(ggplot2)
 library(plotly)
+library(MatchIt)
 # library(ggsci)
 
 #-- SET-UP:data -----------------------------------------------------------------------------------#
@@ -27,7 +28,8 @@ source("helpers.R")
 
 #-- SET-UP:variables ------------------------------------------------------------------------------#
 
-cohortdata <- reactiveValues(cohortX = NULL, fused = NULL)
+cohortdata <- reactiveValues(cohortX = NULL, fused = NULL, 
+                             matchOpts = NULL, matchOn = NULL, matchResult = NULL)
 
 plotdata <- reactiveValues(corr = cor.data, cdata = cdata, newdata = NULL, corr.last.state = cor.data, 
                            drilldown = NULL, # pertains to "2D" view

@@ -23,6 +23,40 @@
   margin-left: -10px;
 }
 
+.covariate {
+  color: black;
+  cursor: grab;
+  font-family: Consolas,monaco,monospace;
+  font-weight: normal;
+  text-transform: none;
+  text-decoration: none;
+  padding: 3px 8px;
+  border-radius: 10%;
+  border: 0;
+  vertical-align: middle;
+} 
+
+.used {
+  background: lemonchiffon;
+}
+
+.unused {
+  background: gainsboro;
+}
+
+.ui-sortable {
+  display: inline-block;
+  vertical-align: middle; 
+  margin-bottom: 5px;
+}
+
+label.orderInput { 
+ display: inline-block; 
+ text-align: center; 
+ vertical-align: middle; 
+ padding-right: 5px;
+} 
+
 .top-options {
   height: 100px;
 }

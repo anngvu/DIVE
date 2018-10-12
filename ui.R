@@ -1,4 +1,5 @@
 library(shinythemes)
+library(shinyjqui)
 library(shinycssloaders)
 
 shinyUI(
@@ -27,81 +28,88 @@ shinyUI(
                                actionButton("helpFusion", "", icon = icon("info-circle"))
                         ),
                         column(1, 
-                               h3("nPOD")
+                               h3("CohortX"),
+                               helpText("(your cohort)")
+                        ),
+                        column(2,
+                               textInput("cohortname", "Your cohort name/label (optional)", value = "", placeholder = "e.g. 'DiViD', 'TEDDY', 'pilot'.."),
+                               fileInput("cohortDataUpload",  HTML("<strong>Upload data to begin</strong>"), multiple = FALSE,
+                                         accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
+                                         buttonLabel = "Data")
                         ),
                         column(2, 
-                               selectInput("matchy", "Type of matches to get from nPOD", 
-                                           choices = list("No diabetes (negative control)" = c(`No-diabetes donors` = "ND"),
-                                                          "T1D (positive control)" = c(`T1D donors` = "T1D"),
-                                                          "Other" = c(`T2D donors` = "T2D", `Autoantibody-positive donors` = "AAb")))
+                               br(),
+                               br(),
+                               br(),
+                               br(),
+                               helpText("What should be included?"),
+                               actionLink("cohordatauploadhelp", "See guide.")
                         ),
-                        column(2, style="border-right: 1px solid lightgray",
-                               selectizeInput("matchon", "Covariates to match on", 
-                                              choices = c("", "age" , "sex", "race", "BMI", "db.duration", "age.onset", "Cpeptide", "HbA1c", "peak.gluc", 
-                                                          "GADA.pos", "IA2A.pos", "mIAA.pos", "ZnT8A.pos", "AutoAb.count"), selected = "",
-                                              options = list(maxItems = 14, placeholder = "choose...")),
-                               helpText("Missing data reduces the yield of matches; refer to data availability across covariates below.")
-                        ),
-                        column(1,
-                               ""
-                        ),
-                        column(5,
-                               ""
+                        column(6
                         )),
                         fluidRow(
-                          column(1,
-                                 br()
+                          column(1
                           ),
                           column(1, style="border-top: 1px solid lightgray;",
                                  br(),
-                                 h3("CohortX"),
-                                 helpText("(your cohort)")
+                                 h3("nPOD")
                           ),
                           column(2, style="border-top: 1px solid lightgray;",
                                  br(),
-                                 textInput("cohortname", "Your cohort name/label (optional)", value = "", placeholder = "e.g. 'DiViD', 'TEDDY', 'pilot'..")
+                                 selectInput("matchType", "Type of matches to get from nPOD", 
+                                             choices = list("No diabetes (negative control)" = c(`No-diabetes donors` = "ND"),
+                                                            "T1D (positive control)" = c(`T1D donors` = "T1D"),
+                                                            "Other" = c(`T2D donors` = "T2D", `Autoantibody-positive donors` = "AAb"))),
+                                 div(style="padding-bottom: 5px;", HTML("<strong>You are matching on:</strong>")),
+                                 verbatimTextOutput("matchOn", placeholder = TRUE),
+                                 actionButton("match", "Match")
                           ),
-                          column(2, style="border-right: 1px solid lightgray; border-top: 1px solid lightgray;",
+                          column(2, style="padding-top: 10px;",
+                                helpText("Refer to the right for a visual summary of nPOD's data availability. 
+                                         Covariates with more missing data work less well for matching."),
                                 br(),
-                                fileInput("cohortDataUpload", "", multiple = FALSE,
-                                          accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
-                                          buttonLabel = "Data"),
-                                helpText("Factor-encoding and column names in your data must be the same as nPOD's for the selected covariates.")
+                                uiOutput("matchUIhelp")
                           ),
-                          column(1, style="margin-top: -100px",
-                                 conditionalPanel("output.reviewFusion && !output.matchSummary",
-                                   h4("Data review"),
-                                   helpText("Please check that your upload has undergone proper fusion with nPOD's dataset before running the matching."),
-                                   helpText("Looks good?"),
-                                   actionButton("match", "Match")
+                          column(6, style="margin-top: -220px",
+                                 plotlyOutput("npodgraph")
                                  )
                           ),
-                          column(5, style="margin-top: -100px",
-                                 conditionalPanel("output.reviewFusion && !output.matchSummary",
-                                  verbatimTextOutput("reviewFusion")
-                                 ),
-                                 conditionalPanel("output.matchSummary",
-                                                  h3("Match result summary"),
-                                                  verbatimTextOutput("matchSummary"),
-                                                  br(),
-                                                  br(),
-                                                  downloadButton("downloadmatch", "Export result"),
-                                                  br())
-                                                  
-                          )),
                         fluidRow(
-                          column(6,
-                               plotlyOutput("npodgraph")
-                          ),
-                          column(6, #style="background-color: lightgray", 
+                          column(1),
+                          column(6, style="padding-top: 20px;",
+                                 fluidRow(
+                                          column(4,
+                                                 uiOutput("matchCovariatesX")
+                                          ),
+                                          column(4,
+                                                 uiOutput("matchCovariatesD")
+                                          ),
+                                          column(4,
+                                                 uiOutput("matchCovariatesC")
+                                          )
+                                 )),
+                          column(5, #style="background-color: lightgray", 
                                  br()
-                       
-                      ))
-                    )),
+                          )),
+                      fluidRow(
+                        column(1),
+                        column(1 #, style="border-top: 1px solid lightgray;"
+                        ),
+                        column(4, # style="border-top: 1px solid lightgray; padding-top: 20px;",
+                               uiOutput("matchResult")
+                        ),
+                        column(2, 
+                               tableOutput("otherAttributes")
+                        ),
+                        column(4,
+                               ""
+                        )       
+                    ))
+             )),
              
              
              #-- PAGE 3 ----------------------------------------------------------------------------------------#
-             tabPanel("Experimental data", value = "data-fusion-2", # icon = icon("cube"), 
+             tabPanel("Experimental data", value = "data-fusion-2",
                       fluidPage(fluidRow(
                         column(1,
                                br(),
@@ -229,7 +237,7 @@ shinyUI(
                                methodology, definitions and other metadata, but are in a variety of formats not universally machine-readable (e.g. PDF, Excel). 
                                To facililate re-use, curated data can also be downloaded all at once (except for some high-throughput datasets) 
                                as a collection of plain text tab-delimited  files."),
-                      downloadButton("download", label = "Download Collection"),
+                      downloadButton("downloadCollection", label = "Download Collection"),
                       DT::dataTableOutput("sourceDT")
              ),
              

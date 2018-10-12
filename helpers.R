@@ -13,8 +13,120 @@ bpkey <- "4e941848-9247-4b38-a68a-fc6f235cb4e6"
 
 load("Ontology/db.Rdata")
 
+# ----
+
+newOrderInput <- function(inputId, label, items,
+                       as_source = FALSE, connect = NULL,
+                       item_class = NULL,
+                       placeholder = NULL,
+                       width = "500px", ...) {
+  if (is.null(connect)) {
+    connect <- "false"
+  } else {
+    connect <- paste0("#", connect, collapse = ", ")
+  }
+  # item_class <- sprintf("btn btn-%s", match.arg(item_class))
+  
+  if (length(items) == 0 || (!is.vector(items) && !is.factor(items))) {
+    item_tags <- list()
+  } else {
+    if (is.vector(items)) {
+      item_values <- unlist(items, recursive = FALSE, use.names = TRUE)
+      nms <- names(item_values)
+      item_html <- `if`(
+        is.null(nms) || any(nms == "") || any(is.na(nms)),
+        item_values, nms
+      )
+    } else if (is.factor(items)) {
+      item_values <- as.numeric(items)
+      item_html <- as.character(items)
+    }
+    item_tags <- lapply(1:length(item_values), function(i) {
+      tag <- shiny::tags$div(
+        item_html[i],
+        `data-value` = item_values[i],
+        class = item_class, style = "margin: 1px"
+      )
+      if (as_source) {
+        options <- list(connectToSortable = connect, helper = "clone", cancel = "")
+        tag <- jqui_draggable(tag, options = options)
+      }
+      return(tag)
+    })
+  }
+  
+  style <- sprintf(
+    "width: %s; font-size: 0px; min-height: 25px;",
+    shiny::validateCssUnit(width)
+  )
+  container <- shiny::tagSetChildren(
+    shiny::tags$div(id = inputId, style = style, ...),
+    list = item_tags
+  )
+  if (!as_source) {
+    cb <- "function(e, ui){if(!$(e.target).children().length)$(e.target).empty();}"
+    func <- 'function(event, ui){
+    return $(event.target).children().map(function(i, e){
+    return $(e).attr("data-value");
+    }).get();
+  }'
+    options <- list(
+      connectWith = connect,
+      remove = htmlwidgets::JS(cb),
+      shiny = list(
+        order = list(
+          sortcreate = htmlwidgets::JS(func),
+          sortupdate = htmlwidgets::JS(func)
+        )
+      )
+      )
+    container <- jqui_sortable(container, options = options)
+    }
+  
+  if (!is.null(placeholder)) {
+    css <- '#%s:empty:before{content: "%s"; font-size: 14px; opacity: 0.5;}'
+    placeholder <- shiny::singleton(
+      shiny::tags$head(
+        shiny::tags$style(
+          shiny::HTML(
+            sprintf(css, inputId, placeholder)
+          )
+        )
+      )
+    )
+  }
+  
+  shiny::tagList(
+    placeholder,
+    shiny::tags$label(label, `for` = inputId, `class` = "orderInput"),
+    container
+  )
+}
+
+matchUI <- function(cv, match.opts) {
+  ix <- match(cv, names(match.opts))
+  UIlist <- tagList()
+  for(i in seq_along(cv)) {
+    UIlist[[i]] <- list(newOrderInput(paste0("cv", ix[i]), HTML(paste(cv[i], "&rarr;")), items = match.opts[[ix[i]]], 
+                                      connect = c(paste0("cv", seq_along(match.opts)), "cvbank"), 
+                                      item_class = "btn btn-sm used covariate", width = 100, placeholder = "n/a"), br())
+  }
+  return(UIlist)
+}
+
 #-- Cohort data fusion -----------------------------------------------------------------------------------#
 
+guessMatch <- function(v) {
+  fs <- list(GADA.pos = "gad", IA2A.pos = "ia2", mIAA.pos = "mIA", ZnT8A.pos = "znt8", 
+             AutoAb.count = "abcount", age = "age", BMI = "BMI", db.duration = "duration",
+             age.onset = "onset", Cpeptide = "cpeptide", HbA1c = "hba1c", peak.gluc = "gluc",
+             race_AfricanAmerican = "afr", race_AmericanIndian = "ind", race_Asian = "asian",
+             race_Caucasian = "cau", race_Hispanic.Latino = "hisp", race_Multiracial = "multiracial",
+             sex_Female = "female", sex_Male = "[^fe]male")
+  res <- lapply(fs, function(f) sort(grep(f, v, val = T, ignore.case = T))[1])
+  res[sapply(res, is.na)] <- list(NULL)
+  return(res)
+}
 
 #-- Correlations  ----------------------------------------------------------------------------------------#
 # Remove data with 0 variance
