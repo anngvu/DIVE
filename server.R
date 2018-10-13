@@ -92,38 +92,28 @@ shinyServer(function(input, output, session) {
                            T1D = c("T1D", "T1D Medalist"),
                            T2D = "T2D",
                            Aab = "Autoab Pos")
-    npodL <- paste0("nPOD-", input$matchType)
     npod.subset <- npodX[donor.type %in% which.donors]
-    npod.subset[, donor.type := npodL]
-    cohortL <- ifelse(input$cohortname == "", "CohortX", input$cohortname)
-    cohortX[, donor.type := cohortL]
-    setnames(cohortX, old = matchOn, new = names(matchOn))
-    fused <- rbind(npod.subset, cohortX, use.names = T, fill = T)
-    fused <- fused[ fused[, !Reduce(`|`, lapply(.SD, function(x) is.na(x))), .SDcols = names(matchOn)] ] # remove NAs
-    fused <- fused[, c("ID", "donor.type", names(matchOn)), with = F]
+    fused <- cohortFusion(npod.subset, cohortX, matchOn,
+                          c(paste0("nPOD-", input$matchType), ifelse(input$cohortname == "", "CohortX", input$cohortname)))
     cohortdata$fused <- copy(fused)
     # Do match
-    fused[, donor.type := as.numeric(factor(donor.type, levels = c(npodL, cohortL))) - 1]
-    matchformula <- as.formula(paste("donor.type", "~", paste(names(matchOn), collapse = " + ")))
-    result <- matchit(matchformula, method = "nearest", replace = F, data = fused, caliper = 0.2, ratio = 1)
-    i1 <- as.numeric(result$match.matrix[, 1])
-    i2 <- as.numeric(row.names(result$match.matrix))
-    matched <- fused[c(i1, i2)]
-    matched[, Match := c(fused[c(i2, i1), ID])]
-    # result <- pairmatch(matchformula, data = fused)
-    cohortdata$matchResult <- result
-    cohortdata$matched <- matched
+    matchResult <- Match2(fused, matchOn)
+    cohortdata$matchResult <- matchResult$result
+    cohortdata$matchedSet <- matchResult$matched
   })
   
-  output$matchSummary <- renderPrint({
-    if(is.null(cohortdata$matchResult)) return()
-    cohortdata$matchResult
+  output$matchSummary <- renderTable({
+    if(is.null(cohortdata$matchedSet)) return()
+    cohortdata$matchedSet
   })
   
   output$matchResult <- renderUI({
     if(is.null(cohortdata$matchResult)) return()
-    cohortdata$matchResult
-    tags$div(verbatimTextOutput("matchSummary"), downloadButton("exportMatch", "Export result"))
+    tags$div(class = "matchOutput",
+             h4("Result preview"),
+             tableOutput("matchSummary"), 
+             downloadButton("downloadSummary", "Match stats summary"), downloadButton("exportMatch", "Match table"), br(), br(),
+             HTML("*Samples from matched cases can be requested through this <a href='https://npoddatashare.coh.org/'>portal</a>."))
   })
 
   output$npodgraph <- renderPlotly({
@@ -138,6 +128,33 @@ shinyServer(function(input, output, session) {
       write.csv(cohortdata$fused, file, row.names = F)
     }
   )
+  
+  output$otherAttributes <- renderTable({
+    if(is.null(cohortdata$matchedSet)) return()
+    matched <- cohortdata$matchedSet[grep("nPOD", ID), as.numeric(gsub("nPOD_", "", ID))]
+    cutoff <- length(matched)/2
+    matched <- cdata[ID %in% matched]
+    n <- matched[, lapply(.SD, function(x) table(is.na(x))["FALSE"])]
+    n <- melt(n, measure.vars = names(n), variable.name = "Variable", value.name = "N")
+    n <- n[!Variable %in% c("ID", "donor.type") & N > cutoff][order(N, decreasing = T)]
+    as.data.frame(n)
+  }, width = 400)
+  
+  output$exploreMatchData <- renderUI({
+    if(is.null(cohortdata$matchResult)) return()
+    tags$div(class = "matchOutput", style="background-color: honeydew",
+             h4("Other measurement data available for matched nPOD cases"), br(),
+             helpText("Showing all data that are available for at least half of matched nPOD cases."),
+             tableOutput("otherAttributes")
+    )
+  })
+  
+  output$exploreMatchData2 <- renderUI({
+    if(is.null(cohortdata$matchResult)) return()
+    tags$div(class = "matchOutput", style="background-color: azure",
+             h4("More data views"), br()
+    )
+  })
   
   # observe({
   #   s <- event_data("plotly_click", source = "npodgraph")

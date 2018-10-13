@@ -29,7 +29,7 @@ source("helpers.R")
 #-- SET-UP:variables ------------------------------------------------------------------------------#
 
 cohortdata <- reactiveValues(cohortX = NULL, fused = NULL, 
-                             matchOpts = NULL, matchOn = NULL, matchResult = NULL)
+                             matchOpts = NULL, matchOn = NULL, matchResult = NULL, matchedSet = NULL)
 
 plotdata <- reactiveValues(corr = cor.data, cdata = cdata, newdata = NULL, corr.last.state = cor.data, 
                            drilldown = NULL, # pertains to "2D" view

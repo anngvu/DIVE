@@ -128,6 +128,29 @@ guessMatch <- function(v) {
   return(res)
 }
 
+cohortFusion <- function(coh1, coh2, matchOn, cohnames = c("Cohort1", "Cohort2")) {
+  coh1[, donor.type := cohnames[1]]
+  coh2[, donor.type := cohnames[2]]
+  setnames(coh2, old = matchOn, new = names(matchOn))
+  fused <- rbind(coh1, coh2, use.names = T, fill = T)
+  fused <- fused[ fused[, !Reduce(`|`, lapply(.SD, function(x) is.na(x))), .SDcols = names(matchOn)] ] # remove NAs
+  fused <- fused[, c("ID", "donor.type", names(matchOn)), with = F]
+  fused[, donor.type := factor(donor.type, levels = c(coh1$donor.type[1], coh2$donor.type[1]))]
+  fused
+}
+
+Match2 <- function(ds, matchOn) {
+  dataset <- copy(ds)
+  dataset[, donor.type := as.integer(donor.type) - 1]
+  matchformula <- as.formula(paste("donor.type", "~", paste(names(matchOn), collapse = " + ")))
+  result <- matchit(matchformula, method = "nearest", replace = F, data = dataset, caliper = 0.2, ratio = 1)
+  i1 <- as.numeric(result$match.matrix[, 1])
+  i2 <- as.numeric(row.names(result$match.matrix))
+  matched <- ds[c(i1, i2)]
+  matched[, Match := c(ds[c(i2, i1), ID])]
+  return(list(result = result, matched = matched))
+}
+
 #-- Correlations  ----------------------------------------------------------------------------------------#
 # Remove data with 0 variance
 rem0Var <- function(x) sd(na.omit(x)) != 0 
@@ -135,10 +158,10 @@ rem0Var <- function(x) sd(na.omit(x)) != 0
 # Return data suitable for running correlations
 data2cor <- function(cdata) {
   cor.data <- Filter(is.numeric, cdata) # remove nominal category variables
-  cor.data <- cor.data[, !grepl("^ID|_SE$|_SEM$|_SD$", names(cor.data )), with = F]
+  cor.data <- cor.data[, !grepl("^ID|_SE$|_SEM$|_SD$", names(cor.data )), with = F] # _SE cols for error bars
   cor.data <- Filter(rem0Var, cor.data)
   corM <- cor(cor.data, use = "pairwise.complete.obs", method = "spearman")
-  corN <- crossprod(as.matrix(cor.data[, lapply(.SD, function(x) as.integer(!is.na(x)))]))
+  corN <- crossprod(as.matrix(cor.data[, lapply(.SD, function(x) as.integer(!is.na(x)))])) # n sample size
   return(list(corM = corM, corN = corN))
 }
 

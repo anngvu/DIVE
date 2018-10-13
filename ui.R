@@ -93,18 +93,17 @@ shinyUI(
                           )),
                       fluidRow(
                         column(1),
-                        column(1 #, style="border-top: 1px solid lightgray;"
-                        ),
-                        column(4, # style="border-top: 1px solid lightgray; padding-top: 20px;",
+                        column(3, style="padding-top: 20px; padding-bottom: 50px;",
                                uiOutput("matchResult")
                         ),
-                        column(2, 
-                               tableOutput("otherAttributes")
+                        column(1),
+                        column(3,
+                               uiOutput("exploreMatchData")
                         ),
                         column(4,
-                               ""
+                               uiOutput("exploreMatchData2")
                         )       
-                    ))
+                    )
              )),
              
              
