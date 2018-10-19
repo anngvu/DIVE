@@ -1,0 +1,6 @@
+step	element	intro	position	onchange
+1	#corM	Exploring correlations with all data	right	"function(){  alert(""Want to call function after this step , no alert showing ""); }"
+2	.drilldown	Shows the data for selected correlation. This box can also be used to find a correlations between variables.	left	
+3	#drilldownShow	Look	left	
+4	#corrFilters	For instance, find negative controls from nPOD if you have a number of T1D cases. Or use nPOD’s T1D data as positive controls or a validation cohort.	bottom	
+5	#corrUpload	Exploring correlations with all data	bottom	

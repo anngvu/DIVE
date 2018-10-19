@@ -4,18 +4,23 @@ library(shinycssloaders)
 
 shinyUI(
   navbarPage("nPOD DIVE", id = "main", selected = "intro", 
-             theme = shinytheme("lumen"), tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
+             theme = shinytheme("lumen"), tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
+                                                    tags$link(rel = "stylesheet", type = "text/css", href = "introjs.min.css"),
+                                                    tags$script(src = "intro.min.js")),
+             includeScript("www/app.js"),
              
              #-- PAGE 1 ----------------------------------------------------------------------------------------#                 
              tabPanel("Connections in Investigations", value = "intro", # icon = icon("connectdevelop"),
                       fluidRow(
                         column(8,
-                               visNetworkOutput("network", height = "750px"),
-                               actionButton("accessdata", "Data accessible", icon = icon("circle", class = "node")),
-                               actionButton("noaccessdata", "Data not accessible", icon = icon("circle", class = "node"))
+                               div(id = "nPOD-connections", 
+                                   visNetworkOutput("network", height = "750px"),
+                                   actionButton("accessdata", "Data accessible", icon = icon("circle", class = "node")),
+                                   actionButton("noaccessdata", "Data not accessible", icon = icon("circle", class = "node"))
+                               )
                         ),
                         column(4,
-                               includeMarkdown("Intro.Rmd")
+                               div(id = "about", includeMarkdown("Intro.Rmd"))
                         )
                       )),
              #-- PAGE 2 ----------------------------------------------------------------------------------------#
@@ -25,24 +30,26 @@ shinyUI(
                       fluidPage(fluidRow(
                         column(1,
                                br(),
-                               actionButton("helpFusion", "", icon = icon("info-circle"))
+                               actionButton("helpCohortIn", "Guided tour", icon = icon("info-circle"))
                         ),
                         column(1, 
                                h3("CohortX"),
                                helpText("(your cohort)")
                         ),
                         column(2,
-                               textInput("cohortname", "Your cohort name/label (optional)", value = "", placeholder = "e.g. 'DiViD', 'pilot'.."),
-                               fileInput("cohortDataUpload",  HTML("<strong>Upload data to begin</strong>"), multiple = FALSE,
+                               div(id = "cohortInput", 
+                                   textInput("cohortname", "Your cohort name/label (optional)", value = "", placeholder = "e.g. 'DiViD', 'pilot'.."),
+                                   fileInput("cohortDataUpload",  HTML("<strong>Upload data to begin</strong>"), multiple = FALSE,
                                          accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
                                          buttonLabel = "Data")
+                               )
                         ),
                         column(1, 
                                br(),
                                checkboxInput("outsideCohort", "non-nPOD cohort", value = T),
                                br(),
                                helpText("How does this work?"),
-                               actionLink("cohordatauploadhelp", "See complete guide.")
+                               actionLink("cohordatauploadhelp", "See details and methodology.")
                         ),
                         column(1
                         ),
@@ -57,22 +64,24 @@ shinyUI(
                           ),
                           column(2, style="border-top: 1px solid lightgray;",
                                  br(),
-                                 selectInput("matchType", "Type of matches to get from nPOD", 
-                                             choices = list("No diabetes (negative control)" = c(`No-diabetes donors` = "ND"),
-                                                            "T1D (positive control)" = c(`T1D donors` = "T1D"),
-                                                            "Other" = c(`T2D donors` = "T2D", `Autoantibody-positive donors` = "AAb"))),
-                                 div(style="padding-bottom: 5px;", HTML("<strong>You are matching on:</strong>")),
-                                 verbatimTextOutput("matchOn", placeholder = TRUE),
-                                 actionButton("match", "Match")
+                                 div(id = "nPODInput", 
+                                   selectInput("matchType", "Type of matches to get from nPOD", 
+                                               choices = list("No diabetes (negative control)" = c(`No-diabetes donors` = "ND"),
+                                                              "T1D (positive control)" = c(`T1D donors` = "T1D"),
+                                                              "Other" = c(`T2D donors` = "T2D", `Autoantibody-positive donors` = "AAb"))),
+                                   div(style="padding-bottom: 5px;", HTML("<strong>You are matching on:</strong>")),
+                                   verbatimTextOutput("matchOn", placeholder = TRUE),
+                                   actionButton("match", "Match")
+                                 )
                           ),
                           column(2, style="padding-top: 10px;",
-                                helpText("Refer to the right for a visual summary of nPOD's data availability. 
-                                         Covariates with more missing data work less well for matching."),
+                                # helpText("Refer to the right for a visual summary of nPOD's data availability. 
+                                #          Covariates with more missing data work less well for matching."),
                                 br(),
                                 uiOutput("matchUIhelp")
                           ),
                           column(6, div(style="margin-top: -220px; z-index: 0;", plotlyOutput("npodgraph")),
-                                 div(style="position: absolute; margin-top: -220px; margin-left: -140px; top:0; left:0; z-index: 1;", 
+                                 div(style="position: absolute; margin-top: -200px; margin-left: -140px; top:0; left:0; z-index: 1;", 
                                      plotlyOutput("nPie"))
                           )),
                         fluidRow(
@@ -113,9 +122,9 @@ shinyUI(
                       fluidPage(fluidRow(
                         column(1,
                                br(),
-                               actionButton("helpCorrelation", "", icon = icon("info-circle"))
+                               actionButton("helpCorrelation", "Guided tour", icon = icon("info-circle"))
                         ),
-                        column(5,
+                        column(5, div(id = "corrFilters", 
                                div(class = "forceInline", numericInput("minimumN", HTML("min. N for <i>r</i>"), min = 2, max = NA, step = 1, val = 5, width = "80px")),
                                HTML("&nbsp"),
                                div(class = "forceInline", selectInput("varMenuOpt", "Filter variables by", 
@@ -125,22 +134,26 @@ shinyUI(
                                                                          options= list(placeholder = "select..."), width = "300px")),
                                div(class = "forceInline", br(), actionButton("varExclude", "Exclude")),
                                div(class = "forceInline", br(), actionButton("varKeep", "Keep")),
-                               div(class = "forceInline", br(), actionButton("varReset", "Reset", icon = icon("undo"))) 
+                               div(class = "forceInline", br(), actionButton("varReset", "Reset", icon = icon("undo")))
+                               )
                         ),
-                        column(2, 
+                        column(2, div(id = "corrUpload",  
                                div(class = "forceInline", fileInput("dataUpload", "", multiple = FALSE, width = "250px", 
                                                                     accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
                                                                     buttonLabel = "My data", placeholder = "Upload to compare..")),
                                div(class = "forceInline", br(), actionButton("helpUpload", "", icon = icon("question-circle"), width = "10px"))
+                        )
                         ),
-                        column(4, 
+                        column(4,
+                               div(id = "drilldown", 
                                selectizeInput("drilldown", "Drill down to data for", 
                                               choices = c("", colnames(cor.data$corM)), selected = "", 
                                               options = list(maxItems = 2, placeholder = "select variable(s)"), width = "350px")
+                               )
                         )),
                         fluidRow(
                           column(8, align = "left",
-                                 plotlyOutput("corM")
+                                 div(id = "corM", style ="height: 1000px;", plotlyOutput("corM"))
                           ),
                           column(4,
                                   conditionalPanel("input.drilldown",
@@ -151,8 +164,9 @@ shinyUI(
                                                    HTML("&nbsp"),
                                                    div(class = "forceInline", br(), actionButton("switchXY", "XY", icon = icon("refresh"))),
                                                    HTML("&nbsp"),
-                                                   div(class = "forceInline", br(), checkboxInput("plotsmooth", "Add smooth"))),
+                                                   div(class = "forceInline", br(), checkboxInput("plotsmooth", "Add smooth")),
                                  plotlyOutput("scatter")
+                                 )
                           ))
                       )),
              #-- PAGE 4 ----------------------------------------------------------------------------------------#
@@ -160,9 +174,10 @@ shinyUI(
                       fluidRow(class = "top-options",
                                column(1,
                                       br(),
-                                      actionButton("helpVolcano", "", icon = icon("info-circle")),
+                                      actionButton("helpVolcano", "Guided tour", icon = icon("info-circle")),
+                                      br(), br(),
                                       actionButton("viewVolcano", "", icon = icon("eye-slash")),
-                                      div(class = "forceInline", br(), actionButton("resetVolcano", "Reset", icon = icon("undo")))
+                                      actionButton("resetVolcano", "Reset", icon = icon("undo"))
                                ),       
                                column(3,
                                       div(class = "forceInline", selectizeInput("Glist", "Genes (proteins) of interest", 

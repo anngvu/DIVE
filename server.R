@@ -3,10 +3,22 @@ library(shiny)
 #-- SET-UP ----------------------------------------------------------------------------------------#
 
 
-
 #--------------------------------------------------------------------------------------------------#
 
 shinyServer(function(input, output, session) {
+  
+  #-- HELP TOURS ----------------------------------------------------------------------------------#
+  
+  observeEvent(input$helpCohortIn, {
+    session$sendCustomMessage(type = "setHelpContent", message = list(steps = toJSON(steps)))
+    session$sendCustomMessage(type = "startHelp", message = list(""))
+  })
+  
+  observeEvent(input$helpCorrelation, {
+    session$sendCustomMessage(type = "setHelpContent", message = list(steps = toJSON(steps2)))
+    session$sendCustomMessage(type = "startHelp", message = list(""))
+  })
+  
   
   #-- HOME ----------------------------------------------------------------------------------------#
   
@@ -17,9 +29,6 @@ shinyServer(function(input, output, session) {
   observeEvent(input$accessdata, {
     updateNavbarPage(session, "main", selected = "source-data")
   })
-  
-  # Help events -------------------------------------------------
-  # Intro.js demo
   
   # -------------------------------------------------------------
   
@@ -247,15 +256,6 @@ shinyServer(function(input, output, session) {
     showModal(modalDialog(
       title = "Uploading data",
       includeHTML("uploading_data.html"),
-      easyClose = TRUE,
-      footer = NULL
-    ))
-  })
-  
-  observeEvent(input$helpCorrelation, {
-    showModal(modalDialog(
-      title = "Exploring correlations with all data",
-      HTML(""),
       easyClose = TRUE,
       footer = NULL
     ))

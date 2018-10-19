@@ -1,0 +1,4 @@
+step	element	intro	position
+1	#cohortInput	<strong>Compare cohort data</strong><br>Find nPOD matches for cases in your cohort.	bottom
+2	#nPODInput	For instance, find negative controls from nPOD if you have a number of T1D cases. Or use nPOD’s T1D data as positive controls or a validation cohort.	bottom
+3	#npodgraph	npod graph	bottom
