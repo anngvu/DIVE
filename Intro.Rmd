@@ -7,10 +7,11 @@ output: html_document
 
 Since 2008, investigators have published over 100 papers using nPOD donor biosamples, yielding rich insights on both long-standing themes and diverse, exploratory areas in diabetes research. An opportunity exists to "connect more dots" given that much of the data can be linked by the shared individual-level biosamples from which they were generated. The integration of data from all studies can make the data from each study go even further to deliver additional returns on knowledge. The data can play a role in not only one important story, but many important stories. The Data Integration & Visual Exploration (DIVE) application implements this idea with these uses and features in mind:
 
-- Discover new relationships between data that can become testable new hypotheses.
+- Allow data to connect both nPOD and non-nPOD investigators for new collaborations.
+- Build more comprehensive, higher-confidence characterizations by putting together all data parts that have been produced.
 - Compare results and methodologies of similar data from different labs.
-- Build more comprehensive, higher-confidence models of disease processes by using all data parts that have been produced.
-- Facilitate FAIR (Findable, Accessible, Interoperable, Reusable) sharing, helping investigators access data of interest to reuse and support their own investigations.
+- Discover new relationships between data that can become testable new hypotheses.
+- Ease FAIR (Findable, Accessible, Interoperable, Reusable) sharing, helping investigators to access data that can support their own investigations.
 
 **Contribute**
 
@@ -27,4 +28,4 @@ _future citation_
 
 **Related Projects**
 
-You may also be interested in the [nPOD Resource Browser](http://www.example.com), which catalogs and facilitates sharing of resources ***other*** than data.
+You may also be interested in the [nPOD Resource Browser](http://www.example.com), which catalogs and facilitates sharing of experimental resources *other* than data.

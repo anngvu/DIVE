@@ -26,9 +26,11 @@ shinyServer(function(input, output, session) {
   #-- PAGE 1 ----------------------------------------------------------------------------------------#
   
   observeEvent(input$cohortDataUpload, {
+    # Remove previous match results
+    removeUI(".matchOutput", multiple = T, immediate = T)
     cohortX <- fread(input$cohortDataUpload$datapath, header = T)
     # TO DO: perform data checks
-    
+    names(cohortX) <- make.names(names(cohortX))
     cohortdata$cohortX <- cohortX
     cohortdata$matchResult <- NULL
     # Set initial default matching parameters
@@ -40,7 +42,7 @@ shinyServer(function(input, output, session) {
     tags$div(class = "matchUI", 
             HTML("<strong>Data fusion/parameter selection</strong><br>"), 
             helpText("All covariates guessed as shared by both datasets are used as match parameters, which does not necessarily represent the user-desired default.
-                      Parameters can be adjusted in a drag-and-drop manner, i.e. relocate them to the relevant slot."))
+                      Parameters can be adjusted in a drag-and-drop manner, i.e. bring over and connect those that should be used."))
   })
   
   output$matchCovariatesC <- renderUI({
@@ -83,7 +85,8 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$match, {
-    removeUI(".matchUI *", multiple = T, immediate = T)
+    removeUI(".matchUI", multiple = T, immediate = T)
+    removeUI(".matchOutput", multiple = T, immediate = T)
     cohortX <- cohortdata$cohortX
     matchOn <- cohortdata$matchOn
     # Data fusion -- create dataset with required structure
@@ -110,14 +113,19 @@ shinyServer(function(input, output, session) {
   output$matchResult <- renderUI({
     if(is.null(cohortdata$matchResult)) return()
     tags$div(class = "matchOutput",
-             h4("Result preview"),
-             tableOutput("matchSummary"), 
-             downloadButton("downloadSummary", "Match stats summary"), downloadButton("exportMatch", "Match table"), br(), br(),
-             HTML("*Samples from matched cases can be requested through this <a href='https://npoddatashare.coh.org/'>portal</a>."))
-  })
-
-  output$npodgraph <- renderPlotly({
-    npodgraph
+             h4("Results"),
+             tabsetPanel(type = "tabs",
+               tabPanel("Match preview", br(),
+                 tableOutput("matchSummary"), 
+                 downloadButton("exportMatch", "Match table"), br(), br(),
+                 HTML("*Samples of matched cases can be requested through this <a href='https://npoddatashare.coh.org/'>portal</a>.") 
+               ),
+               tabPanel("Match stats summary",
+                        br(),
+                        downloadButton("downloadSummary", "Match stats summary")       
+               )
+             )
+    )
   })
   
   output$exportMatch <- downloadHandler(
@@ -129,44 +137,108 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  output$otherAttributes <- renderTable({
+  output$exploreMatchData <- renderUI({
     if(is.null(cohortdata$matchedSet)) return()
     matched <- cohortdata$matchedSet[grep("nPOD", ID), as.numeric(gsub("nPOD_", "", ID))]
     cutoff <- length(matched)/2
     matched <- cdata[ID %in% matched]
     n <- matched[, lapply(.SD, function(x) table(is.na(x))["FALSE"])]
-    n <- melt(n, measure.vars = names(n), variable.name = "Variable", value.name = "N")
-    n <- n[!Variable %in% c("ID", "donor.type") & N > cutoff][order(N, decreasing = T)]
-    as.data.frame(n)
-  }, width = 400)
-  
-  output$exploreMatchData <- renderUI({
-    if(is.null(cohortdata$matchResult)) return()
-    tags$div(class = "matchOutput", style="background-color: honeydew",
-             h4("Other measurement data available for matched nPOD cases"), br(),
-             helpText("Showing all data that are available for at least half of matched nPOD cases."),
-             tableOutput("otherAttributes")
+    n <- melt(n, measure.vars = names(n))
+    n <- n[!variable %in% c("ID", "donor.type") & value > cutoff][order(value, decreasing = T)]
+    nPOD <- setNames(as.character(n$variable), n[, paste0(variable, " (", value, ")")])
+    cohortX <- names(cohortdata$cohortX)
+    cohortX <- c("", cohortX[cohortX != "ID"])
+    tags$div(class = "matchOutput", style="padding-right: 30px;",
+             h4("Advanced"),
+             tabsetPanel(type = "tabs",
+                         tabPanel("Other characterization data", br(), 
+               helpText("You might be interested in looking at all available data to know more about your matched cases. 
+                        This includes characterization data derived from various independent experiments
+                        that extend beyond basic demographic and clinical measurements
+                        and which may not be available for all matches. 
+                        The selection below contains attributes that cover at least half of your match subset."),
+               selectInput("matchAttribute", "Other features (cases)", choices = nPOD),
+               br(),
+               h5('Compare to a measurement in your dataset'),
+               selectInput("matchAttribute2", "Features in your data", choices = cohortX),
+               checkboxInput("sameScale", "Plot on same scale"),
+               helpText("")
+                         )
+             )
     )
+  })
+  
+  output$matchPlot <- renderPlot({
+    if(is.null(cohortdata$matchedSet)) return()
+    matched <- cohortdata$matchedSet[grep("nPOD", ID), as.numeric(gsub("nPOD_", "", ID))]
+    var1 <- input$matchAttribute
+    var2 <- input$matchAttribute2
+    tmp <- cdata[ID %in% matched, c("ID", "donor.type", var1), with = F]
+    tmp[, donor.type := paste0("nPOD-", donor.type)]
+    p <- ggplot(tmp, aes_string(x = "donor.type", y = var1)) + 
+      geom_dotplot(method = "histodot", stackdir = "center", binaxis = "y", color = "#17a2b8", fill = "#17a2b8") + 
+      theme_bw()
+    if(var2 == "") {
+      return(p)
+    } else {
+      ids <- cohortdata$matchedSet[grep("nPOD", ID, invert = T), ID]  
+      tmp2 <- cohortdata$cohortX[ID %in% ids, c("ID", var2), with = F]
+      tmp2[, donor.type := "CohortX"]
+      if(input$sameScale) {
+        setnames(tmp2, old = var2, new = var1)
+        tmp2 <- rbind(tmp, tmp2, use.names = T)
+        colors <- setNames(c("#17a2b8", "indianred"), unique(tmp2$donor.type))
+        p <- p + geom_dotplot(data = tmp2, 
+                              aes_string(x = "donor.type", y = var1, color = "donor.type", fill = "donor.type"), 
+                              method = "histodot", stackdir = "center", binaxis = "y") +
+          scale_color_manual(values = colors) + scale_fill_manual(values = colors)
+        return(p)
+      } 
+      q <- ggplot(tmp2, aes_string(x = "donor.type", y = var2)) + 
+        geom_dotplot(method = "histodot", stackdir = "center", binaxis = "y",
+                     color = "indianred", fill = "indianred") + 
+        theme_bw()
+      gridExtra::grid.arrange(grobs = list(p, q), ncols = 2, nrow = 1)
+    }
   })
   
   output$exploreMatchData2 <- renderUI({
     if(is.null(cohortdata$matchResult)) return()
-    tags$div(class = "matchOutput", style="background-color: azure",
-             h4("More data views"), br()
+    tags$div(class = "matchOutput",
+             h4("Viewer"), br(),
+             plotOutput("matchPlot")
     )
   })
   
-  # observe({
-  #   s <- event_data("plotly_click", source = "npodgraph")
-  #   if(length(s)) {
-  #     Var <- s[["x"]]
-  #     Value <- s[["y"]]
-  #     updateSelectizeInput(session, "drilldown", "Drill down to data points for V1, or V1 x V2:", selected = c(Var1, Var2))
-  #   } else {
-  #     return(NULL)
-  #   }
-  # })
+  output$npodgraph <- renderPlotly({
+    npodgraph
+  })
   
+  output$nPie <- renderPlotly({
+    hover <- event_data("plotly_hover")
+    if(is.null(hover$key)) return()
+    if(hover$key == "NA") {
+      pie <- ndata[variable == hover$x & value == hover$y, table(donor.type)]
+    } else {
+      pie <- ndata[variable == hover$key & value == hover$y, table(donor.type)]
+    }
+    pie <- melt(pie, measure.vars = names(pie))
+    pie <- pie[order(pie$value), ]
+    colors <- as.character(pie$donor.type[order(pie$value)])
+    colors <- c(ppColors, "Pending" = "gray", "Pregnancy" = "pink", "Transplant" = "darkseagreen4")[colors]
+    colors <- apply(col2rgb(colors), 2, function(x) paste0("rgb(", x[1], ",", x[2],",", x[3], ")"))
+    p <- plot_ly(pie, labels = ~donor.type, values = ~value, type = 'pie', sort = F,
+                 textinfo = "label", hole = 0.3, showlegend = F,
+                 marker = list(colors = colors),
+                 width = 250, height = 300,
+                 insidetextfont = list(color = "#FFFFFF")) %>%
+      layout(xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             paper_bgcolor= "transparent", plot_bgcolor = "transparent",
+             autosize = F, margin = list(t = 100, b = 100, r = 25, l = 80),
+             font = list(size = 10))
+    p
+  })
   
   #-- PAGE 2 ----------------------------------------------------------------------------------------#
   
@@ -233,7 +305,7 @@ shinyServer(function(input, output, session) {
     has.n <- apply(corrN, 1, max) >= input$minimumN
     corr <- corr[has.n, has.n]
     p <- plot_ly(x = rownames(corr), y = colnames(corr), z = corr, type = "heatmap", source = "correlation", colorscale = "RdBu",
-                 width = 1200, height = 1000) %>%
+                 width = 1200, height = 1000, colorbar = list(thickness = 10)) %>%
       layout(xaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = ""), 
              yaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = ""), 
              plot_bgcolor = "gray")
@@ -251,7 +323,7 @@ shinyServer(function(input, output, session) {
     newcorrs <- data2cor(newdata)
     plotdata$corr <- plotdata$corr.last.state <- newcorrs
     newchoices <- rownames(newcorrs$corM)
-    updateSelectizeInput(session, "drilldown", "Drill down to data points for V1, or V1 x V2:", choices = c("", newchoices),
+    updateSelectizeInput(session, "drilldown", "Drill down to data for", choices = c("", newchoices),
                          selected = "", options = list(maxItems = 2))
     updateSelectizeInput(session, "varMenu", "Exclude/keep in correlation matrix:", choices = newchoices)
     # updateSelectInput(session, "colorby", "Color data points by", choices = newchoices, selected = "donor.type")
@@ -261,37 +333,45 @@ shinyServer(function(input, output, session) {
     req(!is.null(input$drilldown))
     drilldown <- input$drilldown
     tmp <- as.data.frame(plotdata$cdata)
-    Var1 <- drilldown[1]
-    if(length(drilldown) == 2) { # Scatter plot for 2-variable view
-      Var2 <- drilldown[2]
-      tmp <- tmp[complete.cases(tmp[, c(Var1, Var2)]), ]
-      if(grepl("grp$|cat$|score$|bin$", Var1)) tmp[[Var1]] <- factor(tmp[[Var1]]) 
-      if(grepl("grp$|cat$|score$|bin$", Var2)) tmp[[Var2]] <- factor(tmp[[Var2]])
-      p <- ggplot(tmp, aes_string(x = Var1, y = Var2)) + 
-        geom_point(aes_string(color = input$colorby), size = 2) + 
+    var1 <- drilldown[1]
+    var2 <- drilldown[2]
+    if(grepl("grp$|cat$|score$|bin$|count$", var1)) tmp[[var1]] <- factor(tmp[[var1]])
+    if(!is.na(var2)) { # -> scatter plot 2-variable view
+      tmp <- tmp[complete.cases(tmp[, c(var1, var2)]), ]
+      if(grepl("grp$|cat$|score$|bin$|count$", var2)) tmp[[var2]] <- factor(tmp[[var2]])
+      p <- ggplot(tmp, aes_string(x = var1, y = var2)) + 
         labs(title = paste("n =", nrow(tmp))) +
         theme_bw()
-      if(input$colorby == "donor.type") {
+      if(all(grepl("grp$|cat$|score$|bin$", c(var1, var2)))) {
+        p <- p + geom_count() # when both variables are categorical, this deals with overplotting
+      } else {
+        p <- p + geom_point(aes_string(color = input$colorby), size = 2, alpha = 0.7)
+      }
+      if(input$colorby == "donor.type") { # default is to color points by donor.type
         p <- p + scale_colour_manual(values = ppColors)
-      } else if(grepl("grp$|cat$", input$colorby)) { # if is a categorical variable
-        # p <- p + scale_color_d3("category20")
-      } else { # interval variable
+      } else if(grepl("grp$|cat$", input$colorby)) { # allow to color by limited set of categorical vars?
+        # not yet implemented
+        
+      } else { # continuous color scale for interval variable
         p <- p + scale_colour_distiller(palette = "YlOrRd", na.value = "black")
       }
-      # if(all(grepl("grp$|cat$|score$|bin$", c(Var1, Var2)))) p <- p %>% facet_wrap() TO DO: better plots for cat x cat vars
       if(input$plotsmooth) p <- p + stat_smooth(method = "lm")
       if(input$switchXY) p <- p + coord_flip()
       p <- ggplotly(p)
       p
-    } else { # Boxplot for 1-variable view
-      tmp <- tmp[!is.na(tmp[[Var1]]), ]
+    } else { # boxplot 1-variable view
+      tmp <- tmp[!is.na(tmp[[var1]]), ]
       tmp$donor.type <- factor(tmp$donor.type)
-      p <- ggplot(tmp, aes_string(x = "donor.type", y = Var1)) +
+      p <- ggplot(tmp, aes_string(x = "donor.type", y = var1)) +
         geom_boxplot(outlier.color = NA) + 
-        geom_point(aes(color = donor.type), size = 2, position = position_jitter(width = 0.05, height = 0.05)) +
         scale_colour_manual(values = ppColors) +
         labs(title = paste("n =", nrow(tmp))) +
         theme_bw()
+      if(is.factor(tmp[[var1]])) {
+        p <- p + geom_count(aes(color = donor.type)) 
+      } else {
+        p <- p + geom_point(aes(color = donor.type), size = 2, alpha = 0.5, position = position_jitter(width = 0.05, height = 0.05))
+      }
       p <- ggplotly(p)
       p$x$data[[1]]$marker$opacity <- 0 # Manual specification since plotly doesn't translate ggplot settings for boxplot
       p <- hide_legend(p)
@@ -303,9 +383,9 @@ shinyServer(function(input, output, session) {
   observe({
     s <- event_data("plotly_click", source = "correlation")
     if(length(s)) {
-      Var1 <- s[["x"]]
-      Var2 <- s[["y"]]
-      updateSelectizeInput(session, "drilldown", "Drill down to data points for V1, or V1 x V2:", selected = c(Var1, Var2))
+      var1 <- s[["x"]]
+      var2 <- s[["y"]]
+      updateSelectizeInput(session, "drilldown", "Drill down to data for", selected = c(var1, var2))
     } else {
       return(NULL)
     }

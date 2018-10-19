@@ -32,18 +32,19 @@ shinyUI(
                                helpText("(your cohort)")
                         ),
                         column(2,
-                               textInput("cohortname", "Your cohort name/label (optional)", value = "", placeholder = "e.g. 'DiViD', 'TEDDY', 'pilot'.."),
+                               textInput("cohortname", "Your cohort name/label (optional)", value = "", placeholder = "e.g. 'DiViD', 'pilot'.."),
                                fileInput("cohortDataUpload",  HTML("<strong>Upload data to begin</strong>"), multiple = FALSE,
                                          accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
                                          buttonLabel = "Data")
                         ),
-                        column(2, 
+                        column(1, 
                                br(),
+                               checkboxInput("outsideCohort", "non-nPOD cohort", value = T),
                                br(),
-                               br(),
-                               br(),
-                               helpText("What should be included?"),
-                               actionLink("cohordatauploadhelp", "See guide.")
+                               helpText("How does this work?"),
+                               actionLink("cohordatauploadhelp", "See complete guide.")
+                        ),
+                        column(1
                         ),
                         column(6
                         )),
@@ -70,10 +71,10 @@ shinyUI(
                                 br(),
                                 uiOutput("matchUIhelp")
                           ),
-                          column(6, style="margin-top: -220px",
-                                 plotlyOutput("npodgraph")
-                                 )
-                          ),
+                          column(6, div(style="margin-top: -220px; z-index: 0;", plotlyOutput("npodgraph")),
+                                 div(style="position: absolute; margin-top: -220px; margin-left: -140px; top:0; left:0; z-index: 1;", 
+                                     plotlyOutput("nPie"))
+                          )),
                         fluidRow(
                           column(1),
                           column(6, style="padding-top: 20px;",
@@ -88,12 +89,12 @@ shinyUI(
                                                  uiOutput("matchCovariatesC")
                                           )
                                  )),
-                          column(5, #style="background-color: lightgray", 
+                          column(5,
                                  br()
                           )),
-                      fluidRow(
+                      fluidRow(style="margin-top: 30px; padding-bottom: 50px;",
                         column(1),
-                        column(3, style="padding-top: 20px; padding-bottom: 50px;",
+                        column(3,
                                uiOutput("matchResult")
                         ),
                         column(1),
@@ -118,7 +119,7 @@ shinyUI(
                                div(class = "forceInline", numericInput("minimumN", HTML("min. N for <i>r</i>"), min = 2, max = NA, step = 1, val = 5, width = "80px")),
                                HTML("&nbsp"),
                                div(class = "forceInline", selectInput("varMenuOpt", "Filter variables by", 
-                                                                      choices = c(`variable name` = "variable", `variable category` = "category", `parent source` = "author"), 
+                                                                      choices = c(`variable name` = "variable", `variable category` = "category", `publication source` = "author"), 
                                                                       width = "150px")),
                                div(class = "forceInline", selectizeInput("varMenu", "Exclude/keep in correlation matrix:", colnames(cor.data$corM), multiple = T, 
                                                                          options= list(placeholder = "select..."), width = "300px")),
@@ -133,8 +134,9 @@ shinyUI(
                                div(class = "forceInline", br(), actionButton("helpUpload", "", icon = icon("question-circle"), width = "10px"))
                         ),
                         column(4, 
-                               selectizeInput("drilldown", "Drill down to data points for V1 or V1 x V2:", 
-                                              choices = c("", colnames(cor.data$corM)), selected = "", options = list(maxItems = 2), width = "300px")
+                               selectizeInput("drilldown", "Drill down to data for", 
+                                              choices = c("", colnames(cor.data$corM)), selected = "", 
+                                              options = list(maxItems = 2, placeholder = "select variable(s)"), width = "350px")
                         )),
                         fluidRow(
                           column(8, align = "left",
