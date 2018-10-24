@@ -10,13 +10,11 @@ shinyServer(function(input, output, session) {
   #-- HELP TOURS ----------------------------------------------------------------------------------#
   
   observeEvent(input$helpCohortIn, {
-    session$sendCustomMessage(type = "setHelpContent", message = list(steps = toJSON(steps)))
-    session$sendCustomMessage(type = "startHelp", message = list(""))
+    session$sendCustomMessage(type = "startHelp", message = list(steps = toJSON(steps)))
   })
   
   observeEvent(input$helpCorrelation, {
-    session$sendCustomMessage(type = "setHelpContent", message = list(steps = toJSON(steps2)))
-    session$sendCustomMessage(type = "startHelp", message = list(""))
+    session$sendCustomMessage(type = "startHelp", message = list(steps = toJSON(steps2)))
   })
   
   
@@ -305,9 +303,9 @@ shinyServer(function(input, output, session) {
     has.n <- apply(corrN, 1, max) >= input$minimumN
     corr <- corr[has.n, has.n]
     p <- plot_ly(x = rownames(corr), y = colnames(corr), z = corr, type = "heatmap", source = "correlation", colorscale = "RdBu",
-                 width = 1200, height = 1000, colorbar = list(thickness = 10)) %>%
-      layout(xaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = ""), 
-             yaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = ""), 
+                 height = 1000, colorbar = list(thickness = 8)) %>%
+      layout(xaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = "", linecolor = "gray", mirror = T), 
+             yaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = "", linecolor = "gray", mirror = T), 
              plot_bgcolor = "gray")
     p
   })

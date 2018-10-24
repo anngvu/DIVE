@@ -122,40 +122,42 @@ shinyUI(
                       fluidPage(fluidRow(
                         column(1,
                                br(),
-                               actionButton("helpCorrelation", "Guided tour", icon = icon("info-circle"))
+                               actionButton("helpCorrelation", "Tour", icon = icon("info-circle"))
                         ),
-                        column(5, div(id = "corrFilters", 
+                        column(7, div(id = "corrFilters",
                                div(class = "forceInline", numericInput("minimumN", HTML("min. N for <i>r</i>"), min = 2, max = NA, step = 1, val = 5, width = "80px")),
                                HTML("&nbsp"),
                                div(class = "forceInline", selectInput("varMenuOpt", "Filter variables by", 
                                                                       choices = c(`variable name` = "variable", `variable category` = "category", `publication source` = "author"), 
                                                                       width = "150px")),
-                               div(class = "forceInline", selectizeInput("varMenu", "Exclude/keep in correlation matrix:", colnames(cor.data$corM), multiple = T, 
-                                                                         options= list(placeholder = "select..."), width = "300px")),
-                               div(class = "forceInline", br(), actionButton("varExclude", "Exclude")),
-                               div(class = "forceInline", br(), actionButton("varKeep", "Keep")),
-                               div(class = "forceInline", br(), actionButton("varReset", "Reset", icon = icon("undo")))
-                               )
-                        ),
-                        column(2, div(id = "corrUpload",  
-                               div(class = "forceInline", fileInput("dataUpload", "", multiple = FALSE, width = "250px", 
-                                                                    accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
-                                                                    buttonLabel = "My data", placeholder = "Upload to compare..")),
-                               div(class = "forceInline", br(), actionButton("helpUpload", "", icon = icon("question-circle"), width = "10px"))
-                        )
-                        ),
+                                   div(class = "forceInline", selectizeInput("varMenu", "Exclude/keep in correlation matrix:", colnames(cor.data$corM), multiple = T, 
+                                                                         options= list(placeholder = "select..."), width = "500px")),
+                                 div(id = "EKR", class = "forceInline", 
+                                   div(class = "forceInline", br(), actionButton("varExclude", "Exclude")),
+                                   div(class = "forceInline", br(), actionButton("varKeep", "Keep")),
+                                   div(class = "forceInline", br(), actionButton("varReset", "Reset", icon = icon("undo")))
+                                  )
+                        )),
                         column(4,
-                               div(id = "drilldown", 
-                               selectizeInput("drilldown", "Drill down to data for", 
-                                              choices = c("", colnames(cor.data$corM)), selected = "", 
-                                              options = list(maxItems = 2, placeholder = "select variable(s)"), width = "350px")
-                               )
+                               div(id = "corrUpload",
+                                      div(class = "forceInline",
+                                          fileInput("dataUpload", "", multiple = FALSE, width = "300px", 
+                                                                           accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
+                                                                           buttonLabel = "My data", placeholder = "Upload to compare..")),
+                                      div(class = "forceInline",
+                                          br(), actionButton("helpUpload", "", icon = icon("question-circle"), width = "10px"))
+                                   )
                         )),
                         fluidRow(
                           column(8, align = "left",
-                                 div(id = "corM", style ="height: 1000px;", plotlyOutput("corM"))
+                                 div(id = "corM", style ="height: 1000px;", 
+                                     plotlyOutput("corM"))
                           ),
                           column(4,
+                                 div(id = "drilldown", style = "margin-top: 20px; margin-left: 10px;",
+                                     selectizeInput("drilldown", "Drill down to data for", 
+                                                    choices = c("", colnames(cor.data$corM)), selected = "", 
+                                                    options = list(maxItems = 2, placeholder = "select variable(s)"), width = "400px"),    
                                   conditionalPanel("input.drilldown",
                                                    div(class = "forceInline", 
                                                        selectInput("colorby", "Color data points by", 
@@ -166,6 +168,7 @@ shinyUI(
                                                    HTML("&nbsp"),
                                                    div(class = "forceInline", br(), checkboxInput("plotsmooth", "Add smooth")),
                                  plotlyOutput("scatter")
+                                 )
                                  )
                           ))
                       )),

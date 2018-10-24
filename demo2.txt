@@ -1,6 +1,5 @@
-step	element	intro	position	onchange
-1	#corM	Exploring correlations with all data	right	"function(){  alert(""Want to call function after this step , no alert showing ""); }"
-2	.drilldown	Shows the data for selected correlation. This box can also be used to find a correlations between variables.	left	
-3	#drilldownShow	Look	left	
-4	#corrFilters	For instance, find negative controls from nPOD if you have a number of T1D cases. Or use nPOD’s T1D data as positive controls or a validation cohort.	bottom	
-5	#corrUpload	Exploring correlations with all data	bottom	
+step	element	intro	position
+1	#corM	The correlation matrix shows all correlation between variables that share a subset of nPOD cases. The data come from many small-scale independent experiments mostly focused on different questions. Yet a measurement from one investigation may show an interesting relationship with another in a separate investigation. <strong>Click on a cell to see the underlying data points.</strong>	right
+2	#drilldown	This module drills down to the individual-level data for a variable/relationship of interest. Either one-dimensional or two-dimension variable views are available. Explore data for certain variables/relationships by interacting with the correlationship matrix or by using the menu to search and select.	left
+3	#corrFilters	Use these filters to control what is shown in the correlation matrix. Set a more stringent sample size (larger shared subset of nPOD cases) for displaying correlations, or focus only on variables within some category or criteria.	bottom
+4	#corrUpload	Data can tell a better story when provided more context. Comparison of your data, i.e. unpublished measurements, with the past cumulative data can: <li>help support results (by showing that they are consistent with data for a similar variable)</li> or <li>reveal unexpected connections (a strong correlation with a very different variable measured elsewhere) that provide leads to a new story.</li><br><br>Note that this does depend on whether there is large enough overlapping subset of nPOD cases. See the guide for what your upload should look like.	bottom

@@ -1,4 +1,5 @@
 step	element	intro	position
-1	#cohortInput	<strong>Compare cohort data</strong><br>Find nPOD matches for cases in your cohort.	bottom
-2	#nPODInput	For instance, find negative controls from nPOD if you have a number of T1D cases. Or use nPOD’s T1D data as positive controls or a validation cohort.	bottom
-3	#npodgraph	npod graph	bottom
+1	#cohortInput	As an effort to serve diabetes researchers outside of nPOD, the cohort tool provides an easy interface to match an outside independent cohort (CohortX) with nPOD. But investigators can also use it to match nPOD cases to other nPOD cases (make sure the checkbox on the right is unchecked from the default). Click “Next” to proceed with demo data.	bottom
+2	#nPODInput	After uploading the CohortX data, select the kind of nPOD matches desired. In one use case, you have a set of T1D cases and want to find non-diabetic “negative controls” from nPOD. In another use case, you want to match your set of T1D cases to nPOD’s T1D cases to use as positive controls or a validation cohort.	bottom
+3	#npodgraph	The nPOD graph provides a quick visual summary of nPOD resources and data available.	bottom
+4			

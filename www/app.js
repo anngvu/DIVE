@@ -1,29 +1,15 @@
 // initialize an introjs instance          
 var intro = introJs();
 
-// handler 1
-Shiny.addCustomMessageHandler("setHelpContent",
-  
-  // callback function. 
-  // note: message is passed by shiny and contains the tour data
-  function(message){
+function userDrill(event) { intro.goToStepNumber(2) }
 
-    // load data 
-    intro.setOptions({steps: message.steps });
-    
-  }
-  
-);
-
-// handler 2
+// handler
 Shiny.addCustomMessageHandler("startHelp",
-  
-  // callback function
   function(message) {
+    intro.setOptions({steps: message.steps }).start()
+    .onchange(function(targetElement) { 
+      if(targetElement.id === "corM") { $("#drilldown").on("shiny:value", userDrill) }  })
+    .goToStep(1)
+    .onexit( function() { $("#drilldown").off("shiny:value", userDrill) });
+});
 
-    // start intro.js
-    // note: we don't need information from shiny, just start introJS
-    intro.start();
-  }
-  
-);
