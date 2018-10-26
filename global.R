@@ -22,8 +22,9 @@ load("Data/px1.Rdata")
 load("Data/px2.Rdata")
 load("Ontology/GObranches.Rdata")
 Columns <- fread("Data/Columns.txt")
-steps <- read.table("demo.txt", sep = "\t", header = T, stringsAsFactors = F, comment.char = "")
-steps2 <- read.table("demo2.txt", sep = "\t", header = T, stringsAsFactors = F, comment.char = "")
+
+steps <- read.table("Help/demo.txt", sep = "\t", header = T, stringsAsFactors = F, comment.char = "")
+steps2 <- read.table("Help/demo2.txt", sep = "\t", header = T, stringsAsFactors = F, comment.char = "")
 
 #-- SET-UP:source ---------------------------------------------------------------------------------#
 

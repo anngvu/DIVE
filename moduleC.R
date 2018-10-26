@@ -7,7 +7,7 @@ observeEvent(input$guideCorrelation, {
 observeEvent(input$helpUpload, {
   showModal(modalDialog(
     title = "Uploading data",
-    includeHTML("uploading_data.html"),
+    includeHTML("Help/uploading_data.html"),
     easyClose = TRUE,
     footer = NULL
   ))

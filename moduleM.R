@@ -7,18 +7,27 @@ observeEvent(input$guideMatch, {
 # -------------------------------------------------------------
 
 observeEvent(input$cohortDataUpload, {
-  # Remove previous match results
-  removeUI(".matchOutput", multiple = T, immediate = T)
   cohortX <- fread(input$cohortDataUpload$datapath, header = T)
-  # TO DO: perform data checks
-  names(cohortX) <- make.names(names(cohortX))
-  cohortdata$cohortX <- cohortX
-  cohortdata$matchResult <- NULL
-  # Set initial default matching parameters
-  cohortdata$matchOpts <- guessMatch(names(cohortX))
+  # Perform data checks
+  
+  # If data looks good...
+  setNewCohort(cohortX)
 })
 
-output$matchUIhelp <- renderUI({
+observe({
+  if(input$cohortName == "ExampleCohort2020") setNewCohort(fread("divid.csv", header = T))
+})
+
+setNewCohort <- function(cohortX) { # When there's a new dataset in town...
+  names(cohortX) <- make.names(names(cohortX))
+  cohortdata$cohortX <- cohortX
+  removeUI(".matchOutput", multiple = T, immediate = T)
+  cohortdata$matchResult <- NULL
+  cohortdata$matchOpts <- guessMatch(names(cohortX)) # initial matching parameters
+}
+
+
+output$matchUIHelp <- renderUI({
   req(!is.null(cohortdata$matchOpts))
   tags$div(class = "matchUI", 
            HTML("<strong>Data fusion/parameter selection</strong><br>"), 
@@ -27,19 +36,17 @@ output$matchUIhelp <- renderUI({
 })
 
 output$matchCovariatesC <- renderUI({
-  cohortdata$cohortX
   req(!is.null(cohortdata$matchOpts))
   C <- c("BMI", "db.duration", "age.onset", "Cpeptide", "HbA1c", "peak.gluc", 
          "GADA.pos", "IA2A.pos", "mIAA.pos", "ZnT8A.pos", "AutoAb.count")
-  tags$div(class = "matchUI", h4("[ clinical ]"), matchUI(C, cohortdata$matchOpts))
+  tags$div(h4("[ clinical ]"), matchUI(C, cohortdata$matchOpts))
 })
 
 output$matchCovariatesD <- renderUI({
-  cohortdata$cohortX
   req(!is.null(cohortdata$matchOpts))
   D <- c("age", "sex_Female", "sex_Male", "race_Caucasian", "race_AfricanAmerican", "race_Hispanic.Latino", 
          "race_Asian", "race_AmericanIndian", "race_Multiracial")
-  tags$div(class = "matchUI", h4("[ demographic ]"), matchUI(D, cohortdata$matchOpts))
+  tags$div(h4("[ demographic ]"), matchUI(D, cohortdata$matchOpts))
 })
 
 output$matchCovariatesX <- renderUI({
@@ -48,10 +55,40 @@ output$matchCovariatesX <- renderUI({
   used <- cohortdata$matchOpts
   unused <- setdiff(covariates, used)
   unused <- unused[unused != "ID"]
-  tags$div(class = "matchUI", h4("[ don't use ]"), 
+  tags$div(h4("[ don't use ]"), 
            newOrderInput("cvbank", NULL, items = unused, 
                          connect = paste0("cv", seq_along(cohortdata$matchOpts)), 
                          item_class = "btn btn-sm unused covariate", width = 100)
+  )
+})
+
+output$matchParameters <- renderUI({
+  tags$div(id = "matchParameters", class = "matchUI", 
+           fluidRow(
+               column(4,
+                      uiOutput("matchCovariatesX")
+               ),
+               column(4,
+                      uiOutput("matchCovariatesD")
+               ),
+               column(4,
+                      uiOutput("matchCovariatesC")
+               ))
+  )
+})
+
+output$matchUI <- renderUI({
+  tags$div(
+    fluidRow(
+      column(2,
+        HTML("<strong>You are matching on:</strong>"),
+        verbatimTextOutput("matchOn", placeholder = TRUE),
+        actionButton("match", "Match")),
+      column(2,
+        uiOutput("matchUIHelp")),
+      column(8,
+             uiOutput(matchParameters)
+      ))
   )
 })
 
@@ -78,7 +115,7 @@ observeEvent(input$match, {
                          Aab = "Autoab Pos")
   npod.subset <- npodX[donor.type %in% which.donors]
   fused <- cohortFusion(npod.subset, cohortX, matchOn,
-                        c(paste0("nPOD-", input$matchType), ifelse(input$cohortname == "", "CohortX", input$cohortname)))
+                        c(paste0("nPOD-", input$matchType), ifelse(input$cohortName == "", "CohortX", input$cohortName)))
   cohortdata$fused <- copy(fused)
   # Do match
   matchResult <- Match2(fused, matchOn)
