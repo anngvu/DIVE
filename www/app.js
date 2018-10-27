@@ -2,6 +2,7 @@
 var intro = introJs();
 
 function userDemoDrill(event) { intro.goToStepNumber(2) }
+function userDemoMatch(event) { intro.goToStepNumber(5) }
 
 // handler
 Shiny.addCustomMessageHandler("startGuideC",
@@ -22,16 +23,27 @@ Shiny.addCustomMessageHandler("startGuideM",
         case "nPODInput":
           Shiny.setInputValue("cohortName", "ExampleCohort2020");
           break;
-        // listen for user to click on "Match"
-        case "matchParameters": break;
-        case "matchResult": break;
-        case "matchAttributes": break;
-        case "matchPlot": break;
+        // set listener for "Match" before parameters are shown
+        case "matchParameters":
+          $("#match").on("shiny:value", userDemoMatch);
+          break;
+        // Switch to other tab
+        case "matchResult":
+          
+          break;
+        case "matchAttributes":
+          
+          break;
+        case "matchPlot":
+          
+          break;
       }
     })
     .goToStep(1)
     // remove "Match" listener when the demo context ends
-    .onexit( function() {  });
+    .onexit( function() {  
+      $("#match").on("shiny:value", userDemoMatch);
+    });
 });
 
 Shiny.addCustomMessageHandler("startGuideV",

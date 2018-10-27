@@ -41,7 +41,7 @@ shinyServer(function(input, output, session) {
     setnames(show, c("MPOLabel", "IndividualLevelData", "DataSource", "DataSourceLink"), 
              c("Theme or Area of Interest", "Individual-Level Data", "Source", "Data Source Link"))
   }, escape = FALSE, rownames = F, options = list(dom = 'ftp', pageLength = 7))
-  
+
   output$downloadCollection <- downloadHandler(
     filename = function() {
       "Archive.zip"
