@@ -51,20 +51,15 @@ fluidPage(fluidRow(
   fluidRow(
     column(1),
     column(11, style="padding-top: 20px;",
-           uiOutput("matchParameters")
+           uiOutput("matchUI")
            )
     ),
-  fluidRow(style="margin-top: 30px; padding-bottom: 50px;",
-           column(1),
-           column(3,
+  fluidRow(style="margin-top: 20px; padding-bottom: 50px;",
+           column(5, style="padding-left: 50px;",
                   uiOutput("matchResult")
            ),
-           column(1),
-           column(3,
-                  uiOutput("advancedMatchresult")
-           ),
-           column(4,
-                  uiOutput("advancedMatchResult2")
-           )       
+           column(7,
+                  uiOutput("advancedMatchResult")
+           )
   )
 )

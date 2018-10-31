@@ -26,31 +26,19 @@ setNewCohort <- function(cohortX) { # When there's a new dataset in town...
   cohortdata$matchOpts <- guessMatch(names(cohortX)) # initial matching parameters
 }
 
-
-output$matchUIHelp <- renderUI({
-  req(!is.null(cohortdata$matchOpts))
-  tags$div(class = "matchUI", 
-           HTML("<strong>Data fusion/parameter selection</strong><br>"), 
-           helpText("All covariates guessed as shared by both datasets are used as match parameters, which does not necessarily represent the user-desired default.
-                    Parameters can be adjusted in a drag-and-drop manner, i.e. bring over and connect those that should be used."))
-})
-
 output$matchCovariatesC <- renderUI({
-  req(!is.null(cohortdata$matchOpts))
   C <- c("BMI", "db.duration", "age.onset", "Cpeptide", "HbA1c", "peak.gluc", 
          "GADA.pos", "IA2A.pos", "mIAA.pos", "ZnT8A.pos", "AutoAb.count")
   tags$div(h4("[ clinical ]"), matchUI(C, cohortdata$matchOpts))
 })
 
 output$matchCovariatesD <- renderUI({
-  req(!is.null(cohortdata$matchOpts))
   D <- c("age", "sex_Female", "sex_Male", "race_Caucasian", "race_AfricanAmerican", "race_Hispanic.Latino", 
          "race_Asian", "race_AmericanIndian", "race_Multiracial")
   tags$div(h4("[ demographic ]"), matchUI(D, cohortdata$matchOpts))
 })
 
 output$matchCovariatesX <- renderUI({
-  req(!is.null(cohortdata$matchOpts))
   covariates <- names(cohortdata$cohortX)
   used <- cohortdata$matchOpts
   unused <- setdiff(covariates, used)
@@ -63,7 +51,7 @@ output$matchCovariatesX <- renderUI({
 })
 
 output$matchParameters <- renderUI({
-  tags$div(id = "matchParameters", class = "matchUI", 
+  tags$div(id = "matchParameters",
            fluidRow(
                column(4,
                       uiOutput("matchCovariatesX")
@@ -78,16 +66,20 @@ output$matchParameters <- renderUI({
 })
 
 output$matchUI <- renderUI({
-  tags$div(
+  req(!is.null(cohortdata$matchOpts))
+  tags$div(id = "matchUI",
     fluidRow(
       column(2,
-        HTML("<strong>You are matching on:</strong>"),
-        verbatimTextOutput("matchOn", placeholder = TRUE),
-        actionButton("match", "Match")),
+             HTML("<strong>Data fusion/parameter selection</strong><br>"), 
+             helpText("All covariates guessed as shared by both datasets are used as match parameters, which does not necessarily represent the user-desired default.
+                    Parameters can be adjusted in a drag-and-drop manner, i.e. bring over and connect those that should be used.")
+      ),
       column(2,
-        uiOutput("matchUIHelp")),
+             HTML("<strong>You are matching on</strong>"),
+             verbatimTextOutput("matchOn", placeholder = TRUE),
+             actionButton("match", "Match")),
       column(8,
-             uiOutput(matchParameters)
+             uiOutput("matchParameters")
       ))
   )
 })
@@ -103,8 +95,7 @@ output$matchOn <- renderPrint({
 })
 
 observeEvent(input$match, {
-  removeUI(".matchUI", multiple = T, immediate = T)
-  removeUI(".matchOutput", multiple = T, immediate = T)
+  removeUI("#matchUI", immediate = T)
   cohortX <- cohortdata$cohortX
   matchOn <- cohortdata$matchOn
   # Data fusion -- create dataset with required structure
@@ -123,7 +114,7 @@ observeEvent(input$match, {
   cohortdata$matchedSet <- matchResult$matched
 })
 
-output$matchSummary <- renderTable({
+output$matchTable <- renderTable({
   if(is.null(cohortdata$matchedSet)) return()
   cohortdata$matchedSet
 })
@@ -134,17 +125,17 @@ output$matchResult <- renderUI({
            h4("Results"),
            tabsetPanel(type = "tabs",
                        tabPanel("Match preview", br(),
-                                tableOutput("matchSummary"), 
+                                tableOutput("matchTable"), 
                                 downloadButton("exportMatch", "Match table"), br(), br(),
-                                HTML("*Samples of matched cases can be requested through this <a href='https://npoddatashare.coh.org/'>portal</a>.") 
+                                HTML("*Samples of matched cases can be requested through this <a href='https://npoddatashare.coh.org/'>portal</a>.")
                        ),
-                       tabPanel("Match stats summary",
-                                br(),
-                                downloadButton("downloadSummary", "Match stats summary")       
+                       tabPanel("Match stats summary", br(),
+                                downloadButton("downloadSummary", "Match stats summary")
                        )
            )
   )
 })
+
 
 output$exportMatch <- downloadHandler(
   filename = function() {
@@ -166,10 +157,11 @@ output$advancedMatchResult <- renderUI({
   nPOD <- setNames(as.character(n$variable), n[, paste0(variable, " (", value, ")")])
   cohortX <- names(cohortdata$cohortX)
   cohortX <- c("", cohortX[cohortX != "ID"])
-  tags$div(id = "matchAttributes", class = "matchOutput", style="padding-right: 30px;",
-           h4("Advanced"),
-           tabsetPanel(type = "tabs",
-                       tabPanel("Other characterization data", br(), 
+  tags$div(id = "advancedMatchResult", class = "matchOutput",
+           fluidRow(
+             column(6, h4("Advanced"),
+              tabsetPanel(type = "tabs",
+                          tabPanel("Other characterization data", br(), 
                                 helpText("You might be interested in looking at all available data to know more about your matched cases. 
                                          This includes characterization data derived from various independent experiments
                                          that extend beyond basic demographic and clinical measurements
@@ -182,7 +174,10 @@ output$advancedMatchResult <- renderUI({
                                 checkboxInput("sameScale", "Plot on same scale"),
                                 helpText("")
                                 )
-                       )
+                       )),
+             column(6, br(), br(), br(),
+                    plotOutput("matchPlot"))
+           )
            )
 })
 
@@ -220,13 +215,6 @@ output$matchPlot <- renderPlot({
   }
 })
 
-output$advancedMatchResult2 <- renderUI({
-  if(is.null(cohortdata$matchResult)) return()
-  tags$div(id = "matchPlot", class = "matchOutput",
-           h4("Viewer"), br(),
-           plotOutput("matchPlot")
-  )
-})
 
 output$npodgraph <- renderPlotly({
   npodgraph

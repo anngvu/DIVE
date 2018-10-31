@@ -1,17 +1,17 @@
 // initialize an introjs instance          
 var intro = introJs();
 
-function userDemoDrill(event) { intro.goToStepNumber(2) }
-function userDemoMatch(event) { intro.goToStepNumber(5) }
+function userGetsDrill() { intro.goToStepNumber(2) }
+function userGetsMatches() { setTimeout(function() { intro.goToStepNumber(5) }, 500); }
 
 // handler
 Shiny.addCustomMessageHandler("startGuideC",
   function(message) {
     intro.setOptions({steps: message.steps }).start()
     .onchange(function(targetElement) { 
-      if(targetElement.id === "corM") { $("#drilldown").on("shiny:value", userDrill) }  })
+      if(targetElement.id === "corM") { $("#drilldown").on("shiny:value", userGetsDrill)}  })
     .goToStep(1)
-    .onexit( function() { $("#drilldown").off("shiny:value", userDemoDrill) });
+    .onexit( function() { $("#drilldown").off("shiny:value", userGetsDrill) });
 });
 
 Shiny.addCustomMessageHandler("startGuideM",
@@ -24,23 +24,19 @@ Shiny.addCustomMessageHandler("startGuideM",
           Shiny.setInputValue("cohortName", "ExampleCohort2020");
           break;
         // set listener for "Match" before parameters are shown
-        case "matchParameters":
-          $("#match").on("shiny:value", userDemoMatch);
+        case "matchUI":
+          $("#matchResult").on("shiny:outputinvalidated", userGetsMatches);
           break;
-        // Switch to other tab
+        // simulate clicking match to get results
         case "matchResult":
-          
+          $("#match").trigger("click");
           break;
-        case "matchAttributes":
-          
-          break;
-        case "matchPlot":
-          
-          break;
+        //case "matchAttributes":
+        //break;
       }
     })
     .goToStep(1)
-    // remove "Match" listener when the demo context ends
+    // remove demo listeners when the demo context ends
     .onexit( function() {  
       $("#match").on("shiny:value", userDemoMatch);
     });
