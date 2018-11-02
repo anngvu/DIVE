@@ -35,10 +35,9 @@ Shiny.addCustomMessageHandler("startGuideM",
         //break;
       }
     })
-    .goToStep(1)
-    // remove demo listeners when the demo context ends
+    // remove listeners when the demo context ends
     .onexit( function() {  
-      $("#match").on("shiny:value", userDemoMatch);
+      $("#matchResult").off("shiny:outputinvalidated", userGetsMatches);
     });
 });
 
