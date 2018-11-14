@@ -8,15 +8,22 @@ fluidPage(
                   div(class = "forceInline", numericInput("minimumN", HTML("min. N for <i>r</i>"), min = 2, max = NA, step = 1, val = 5, width = "80px")),
                   HTML("&nbsp"),
                   div(class = "forceInline", selectInput("varMenuOpt", "Filter variables by", 
-                                                         choices = c(`variable name` = "variable", `variable category` = "category", `publication source` = "author"), 
-                                                         width = "150px")),
-                  div(class = "forceInline", selectizeInput("varMenu", "Exclude/keep in correlation matrix:", colnames(cor.data$corM), multiple = T, 
-                                                            options= list(placeholder = "select..."), width = "500px")),
-                  div(id = "EKR", class = "forceInline", 
-                      div(class = "forceInline", br(), actionButton("varExclude", "Exclude")),
-                      div(class = "forceInline", br(), actionButton("varKeep", "Keep")),
-                      div(class = "forceInline", br(), actionButton("varReset", "Reset", icon = icon("undo")))
-                  )
+                                                         choices = c(`name` = "variable", `cell/tissue origin` = "cell", `publication source` = "author"), 
+                                                         width = "170px")),
+                  div(class = "forceInline", selectizeInput("varMenu", icon("search"), colnames(cor.data$corM), multiple = T, 
+                                                            options= list(placeholder = "..."), width = "500px")),
+                  div(id = "EKR", class = "forceInline",
+                     div(class = "forceInline", br(), actionButton("varKeep", icon("filter"))),
+                     div(class = "forceInline", br(), actionButton("varReset", "Reset", icon = icon("undo")))
+                  ),
+                  conditionalPanel("input.varMenuOpt == 'cell'", 
+                                   absolutePanel(id = "cellpackpanel", width = "450px", height = "550px", draggable = T, left = 400,
+                                                 h4("A map of data by cell/tissue origin"), 
+                                                 HTML("Cells are shown within larger circles that represent particular tissue contexts.  
+                                                 This is most relevant for <span style='font-weight:bold; color:dodgerblue'>immune cells</span>, which can be assayed in different tissues,
+                                                 e.g. <span style='background-color:lemonchiffon'>pancreatic</span>, <span style='background-color:lightcoral'>hemolymphoid</span>,
+                                                 <span style='background-color:rosybrown'>intestinal</span>, unlike <span style='font-weight:bold; color:deeppink'>pancreas cells</span>. Hover for info, click to zoom, double-click to select."),
+                                                 d3Output("cellpack", width = "400px", height = "400px")))
     )),
   column(4,
          div(id = "corrUpload",
@@ -52,3 +59,4 @@ fluidPage(
            )
     ))
 )
+

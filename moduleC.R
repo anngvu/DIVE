@@ -18,24 +18,29 @@ observeEvent(input$helpUpload, {
 observe({
   opt <- input$varMenuOpt
   if(opt == "variable") {
-    updateSelectizeInput(session, "varMenu", "Exclude/keep in correlation matrix:", colnames(plotdata$corr$corM))
-  } else if(opt == "category") {
-    
+    updateSelectizeInput(session, "varMenu", "All variables", colnames(plotdata$corr$corM))
+  } else if(opt == "cell") {
+    updateSelectizeInput(session, "varMenu", "Cell/Tissues", unique(Columns$CellTissue))
   } else {
     AuthYr <- unique(gsub("_.*$", "", colnames(plotdata$corr$corM)))
     AuthYr <- sapply(AuthYr, function(s) paste0(substr(s, 1, nchar(s)-2), " et al. 20", substr(s, nchar(s)-1, nchar(s))))
     AuthYr <- setNames(names(AuthYr), AuthYr)
-    updateSelectizeInput(session, "varMenu", "Exclude/keep in correlation matrix:", AuthYr)
+    updateSelectizeInput(session, "varMenu", "Publications", AuthYr)
   }
 })
 
-# observeEvent(input$varExclude, {
-#   corr <- plotdata$corr.last.state
-#   vars <- input$varMenu
-#   corr <- corr[grep(), !colnames(corr) %in% vars]
-#   plotdata$corr <- corr
-# })
-# 
+output$cellpack <- renderD3({
+  if(input$varMenuOpt != "cell") return()
+  r2d3(data = read_json("Dev/test.json"), script = "Dev/cellpack.js", css = "Dev/cellpack.css", d3_version = 4, viewer = "browser")
+})
+
+observe({
+  if(!is.null(input$cellpack_click)) {
+    selected <- c(isolate(input$varMenu), input$cellpack_click)
+    updateSelectizeInput(session, "varMenu", "Cell/Tissues", unique(Columns$CellTissue), selected = selected) 
+  }
+})
+
 # observeEvent(input$varKeep, {
 #   corr <- plotdata$corr.last.state
 #   vars <- input$varMenu
