@@ -6,6 +6,7 @@ library(data.table)
 library(DT)
 library(ggplot2)
 library(plotly)
+library(optmatch)
 library(MatchIt)
 library(jsonlite)
 library(r2d3)
@@ -36,7 +37,7 @@ source("helpers.R")
 cohortdata <- reactiveValues(cohortX = NULL, fused = NULL, 
                              matchOpts = NULL, matchOn = NULL, matchResult = NULL, matchedSet = NULL)
 
-plotdata <- reactiveValues(corr = cor.data, cdata = cdata, newdata = NULL, corr.last.state = cor.data, 
+plotdata <- reactiveValues(corr = cor.data, cdata = cdata, uploaded.data = NULL, corr.last.state = cor.data, 
                            drilldown = NULL, # pertains to "2D" view
                            genes = NULL, xdata = NULL) # pertains to "HD" view
 ppColors <- c("Autoab Pos" = "orange", "Cystic fibrosis" = "aquamarine4", "Gastric Bypass" = "bisque4", 

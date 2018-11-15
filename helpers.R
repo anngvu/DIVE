@@ -13,7 +13,7 @@ bpkey <- "4e941848-9247-4b38-a68a-fc6f235cb4e6"
 
 load("Ontology/db.Rdata")
 
-# ----
+# ------------------------------------------------------------------------------------------#
 
 newOrderInput <- function(inputId, label, items,
                        as_source = FALSE, connect = NULL,
@@ -139,17 +139,30 @@ cohortFusion <- function(coh1, coh2, matchOn, cohnames = c("Cohort1", "Cohort2")
   fused
 }
 
-Match2 <- function(ds, matchOn) {
-  dataset <- copy(ds)
+Match1 <- function(data, matchOn) {
+  dataset <- copy(data)
   dataset[, donor.type := as.integer(donor.type) - 1]
   matchformula <- as.formula(paste("donor.type", "~", paste(names(matchOn), collapse = " + ")))
-  result <- matchit(matchformula, method = "nearest", replace = F, data = dataset, caliper = 0.2, ratio = 1)
-  i1 <- as.numeric(result$match.matrix[, 1])
-  i2 <- as.numeric(row.names(result$match.matrix))
-  matched <- ds[c(i1, i2)]
-  matched[, Match := c(ds[c(i2, i1), ID])]
+  result <- pairmatch(matchformula, data = dataset)
+  result <- na.omit(result)
+  result <- split(as.numeric(names(result)), f = result)
+  matched <- cbind(data[sapply(result, `[[`, 1), c("ID", names(matchOn)), with = F],
+        setNames(data[sapply(result, `[[`, 2), c("ID", names(matchOn)), with = F],
+        paste0("match.", c("ID", names(matchOn)))))
   return(list(result = result, matched = matched))
 }
+
+# Match2 <- function(data, matchOn) {
+#   dataset <- copy(data)
+#   dataset[, donor.type := as.integer(donor.type) - 1]
+#   matchformula <- as.formula(paste("donor.type", "~", paste(names(matchOn), collapse = " + ")))
+#   result <- matchit(matchformula, method = "nearest", replace = F, data = dataset, caliper = 0.2, ratio = 1)
+#   matched <- na.omit(result$match.matrix)
+#   matched <- cbind(data[as.numeric(matched[, 1]), c("ID", names(matchOn)), with = F], 
+#                    setNames(data[as.numeric(row.names(matched)), c("ID", names(matchOn)), with = F], 
+#                             paste0("match.", c("ID", names(matchOn)))))
+#   return(list(result = result, matched = matched))
+# }
 
 #-- Correlations  ----------------------------------------------------------------------------------------#
 # Remove data with 0 variance

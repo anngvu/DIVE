@@ -20,7 +20,7 @@ fluidPage(fluidRow(
          checkboxInput("outsideCohort", "non-nPOD cohort", value = T),
          br(),
          br(),
-         actionLink("cohortDataRequirements", icon = icon("exclamation"), "Data requirements")
+         actionLink("cohortDataRequirements", icon = icon("exclamation-circle"), "data requirements")
   ),
   column(1
   ),

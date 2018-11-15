@@ -109,7 +109,7 @@ observeEvent(input$match, {
                         c(paste0("nPOD-", input$matchType), ifelse(input$cohortName == "", "CohortX", input$cohortName)))
   cohortdata$fused <- copy(fused)
   # Do match
-  matchResult <- Match2(fused, matchOn)
+  matchResult <- Match1(fused, matchOn)
   cohortdata$matchResult <- matchResult$result
   cohortdata$matchedSet <- matchResult$matched
 })
@@ -124,13 +124,14 @@ output$matchResult <- renderUI({
   tags$div(id = "matchResult", class = "matchOutput",
            h4("Results"),
            tabsetPanel(type = "tabs",
-                       tabPanel("Match preview", br(),
+                       tabPanel("Match table", br(),
+                                helpText("This preview shows the first part of the matched set:"), br(), br(),
                                 tableOutput("matchTable"), 
                                 downloadButton("exportMatch", "Match table"), br(), br(),
-                                HTML("*Samples of matched cases can be requested through this <a href='https://npoddatashare.coh.org/'>portal</a>.")
+                                HTML("*Matched cases can be requested through this <a href='https://npoddatashare.coh.org/'>portal</a>.")
                        ),
                        tabPanel("Match stats summary", br(),
-                                downloadButton("downloadSummary", "Match stats summary")
+                                ""
                        )
            )
   )

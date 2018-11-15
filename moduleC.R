@@ -13,7 +13,7 @@ observeEvent(input$helpUpload, {
   ))
 })
 
-# Menu events -------------------------------------------------#
+# Filter events -------------------------------------------------#
 
 observe({
   opt <- input$varMenuOpt
@@ -53,20 +53,13 @@ observeEvent(input$varReset, {
   updateSelectizeInput(session, "varMenu", "Exclude/keep in correlation matrix:", selected = character(0))
 })
 
-# Plot events ----------------------------------------------------------
-#  Correlations
-output$corM <- renderPlotly({
-  corr <- plotdata$corr$corM
-  corrN <- plotdata$corr$corN
-  corr[corrN < input$minimumN] <- NA  # Gray out/remove cor values calculated from less than specified n
-  has.n <- apply(corrN, 1, max) >= input$minimumN
-  corr <- corr[has.n, has.n]
-  p <- plot_ly(x = rownames(corr), y = colnames(corr), z = corr, type = "heatmap", source = "correlation", colorscale = "RdBu",
-               height = 1000, colorbar = list(thickness = 8)) %>%
-    layout(xaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = "", linecolor = "gray", mirror = T), 
-           yaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = "", linecolor = "gray", mirror = T), 
-           plot_bgcolor = "gray")
-  p
+# File upload/remove --------------------------------------------------#
+
+output$dataUploadUI <- renderUI({
+  input$removeData
+  fileInput("dataUpload", "", multiple = FALSE, width = "300px", 
+            accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
+            buttonLabel = "My data", placeholder = "Upload to compare..")
 })
 
 observeEvent(input$dataUpload, {
@@ -77,13 +70,40 @@ observeEvent(input$dataUpload, {
   plotdata$uploaded.data <- uploaded.data
   newdata <- merge(cdata, uploaded.data, by.x = "ID", by.y = names(uploaded.data)[1], all = T)
   plotdata$cdata <- newdata
-  newcorrs <- data2cor(newdata)
+  newcorrs <- suppressWarnings(data2cor(newdata))
   plotdata$corr <- plotdata$corr.last.state <- newcorrs
   newchoices <- rownames(newcorrs$corM)
   updateSelectizeInput(session, "drilldown", "Drill down to data for", choices = c("", newchoices),
                        selected = "", options = list(maxItems = 2))
   updateSelectizeInput(session, "varMenu", "Exclude/keep in correlation matrix:", choices = newchoices)
   # updateSelectInput(session, "colorby", "Color data points by", choices = newchoices, selected = "donor.type")
+})
+
+output$dataUploaded <- reactive({
+  return(!is.null(plotdata$uploaded.data))
+})
+outputOptions(output, "dataUploaded", suspendWhenHidden=FALSE)
+
+observeEvent(input$removeData, {
+  plotdata$uploaded.data <- NULL
+  plotdata$cdata <- cdata
+  plotdata$corr <- plotdata$corr.last.state <- cor.data
+})
+
+# Plot events ----------------------------------------------------------#
+#  Correlations
+output$corM <- renderPlotly({
+  corr <- plotdata$corr$corM
+  corrN <- plotdata$corr$corN
+  corr[corrN < input$minimumN] <- NA  # Gray out/remove r values calculated from less than specified n
+  has.n <- apply(corrN, 1, max) >= input$minimumN
+  corr <- corr[has.n, has.n]
+  p <- plot_ly(x = rownames(corr), y = colnames(corr), z = corr, type = "heatmap", source = "correlation", colorscale = "RdBu",
+               height = 1000, colorbar = list(thickness = 8)) %>%
+    layout(xaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = "", linecolor = "gray", mirror = T), 
+           yaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = "", linecolor = "gray", mirror = T), 
+           plot_bgcolor = "gray")
+  p
 })
 
 output$scatter <- renderPlotly({

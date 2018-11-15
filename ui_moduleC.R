@@ -28,12 +28,12 @@ fluidPage(
   column(4,
          div(id = "corrUpload",
              div(class = "forceInline",
-                 fileInput("dataUpload", "", multiple = FALSE, width = "300px", 
-                           accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"), 
-                           buttonLabel = "My data", placeholder = "Upload to compare..")),
+                 br(), actionLink("helpUpload", "", icon = icon("question-circle"))),
              div(class = "forceInline",
-                 br(), actionButton("helpUpload", "", icon = icon("question-circle"), width = "10px"))
-         )
+                 uiOutput("dataUploadUI")),
+             div(class = "forceInline",
+                 br(), conditionalPanel("output.dataUploaded", actionButton("removeData", "", icon = icon("times")))
+         ))
   )),
   fluidRow(
     column(8, align = "left",
