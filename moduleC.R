@@ -112,7 +112,7 @@ output$scatter <- renderPlotly({
   tmp <- as.data.frame(plotdata$cdata)
   var1 <- drilldown[1]
   var2 <- drilldown[2]
-  if(grepl("grp$|cat$|score$|bin$|count$", var1)) tmp[[var1]] <- factor(tmp[[var1]])
+  if(grepl("grp$|cat$|score$|bin$|count$|pos$", var1)) tmp[[var1]] <- factor(tmp[[var1]])
   if(!is.na(var2)) { # -> scatter plot 2-variable view
     tmp <- tmp[complete.cases(tmp[, c(var1, var2)]), ]
     if(grepl("grp$|cat$|score$|bin$|count$", var2)) tmp[[var2]] <- factor(tmp[[var2]])

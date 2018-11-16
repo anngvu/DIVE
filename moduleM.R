@@ -4,6 +4,15 @@ observeEvent(input$guideMatch, {
   session$sendCustomMessage(type = "startGuideM", message = list(steps = toJSON(steps)))
 })
 
+observeEvent(input$cohortDataRequirements, {
+  showModal(modalDialog(
+    title = "Cohort data requirements",
+    includeHTML("Help/uploading_data.html"),
+    easyClose = TRUE,
+    footer = NULL
+  ))
+})
+
 # -------------------------------------------------------------
 
 observeEvent(input$cohortDataUpload, {
@@ -105,8 +114,8 @@ observeEvent(input$match, {
                          T2D = "T2D",
                          Aab = "Autoab Pos")
   npod.subset <- npodX[donor.type %in% which.donors]
-  fused <- cohortFusion(npod.subset, cohortX, matchOn,
-                        c(paste0("nPOD-", input$matchType), ifelse(input$cohortName == "", "CohortX", input$cohortName)))
+  fused <- cohortFusion(cohortX, npod.subset, matchOn,
+                        c(ifelse(input$cohortName == "", "CohortX", input$cohortName), paste0("nPOD-", input$matchType)))
   cohortdata$fused <- copy(fused)
   # Do match
   matchResult <- Match1(fused, matchOn)
@@ -117,26 +126,28 @@ observeEvent(input$match, {
 output$matchTable <- renderTable({
   if(is.null(cohortdata$matchedSet)) return()
   cohortdata$matchedSet
-})
+}, striped = T)
 
 output$matchResult <- renderUI({
   if(is.null(cohortdata$matchResult)) return()
-  tags$div(id = "matchResult", class = "matchOutput",
+  tags$div(class = "matchOutput",
            h4("Results"),
-           tabsetPanel(type = "tabs",
+           tabsetPanel(id = "resultsTabs", type = "tabs",
                        tabPanel("Match table", br(),
-                                helpText("This preview shows the first part of the matched set:"), br(), br(),
-                                tableOutput("matchTable"), 
+                                helpText("A sample of the matched cases"), br(),
+                                div(style = "overflow-x: auto; width: 90%;", tableOutput("matchTable")), br(), 
                                 downloadButton("exportMatch", "Match table"), br(), br(),
                                 HTML("*Matched cases can be requested through this <a href='https://npoddatashare.coh.org/'>portal</a>.")
                        ),
                        tabPanel("Match stats summary", br(),
                                 ""
+                       ),
+                       tabPanel("Advanced match exploration", br(),
+                                uiOutput("advancedMatchResult")
                        )
            )
   )
 })
-
 
 output$exportMatch <- downloadHandler(
   filename = function() {
@@ -147,57 +158,60 @@ output$exportMatch <- downloadHandler(
   }
 )
 
+observe({
+  input$switchTabs_advanced
+  updateTabsetPanel(session, "resultsTabs", selected = "Advanced match exploration")
+})
+
 output$advancedMatchResult <- renderUI({
   if(is.null(cohortdata$matchedSet)) return()
-  matched <- cohortdata$matchedSet[grep("nPOD", ID), as.numeric(gsub("nPOD_", "", ID))]
-  cutoff <- length(matched)/2
-  matched <- cdata[ID %in% matched]
-  n <- matched[, lapply(.SD, function(x) table(is.na(x))["FALSE"])]
+  npod.matches <- cohortdata$matchedSet[, as.numeric(gsub("nPOD_", "", match.ID))]
+  cutoff <- length(npod.matches)/2
+  npod.matches <- cdata[ID %in% npod.matches]
+  n <- npod.matches[, lapply(.SD, function(x) table(is.na(x))["FALSE"])]
   n <- melt(n, measure.vars = names(n))
   n <- n[!variable %in% c("ID", "donor.type") & value > cutoff][order(value, decreasing = T)]
   nPOD <- setNames(as.character(n$variable), n[, paste0(variable, " (", value, ")")])
-  cohortX <- names(cohortdata$cohortX)
-  cohortX <- c("", cohortX[cohortX != "ID"])
+  cohortX <- c("", names(cohortdata$cohortX)[names(cohortdata$cohortX) != "ID"])
   tags$div(id = "advancedMatchResult", class = "matchOutput",
-           fluidRow(
-             column(6, h4("Advanced"),
-              tabsetPanel(type = "tabs",
-                          tabPanel("Other characterization data", br(), 
-                                helpText("You might be interested in looking at all available data to know more about your matched cases. 
-                                         This includes characterization data derived from various independent experiments
-                                         that extend beyond basic demographic and clinical measurements
-                                         and which may not be available for all matches. 
-                                         The selection below contains attributes that cover at least half of your match subset."),
-                                selectInput("matchAttributeA", "Other features (cases)", choices = nPOD),
-                                br(),
-                                h5('Compare to a measurement in your dataset'),
-                                selectInput("matchAttributeB", "Features in your data", choices = cohortX),
-                                checkboxInput("sameScale", "Plot on same scale"),
-                                helpText("")
-                                )
-                       )),
-             column(6, br(), br(), br(),
-                    plotOutput("matchPlot"))
+            fluidRow(
+             column(5, br(), 
+                    helpText("Aside from comparing group data to see how well matching worked using the selected covariates, 
+                              examining other available data may be of interest. 
+                              This includes characterization data derived from independent experiments
+                              that extend beyond basic demographic and clinical measurements
+                              and which may not be complete across all nPOD cases."), br(),
+                    h5("nPOD"),
+                    selectInput("matchAttributeA", "Features (cases)", choices = nPOD),
+                    br(),
+                    h5("Your cohort"),
+                    selectInput("matchAttributeB", "Features", choices = cohortX),
+                    checkboxInput("sameScale", "Plot on same scale"),
+                    helpText("")
+                    ),
+             column(1),
+             column(5, br(), br(), br(),
+                    plotOutput("matchPlot")),
+             column(1)
            )
-           )
+          )
 })
 
 output$matchPlot <- renderPlot({
   if(is.null(cohortdata$matchedSet)) return()
-  matched <- cohortdata$matchedSet[grep("nPOD", ID), as.numeric(gsub("nPOD_", "", ID))]
+  matches <- cohortdata$matchedSet[, as.numeric(gsub("nPOD_", "", match.ID))]
   var1 <- input$matchAttributeA
   var2 <- input$matchAttributeB
-  tmp <- cdata[ID %in% matched, c("ID", "donor.type", var1), with = F]
+  tmp <- cdata[ID %in% matches, c("ID", "donor.type", var1), with = F]
   tmp[, donor.type := paste0("nPOD-", donor.type)]
+  if(grepl("grp$|cat$|score$|bin$|count$|pos$", var1)) tmp[[var1]] <- factor(tmp[[var1]])
   p <- ggplot(tmp, aes_string(x = "donor.type", y = var1)) + 
     geom_dotplot(method = "histodot", stackdir = "center", binaxis = "y", color = "#17a2b8", fill = "#17a2b8") + 
     theme_bw()
   if(var2 == "") {
     return(p)
   } else {
-    ids <- cohortdata$matchedSet[grep("nPOD", ID, invert = T), ID]  
-    tmp2 <- cohortdata$cohortX[ID %in% ids, c("ID", var2), with = F]
-    tmp2[, donor.type := "CohortX"]
+    tmp2 <- merge(cohortdata$matchedSet[, .(donor.type, ID)],  cohortdata$cohortX[, c("ID", var2), with = F], by = "ID")
     if(input$sameScale) {
       setnames(tmp2, old = var2, new = var1)
       tmp2 <- rbind(tmp, tmp2, use.names = T)

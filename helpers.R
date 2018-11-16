@@ -131,7 +131,7 @@ guessMatch <- function(v) {
 cohortFusion <- function(coh1, coh2, matchOn, cohnames = c("Cohort1", "Cohort2")) {
   coh1[, donor.type := cohnames[1]]
   coh2[, donor.type := cohnames[2]]
-  setnames(coh2, old = matchOn, new = names(matchOn))
+  setnames(coh1, old = matchOn, new = names(matchOn))
   fused <- rbind(coh1, coh2, use.names = T, fill = T)
   fused <- fused[ fused[, !Reduce(`|`, lapply(.SD, function(x) is.na(x))), .SDcols = names(matchOn)] ] # remove NAs
   fused <- fused[, c("ID", "donor.type", names(matchOn)), with = F]
@@ -146,9 +146,9 @@ Match1 <- function(data, matchOn) {
   result <- pairmatch(matchformula, data = dataset)
   result <- na.omit(result)
   result <- split(as.numeric(names(result)), f = result)
-  matched <- cbind(data[sapply(result, `[[`, 1), c("ID", names(matchOn)), with = F],
-        setNames(data[sapply(result, `[[`, 2), c("ID", names(matchOn)), with = F],
-        paste0("match.", c("ID", names(matchOn)))))
+  matched <- cbind(data[sapply(result, `[[`, 1), c("donor.type", "ID", names(matchOn)), with = F],
+        setNames(data[sapply(result, `[[`, 2), c("donor.type", "ID", names(matchOn)), with = F],
+        paste0("match.", c("donor.type", "ID", names(matchOn)))))
   return(list(result = result, matched = matched))
 }
 

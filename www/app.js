@@ -31,8 +31,10 @@ Shiny.addCustomMessageHandler("startGuideM",
         case "matchResult":
           $("#match").trigger("click");
           break;
-        //case "matchAttributes":
-        //break;
+        case "advancedMatchResult":
+          Shiny.setInputValue("switchTabs_advanced", true, {priority: "event"});
+          //$('a[data-value="Advanced match exploration"]').trigger('click');
+          break;
       }
     })
     // remove listeners when the demo context ends
