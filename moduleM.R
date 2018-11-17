@@ -130,9 +130,9 @@ output$matchTable <- renderTable({
 
 output$matchResult <- renderUI({
   if(is.null(cohortdata$matchResult)) return()
-  tags$div(class = "matchOutput",
-           h4("Results"),
-           tabsetPanel(id = "resultsTabs", type = "tabs",
+  tags$div(class = "matchOutput", style = "padding-bottom: 200px;", 
+           h4("Results"), 
+           tabsetPanel(type = "tabs",
                        tabPanel("Match table", br(),
                                 helpText("A sample of the matched cases"), br(),
                                 div(style = "overflow-x: auto; width: 90%;", tableOutput("matchTable")), br(), 
@@ -142,8 +142,8 @@ output$matchResult <- renderUI({
                        tabPanel("Match stats summary", br(),
                                 ""
                        ),
-                       tabPanel("Advanced match exploration", br(),
-                                uiOutput("advancedMatchResult")
+                       tabPanel("Advanced match exploration", value = "match-extra", br(),
+                                uiOutput("matchExtra")
                        )
            )
   )
@@ -158,12 +158,7 @@ output$exportMatch <- downloadHandler(
   }
 )
 
-observe({
-  input$switchTabs_advanced
-  updateTabsetPanel(session, "resultsTabs", selected = "Advanced match exploration")
-})
-
-output$advancedMatchResult <- renderUI({
+output$matchExtra <- renderUI({
   if(is.null(cohortdata$matchedSet)) return()
   npod.matches <- cohortdata$matchedSet[, as.numeric(gsub("nPOD_", "", match.ID))]
   cutoff <- length(npod.matches)/2
@@ -173,7 +168,7 @@ output$advancedMatchResult <- renderUI({
   n <- n[!variable %in% c("ID", "donor.type") & value > cutoff][order(value, decreasing = T)]
   nPOD <- setNames(as.character(n$variable), n[, paste0(variable, " (", value, ")")])
   cohortX <- c("", names(cohortdata$cohortX)[names(cohortdata$cohortX) != "ID"])
-  tags$div(id = "advancedMatchResult", class = "matchOutput",
+  tags$div(class = "matchOutput",
             fluidRow(
              column(5, br(), 
                     helpText("Aside from comparing group data to see how well matching worked using the selected covariates, 

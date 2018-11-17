@@ -20,23 +20,27 @@ Shiny.addCustomMessageHandler("startGuideM",
     .onbeforechange(function(targetElement) { 
       switch(targetElement.id) {
         // load demo dataset before selecting type of nPOD matches
-        case "nPODInput":
+        case "nPODInput": 
           Shiny.setInputValue("cohortName", "ExampleCohort2020");
           break;
         // set listener for "Match" before parameters are shown
-        case "matchUI":
+        case "matchUI": 
           $("#matchResult").on("shiny:outputinvalidated", userGetsMatches);
           break;
-        // simulate clicking match to get results
         case "matchResult":
-          $("#match").trigger("click");
-          break;
-        case "advancedMatchResult":
-          Shiny.setInputValue("switchTabs_advanced", true, {priority: "event"});
-          //$('a[data-value="Advanced match exploration"]').trigger('click');
+         if(this._currentStep === 4) { // if no user trigger, simulate "Match" click before proceeding
+            $("#match").trigger("click");
+          }
+          if(this._currentStep === 5) {
+            $(".nav-tabs a[data-value='match-extra']").tab('show');
+            intro.goToStepNumber(7);
+        }
           break;
       }
     })
+    //.onchange(function(targetElement) {
+    //  if(targetElement.id === "")
+   // })    
     // remove listeners when the demo context ends
     .onexit( function() {  
       $("#matchResult").off("shiny:outputinvalidated", userGetsMatches);
