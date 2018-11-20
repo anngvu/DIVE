@@ -17,8 +17,8 @@ observeEvent(input$helpUpload, {
 
 observe({
   opt <- input$varMenuOpt
-  if(opt == "variable") {
-    updateSelectizeInput(session, "varMenu", "All variables", colnames(plotdata$corr$corM))
+  if(opt == "theme") {
+    # updateSelectizeInput(session, "varMenu", "All variables", colnames(plotdata$corr$corM))
   } else if(opt == "cell") {
     updateSelectizeInput(session, "varMenu", "Cell/Tissues", unique(Columns$CellTissue))
   } else {
