@@ -168,13 +168,13 @@ Match1 <- function(data, matchOn) {
 # Remove data with 0 variance
 rem0Var <- function(x) sd(na.omit(x)) != 0 
 
-# Return data suitable for running correlations
+# Return correlations for applicable data
 data2cor <- function(cdata) {
   cor.data <- Filter(is.numeric, cdata) # remove nominal category variables
-  cor.data <- cor.data[, !grepl("^ID|_SE$|_SEM$|_SD$", names(cor.data )), with = F] # _SE cols for error bars
+  cor.data <- cor.data[, !grepl("^ID|_SE$|_SEM$|_SD$", names(cor.data )), with = F] # don't do cor on _SE info
   cor.data <- Filter(rem0Var, cor.data)
   corM <- cor(cor.data, use = "pairwise.complete.obs", method = "spearman")
-  corN <- crossprod(as.matrix(cor.data[, lapply(.SD, function(x) as.integer(!is.na(x)))])) # n sample size
+  corN <- crossprod(as.matrix(cor.data[, lapply(.SD, function(x) as.integer(!is.na(x)))])) # get n sample size
   return(list(corM = corM, corN = corN))
 }
 

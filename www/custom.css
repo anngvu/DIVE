@@ -3,7 +3,7 @@
              top: calc(10%);
              left: calc(40%);
              }
-             
+
 #accessdata .node {
   color: blue;
 }
@@ -34,7 +34,7 @@
   border-radius: 10%;
   border: 0;
   vertical-align: middle;
-} 
+}
 
 .used {
   background: lemonchiffon;
@@ -46,16 +46,16 @@
 
 .ui-sortable {
   display: inline-block;
-  vertical-align: middle; 
+  vertical-align: middle;
   margin-bottom: 5px;
 }
 
-label.orderInput { 
- display: inline-block; 
- text-align: center; 
- vertical-align: middle; 
+label.orderInput {
+ display: inline-block;
+ text-align: center;
+ vertical-align: middle;
  padding-right: 5px;
-} 
+}
 
 .top-options {
   height: 100px;
@@ -78,7 +78,7 @@ label.orderInput {
 }
 
 .progress-bar {
-  background-color: gray;
-  
+  background-color: MediumSpringGreen;
+
 }
 

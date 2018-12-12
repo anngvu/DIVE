@@ -8,7 +8,7 @@ fluidPage(
                   div(class = "forceInline", numericInput("minimumN", HTML("min. N for <i>r</i>"), min = 2, max = NA, step = 1, val = 5, width = "80px")),
                   HTML("&nbsp"),
                   div(class = "forceInline", selectInput("varMenuOpt", "Filter variables by", 
-                                                         choices = c(`name` = "variable", `cell/tissue origin` = "cell", `publication source` = "author"), 
+                                                         choices = c(`theme` = "theme", `cell/tissue origin` = "cell", `publication source` = "author"), 
                                                          width = "170px")),
                   div(class = "forceInline", selectizeInput("varMenu", icon("search"), colnames(cor.data$corM), multiple = T, 
                                                             options= list(placeholder = "..."), width = "500px")),

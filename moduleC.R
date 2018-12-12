@@ -68,7 +68,7 @@ observeEvent(input$dataUpload, {
   
   names(uploaded.data) <- make.names(names(uploaded.data))
   plotdata$uploaded.data <- uploaded.data
-  newdata <- merge(cdata, uploaded.data, by.x = "ID", by.y = names(uploaded.data)[1], all = T)
+  newdata <- merge(cdata, uploaded.data, by = "ID", all = T)
   plotdata$cdata <- newdata
   newcorrs <- suppressWarnings(data2cor(newdata))
   plotdata$corr <- plotdata$corr.last.state <- newcorrs
@@ -98,11 +98,26 @@ output$corM <- renderPlotly({
   corr[corrN < input$minimumN] <- NA  # Gray out/remove r values calculated from less than specified n
   has.n <- apply(corrN, 1, max) >= input$minimumN
   corr <- corr[has.n, has.n]
-  p <- plot_ly(x = rownames(corr), y = colnames(corr), z = corr, type = "heatmap", source = "correlation", colorscale = "RdBu",
+  ref <- REF$Contributors[REF$VarID == rownames(corr)]
+  new <- list()
+  if(!is.null(plotdata$uploaded.data)) {
+    i <- which(!rownames(corr) %in% REF$VarID)
+    new <- list(type = "line", line = list(color = "MediumSpringGreen", width = 7), 
+              x0 = -0.01, x1 = -0.01, y0 = min(i)+1, y1 = max(i)+1, 
+              xref = "paper", yref = "y")
+  }
+  p <- plot_ly(x = rownames(corr), y = colnames(corr), z = corr, 
+               type = "heatmap", source = "correlation", colorscale = "RdBu",
+               hoverinfo = "text", 
+               text = matrix(paste0("x: ", rep(ref, each = ncol(corr)),
+                                    "<br>y: ", rep(ref, ncol(corr)), 
+                                    "<br>correlation: ", round(corr, 3)), 
+                             ncol = ncol(corr)),
                height = 1000, colorbar = list(thickness = 8)) %>%
     layout(xaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = "", linecolor = "gray", mirror = T), 
-           yaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = "", linecolor = "gray", mirror = T), 
-           plot_bgcolor = "gray")
+           yaxis = list(title = "", showgrid = F, tickvals = -1, ticks = "", tickfont = list(color = "red", size = 0.9), 
+                        linecolor = "gray", mirror = T), 
+           plot_bgcolor = "gray", shapes = list(new))
   p
 })
 
@@ -115,12 +130,12 @@ output$scatter <- renderPlotly({
   if(grepl("grp$|cat$|score$|bin$|count$|pos$", var1)) tmp[[var1]] <- factor(tmp[[var1]])
   if(!is.na(var2)) { # -> scatter plot 2-variable view
     tmp <- tmp[complete.cases(tmp[, c(var1, var2)]), ]
-    if(grepl("grp$|cat$|score$|bin$|count$", var2)) tmp[[var2]] <- factor(tmp[[var2]])
+    if(grepl("grp$|cat$|score$|bin$|count$|pos$", var2)) tmp[[var2]] <- factor(tmp[[var2]])
     p <- ggplot(tmp, aes_string(x = var1, y = var2)) + 
       labs(title = paste("n =", nrow(tmp))) +
       theme_bw()
-    if(all(grepl("grp$|cat$|score$|bin$", c(var1, var2)))) {
-      p <- p + geom_count() # when both variables are categorical, this deals with overplotting
+    if(all(grepl("grp$|cat$|score$|bin$|count$|pos$", c(var1, var2)))) {
+      p <- p + geom_count() # deals with overplotting when both variables are categorical
     } else {
       p <- p + geom_point(aes_string(color = input$colorby), size = 2, alpha = 0.7)
     }

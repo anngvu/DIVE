@@ -23,6 +23,8 @@ load("Data/gx.Rdata")
 load("Data/px1.Rdata")
 load("Data/px2.Rdata")
 load("Ontology/GObranches.Rdata")
+
+REF <- fread("Data/Columns.txt")
 Columns <- fread("Data/Columns.txt")
 
 steps <- read.table("Help/demo.txt", sep = "\t", header = T, stringsAsFactors = F, comment.char = "")
