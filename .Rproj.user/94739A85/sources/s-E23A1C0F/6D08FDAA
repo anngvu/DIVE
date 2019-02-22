@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1545328484276.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "953562201",
+    "id" : "6D08FDAA",
+    "lastKnownWriteTime" : 1545334148,
+    "last_content_update" : 1545334148300,
+    "path" : "~/Documents/Met/fit_contrasts.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "82,67",
+        "scrollLine" : "65",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

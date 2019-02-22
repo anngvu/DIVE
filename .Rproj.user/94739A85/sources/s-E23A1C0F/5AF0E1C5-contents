@@ -1,0 +1,37 @@
+---
+title: "Make Contrasts"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+source("Code/misc.R")
+source("Code/makeContrasts.R")
+
+# Input:
+REVIEW2 <- "sample_review2.txt"
+
+# Output files:
+REVIEW3 <- "sample_review3.txt" 
+CONTRASTS <- "sample_contrasts.txt"
+
+```
+
+## Group names (optional if groups have manually been labeled)
+```{r }
+dt <- makeGroupLabels(REVIEW2)
+unique(dt[, .(GSE, Group, Node, NodeFunction, BSM, BSMDCD, BioSampName)]) # check
+```
+
+## Contrasts
+```{r }
+contrasts <- makeContrasts(dt)
+contrasts[]
+```
+
+Save results:
+```{r }
+write.table(dt, REVIEW3, sep = "\t", row.names = F, quote = F)
+write.table(contrasts, CONTRASTS, sep = "\t", row.names = F, quote = F)
+```

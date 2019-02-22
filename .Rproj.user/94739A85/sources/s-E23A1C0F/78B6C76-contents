@@ -1,0 +1,54 @@
+library(shiny)
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+    fluidRow(
+        column(6, includeHTML("d3/AFR.html")),
+        column(6, includeHTML("d3/BVK.html"))
+        ),
+    fluidRow(
+        column(6, includeHTML("d3/FDW.html")),
+        column(6, includeHTML("d3/CAN.html"))
+    ),
+    fluidRow(
+        column(6, includeHTML("d3/FRP.html")),
+        column(6, includeHTML("d3/GKO.html"))
+    ),
+    fluidRow(
+        column(6, includeHTML("d3/JBK.html")),
+        column(6, includeHTML("d3/JKR.html"))
+    ),
+    fluidRow(
+        column(6, includeHTML("d3/JRA.html")),
+        column(6, includeHTML("d3/LDK.html"))
+    ),
+    fluidRow(
+        column(6, includeHTML("d3/LVR.html")),
+        column(6, includeHTML("d3/LWR.html"))
+    ),
+    fluidRow(
+        column(6, includeHTML("d3/NST.html")),
+        column(6, includeHTML("d3/NWL.html"))
+    ),
+    fluidRow(
+        column(6, includeHTML("d3/RTA.html")),
+        column(6, includeHTML("d3/SWP.html"))
+    ),
+    fluidRow(
+        column(6, includeHTML("d3/TBR.html")),
+        column(6, includeHTML("d3/TRD.html"))
+    ),
+    fluidRow(
+        column(6, includeHTML("d3/VNA.html")),
+        column(6, includeHTML("d3/WGN.html"))
+    )
+)
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+
+
+}
+
+# Run the application
+shinyApp(ui = ui, server = server)

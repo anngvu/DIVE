@@ -1,0 +1,51 @@
+library(data.table)
+library(ggplot2)
+library(plotly)
+library(ggsci)
+
+# if data not already in environment:
+if(!exists("xmat")) {
+  xmat <- as.matrix(read.table("xmat.txt", sep = "\t", header = T, row.names = 1))
+  anno <- fread("anno.txt")
+}
+
+pca <- prcomp(t(xmat))
+maxPC1 <- abs(pca$rotation[, "PC1"])
+anno$BIOCHEMICAL[which(maxPC1 == max(maxPC1))]
+# "4-acetaminophen sulfate"
+
+maxPC2 <- abs(pca$rotation[, "PC2"])
+anno$BIOCHEMICAL[which(maxPC2 == max(maxPC2))]
+# "X - 24542"
+
+pca_df <- data.frame(pca$x[, 1:2], Group = id, Sample = colnames(xmat), Week = week, AB = AB, Donor = isDonor)
+pca_df$X24542 <- xmat["X - 24542", ]
+pca_df$Acetaminophen <- xmat["4-acetaminophen sulfate", ]
+
+# Based on other suggestive plots, might visualize these too
+pca_df$Tyrosine <- colSums(xmat[anno$SUBPATHWAY == "Tyrosine Metabolism", ])
+pca_df$HVA <- xmat[grep("HVA", rownames(xmat)), ]
+
+# Original plot
+ggpca <- ggplot(data = pca_df, aes(x = PC1, y = PC2, fill = Group, color = AB, shape = Week, label = Sample)) +
+  geom_point(size = 2.5) +
+  scale_fill_manual(values = c(pal_d3("category20")(20), "white")) +
+  scale_color_manual(values = c("black", "gray"))
+ggpca <- ggplotly(ggpca)
+ggpca
+
+# Export plots; don't need plotly because tooltips are not as necessary
+plotPCAbyVar <- function(var, palette = "viridis") {
+  p <- ggplot(data = pca_df, aes_(x = ~PC1, y = ~PC2, color = as.name(var), label = ~Sample)) +
+  geom_point(size = 2.5) +
+  scale_color_viridis_c(option = palette) +
+  theme_bw()
+  p
+}
+
+# Export
+colors <- setNames(c("viridis", "magma", "plasma", "inferno"), c("X24542", "Tyrosine", "HVA", "Acetaminophen"))
+for(var in names(colors)) {
+  plotPCAbyVar(var, colors[var])
+  ggsave(paste0(var, ".png"))
+}

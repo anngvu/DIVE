@@ -1,0 +1,106 @@
+library(data.table)
+library(ggplot2)
+library(plotly)
+library(viridis)
+
+caseSD <- sapply(cases, function(case) sd(diff(colSums(mat[, grep(case, colnames(mat))]))))
+
+ccdata <- setNames(sdata[-c(1:8), which(DMID), with = F], sample)
+ccdata <- cbind(anno[, .(SUBPATHWAY, BIOCHEMICAL, COMPID)], ccdata)
+ccdata <- melt(ccdata, id.vars = c("SUBPATHWAY", "BIOCHEMICAL", "COMPID"), variable.name = "Sample")
+ccdata <- ccdata[!grepl("DONOR", Sample)]
+ccdata[, "ID" := trimws(regmatches(Sample, regexpr(" [A-Z]{3}", Sample)))]
+ccdata[, "Week" := regmatches(Sample, regexpr("(?<=week )[0-9]+", Sample, perl = T))]
+ccdata[, "AB" := ifelse(grepl("2:00", Sample), "A", "B")]
+
+dd <- dcast(ccdata, SUBPATHWAY + BIOCHEMICAL + ID + Week ~ AB, value.var = "value")
+dd[, A := as.numeric(A)]
+dd[, B := as.numeric(B)]
+dd[, Delta := A - B]
+ddsum <- dd[, list(Mean = mean(Delta), SD = sd(Delta)), by = .(ID, Week)]
+ddsum[, list(Mean = mean(Mean), SD = sd(Mean)), by = Week]
+
+# Top subpathway shifts by week
+dd[, sum(abs(Delta)), by = .(SUBPATHWAY, Week)][order(V1, decreasing = T)][1:100]
+
+# Increasing difference (A - B) after each transplantation
+dd[, sum(abs(Delta)), by = Week] # approximately the same amount of change each transplantation
+
+# Baseline expression levels over weeks show increase
+dd[, sum(B), by = Week]
+
+
+BvsA_0 <- ggplot(data = dd[Week == 0], aes(x = Delta, fill = SUBPATHWAY)) +
+  geom_density(alpha = 0.25)
+ggplotly(BvsA_0)
+BvsA_24 <- ggplot(data = dd[Week == 24], aes(x = Delta, fill = SUBPATHWAY)) +
+  geom_density(alpha = 0.25)
+ggplotly(BvsA_24)
+BvsA_48 <- ggplot(data = dd[Week == 48], aes(x = Delta, fill = SUBPATHWAY)) +
+  geom_density(alpha = 0.25)
+ggplotly(BvsA_48)
+
+
+BvsA_0 <- ggplot(data = ccdata, aes(x = value, fill = AB)) +
+  geom_density(alpha = 0.25) +
+  facet_grid(cols = vars(ID), rows = vars(Week))
+
+
+ggplot(data = dd, aes(x = Delta, fill = ID)) + geom_density(alpha = 0.25) + facet_grid(cols = vars(ID), rows = vars(Week))
+dist <- ggplot(data = dd, aes(x = Delta, fill = SUBPATHWAY)) + geom_density(alpha = 0.25) +
+  facet_grid(rows = vars(Week)) +
+  theme(legend.position="none")
+
+ggplot(data = ddsum, aes(x = as.numeric(Week), y = Mean, color = ID)) + geom_point() + geom_line()
+
+main <- sdata[-c(1:8),  c(4, which(DMID)), with = F]
+for(j in 2:length(main)) set(main, j = j, value = as.numeric(main[[j]]))
+setnames(main, c("subPW", sample))
+bysubPW <- main[, lapply(.SD, sum), by = subPW]
+long <- melt(bysubPW, id.vars = "subPW", variable.name = "Sample")
+long[, "ID" := regmatches(Sample, regexpr(" [A-Z]{3}", Sample))]
+long[, "Week" := regmatches(Sample, regexpr("(?<=week )[0-9]+", Sample, perl = T))]
+long[, "AB" := ifelse(grepl("2:00", Sample), "X", "B")]
+
+meansubpW <- main[, lapply(.SD, mean), by = subPW]
+meansubpW <- melt(meansubpW, id.vars = "subPW", variable.name = "Sample")
+meansubpW[, "ID" := regmatches(Sample, regexpr(" [A-Z]{3}", Sample))]
+meansubpW[, "Week" := regmatches(Sample, regexpr("(?<=week )[0-9]+", Sample, perl = T))]
+meansubpW[, "AB" := ifelse(grepl("2:00", Sample), "X", "B")]
+
+
+shapesWeek <- rep_len(15:17, nlevels(week))
+shapesAB <- rep_len(15:16, nlevels(week))
+
+hm <- ggplot(data = long, aes(x = AB, y = subPW, fill = value)) +
+  geom_tile() +
+  scale_fill_viridis_c() +
+  facet_grid(cols = vars(ID))
+hm <- ggplotly(hm, tooltip = c("subPW", "value"))
+
+hm <- ggplot(data = long, aes(x = paste0(Week, AB), y = subPW, fill = value)) +
+  geom_tile() +
+  scale_fill_viridis_c() +
+  theme(axis.text.y = element_blank()) +
+  facet_grid(cols = vars(ID))
+hm <- ggplotly(hm, tooltip = c("subPW", "value", "Week", "AB"))
+
+hm <- ggplot(data = long[subPW != ""], aes(x = paste(Week, AB), y = subPW, fill = value)) +
+  geom_tile() +
+  scale_fill_viridis_c() +
+  theme(axis.text.y = element_blank(),
+        plot.background = element_rect(fill = "black"), panel.background = element_rect(fill = "black", color = "black"),
+        panel.grid = element_line(colour = "darkgray"), axis.text.x=element_text(angle = 90, hjust = 0, color = "white")) +
+  facet_grid(cols = vars(ID))
+hm <- ggplotly(hm, tooltip = c("subPW", "value"))
+
+hm <- ggplot(data = meansubpW[subPW != ""], aes(x = paste(Week, AB), y = subPW, fill = value)) +
+  geom_tile() +
+  scale_fill_viridis_c() +
+  theme(axis.text.y = element_blank(),
+        plot.background = element_rect(fill = "black"), panel.background = element_rect(fill = "black", color = "black"),
+        panel.grid = element_line(colour = "darkgray"), axis.text.x=element_text(angle = 90, hjust = 0, color = "white")) +
+  facet_grid(cols = vars(ID))
+hm <- ggplotly(hm, tooltip = c("subPW", "value"))
+
+

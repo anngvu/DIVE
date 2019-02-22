@@ -1,0 +1,31 @@
+source("functions/initial model.txt")
+source("functions/model of merging.txt")
+source("functions/distance.txt")
+source("functions/model score.txt")
+source("functions/polynomial clustering algorithm with proper priors.txt")
+source("functions/automated clustering with optimal order.txt")
+source("functions/new heuristic.txt")
+source("functions/merge common clusters.txt")
+source("functions/heatmap.txt")
+source("functions/iterative clustering.txt")
+
+results.main.dir<- "results"
+data.all <- read.table("data.txt", header=T, sep="\t")
+### parameters to specify for the clustering function
+### details of the options of these parameters are in the function file and the manual
+name.col <- 2
+data.col <- 3:7
+time.col <- 8:12
+id.col <- 1:2
+cs.cov.col <- c()
+int.time.cs.cov.col <- c()
+lgtnl.cov.col <- c()
+n.lgtnl.cov <- 0
+alpha.1 <- 2
+alpha.2 <- 2
+eta <- 1
+normalize <- F
+transform <- 0
+intercept <- F
+type.distance <- 1
+cat.var.col <- 13

@@ -1,0 +1,16 @@
+packages: 
+  - dive
+  
+sources:
+
+targets:
+  app_module:
+    depends:
+      - ui.R
+      - server.R
+      
+  cdata:
+    command: createFromCollection("Collection/Main")
+
+  
+  

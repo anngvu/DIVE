@@ -1,0 +1,84 @@
+.shiny-notification {
+             position: fixed;
+             top: calc(10%);
+             left: calc(40%);
+             }
+
+#accessdata .node {
+  color: blue;
+}
+
+#noaccessdata {
+  background: none;
+  border: 0;
+}
+
+#noaccessdata .node {
+  color: dimgray;
+}
+
+#helpUpload {
+  background: none;
+  border: 0;
+  margin-left: -10px;
+}
+
+.covariate {
+  color: black;
+  cursor: grab;
+  font-family: Consolas,monaco,monospace;
+  font-weight: normal;
+  text-transform: none;
+  text-decoration: none;
+  padding: 3px 8px;
+  border-radius: 10%;
+  border: 0;
+  vertical-align: middle;
+}
+
+.used {
+  background: lemonchiffon;
+}
+
+.unused {
+  background: gainsboro;
+}
+
+.ui-sortable {
+  display: inline-block;
+  vertical-align: middle;
+  margin-bottom: 5px;
+}
+
+label.orderInput {
+ display: inline-block;
+ text-align: center;
+ vertical-align: middle;
+ padding-right: 5px;
+}
+
+.top-options {
+  height: 100px;
+}
+
+.forceInline {
+  display: inline-block;
+  vertical-align:top;
+}
+
+#cellpackpanel {
+  border: 1px solid lightgray;
+  border-radius: 4px;
+  background-color: white;
+  padding: 0 20px 30px 20px;
+  z-index: 3;
+  -webkit-box-shadow: 0 1px 2px lightgray;
+	-moz-box-shadow: 0 2px 1px lightgray;
+	box-shadow: 0 2px 1px lightgray;
+}
+
+.progress-bar {
+  background-color: MediumSpringGreen;
+
+}
+

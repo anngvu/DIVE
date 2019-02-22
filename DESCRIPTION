@@ -1,0 +1,20 @@
+Package: DIVE
+Type: Package
+Title: Data Integration and Visual Exploration
+Version: 0.1.0
+Author: Anh Nguyet Vu
+Maintainer: Anh Nguyet Vu <avu@coh.org>
+Description: Utilities to integrate and visually explore a collection of partially connected datasets, e.g. datasets from different sources that contain distinct measurements for some or all of the same biological individuals. Creates a Shiny application that can provide different types of visual exploration/analysis for the mosaic data, and which incorporates ontology annotations or additional metadata for improved filtering and inference.
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+Imports:
+    shiny,
+    shinythemes, 
+    data.table,
+    igraph,
+    visNetwork,
+    reshape2,
+    plotly,
+    reshape2,
+    shinycssloaders

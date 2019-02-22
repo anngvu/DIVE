@@ -1,0 +1,12 @@
+library(MetaboAnalystR)
+
+chems <- readLines("sigAKEGG.txt")
+
+mSet <- InitDataObjects("conc", "pathora", FALSE)
+mSet <- Setup.MapData(mSet, chems);
+mSet <- CrossReferencing(mSet, "kegg");
+mSet <- CreateMappingResultTable(mSet)
+mSet <- SetKEGG.PathLib(mSet, "hsa")
+mSet <- SetMetabolomeFilter(mSet, F);
+mSet <- CalculateOraScore(mSet, "rbc", "hyperg")
+mSet <- PlotPathSummary(mSet, "path_view_0_", "png", 72, width=NA)

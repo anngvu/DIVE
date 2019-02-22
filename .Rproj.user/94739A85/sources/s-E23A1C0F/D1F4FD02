@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1545334860962.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "D1F4FD02",
+    "lastKnownWriteTime" : 1545335201,
+    "last_content_update" : 1545335201718,
+    "path" : "~/Documents/Met/PCA.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "21,7",
+        "scrollLine" : "11",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

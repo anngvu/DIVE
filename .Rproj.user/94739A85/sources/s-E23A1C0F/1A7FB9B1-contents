@@ -1,0 +1,13 @@
+library(data.table)
+
+fecaldata <- fread("fecaldata.txt")
+fecaldata3t <- fecaldata[timepoint %in% c(2, 8, 12)]
+
+deltaT <- function(x) { c(x[2]-x[1], x[4]-x[3], x[6]-x[5]) }
+
+
+HVA <- xmat[grep("HVA", rownames(xmat)), ]
+HVA <- lapply(cases, function(id) deltaT(HVA[grep(id, names(HVA))]))
+
+X24542 <- xmat["X - 24542", ]
+X24542 <-  lapply(cases, function(id) deltaT(X24542[grep(id, names(X24542))]))
