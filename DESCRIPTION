@@ -14,7 +14,10 @@ Imports:
     data.table,
     igraph,
     visNetwork,
+    ggplot2,
     reshape2,
     plotly,
     reshape2,
-    shinycssloaders
+    shinycssloaders,
+    shinyjqui,
+    r2d3
