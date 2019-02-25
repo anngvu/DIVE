@@ -1,5 +1,5 @@
 #' UI for creating a subsetted dataset
-#' 
+#'
 #' Shiny module UI to subset a dataset through a selection menu.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
@@ -19,7 +19,7 @@ refSubsetInput <- function(id, name = id, label = "", subsets, hasInfo = F) {
       ),
       column(4,
              div(id = "refData",
-                 selectInput(ns("selectSubset"), 
+                 selectInput(ns("selectSubset"),
                              label,
                              choices = subsets, multiple = T)
              )
@@ -32,39 +32,38 @@ refSubsetInput <- function(id, name = id, label = "", subsets, hasInfo = F) {
 }
 
 #' Server function for creating a subsetted dataset
-#' 
+#'
 #' Server function for creating a reactive subsetted dataset following user interaction.
-#' 
+#'
 #' When multiple instances of the module are used to create subsets from different datasets
-#' (as opposed to subsets from the same dataset), it might be helpful to use refkey to track
+#' (as opposed to subsets from the same dataset), it might be necessary to use refkey to track
 #' the origin of the subset, and especially if the subsets are to be merged on some common
-#' column later.
+#' column later. For the most generic example, when datasets come from different sources,
+#' refkey can be called "Source" and the values might be S1 and S2.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param refData The reference data.table.
 #' @param subsetfeat The name of the column containing subset factors.
-#' @param subsetlist A list mapping the select options to the correct subset levels in the data.table.  
 #' @param refkey Optional, a named list containing name/label for creating a key-like column,
 #' where the name is the name of the column. See details for intended purpose.
 #' @param infoHTML Optional, relative path to an info Rmarkdown file that can be pulled up in a modal.
-#' @return A reactive subsetted data.table. 
+#' @return A reactive subsetted data.table.
 #' @export
 refSubset <- function(input, output, session,
-                      refData, subsetfeat, subsetlist, refkey,
+                      refData, subsetfeat, refkey,
                       infoHTML) {
-  
+
   # Help  ------------------------------------------------------- #
   modal <- callModule(info, "requires", infoHTML)
-  
+
   # ------------------------------------------------------------- #
-  
+
   subsetDT <- reactive({
     validate(need(input$selectSubset != "", "Please select a type subset"))
-    whichSS <- unlist(subsetlist[input$selectSubset])
-    SS <- refData[get(subsetfeat) %in% whichSS]
-    if(!is.null(refkey)) SS[, (names(refkey)) := refkey[[1]] ]  
+    SS <- refData[get(subsetfeat) %in% input$selectSubset]
+    if(!is.null(refkey)) SS[, (names(refkey)) := refkey[[1]] ]
     SS
   })
-  
+
   return(subsetDT)
 }
