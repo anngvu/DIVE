@@ -20,7 +20,7 @@ newDatasetInput <- function(id, label = id, type = "", hasInfo = F) {
           dataUploadUI(ns("dataset"), hasInfo = T),
           fluidRow(
              column(8, div(id = "dataUpload",
-                 textInput(ns("name"), "Label (optional)", value = "", 
+                 textInput(ns("name"), "Label (optional)", value = "",
                            placeholder = "e.g. 'TEDDY', 'pilot'.."))
                  ),
              column(4, br(),
@@ -40,43 +40,43 @@ newDatasetInput <- function(id, label = id, type = "", hasInfo = F) {
 #' @param refkey Optional, a named list containing name/label for creating a key-like column.
 #' @param saved Optional, character name that can be used to accession a saved dataset. See details.
 #' @param infoRmd Optional, relative path to an info Rmarkdown file for this module.
-#' @return A reactive data.table of the processed upload. 
+#' @return A reactive data.table of the processed upload.
 #' @export
 newDataset <- function(input, output, session,
                       refkey, saved = F,
                       infoRmd) {
-  
+
   # ------------------------------------------------------------- #
-  
+
   newData <- reactiveVal(NULL)
-  
+
   upload <- callModule(dataUpload, "dataset", infoRmd = infoRmd)
-  
+
   # ------------------------------------------------------------- #
-  processNew <- function(dataset) { 
+  processNew <- function(dataset) {
     names(dataset) <- make.names(names(dataset))
     if(!is.null(refkey)) {
       name <- isolate(input$name)
       name <- if(name != "") name else refkey[[1]]
-      dataset[, (names(refkey)) := name ]
-    } 
+      dataset[[names(refkey)]] <- rep(name, nrow(dataset))
+    }
     newData(dataset)
   }
-  
+
   observeEvent(upload(), {
     dataset <- upload()
     # Perform data checks
-    
+
     # If data looks good...
     processNew(dataset)
   })
-  
+
   observe({
     if(input$name == saved) {
       file <- paste0("./Data/", saved, ".csv")
       newData(data.table::fread(file, header = T))
     }
   })
-  
+
   return(newData)
 }

@@ -8,15 +8,15 @@ Description: Utilities to integrate and visually explore a collection of partial
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-Imports:
+Depends:
     shiny,
+    ggplot2,
+    plotly,
+    data.table
+Imports:
     shinythemes, 
-    data.table,
     igraph,
     visNetwork,
-    ggplot2,
-    reshape2,
-    plotly,
     reshape2,
     shinycssloaders,
     shinyjqui,

@@ -19,3 +19,63 @@
   background-color: MediumSpringGreen;
 }
 
+/*
+Match app
+*/
+
+.covariate {
+  color: black;
+  font-family: Consolas,monaco,monospace;
+  font-size: 12px;
+  font-weight: normal;
+  text-transform: none;
+  text-decoration: none;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 3px;
+  vertical-align: middle;
+  cursor: grab;
+  display: inline-block;
+  margin: 2px 2px 2px 2px;
+}
+
+.used {
+  background: PaleGreen;
+}
+
+.unused {
+  background: gainsboro;
+}
+
+.ui-sortable {
+  display: inline-block;
+  vertical-align: middle;
+  margin-bottom: 5px;
+}
+
+#overlap {
+  border-right: black 2px;
+  border-left: black 2px;
+  border-radius: 10%;
+  margin-left: auto;
+  margin-right: auto;
+  vertical-align: middle;
+}
+
+#refAttributes {
+ margin-left: auto;
+ margin-right: auto;
+ vertical-align: middle;
+}
+
+#extAttributes {
+  margin-left: auto;
+  margin-right: auto;
+  vertical-align: middle;
+}
+
+#explore-matchedAttrs {
+  background-color: lemonchiffon;
+}
+
+

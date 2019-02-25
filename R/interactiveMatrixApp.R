@@ -9,9 +9,9 @@
 #' @param css Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
 #' @export
 interactiveMatrixApp <- function(M = cor.data$corM, N = cor.data$corN, CDATA = cdata, METADATA = metadata,
-                                 css = system.file("App/www/", "app.css", package = "DIVE")) {
-    ui <- fluidPage(theme = shinytheme("lumen"),
-                    includeCSS(css),
+                                 CSS = system.file("App/www/", "app.css", package = "DIVE")) {
+    ui <- fluidPage(theme = shinytheme("lumen"), includeCSS(CSS),
+
                     fluidRow(style="margin-top:50px; margin-bottom:50px; margin-right:100px",
                         column(8,
                                matrixCtrlUI("ctrl"),
