@@ -29,7 +29,7 @@ matchApp <- function(REFDATA = npodX, NGRAPH = npodgraph, NGRAPHDATA = ndata,
                                     "Type 1 Diabetes" = list("T1D", "T1D Medalist", "Monogenic Diabetes"),
                                     "Other diabetes" = list("T2D", "Gestational diabetes"),
                                     "Other" = list("Transplant", "Cystic fibrosis", "Pregnancy", "Gastric Bypass")),
-                     CSS = system.file("App/www/", "app.css", package = "DIVE")) {
+                     CSS = system.file("Apps/www/", "app.css", package = "DIVE")) {
   ui <- fluidPage(theme = shinytheme("lumen"), includeCSS(CSS),
 
                   fluidRow(style="margin-top:50px; margin-bottom:50px; margin-right:100px",

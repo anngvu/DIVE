@@ -43,7 +43,7 @@ matrixCtrlUI <- function(id) {
 #' @return Reactive state values to be used by the associated plotting module.
 #' @export
 matrixCtrl <- function(input, output, session,
-                     M, N, cdata, metadata, newdata = reactive({}), widget = NULL) {
+                     M, N, cdata, metadata, newdata = reactive({ }), widget = reactive({ }) ) {
 
   default <- list(M = M, N = N, cdata = cdata, newdata = NULL, filM = M)
   applied <- reactiveVal(data.frame(opt = character(0), optgroup = character(0)))
@@ -79,7 +79,7 @@ matrixCtrl <- function(input, output, session,
 
   # Update options when input is given via widget
   observe({
-    if(!is.null(widget)) {
+    if(!is.null(widget())) {
       selected <- c(isolate(input$opt), widget())
       updateSelectizeInput(session, "opt", choices = unique(opt()), selected = selected)
     }
