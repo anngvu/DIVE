@@ -73,8 +73,8 @@ newDataset <- function(input, output, session,
 
   observe({
     if(input$name == saved) {
-      file <- paste0("./Data/", saved, ".csv")
-      newData(data.table::fread(file, header = T))
+      datafile <- data.table::fread(paste0("appdata/", saved, ".csv"))
+      newData(datafile)
     }
   })
 

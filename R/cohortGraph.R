@@ -5,10 +5,10 @@
 #' @export
 cohortGraphOutput  <- function(id) {
   ns <- NS(id)
-  tags$div(id = "cohortGraphOutput",
+  tags$div(id = "cohortGraph", style = "height:500px;",
     fluidRow(
     column(2, style="margin-right:-40px; padding-top:25px;", plotlyOutput(ns("cohPie"))),
-    column(9, plotlyOutput(ns("cohGraph"))),
+    column(9, shinycssloaders::withSpinner(color = "gray", plotlyOutput(ns("cohGraph")))),
     column(1)
   ))
 }
@@ -20,17 +20,17 @@ cohortGraphOutput  <- function(id) {
 #' @param cohdata Accompanying data.table of cohort data graph was built off.
 #' @result A hybrid parallel axes graph for exploring a cohort dataset.
 #' @export
-cohortGraph <- function(input, output, session, 
+cohortGraph <- function(input, output, session,
                         cohgraph, cohdata) {
-  
-  ppColors <- c("Autoab Pos" = "orange", "Cystic fibrosis" = "aquamarine4", "Gastric Bypass" = "bisque4", 
-                "Gestational diabetes" = "deeppink2", "Monogenic Diabetes" = "red4", "No diabetes" = "royalblue2", 
-                "Other-Diabetes" = "indianred4", "Other-No Diabetes" = "steelblue2", "T1D" = "red",  
+
+  ppColors <- c("Autoab Pos" = "orange", "Cystic fibrosis" = "aquamarine4", "Gastric Bypass" = "bisque4",
+                "Gestational diabetes" = "deeppink2", "Monogenic Diabetes" = "red4", "No diabetes" = "royalblue2",
+                "Other-Diabetes" = "indianred4", "Other-No Diabetes" = "steelblue2", "T1D" = "red",
                 "T1D Medalist" = "maroon", "T2D" = "purple")
   output$cohGraph <- renderPlotly({
     cohgraph %>% config(displayModeBar = F)
   })
-  
+
   output$cohPie <- renderPlotly({
     hover <- event_data("plotly_hover")
     if(is.null(hover$key)) return()

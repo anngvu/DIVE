@@ -1,11 +1,11 @@
-#' UI for interactive drag-and-drop variable harmonization of two datasets 
+#' UI for interactive drag-and-drop variable harmonization of two datasets
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @return Interactive drag-and-drop UI elements.
 #' @export
 matchLinkUI <- function(id) {
   ns <- NS(id)
-  tags$div(id = "linkUI",
+  tags$div(id = "matchLinkUI",
            fluidRow(
              column(3,
                     infoOutput(ns("help"), label = "Method details", i = "question-circle"),
@@ -30,25 +30,25 @@ matchLinkUI <- function(id) {
   ))
 }
 
-#' Server function for interactive drag-and-drop variable harmonization of two datasets 
+#' Server function for interactive drag-and-drop variable harmonization of two datasets
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param refData Reactive subsetted reference data.table.
 #' @param cohortX Reactive data.table dataset, which typically comes from the newCohortInput module.
-#' @param vars Optional, a named list of a variable set (or sets) allowed for matching. 
-#' If not provided, the first 10 variables in the reference cohort dataset is used. 
-#' @param guess Optional, name of the function to call for initial guessing of harmonized variables; 
+#' @param vars Optional, a named list of a variable set (or sets) allowed for matching.
+#' If not provided, the first 10 variables in the reference cohort dataset is used.
+#' @param guess Optional, name of the function to call for initial guessing of harmonized variables;
 #' no initial guesses made if argument is provided or function does not exist.
 #' @param infoRmd Optional, relative path to an info Rmarkdown file that can be pulled up in a modal.
 #' @return Reactive list of parameter values.
 #' @export
 matchLink <- function(input, output, session,
                             refData, cohortX, vars, guess, infoRmd) {
-  
+
   modal <- callModule(info, "help", infoRmd)
-  
+
   params <- reactiveValues(run = NULL, matchOpts = NULL, matchOn = NULL)
-  
+
 #-- when CohortX data changes, initialize match options ------------------------------------------------------------#
   observe({
     if(!is.null(vars) & !is.null(guess)) {
@@ -61,8 +61,8 @@ matchLink <- function(input, output, session,
     }
   })
 
-  # The actual drag-n-drop sets -----------------------------------------------------------------------------------# 
-  
+  # The actual drag-n-drop sets -----------------------------------------------------------------------------------#
+
   # Panel for matched/harmonized pairs
   output$varSets <- renderUI({
     varSets <- tagList()
@@ -72,7 +72,7 @@ matchLink <- function(input, output, session,
     }
     varSets
   })
-  
+
   # Panel for un-matched/un-harmonized pairs
   output$varBank <- renderUI({
     extvars <- names(cohortX())
@@ -93,40 +93,40 @@ matchLink <- function(input, output, session,
     names(cvars) <- names(params$matchOpts)
     params$matchOn <- unlist(lapply(cvars, function(v) input[[v]]))
   })
-  
+
   output$matchOn <- renderPrint({
     params$matchOn
   })
-  
+
   output$matchWith <- renderPrint({
     cat(paste("a subset of", nrow(refData())))
   })
-  
+
   #-- Return --------------------------------------------------------------------------------------------------#
   observeEvent(input$run, {
-    if(!is.null(refData())) params$run <- input$run 
+    if(!is.null(refData())) params$run <- input$run
   })
-  
-  
-  return(params)  
+
+
+  return(params)
 }
 
 #-- Helper functions ------------------------------------------------------------------------------------------#
-  
+
 #' Custom function for trying to harmonize diabetes-relevant variables in two different  datasets
 #'
-#' @param vars Vector of variable names from an external (cohort) dataset. 
+#' @param vars Vector of variable names from an external (cohort) dataset.
 #' An attempt will be made to harmonize them to variable names in the reference dataset.
-#' @return List of named list elements, containing only those reference variables that seem to have 
-#' a corresponding version in the external variables (list elements). 
+#' @return List of named list elements, containing only those reference variables that seem to have
+#' a corresponding version in the external variables (list elements).
 guessMatch <- function(extvars) {
-  fuzzymap <- list(GADA.pos = "gad", IA2A.pos = "ia2", mIAA.pos = "mIA", ZnT8A.pos = "znt8", 
+  fuzzymap <- list(GADA.pos = "gad", IA2A.pos = "ia2", mIAA.pos = "mIA", ZnT8A.pos = "znt8",
              AutoAb.count = "abcount", age = "age", BMI = "BMI", db.duration = "duration",
              age.onset = "onset", Cpeptide = "cpeptide", HbA1c = "hba1c", peak.gluc = "gluc",
              race_AfricanAmerican = "afr", race_AmericanIndian = "ind", race_Asian = "asian",
              race_Caucasian = "cau", race_Hispanic.Latino = "hisp", race_Multiracial = "multiracial",
              sex_Female = "female", sex_Male = "[^fe]male")
-  # Basically, find the first variable that seems close enough to each of the variables in reference 
+  # Basically, find the first variable that seems close enough to each of the variables in reference
   res <- lapply(fuzzymap, function(f) sort(grep(f, extvars, val = T, ignore.case = T))[1])
   res[sapply(res, is.na)] <- list(NULL) # Remove any terms without matches from result list
   return(res)
@@ -143,10 +143,10 @@ orderSet <- function(vars, matchOpts, sessionNS) {
   UIlist <- tagList()
   for(v in seq_along(vars)) {
     UIlist[[v]] <- list(newOrderInput(inputId = sessionNS(paste0("var", ix[v])),
-                                      label = HTML(paste(vars[v], "&rarr;")), 
+                                      label = HTML(paste(vars[v], "&rarr;")),
                                       items = matchOpts[[ ix[v] ]],
                                       connect = c(sessionNS(paste0("var", seq_along(matchOpts))), sessionNS("varBank")),
-                                      item_class = "covariate used", 
+                                      item_class = "covariate used",
                                       width = 200,
                                       placeholder = "n/a"),
                                       br()) # force each pair on its own line
@@ -167,7 +167,7 @@ newOrderInput <- function(inputId, label, items,
     connect <- paste0("#", connect, collapse = ", ")
   }
   # item_class <- sprintf("btn btn-%s", match.arg(item_class))
-  
+
   if (length(items) == 0 || (!is.vector(items) && !is.factor(items))) {
     item_tags <- list()
   } else {
@@ -195,7 +195,7 @@ newOrderInput <- function(inputId, label, items,
       return(tag)
     })
   }
-  
+
   style <- sprintf(
     "width: %s; font-size: 15px; min-height: 25px;",
     shiny::validateCssUnit(width)
@@ -223,7 +223,7 @@ newOrderInput <- function(inputId, label, items,
     )
     container <- jqui_sortable(container, options = options)
   }
-  
+
   if (!is.null(placeholder)) {
     css <- '#%s:empty:before{content: "%s"; font-size: 14px; opacity: 0.5;}'
     placeholder <- shiny::singleton(
@@ -236,7 +236,7 @@ newOrderInput <- function(inputId, label, items,
       )
     )
   }
-  
+
   shiny::tagList(
     placeholder,
     shiny::tags$label(label, `for` = inputId),

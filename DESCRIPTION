@@ -20,4 +20,5 @@ Imports:
     reshape2,
     shinycssloaders,
     shinyjqui,
-    r2d3
+    r2d3,
+    jsonlite

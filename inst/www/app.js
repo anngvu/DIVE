@@ -21,8 +21,8 @@ Shiny.addCustomMessageHandler("startGuideM",
 
       switch(targetElement.id) {
         // load demo dataset before selecting type of nPOD matches
-        case "nPODInput":
-          Shiny.setInputValue("cohortName", "ExampleCohort2020");
+        case "refSubsetInput":
+          Shiny.setInputValue("match-CohortX-name" + "", "examplecohort2020");
           break;
         // set listener for "Match" before parameters are shown
         case "matchUI":

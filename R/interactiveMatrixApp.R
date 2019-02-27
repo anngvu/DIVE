@@ -7,7 +7,7 @@
 interactiveMatrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
   ns <- NS(id)
   fluidPage(theme = shinytheme("lumen"), includeCSS(CSS),
-            fluidRow(style="margin-top:50px; margin-bottom:50px; margin-right:100px",
+            fluidRow(style="margin-top:30px; margin-bottom:20px; margin-right:100px",
                      column(8,
                             matrixCtrlUI(ns("ctrl")),
                             conditionalPanel(paste0("output['", ns("usewidget"), "'] ", "== 1"),
@@ -45,7 +45,7 @@ interactiveMatrixApp <- function(input, output, session,
 
 #' Launch Shiny app for exploration of relationships in annotated data with an interactive matrix
 #'
-#' A convenience wrapper to launch app at console
+#' Wrapper to launch app at console
 #'
 #' @export
 interactiveMatrixAppRun <- function() {

@@ -2,18 +2,53 @@
 #'
 #' The original use case is for cohort matching.
 #'
+#' @param id
+#' @param SUBSETS Optional, grouped subsets within REFDATA. This can be used to allow only certain subsets
+#' within the data available for matching.
+#' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
+#' @export
+matchAppUI <- function(id,
+                       SUBSETS = list("No diabetes" = list("No diabetes", "Other-No Diabetes"),
+                                    "Autoantibody positive" = list("Autoab Pos"),
+                                    "Type 1 Diabetes" = list("T1D", "T1D Medalist", "Monogenic Diabetes"),
+                                    "Other diabetes" = list("T2D", "Gestational diabetes"),
+                                    "Other" = list("Transplant", "Cystic fibrosis", "Pregnancy", "Gastric Bypass")),
+                       CSS = system.file("www/", "app.css", package = "DIVE"))
+{
+  ns <- NS(id)
+  fluidPage(theme = shinytheme("lumen"), includeCSS(CSS),
+
+            fluidRow(style="margin-top:30px; margin-bottom:50px; margin-right:100px",
+                     column(6, style="border-right: 1px solid lightgray;",
+                            newDatasetInput(ns("CohortX"), "CohortX", type = "cohort", hasInfo = T)),
+                     column(6,
+                            refSubsetInput(ns("nPOD"), "nPOD", label = HTML("<strong>Select type of matches to get</strong>"),
+                                           subsets = SUBSETS)
+                     )),
+            fluidRow(style="margin-top:50px; margin-bottom:50px; margin-right:100px",
+                     column(1),
+                     column(10,
+                            tabsetPanel(id = ns("tabs"),
+                                        tabPanel("Reference cohort graph",
+                                                 cohortGraphOutput(ns("nPODg")))
+                                        ))
+                     )
+  )
+}
+
+#' Launch Shiny app for matching and exploration of two datasets
+#'
+#' The original use case is for cohort matching.
+#'
 #' @param REFDATA A data matrix, e.g. a correlation matrix, which must have variables as rownames.
 #' @param REFKEY Passed to refSubsetInput.
 #' @param NGRAPH A matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.
 #' @param NGRAPHDATA The non-reactive data used for generating the matrix.
 #' @param VARS Optional, variables allowed to be used for matching within REFDATA organized in categories.
 #' If not given, all variables in REFDATA are used without a category.
-#' @param SUBSETFEAT The column containing the grouping feature in REFDATA.
-#' @param SUBSETS Optional, grouped subsets within REFDATA. This can be used to allow only certain subsets
-#' within the data available for matching.
-#' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
 #' @export
-matchApp <- function(REFDATA = npodX, NGRAPH = npodgraph, NGRAPHDATA = ndata,
+matchApp <- function(input, output, session,
+                     REFDATA = npodX, NGRAPH = npodgraph, NGRAPHDATA = ndata,
                      REFKEY = list(Cohort = "nPOD", Cohort = "CohortX"),
                      VARS = list(
                        Clinical = c("BMI", "db.duration", "age.onset",
@@ -24,30 +59,7 @@ matchApp <- function(REFDATA = npodX, NGRAPH = npodgraph, NGRAPHDATA = ndata,
                                        "race_Asian", "race_AmericanIndian", "race_Multiracial")
                      ),
                      SUBSETFEAT = "donor.type",
-                     SUBSETS = list("No diabetes" = list("No diabetes", "Other-No Diabetes"),
-                                    "Autoantibody positive" = list("Autoab Pos"),
-                                    "Type 1 Diabetes" = list("T1D", "T1D Medalist", "Monogenic Diabetes"),
-                                    "Other diabetes" = list("T2D", "Gestational diabetes"),
-                                    "Other" = list("Transplant", "Cystic fibrosis", "Pregnancy", "Gastric Bypass")),
-                     CSS = system.file("Apps/www/", "app.css", package = "DIVE")) {
-  ui <- fluidPage(theme = shinytheme("lumen"), includeCSS(CSS),
-
-                  fluidRow(style="margin-top:50px; margin-bottom:50px; margin-right:100px",
-                           column(6,  style="border-right: 1px solid lightgray;",
-                                  newDatasetInput("CohortX", type = "cohort", hasInfo = T)),
-                           column(6,
-                                  refSubsetInput("nPOD", label = HTML("<strong>Select type of matches to get</strong>"),
-                                                 subsets = SUBSETS)
-                           )),
-                  fluidRow(style="margin-top:50px; margin-bottom:50px; margin-right:100px",
-                           column(1),
-                           column(10,
-                                  tabsetPanel(id = "tabs",
-                                              tabPanel("Reference cohort graph", cohortGraphOutput("nPODg")))
-                           ))
-  )
-
-  server <- function(input, output, session) {
+                     SAVED = "examplecohort2020") {
 
     cohortGraph <- callModule(cohortGraph, "nPODg",
                               cohgraph = NGRAPH,
@@ -60,7 +72,8 @@ matchApp <- function(REFDATA = npodX, NGRAPH = npodgraph, NGRAPHDATA = ndata,
 
     newCohort <- callModule(newDataset, "CohortX",
                             refkey = REFKEY[2],
-                            infoRmd = "Help/match.Rmd")
+                            infoRmd = "help/match.Rmd",
+                            saved = SAVED)
 
     parameters <- callModule(matchLink, "params",
                              refData = nPOD,
@@ -68,7 +81,7 @@ matchApp <- function(REFDATA = npodX, NGRAPH = npodgraph, NGRAPHDATA = ndata,
                              vars = VARS,
                              guess = guessMatch)
 
-    results <-  callModule(matchResult, "match",
+    results <-  callModule(matchResult, "results",
                            refSubset = nPOD,
                            cohortX = newCohort,
                            params = parameters)
@@ -83,23 +96,32 @@ matchApp <- function(REFDATA = npodX, NGRAPH = npodgraph, NGRAPHDATA = ndata,
       removeTab("tabs", "Match parameters")
       removeTab("tabs", "Match results")
       removeTab("tabs", "Explore")
-      appendTab("tabs", tabPanel("Match parameters", div(style="padding-top:25px", matchLinkUI("params"))), select = T)
+      appendTab("tabs", select = T, tabPanel("Match parameters",
+                                 div(style="padding-top:25px", matchLinkUI(session$ns("params")))))
       appendTab("tabs", tabPanel("Explore",
                                  div(style="padding-top:25px",
-                                     exploreMoreUI("explore",
+                                     exploreMoreUI(session$ns("explore"),
                                                    s1Label = "nPOD", s1Data = REFDATA,
                                                    s2Label = "CohortX", s2Data = newCohort,
-                                                   placeholder = "(select from cohort attributes)"))), select = F)
+                                                   placeholder = "(select from cohort attributes)"))))
     })
 
     observeEvent(results$matchtable, {
       removeTab("tabs", "Match results")
-      insertTab("tabs", tabPanel("Match results", div(style="padding-top:25px", matchResultOutput("match"))),
-                target = "Match parameters", position = "after", select = T)
+      insertTab("tabs", tabPanel("Match results", div(style="padding-top:25px", matchResultOutput(session$ns("results"))),
+                target = "Match parameters", position = "after", select = T))
     })
+}
 
+#' Launch Shiny app for exploration of relationships in annotated data with an interactive matrix
+#'
+#' Wrapper to launch app at console
+#'
+#' @export
+matchAppRun <- function() {
+  ui <- matchAppUI("default")
+  server <- function(input, output, session) {
+    callModule(matchApp, "default")
   }
-
-  shinyApp(ui = ui, server = server)
-
+ shinyApp(ui = ui, server = server)
 }
