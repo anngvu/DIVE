@@ -2,7 +2,7 @@
 var intro = introJs();
 
 function userGetsDrill() { intro.goToStepNumber(2) }
-function userGetsMatches() { setTimeout(function() { intro.goToStepNumber(5) }, 500); }
+function userMsg() { alert("GRR") }
 
 // handler
 Shiny.addCustomMessageHandler("startGuideC",
@@ -16,35 +16,92 @@ Shiny.addCustomMessageHandler("startGuideC",
 
 Shiny.addCustomMessageHandler("startGuideM",
   function(message) {
-    intro.setOptions({steps: message.steps, 'showStepNumbers': false }).start()
-    .onbeforechange(function(targetElement) {
-
-      switch(targetElement.id) {
-        // load demo dataset before selecting type of nPOD matches
-        case "refSubsetInput":
-          Shiny.setInputValue("match-CohortX-name" + "", "examplecohort2020");
-          break;
-        // set listener for "Match" before parameters are shown
-        case "matchUI":
-          $("#matchResult").on("shiny:outputinvalidated", userGetsMatches);
-          break;
-        case "matchResult":
-          if(this._currentStep === 4) { // if no user trigger, simulate "Match" click before proceeding
-            $("#match").trigger("click");
-          }
-          if(this._currentStep === 5) {
-            $("#matchResult").off("shiny:outputinvalidated", userGetsMatches);
-            $(".nav-tabs a[data-value='match-extra']").tab('show');
-
-        }
-          break;
-      }
-    })
-    // remove listeners when the demo context ends
-    .onexit( function() {
-      $("#matchResult").off("shiny:outputinvalidated", userGetsMatches);
-   });
+    firststeps = message.steps.slice(0,2);
+    intro.setOptions({
+      steps: firststeps,
+      'showStepNumbers': false,
+      'hideNext': true,
+      'doneLabel': 'Load demo data',
+      'showBullets': false })
+    .start()
+    .oncomplete( function() {
+      Shiny.setInputValue("match-CohortX-name" + "", "examplecohort2020");
+      setTimeout(function() { introMatchLoadData(message) }, 250);
+    });
 });
+
+function introMatchLoadData(message) {
+  nextsteps = message.steps.slice(2,4);
+  intro.setOptions({
+    steps: nextsteps,
+    'showStepNumbers': false,
+    'doneLabel': 'Explore data without matching',
+    'hideNext': true,
+    'showBullets': false
+  })
+  .start()
+  .oncomplete( function() {
+    $(".nav-tabs a[data-value='Explore']").tab('show');
+    setTimeout(function() { introMatch3(message) }, 250);
+  });
+}
+
+function introMatch3(message) {
+  nextsteps = message.steps.slice(4,5);
+  intro.setOptions({
+    steps: nextsteps,
+    'showStepNumbers': false,
+    'doneLabel': 'Go back to get matched data',
+    'showBullets': false
+  })
+  .start()
+  .oncomplete( function() {
+    $(".nav-tabs a[data-value='Match parameters']").tab('show');
+    setTimeout(function() { introMatch4(message) }, 250);
+  });
+}
+
+function introMatch4(message) {
+  nextsteps = message.steps.slice(5,6);
+  intro.setOptions({
+    steps: nextsteps,
+    'showStepNumbers': false,
+    'hideNext': true,
+    'doneLabel': 'OK',
+    'showBullets': false
+  })
+  .start()
+  .oncomplete(function() {
+    setTimeout(function() { introMatch5(message) }, 300);
+  });
+}
+
+function introMatch5(message) {
+  nextsteps = message.steps.slice(6,7);
+  intro.setOptions({
+    steps: nextsteps,
+    'showStepNumbers': false,
+    'doneLabel': 'Explore data after matching',
+    'showBullets': false
+  })
+  .start()
+  .oncomplete( function() {
+    $(".nav-tabs a[data-value='Explore']").tab('show');
+    setTimeout(function() { introMatch6(message) }, 250);
+  });
+}
+
+function introMatch6(message) {
+  nextsteps = message.steps.slice(7,9);
+  introJs().setOptions({
+    steps: nextsteps,
+    'showStepNumbers': false,
+    'showBullets': false
+  })
+  .start();
+}
+
+
 
 Shiny.addCustomMessageHandler("startGuideV",
   function(message) {

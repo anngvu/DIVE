@@ -9,9 +9,7 @@ matchResultOutput <- function(id) {
     tableOutput(ns("table")),
     br(),
     downloadButton(ns("save"), "Download main match result table"),
-    downloadButton(ns("save_intermediate"), "Download match result intermediates"),
-    br(), br(),
-    HTML("*Matched cases can be requested through this <a href='https://npoddatashare.coh.org/'>portal</a>.")
+    downloadButton(ns("save_intermediate"), "Download match result intermediates")
   )
 }
 
@@ -25,15 +23,15 @@ matchResultOutput <- function(id) {
 #' @export
 matchResult <- function(input, output, session,
                         refSubset, cohortX, params) {
-  
+
   results <- reactiveValues(params = NULL, intermediate = NULL, pair = NULL, matchtable = NULL)
-  
+
   observeEvent(cohortX(), {
     results$params <- results$intermediate <- results$pair <- results$matchtable <- NULL
   })
 
   observeEvent(params$run, {
-    # Data fusion -- create dataset with required structure
+    # Create fused dataset with required structure
     intermediate <- dataFusion(d1 = refSubset(), d2 = cohortX(), fuseon = params$matchOn,
                         sourcecol = "Cohort")
     # Do match
@@ -58,7 +56,7 @@ matchResult <- function(input, output, session,
       write.csv(results$matchtable, file, row.names = F)
     }
   )
-  
+
   output$save_intermediate <- downloadHandler(
     filename = function() {
       "match_intermediate.csv"
@@ -67,7 +65,7 @@ matchResult <- function(input, output, session,
       write.csv(results$intermediate, file, row.names = F)
     }
   )
-  
+
   return(results)
 }
 
@@ -81,7 +79,7 @@ matchResult <- function(input, output, session,
 #' @param d2 A data.frame of the second dataset.
 #' @param fuseon A named vector of the harmonized features, where the names are the features in d1 and elements are features in d2.
 #' @param sourcecol The key column used to identify the row sources after the two datasets are fused.
-#' @return A data.table of the fused data. 
+#' @return A data.table of the fused data.
 #' @export
 dataFusion <- function(d1, d2, fuseon, sourcecol) {
   d1 <- data.table::as.data.table(d1)
@@ -91,14 +89,14 @@ dataFusion <- function(d1, d2, fuseon, sourcecol) {
   # remove NAs
   fused <- fused[ fused[, !Reduce(`|`, lapply(.SD, function(x) is.na(x))), .SDcols = names(fuseon)] ]
   fused <- fused[, c("ID", sourcecol, names(fuseon)), with = F]
-  fused[[sourcecol]] <- factor(fused[[sourcecol]], 
-                               levels = c(unique(d1[[sourcecol]]), unique(d2[[sourcecol]])))
+  # sourecol must be factored for use in matching functions
+  fused[[sourcecol]] <- factor(fused[[sourcecol]], levels = c(unique(d1[[sourcecol]]), unique(d2[[sourcecol]])))
   fused
 }
 
 #' Matching main function
 #'
-#' Calls pairmatch to perform matching using the desired parameters.
+#' Calls optmatch::pairmatch to perform matching using the desired parameters.
 #'
 #' @param data The data.
 #' @param groupcol Name of the column containing groups to match between.

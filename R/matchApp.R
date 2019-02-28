@@ -58,6 +58,7 @@ matchApp <- function(input, output, session,
                                        "race_Caucasian", "race_AfricanAmerican", "race_Hispanic.Latino",
                                        "race_Asian", "race_AmericanIndian", "race_Multiracial")
                      ),
+                     GUESS = guessMatch,
                      SUBSETFEAT = "donor.type",
                      SAVED = "examplecohort2020") {
 
@@ -79,7 +80,7 @@ matchApp <- function(input, output, session,
                              refData = nPOD,
                              cohortX = newCohort,
                              vars = VARS,
-                             guess = guessMatch)
+                             guess = GUESS)
 
     results <-  callModule(matchResult, "results",
                            refSubset = nPOD,
@@ -96,20 +97,23 @@ matchApp <- function(input, output, session,
       removeTab("tabs", "Match parameters")
       removeTab("tabs", "Match results")
       removeTab("tabs", "Explore")
-      appendTab("tabs", select = T, tabPanel("Match parameters",
-                                 div(style="padding-top:25px", matchLinkUI(session$ns("params")))))
-      appendTab("tabs", tabPanel("Explore",
-                                 div(style="padding-top:25px",
-                                     exploreMoreUI(session$ns("explore"),
-                                                   s1Label = "nPOD", s1Data = REFDATA,
-                                                   s2Label = "CohortX", s2Data = newCohort,
-                                                   placeholder = "(select from cohort attributes)"))))
+      appendTab("tabs", select = T,
+                tabPanel("Match parameters",
+                         div(style="padding-top:25px",
+                             matchLinkUI(session$ns("params")))))
+      appendTab("tabs",
+                tabPanel("Explore",
+                         div(style="padding-top:25px",
+                            exploreMoreUI(session$ns("explore"),
+                                          s1Label = "nPOD", s1Data = REFDATA,
+                                          s2Label = "CohortX", s2Data = newCohort,
+                                           placeholder = "(select from cohort attributes)"))))
     })
 
     observeEvent(results$matchtable, {
       removeTab("tabs", "Match results")
-      insertTab("tabs", tabPanel("Match results", div(style="padding-top:25px", matchResultOutput(session$ns("results"))),
-                target = "Match parameters", position = "after", select = T))
+      insertTab("tabs", target = "Match parameters", position = "after", select = T,
+                tabPanel("Match results", div(style="padding-top:25px", matchResultOutput(session$ns("results")))))
     })
 }
 
