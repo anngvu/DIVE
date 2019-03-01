@@ -15,11 +15,11 @@ ui <- navbarPage("nPOD DIVE", id = "main", selected = "intro",
   #-- MENU PG 2,3,4 ------------------------------------------------------------------------------------#
   navbarMenu("Integrative Data Views",
              tabPanel("Cohort Exchange", value = "cohort-exchange",
-                      actionButton("guideMatch", "Demo tour", icon = icon("info-circle")),
+                      actionButton("demoCohortExchange", "Demo tour", icon = icon("info-circle")),
                       matchAppUI("match")),
              tabPanel("Data Exploration", value = "data-exploration-1",
-                      actionButton("guideCorrelation", "Demo tour", icon = icon("info-circle")),
-                      interactiveMatrixAppUI("module2")),
+                      actionButton("demoCorrelation", "Demo tour", icon = icon("info-circle")),
+                      interactiveMatrixAppUI("cor")),
              tabPanel("Data Exploration (high-throughput)", value = "data-exploration-2",
                       "")
   ),
@@ -48,13 +48,13 @@ ui <- navbarPage("nPOD DIVE", id = "main", selected = "intro",
 
 server <- function(input, output, session) {
   callModule(matchApp, "match")
-  callModule(interactiveMatrixApp, "module2")
-  observeEvent(input$guideCorrelation, {
-    session$sendCustomMessage(type = "startGuideC",
+  callModule(interactiveMatrixApp, "cor")
+  observeEvent(input$demoCorrelation, {
+    session$sendCustomMessage(type = "demoCorrelation",
                               message = list(steps = jsonlite::toJSON(read.table("help/data_exploration.txt", sep = "\t", header = T, comment.char = ""))))
   })
-  observeEvent(input$guideMatch, {
-    session$sendCustomMessage(type = "startGuideM",
+  observeEvent(input$demoCohortExchange, {
+    session$sendCustomMessage(type = "demoCohortExchange",
                               message = list(steps = jsonlite::toJSON(read.table("help/cohort_exchange.txt", sep = "\t", header = T, comment.char = ""))))
   })
 }

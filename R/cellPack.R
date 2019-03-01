@@ -24,7 +24,7 @@ cellPack <- function(input, output, session,
                      json, css = system.file("www/", "cellpack.css", package = "DIVE")) {
 
   output$cellpack <- r2d3::renderD3({
-    r2d3::r2d3(data = read_json(json), script = system.file("www/", "cellpack.js", package = "DIVE"),
+    r2d3::r2d3(data = jsonlite::read_json(json), script = system.file("www/", "cellpack.js", package = "DIVE"),
                options = list(click = session$ns("click"), hover = session$ns("hover")),
                css = css, d3_version = 4, viewer = "browser")
   })

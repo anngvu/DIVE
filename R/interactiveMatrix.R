@@ -9,11 +9,11 @@ interactiveMatrixUI <- function(id) {
   tags$div(
     fluidRow(
     column(8, align = "left",
-           div(id = "matrix", style ="height: 1000px;",
+           div(id = "matrixOutput", style ="height: 1000px;",
                shinycssloaders::withSpinner(plotlyOutput(ns("matrix")), color = "gray"))
     ),
     column(4,
-           div(id = "drilldown", style = "margin-top: 20px; margin-left: 10px;",
+           div(id = "drilldownOutput", style = "margin-top: 20px; margin-left: 10px;",
                selectizeInput(ns("drilldown"), "Drill down to data for",
                               choices = "", selected = "",
                               options = list(maxItems = 2, placeholder = "select variable(s)"), width = "400px"),

@@ -96,6 +96,10 @@ matchApp <- function(input, output, session,
                         results = results)
 
   #-- Show output tabs ------------------------------------------------------------------------------------------#
+
+  # Need to keep track of first upload since previous implementation of removing and adding new tabs
+  # (as opposed to new logic of adding tab if it's the first interaction and showing/hiding for all subsequent)
+  # results in puzzling behavior where one must click twice on run to get results.
   first <- reactiveValues(upload = TRUE, result = TRUE)
 
   observeEvent(newCohort(), {

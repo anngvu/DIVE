@@ -78,4 +78,12 @@ Match app
   background-color: lemonchiffon;
 }
 
+.custom-highlight {
+  background-color: white;
+}
 
+.custom-highlight-table {
+  background-color: transparent;
+}
+}
+}

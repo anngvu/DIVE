@@ -31,8 +31,8 @@ exploreMoreUI <- function(id, s1Label = "", s1Data, s2Label = "", s2Data, placeh
                                    render = displayjs))
       ))
     ),
-    fluidRow(
-     plotOutput(ns("plot"))
+    fluidRow(align = "center",
+     plotOutput(ns("plot"), width = "90%")
     )
   )
 }
