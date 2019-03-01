@@ -2,7 +2,6 @@
 var intro = introJs();
 
 function userGetsDrill() { intro.goToStepNumber(2) }
-function userMsg() { alert("GRR") }
 
 // handler
 Shiny.addCustomMessageHandler("startGuideC",
@@ -16,7 +15,8 @@ Shiny.addCustomMessageHandler("startGuideC",
 
 Shiny.addCustomMessageHandler("startGuideM",
   function(message) {
-    firststeps = message.steps.slice(0,2);
+    $(".nav-tabs a[data-value='Reference cohort graph']").tab('show');
+    var firststeps = message.steps.slice(0,2);
     intro.setOptions({
       steps: firststeps,
       'showStepNumbers': false,
@@ -31,12 +31,14 @@ Shiny.addCustomMessageHandler("startGuideM",
 });
 
 function introMatchLoadData(message) {
-  nextsteps = message.steps.slice(2,4);
+  $(".nav-tabs a[data-value='Match parameters']").tab('show');
+  var nextsteps = message.steps.slice(2,4);
   intro.setOptions({
     steps: nextsteps,
     'showStepNumbers': false,
-    'doneLabel': 'Explore data without matching',
+    'doneLabel': 'Try exploring data <strong>without</strong> matching',
     'hideNext': true,
+    'hidePrev': true,
     'showBullets': false
   })
   .start()
@@ -47,21 +49,28 @@ function introMatchLoadData(message) {
 }
 
 function introMatch3(message) {
-  nextsteps = message.steps.slice(4,5);
+  var nextsteps = message.steps.slice(4,5);
   intro.setOptions({
     steps: nextsteps,
     'showStepNumbers': false,
-    'doneLabel': 'Go back to get matched data',
+    'doneLabel': 'OK, now proceed with getting matches',
     'showBullets': false
   })
   .start()
   .oncomplete( function() {
     $(".nav-tabs a[data-value='Match parameters']").tab('show');
-    setTimeout(function() { introMatch4(message) }, 250);
+    setTimeout(function() { introMatch4(message) }, 400);
   });
 }
 
+// need to listen for run-params by user
 function introMatch4(message) {
+  var userInitiatesRun = function(event) {
+    if(event.target.id === 'match-results-table') {
+      setTimeout(function() { introMatch5(message) }, 250);
+    }
+  };
+  $(document).on('shiny:value', userInitiatesRun);
   nextsteps = message.steps.slice(5,6);
   intro.setOptions({
     steps: nextsteps,
@@ -72,7 +81,10 @@ function introMatch4(message) {
   })
   .start()
   .oncomplete(function() {
-    setTimeout(function() { introMatch5(message) }, 300);
+    setTimeout(function() { introMatch5(message) }, 250);
+  })
+  .onexit(function() {
+    $(document).off('shiny:value', userInitiatesRun);
   });
 }
 
@@ -81,7 +93,7 @@ function introMatch5(message) {
   intro.setOptions({
     steps: nextsteps,
     'showStepNumbers': false,
-    'doneLabel': 'Explore data after matching',
+    'doneLabel': 'Try exploring data <strong>after</strong> matching',
     'showBullets': false
   })
   .start()
@@ -98,7 +110,10 @@ function introMatch6(message) {
     'showStepNumbers': false,
     'showBullets': false
   })
-  .start();
+  .start()
+  .oncomplete( function() {
+    Shiny.setInputValue("match-CohortX-name" + "", "");
+  });
 }
 
 

@@ -6,7 +6,7 @@
 #' @export
 interactiveMatrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
   ns <- NS(id)
-  fluidPage(theme = shinytheme("lumen"), includeCSS(CSS),
+  fluidPage(theme = shinythemes::shinytheme("lumen"), includeCSS(CSS),
             fluidRow(style="margin-top:30px; margin-bottom:20px; margin-right:100px",
                      column(8,
                             matrixCtrlUI(ns("ctrl")),

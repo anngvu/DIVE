@@ -107,7 +107,6 @@ matchLink <- function(input, output, session,
     if(!is.null(refData())) params$run <- input$run
   })
 
-
   return(params)
 }
 
@@ -190,7 +189,7 @@ newOrderInput <- function(inputId, label, items,
       )
       if (as_source) {
         options <- list(connectToSortable = connect, helper = "clone", cancel = "")
-        tag <- jqui_draggable(tag, options = options)
+        tag <- shinyjqui::jqui_draggable(tag, options = options)
       }
       return(tag)
     })
@@ -221,7 +220,7 @@ newOrderInput <- function(inputId, label, items,
         )
       )
     )
-    container <- jqui_sortable(container, options = options)
+    container <- shinyjqui::jqui_sortable(container, options = options)
   }
 
   if (!is.null(placeholder)) {

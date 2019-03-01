@@ -8,7 +8,7 @@
 #' @export
 cellPackUI <- function(id, width = "400px", height = "400px") {
   ns <- NS(id)
-  tagList(fluidRow(d3Output(ns("cellpack"), width = width, height = height)),
+  tagList(fluidRow(r2d3::d3Output(ns("cellpack"), width = width, height = height)),
           fluidRow(textOutput(ns("out")))
           )
 }
@@ -23,7 +23,7 @@ cellPackUI <- function(id, width = "400px", height = "400px") {
 cellPack <- function(input, output, session,
                      json, css = system.file("www/", "cellpack.css", package = "DIVE")) {
 
-  output$cellpack <- renderD3({
+  output$cellpack <- r2d3::renderD3({
     r2d3::r2d3(data = read_json(json), script = system.file("www/", "cellpack.js", package = "DIVE"),
                options = list(click = session$ns("click"), hover = session$ns("hover")),
                css = css, d3_version = 4, viewer = "browser")
