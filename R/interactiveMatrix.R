@@ -92,7 +92,7 @@ interactiveMatrix <- function(input, output, session,
 
   #-- Drilldown handling -----------------------------------------------------------------------------------------------------#
   observeEvent(state$cdata, {
-    updateSelectizeInput(session, "drilldown", choices = names(state$cdata), selected = character(0))
+    updateSelectizeInput(session, "drilldown", choices = removeID(names(state$cdata)), selected = character(0))
   })
 
   observe({

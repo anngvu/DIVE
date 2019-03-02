@@ -5,10 +5,9 @@
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param label Name of the dataset.
 #' @param type Optional, a keyword to describe type of dataset, included in label text for additional UI customization.
-#' @param hasInfo Optional, TRUE or FALSE to indicate whether to show an info/help link for module.
 #' @return A \code{shiny::\link[shiny]{tagList}} containing inputs for cohort data.
 #' @export
-newDatasetInput <- function(id, label = id, type = "", hasInfo = F) {
+newDatasetInput <- function(id, label = id, type = "") {
   ns <- NS(id)
   tags$div(id = "newDatasetInput",
     fluidRow(
@@ -17,7 +16,7 @@ newDatasetInput <- function(id, label = id, type = "", hasInfo = F) {
              h3(label)
       ),
       column(8,
-          dataUploadUI(ns("dataset"), hasInfo = T),
+          dataUploadUI(ns("upload")),
           fluidRow(
              column(8, div(id = "dataUpload",
                  textInput(ns("name"), "Label (optional)", value = "",
@@ -38,19 +37,18 @@ newDatasetInput <- function(id, label = id, type = "", hasInfo = F) {
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param refkey Optional, a named list containing name/label for creating a key-like column.
-#' @param saved Optional, character name that can be used to accession a saved dataset. See details.
+#' @param appdata Optional, character name that can be used to accession a saved dataset. See details.
 #' @param infoRmd Optional, relative path to an info Rmarkdown file for this module.
 #' @return A reactive data.table of the processed upload.
 #' @export
 newDataset <- function(input, output, session,
-                      refkey, saved = F,
-                      infoRmd) {
+                      refkey, infoRmd, appdata) {
 
   # ------------------------------------------------------------- #
 
   newData <- reactiveVal(NULL)
 
-  upload <- callModule(dataUpload, "dataset", infoRmd = infoRmd)
+  upload <- callModule(dataUpload, "upload", infoRmd = infoRmd, appdata = appdata)
 
   # ------------------------------------------------------------- #
   processNew <- function(dataset) {
@@ -65,17 +63,8 @@ newDataset <- function(input, output, session,
 
   observeEvent(upload(), {
     dataset <- upload()
-    # Perform data checks
-
     # If data looks good...
     processNew(dataset)
-  })
-
-  observe({
-    if(input$name == saved) {
-      datafile <- data.table::fread(paste0("appdata/", saved, ".csv"))
-      newData(datafile)
-    }
   })
 
   return(newData)

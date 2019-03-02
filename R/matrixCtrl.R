@@ -46,14 +46,16 @@ matrixCtrl <- function(input, output, session,
                      M, N, cdata, metadata, newdata = reactive({ }), widget = reactive({ }) ) {
 
   default <- list(M = M, N = N, cdata = cdata, newdata = NULL, filM = M)
-  applied <- reactiveVal(data.frame(opt = character(0), optgroup = character(0)))
+  applied <- reactiveVal(data.frame(opt = character(0), optgroup = character(0))) # stores user selection in long format
   state <- reactiveValues(applied = applied) # returned; initialized with default values above
 
+  # clears selected filters
   reset <- function() {
     updateSelectizeInput(session, "applied", choices = "", selected = character(0))
     applied(isolate(applied())[0, ])
   }
 
+  # need to return optgroup because widget visibility is tied to optgroup
   observe({
     state$optgroup <- input$optgroup
   })

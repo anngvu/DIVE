@@ -14,7 +14,7 @@ interactiveMatrixAppUI <- function(id, CSS = system.file("www/", "app.css", pack
                                              absolutePanel(id = "cellpackpanel", draggable = T, left = 300,
                                                            cellPackUI(ns("cellfilter")))
                             )),
-                     column(4, dataUploadUI(ns("upload"), hasInfo = T))
+                     column(4, dataUploadUI(ns("upload")))
             ),
             fluidRow(interactiveMatrixUI(ns("matrix")))
   )
@@ -32,10 +32,12 @@ interactiveMatrixAppUI <- function(id, CSS = system.file("www/", "app.css", pack
 interactiveMatrixApp <- function(input, output, session,
                                  M = cor.data$corM, N = cor.data$corN, CDATA = cdata, METADATA = metadata,
                                  widgetopt = "Cell/Tissue",
-                                 widgetdata = system.file("www/", "test.json", package = "DIVE")) {
+                                 widgetdata = system.file("www/", "test.json", package = "DIVE"),
+                                 infoRmd = "help/uploading_data.html",
+                                 appdata = "pilot.csv") {
 
   cellfilter <- callModule(cellPack, "cellfilter", json = widgetdata)
-  upload <- callModule(dataUpload, "upload", removable = T)
+  upload <- callModule(dataUpload, "upload", removable = T, infoRmd, appdata)
   display <- callModule(matrixCtrl, "ctrl", M, N, CDATA, METADATA,
                         newdata = upload, widget = cellfilter)
   matrix <- callModule(interactiveMatrix, "matrix", state = display)

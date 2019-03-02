@@ -17,6 +17,7 @@
 
 .progress-bar {
   background-color: MediumSpringGreen;
+  color: black;
 }
 
 /*
@@ -80,10 +81,4 @@ Match app
 
 .custom-highlight {
   background-color: white;
-}
-
-.custom-highlight-table {
-  background-color: transparent;
-}
-}
 }

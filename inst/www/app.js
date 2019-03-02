@@ -13,12 +13,14 @@ Shiny.addCustomMessageHandler("demoCorrelation",
       'hidePrev': true,
       'hideNext': true,
       'showBullets': false,
-      'highlightClass': 'custom-highlight' })
-    .start()
-    .onexit(function(targetElement) {
-      $(document).off('shiny:value', userDoesDrill);
+      'highlightClass': 'custom-highlight',
+      'doneLabel': 'Upload demo dataset'
     })
-    .onexit( function() { $(document).on('shiny:value', userDoesDrill) });
+    .start()
+    .oncomplete(function() {
+      Shiny.setInputValue("cor-upload-appdata", "pilot.csv" );
+    })
+    .onexit(function() { $(document).off('shiny:value', userDoesDrill) });
 });
 
 // handler demoCohortExchange
@@ -33,10 +35,10 @@ Shiny.addCustomMessageHandler("demoCohortExchange",
       'hideNext': true,
       'showBullets': false,
       'highlightClass': 'custom-highlight',
-      'doneLabel': 'Load demo data' })
+      'doneLabel': 'Upload demo dataset' })
     .start()
     .oncomplete( function() {
-      Shiny.setInputValue("match-CohortX-name" + "", "examplecohort2020");
+      Shiny.setInputValue("match-CohortX-upload-appdata", "examplecohort2020.csv");
       setTimeout(function() { introCX2(message) }, 250);
     });
 });

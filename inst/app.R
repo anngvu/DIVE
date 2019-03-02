@@ -15,10 +15,10 @@ ui <- navbarPage("nPOD DIVE", id = "main", selected = "intro",
   #-- MENU PG 2,3,4 ------------------------------------------------------------------------------------#
   navbarMenu("Integrative Data Views",
              tabPanel("Cohort Exchange", value = "cohort-exchange",
-                      actionButton("demoCohortExchange", "Demo tour", icon = icon("info-circle")),
+                      actionButton("demoCohortExchange", "Help Demo", icon = icon("play")),
                       matchAppUI("match")),
              tabPanel("Data Exploration", value = "data-exploration-1",
-                      actionButton("demoCorrelation", "Demo tour", icon = icon("info-circle")),
+                      actionButton("demoCorrelation", "Help Demo", icon = icon("play")),
                       interactiveMatrixAppUI("cor")),
              tabPanel("Data Exploration (high-throughput)", value = "data-exploration-2",
                       "")
@@ -57,6 +57,7 @@ server <- function(input, output, session) {
     session$sendCustomMessage(type = "demoCohortExchange",
                               message = list(steps = jsonlite::toJSON(read.table("help/cohort_exchange.txt", sep = "\t", header = T, comment.char = ""))))
   })
+
 }
 
 shinyApp(ui = ui, server = server)

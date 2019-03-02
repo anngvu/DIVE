@@ -20,7 +20,7 @@ matchAppUI <- function(id,
 
     fluidRow(style="margin-top:30px; margin-bottom:50px; margin-right:100px",
              column(6, style="border-right: 1px solid lightgray;",
-                    newDatasetInput(ns("CohortX"), "CohortX", type = "cohort", hasInfo = T)),
+                    newDatasetInput(ns("CohortX"), "CohortX", type = "cohort")),
                     column(6,
                             refSubsetInput(ns("nPOD"), "nPOD", label = HTML("<strong>Select type of matches to get</strong>"),
                                            subsets = SUBSETS)
@@ -59,7 +59,7 @@ matchApp <- function(input, output, session,
                      ),
                      GUESS = guessMatch,
                      SUBSETFEAT = "donor.type",
-                     SAVED = "examplecohort2020") {
+                     APPDATA = "examplecohort2020.csv") {
 
   # start with hidden tabs
   # hideTab("tabs", "Match parameters")
@@ -77,7 +77,7 @@ matchApp <- function(input, output, session,
   newCohort <- callModule(newDataset, "CohortX",
                           refkey = REFKEY[2],
                           infoRmd = "help/match.Rmd",
-                          saved = SAVED)
+                          appdata = APPDATA)
 
   parameters <- callModule(matchLink, "params",
                            refData = nPOD,
