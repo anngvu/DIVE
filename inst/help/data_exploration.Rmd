@@ -1,0 +1,16 @@
+---
+title: "Data exploration"
+output: html_document
+---
+
+**What kind of data?**
+
+You are uploading *nPOD* non-high-throughput numeric data. For high-throughput, image, or other complex data, please contact us or go to (OFFICIAL PROCESS TBD). For non-nPOD data comparisons, you may be intested in the Cohort Exchange.
+
+**Format**
+
+The table should have a first column named 'ID' with *nPOD* case IDs, which we use as the key for joining data. If there is no ID column, the upload will not proceed.
+
+**Data confidentiality**
+
+Note that this DOES NOT automatically save your data within our server. To officially contribute your data, go to (OFFICIAL PROCESS TBD)

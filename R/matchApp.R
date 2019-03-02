@@ -59,6 +59,7 @@ matchApp <- function(input, output, session,
                      ),
                      GUESS = guessMatch,
                      SUBSETFEAT = "donor.type",
+                     INFORMD = "help/cohort_exchange.Rmd",
                      APPDATA = "examplecohort2020.csv") {
 
   # start with hidden tabs
@@ -76,7 +77,7 @@ matchApp <- function(input, output, session,
 
   newCohort <- callModule(newDataset, "CohortX",
                           refkey = REFKEY[2],
-                          infoRmd = "help/match.Rmd",
+                          infoRmd = INFORMD,
                           appdata = APPDATA)
 
   parameters <- callModule(matchLink, "params",

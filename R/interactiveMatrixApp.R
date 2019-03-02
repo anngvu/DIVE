@@ -33,7 +33,7 @@ interactiveMatrixApp <- function(input, output, session,
                                  M = cor.data$corM, N = cor.data$corN, CDATA = cdata, METADATA = metadata,
                                  widgetopt = "Cell/Tissue",
                                  widgetdata = system.file("www/", "test.json", package = "DIVE"),
-                                 infoRmd = "help/uploading_data.html",
+                                 infoRmd = "help/data_exploration.Rmd",
                                  appdata = "pilot.csv") {
 
   cellfilter <- callModule(cellPack, "cellfilter", json = widgetdata)

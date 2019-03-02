@@ -1,0 +1,16 @@
+---
+title: "Cohort exchange"
+output: html_document
+---
+
+**What kind of data?**
+
+The data should only be numeric/numeric factors. Columns containing text data will be filtered out.
+
+**Format**
+
+The table should have a first column named 'ID', which are presumed case IDs. If there is no ID column, the upload will not proceed.
+
+**Data confidentiality**
+
+Note that this DOES NOT automatically save your data within our server. To officially contribute your data, go to (OFFICIAL PROCESS TBD)
