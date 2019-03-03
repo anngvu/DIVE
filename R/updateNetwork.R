@@ -1,25 +1,36 @@
-#' Make graph showing connections between datasets/sources
+#' Make igraph showing connections between datasets/sources
 #'
-#' Get node and edge counts from the collection of datasets to build a network graph. Each dataset/source is a node
-#' whose size is proportional to the number of features (columns). More concretely, when each dataset file represents
-#' a published study, nodes are proportional to the amount of data the study generated. Edge weights between datasets are determined
-#' proportional to the number of overlapping IDs.
+#' The method first calculates node and edge counts from the collection of datasets.
+#' Each dataset/source is a node whose size is proportional to the number of features (columns).
+#' More concretely, when each dataset file represents a published study,
+#' node size is proportional to the amount of data the study generated
+#' (currently, the log of the number of features in the dataset).
+#' Edge weights between datasets are counted as the number of overlapping IDs.
 #'
-#' @param cdir Directory path (relative to current working directory) to the collection of dataset files.
-#' @param nodes Pattern for extracting node names from source file name, or "" to use the file name.
-#' @param edges Column used for calculating edges, usually "ID".
-#' @result List containing igraph object and a data frame for graph aesthetics.
-networkGraph <- function(cdir, nodes, edges) {
-  sources <- grep("*.txt$", list.files(cdir), value = T)
-  names(sources) <- regmatches(sources, regexpr(nodes, sources))
-  nodes <- lapply(sources, function(x) readLines(paste0(cdir, "/",  x), n = 1))
-  nodesz <- log(lengths(nodes)-1) + 1
-  edges <- lapply(sources, function(x) fread(paste0(cdir, "/",  x), select = edges))
-  edgewt <- lapply(edges, function(x) sapply(edges, function(y) length(intersect(x, y))))
-  names(edges) <- names(sources)
-  adjm <- as.matrix(do.call(rbind, edges))
-  network <- graph_from_adjacency_matrix(adjm, mode = "undirected", weighted = T, diag = F)
-  aes <- data.frame(node = names(V(network)), size = nodesz)
+#' @param cdir Directory (relative to current working directory) to the collection of dataset files.
+#' @param filepattern Pattern to help select files within the directory. Defaults to selecting all files with extension .txt|.tsv|.csv.
+#' @param nodes Pattern for extracting node names from source file name. Defaults to using the file name without the extension.
+#' @param edges Column within the dataset used for calculating edges,defaults to "ID".
+#' @return List containing igraph object and data frame summarizing nodes and edges.
+updateNetworkGraph <- function(cdir, filepattern = "*[.](txt|tsv|csv)$", nodes = "([^\\.]*)", edges = "ID") {
+  sources <- grep(filepattern, list.files(cdir), value = T)
+  names(sources) <- regmatches(sources, regexpr(nodes, sources, perl = T))
+  nodes <- lapply(sources, function(x) fread(paste0(cdir, "/",  x), nrows = 0))
+  # Check for edge column and warn for any without edge column
+  noedge <- sapply(nodes, function(x) !any(grepl(edges, names(x))))
+  nodes <- nodes[!noedge]
+  if(any(noedge)) warning(paste("removed datasets with missing edge column:", paste(sources[noedge], collapse = ", ")))
+  # Check if dataset ONLY contains edge column
+  size0 <- lengths(nodes) == 1
+  nodes <- nodes[!size0]
+  if(any(size0)) warning(paste("removed datasets with no real data:", paste(sources[size0], collapse = ", ")))
+  nodesize <- log(lengths(nodes)-1) + 1
+  edgewt <- lapply(sources, function(x) fread(paste0(cdir, "/",  x), select = edges)[[1]])
+  edgewt <- lapply(edgewt, function(x) sapply(edgewt, function(y) length(intersect(x, y))))
+  names(edgewt) <- names(nodes)
+  adjm <- as.matrix(do.call(rbind, edgewt))
+  network <- igraph::graph_from_adjacency_matrix(adjm, mode = "undirected", weighted = T, diag = F)
+  aes <- data.frame(node = names(nodes), size = nodesize)
   return(list(network, aes))
 }
 

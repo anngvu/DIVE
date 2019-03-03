@@ -1,0 +1,6 @@
+ID	Autoreactivity
+6342	X
+6367	X
+6268	X
+69	X
+6323	X

@@ -1,0 +1,5 @@
+ID	CD3.cells	CD3.cells_SE	beta.mass
+6310	9.2	0.9	0.763
+6366	0.1	0.05	NA
+6029	0.1	0.05	NA
+6401	0.1	0.05	NA

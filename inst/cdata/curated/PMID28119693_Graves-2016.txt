@@ -1,0 +1,31 @@
+ID	BD2	IL17C	TSLP	TLR5	IL10	freq.ILC1	freq.ILC3	freq.CD3	freq.CD4	freq.CD8	freq.Treg	freq.Th1	freq.Tc1	BD2.IEC	IL17C.IEC	TSLP.IEC	TLR5.IEC	IL10.IEC	BD2.IECx	IL17C.IECx	TSLP.IECx	TLR5.IECx	IL10.IECx
+6261	X	X	X	X	X																		
+6263	X	X	X	X	X																		
+6266	X	X	X	X	X																		
+6281	X	X	X	X	X																		
+6285	X	X	X	X	X																		
+6298	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6299	X	X	X	X	X																		
+6302	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6306	X	X	X	X	X																		
+6307	X	X	X	X	X																		
+6323	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6324	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6327	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6328	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6337	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6341	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6342	X	X	X	X	X																		
+6271	X	X	X	X	X																		
+6288	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6289	X	X	X	X	X																		
+6290	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6292	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6295	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6316	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6317	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6333	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6335	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6336	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6339	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X	X
+6340	X	X	X	X	X																		
