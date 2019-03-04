@@ -10,9 +10,10 @@
 #' @param cdir Directory (relative to current working directory) to the collection of dataset files.
 #' @param filepattern Pattern to help select files within the directory. Defaults to selecting all files with extension .txt|.tsv|.csv.
 #' @param nodes Pattern for extracting node names from source file name. Defaults to using the file name without the extension.
-#' @param edges Column within the dataset used for calculating edges,defaults to "ID".
+#' @param edges Column within the dataset used for calculating edges, e.g. "ID".
 #' @return List containing igraph object and data frame summarizing nodes and edges.
-updateNetworkGraph <- function(cdir, filepattern = "*[.](txt|tsv|csv)$", nodes = "([^\\.]*)", edges = "ID") {
+#' @export
+networkGraph <- function(cdir, filepattern = "*[.](txt|tsv|csv)$", nodes = "([^\\.]*)", edges) {
   sources <- grep(filepattern, list.files(cdir), value = T)
   names(sources) <- regmatches(sources, regexpr(nodes, sources, perl = T))
   nodes <- lapply(sources, function(x) fread(paste0(cdir, "/",  x), nrows = 0))
@@ -38,19 +39,22 @@ updateNetworkGraph <- function(cdir, filepattern = "*[.](txt|tsv|csv)$", nodes =
 #'
 #' Change or add node size, color, or other values depending on metadata.
 #'
-#' @param aes Data frame containing nodes for which aesthetics are added or modified.
-#' @param metadata File containing metadata.
-#' @param scol Column used for matching the source IDs (nodes), defaults to "Source".
-#' @param feature Which aesthetic feature, defaults to "color".
-#' @param fcol Column used for mapping to the node feature.
-#' @param mapfun Function for mapping values to the feature.
+#' @param aes Data frame containing nodes to which aesthetics are added or modified.
+#' @param metadata Either a path to a metadata file or a data.table already in the environment.
+#' @param sourcecol Column used for matching node names, defaults to "Source".
+#' @param feature An aesthetic feature, defaults to "color".
+#' @param featurecol Column used for mapping to the node feature.
+#' @param mapfun Function that maps values in the feature column to the desired feature labels.
 #' @return A data frame containing aesthetics data for the nodes.
-graphModAes <- function(aes, metadata, scol = "Source",
-                        feature = "color", fcol, mapfun) {
-  metadata <- fread(metadata, select = c(scol, fcol))
-  values <- metadata[, lapply(.SD, mapfun), by = scol, .SDcols = fcol]
+graphModAes <- function(aes, metadata, sourcecol = "Source", feature = "color", featurecol, mapfun) {
+  if(!match("data.table", class(metadata))) {
+    if(file.exists(metadata)) metadata <- fread(metadata, select = c(sourcecol, featurecol))
+  }
+
+  values <- metadata[, lapply(.SD, mapfun), by = sourcecol, .SDcols = featurecol]
   if(anyNA(values)) warning("Metadata does not match")
   aes[[feature]] <- match(aes$node, values)
+  aes
 }
 
 #' Wrapper to update network graph
@@ -79,4 +83,8 @@ visNetworkMake <- function(network, aes) {
 # is shared for the study, i.e. the node is "online"
 isOnline <- function(x, online = "blue", offline = "dimgray") {
   if(any(x == "Yes")) return(online) else return(offline)
+}
+
+updateNetworkWrapper <- function(cdir = system.file("cdata/curated", package = "DIVE"), nodes = "([^\\_]*)", edges = "ID") {
+  networkGraph(cdir = cdir, nodes = nodes, edges = edges)
 }
