@@ -50,7 +50,7 @@ graphModAes <- function(aes, metadata, sourcecol = "Source", feature = "color", 
   if(!match("data.table", class(metadata))) {
     if(file.exists(metadata)) metadata <- fread(metadata, select = c(sourcecol, featurecol))
   }
-
+  #
   values <- metadata[, lapply(.SD, mapfun), by = sourcecol, .SDcols = featurecol]
   if(anyNA(values)) warning("Metadata does not match")
   aes[[feature]] <- match(aes$node, values)

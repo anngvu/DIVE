@@ -17,6 +17,9 @@ Shiny.addCustomMessageHandler("demoCorrelation",
       'doneLabel': 'Upload demo dataset'
     })
     .start()
+    .onafterchange(function(targetElement) {
+        if(this._currentStep === 1) { $(document).off('shiny:value', userDoesDrill) }
+    })
     .oncomplete(function() {
       Shiny.setInputValue("cor-upload-appdata", "pilot.csv" );
     })
