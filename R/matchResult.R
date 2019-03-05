@@ -1,4 +1,4 @@
-#' Output for cohort matching
+#' Shiny module UI output for match results
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @return Results UI consisting of a table and data download buttons.
@@ -13,7 +13,7 @@ matchResultOutput <- function(id) {
   )
 }
 
-#' Server function for generating match results output
+#' Shiny module server for generating match results output
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param refSubset Reactive reference cohort subset data.table.
@@ -96,7 +96,7 @@ dataFusion <- function(d1, d2, fuseon, sourcecol) {
 
 #' Matching main function
 #'
-#' Calls optmatch::pairmatch to perform matching using the desired parameters.
+#' Calls \code{\link[optmatch]{pairmatch}} to perform matching using the desired parameters.
 #'
 #' @param data The data.
 #' @param groupcol Name of the column containing groups to match between.

@@ -1,28 +1,35 @@
-#' Launch Shiny app for matching and exploration of two datasets
+matchAppConfig <- function() {
+
+}
+
+
+#' Shiny app UI for matching application
 #'
-#' The original use case is for cohort matching.
+#' Shiny app UI for matching application
 #'
-#' @param id
-#' @param SUBSETS Optional, grouped subsets within REFDATA. This can be used to allow only certain subsets
+#' The application UI can be viewed as a default template of how to put together several module components,
+#' including \code{\link{newDataSetInput}}, \code{\link{refSubsetInput}}, \code{\link{cohortGraphOutput}},
+#' to overall enable interactive exploration and matching of two different (cohort) datasets.
+#'
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param SUBSETS Optional, a list of the named subset groups. This can be used to allow only certain subsets
 #' within the data available for matching.
 #' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
 #' @export
 matchAppUI <- function(id,
                        SUBSETS = list("No diabetes" = list("No diabetes", "Other-No Diabetes"),
-                                    "Autoantibody positive" = list("Autoab Pos"),
-                                    "Type 1 Diabetes" = list("T1D", "T1D Medalist", "Monogenic Diabetes"),
-                                    "Other diabetes" = list("T2D", "Gestational diabetes"),
-                                    "Other" = list("Transplant", "Cystic fibrosis", "Pregnancy", "Gastric Bypass")),
-                       CSS = system.file("www/", "app.css", package = "DIVE"))
-{
+                                      "Autoantibody positive" = list("Autoab Pos"),
+                                      "Type 1 Diabetes" = list("T1D", "T1D Medalist", "Monogenic Diabetes"),
+                                      "Other diabetes" = list("T2D", "Gestational diabetes"),
+                                      "Other" = list("Transplant", "Cystic fibrosis", "Pregnancy", "Gastric Bypass")),
+                       CSS = system.file("www/", "app.css", package = "DIVE")) {
   ns <- NS(id)
   fluidPage(theme = shinythemes::shinytheme("lumen"), includeCSS(CSS),
 
     fluidRow(style="margin-top:30px; margin-bottom:50px; margin-right:100px",
              column(6, style="border-right: 1px solid lightgray;",
                     newDatasetInput(ns("CohortX"), "CohortX", type = "cohort")),
-                    column(6,
-                            refSubsetInput(ns("nPOD"), "nPOD", label = HTML("<strong>Select type of matches to get</strong>"),
+                    column(6, refSubsetInput(ns("nPOD"), "nPOD", label = HTML("<strong>Select type of matches to get</strong>"),
                                            subsets = SUBSETS)
                      )),
     fluidRow(style="margin-top:50px; margin-bottom:50px; margin-right:100px",
@@ -35,9 +42,12 @@ matchAppUI <- function(id,
   )
 }
 
-#' Launch Shiny app for matching and exploration of two datasets
+#' Shiny app server for matching and exploration of two datasets
 #'
-#' The original use case is for cohort matching.
+#' Shiny app server for matching and exploration of two datasets
+#'
+#' This server function puts together a number of modular server module components with the correct
+#' logic to power the interactive capabilities of the matching application.
 #'
 #' @param REFDATA A data matrix, e.g. a correlation matrix, which must have variables as rownames.
 #' @param REFKEY Passed to refSubsetInput.
@@ -45,6 +55,10 @@ matchAppUI <- function(id,
 #' @param NGRAPHDATA The non-reactive data used for generating the matrix.
 #' @param VARS Optional, variables allowed to be used for matching within REFDATA organized in categories.
 #' If not given, all variables in REFDATA are used without a category.
+#' @param GUESS Optional, a function for making initial guesses of matchable variables.
+#' @param SUBSETFEAT Which variable to be used as the subset variable.
+#' @param INFORMD Link to to help file
+#' @param APPDATA See ?
 #' @export
 matchApp <- function(input, output, session,
                      REFDATA = npodX, NGRAPH = npodgraph, NGRAPHDATA = ndata,
@@ -61,10 +75,6 @@ matchApp <- function(input, output, session,
                      SUBSETFEAT = "donor.type",
                      INFORMD = "help/cohort_exchange.Rmd",
                      APPDATA = "examplecohort2020.csv") {
-
-  # start with hidden tabs
-  # hideTab("tabs", "Match parameters")
-  # hideTab("tabs", "Match results")
 
   cohortGraph <- callModule(cohortGraph, "nPODg",
                             cohgraph = NGRAPH,
@@ -133,7 +143,7 @@ matchApp <- function(input, output, session,
 
 }
 
-#' Launch Shiny app for exploration of relationships in annotated data with an interactive matrix
+#' Launch Shiny app for matching between two datasets
 #'
 #' Wrapper to launch app at console
 #'

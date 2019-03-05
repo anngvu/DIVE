@@ -1,8 +1,8 @@
-#' UI widget for visualization and filtering of hierarchical cell and tissue samples
+#' Shiny module UI widget for visualization and filtering of hierarchical cell and tissue samples
 #'
 #' Based on d3 circlepack.js
 #'
-#' Certain selections can trigger the widget "augmented input interface"
+#' Certain selections can trigger the widget "augmented input interface".
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @export
@@ -13,12 +13,14 @@ cellPackUI <- function(id, width = "400px", height = "400px") {
           )
 }
 
-#' Server function to render cellPack widget
+#' Server module function for cellPack widget
+#'
+#' Server module function for cellPack widget
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param json Relative path to the JSON data for widget.
 #' @param css Optional, relative path to a CSS file.
-#' @return return input id javascript values can be accessed with (id)_click and (id)_hover
+#' @return reactive object for element that was clicked
 #' @export
 cellPack <- function(input, output, session,
                      json, css = system.file("www/", "cellpack.css", package = "DIVE")) {

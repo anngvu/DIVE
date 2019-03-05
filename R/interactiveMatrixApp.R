@@ -1,4 +1,4 @@
-#' Shiny UI for exploration of relationships in annotated data with an interactive matrix
+#' Shiny app UI for exploration of relationships in annotated data with an interactive matrix
 #'
 #' See matrixCtrlUI
 #'
@@ -20,7 +20,7 @@ interactiveMatrixAppUI <- function(id, CSS = system.file("www/", "app.css", pack
   )
 }
 
-#' Shiny server for exploration of relationships in annotated data with an interactive matrix
+#' Shiny app server for exploration of relationships in annotated data with an interactive matrix
 #'
 #' See matrixCtrlUI
 #'
@@ -30,7 +30,7 @@ interactiveMatrixAppUI <- function(id, CSS = system.file("www/", "app.css", pack
 #' @param METADATA A data.table with "Variable" as a key column and any number of columns (metadata) to be used as filters.
 #' @export
 interactiveMatrixApp <- function(input, output, session,
-                                 M = cor.data$corM, N = cor.data$corN, CDATA = cdata, METADATA = metadata,
+                                 M = cordata$corM, N = cordata$corN, CDATA = cdata, METADATA = metadata,
                                  widgetopt = "Cell/Tissue",
                                  widgetdata = system.file("www/", "test.json", package = "DIVE"),
                                  infoRmd = "help/data_exploration.Rmd",

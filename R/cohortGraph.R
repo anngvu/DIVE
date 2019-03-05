@@ -1,7 +1,10 @@
-#' Output interactive cohort graph
+#' Shiny UI Output for interactive cohort graph
+#'
+#' The module embeds an interactive "hybrid parallel coordinates" graph pre-built,
+#' linked with a pie chart that gives more information on a node hover.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @return Interactive drag-and-drop UI elements.
+#' @return A \preformatted{div} for the plots.
 #' @export
 cohortGraphOutput  <- function(id) {
   ns <- NS(id)
@@ -13,12 +16,12 @@ cohortGraphOutput  <- function(id) {
   ))
 }
 
-#' Server function for interactive cohort graph
+#' Shiny module server for interactive cohort graph
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param cohgraph Pre-built plotly graph widget.
 #' @param cohdata Accompanying data.table of cohort data graph was built off.
-#' @result A hybrid parallel axes graph for exploring a cohort dataset.
+#' @return A hybrid parallel axes graph for exploring a dataset (typically cohort).
 #' @export
 cohortGraph <- function(input, output, session,
                         cohgraph, cohdata) {

@@ -41,15 +41,14 @@ mergeMore <- function(data, inputpath) {
   return(data)
 }
 
-#' Make a \preformatted{cdata} object for Shiny app
+#' Make data object for Shiny app
 #'
-#' \code{cdataMake} is simply a wrapper that makes the cdata.Rdata object
+#' \code{cdataMake} is a wrapper to create the \code{cdata} object
 #'
 #' @inheritParams createFromCollection
 #' @param other A list of of paths to other data files not in the main collection but
 #' that should be part of the master data object; an empty list or "" if no other data to be incorporated.
 #' @param outdir Where to put \preformatted{cdata}. Defaults to App/Data.
-#' @return
 #' @export
 cdataMake <- function(cdir = "./Collection/Main/", filepattern = "*.txt", exclude = "!",
                        other = list("./Collection/Other/coredata_ref.txt"),

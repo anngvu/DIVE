@@ -21,12 +21,13 @@ matrixCtrlUI <- function(id) {
   )
 }
 
-#' Server functions to generate filter UI for interactive matrix
+#' Shiny module server functions to generate filter UI for interactive matrix
 #'
 #' Update/populate matrix filter UI options depending on available data and metadata,
 #' as well as handling of user inputs to pass on appropriate plot objects.
 #'
-#' Since the filter UI is composed mainly of drop-down selections, one way to expand and improve it is to integrate
+#' See \code{\link{metadata}} for an example data object that can be passed into the parameter
+#' \preformatted{metadata}. Since the filter UI is composed mainly of drop-down selections, one way to expand and improve it is to integrate
 #' with an "add-on" or "augmenting" widget that provides an alternative and more intuitive or interesting
 #' route of input for users. Foe example, in addition to a drop-down selection of geographical locations,
 #' a map widget can be available to allow users to choose more visually. Because the widget may only need to appear for

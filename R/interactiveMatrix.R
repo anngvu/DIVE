@@ -29,7 +29,7 @@ interactiveMatrixUI <- function(id) {
   )
 }
 
-#' Server module logic for plotting correlations matrix with drilldown interaction
+#' Server module server for plotting correlations matrix with drilldown interaction
 #'
 #' The matrix responds to inputs, new plotdata, and has a linked drilldown component.
 #'
@@ -39,9 +39,8 @@ interactiveMatrixUI <- function(id) {
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param state Reactive state variables used for plot functions. See details.
-#' @param factorx
-#' @param dcolors
-#' @return Interactive matrix plot and drilldown components.
+#' @param factorx Optional, names and/or patterns for variables that should be displayed as factors in plots.
+#' @param dcolors List of manual color mappings for variables used for coloring data points.
 #' @export
 interactiveMatrix <- function(input, output, session,
                               state, factorx = "grp$|cat$|score$|bin$|count$|pos$",

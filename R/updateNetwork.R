@@ -64,7 +64,7 @@ graphModAes <- function(aes, metadata, sourcecol = "Source", feature = "color", 
 #'
 #' @param network An igraph object.
 #' @param aes Data frame containing nodes for which aesthetics are added or modified.
-#' @result A visNetwork object.
+#' @return A visNetwork object.
 visNetworkMake <- function(network, aes) {
   # Set attributes
   V(network)$size <- aes$size * 5

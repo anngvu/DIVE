@@ -1,4 +1,4 @@
-#' UI for creating a subsetted dataset
+#' Shiny module UI for selecting a subsetted dataset
 #'
 #' Shiny module UI to subset a dataset through a selection menu.
 #'
@@ -6,10 +6,9 @@
 #' @param name Optional, name for the main dataset.
 #' @param label Optional, select input label.
 #' @param subsets A named list of the available subset factors in the data.
-#' @param hasInfo Optional, TRUE or FALSE to indicate whether to show an info/help link for module.
 #' @return A \code{shiny::\link[shiny]{tagList}} for UI to subset a dataset.
 #' @export
-refSubsetInput <- function(id, name = id, label = "", subsets, hasInfo = F) {
+refSubsetInput <- function(id, name = id, label = "", subsets) {
   ns <- NS(id)
   tags$div(id = "refSubsetInput",
     fluidRow(
@@ -26,12 +25,12 @@ refSubsetInput <- function(id, name = id, label = "", subsets, hasInfo = F) {
       ),
       column(4,
              br(),
-             if(hasInfo) infoOutput(ns("requires"))
+             uiOutput(ns("info"))
       ))
   )
 }
 
-#' Server function for creating a subsetted dataset
+#' Shiny server module function for returning a subsetted dataset
 #'
 #' Server function for creating a reactive subsetted dataset following user interaction.
 #'
@@ -46,17 +45,21 @@ refSubsetInput <- function(id, name = id, label = "", subsets, hasInfo = F) {
 #' @param subsetfeat The name of the column containing subset factors.
 #' @param refkey Optional, a named list containing name/label for creating a key-like column,
 #' where the name is the name of the column. See details for intended purpose.
-#' @param infoHTML Optional, relative path to an info Rmarkdown file that can be pulled up in a modal.
+#' @param infoRmd Optional, relative path to an info Rmarkdown file that can be pulled up in a modal.
 #' @return A reactive subsetted data.table.
 #' @export
 refSubset <- function(input, output, session,
-                      refData, subsetfeat, refkey,
-                      infoHTML) {
+                      refData, subsetfeat, refkey, infoRmd) {
 
-  # Help  ------------------------------------------------------- #
-  modal <- callModule(info, "requires", infoHTML)
+  # Optional info link  ------------------------------------------------------- #
+  if(!is.null(infoRmd)) {
+    output$info <- renderUI({
+      infoOutput(session$ns("reqs"))
+    })
+    modal <- callModule(info, "reqs", infoRmd = infoRmd)
+  }
 
-  # ------------------------------------------------------------- #
+  # ---------------------------------------------------------------------------- #
 
   subsetDT <- reactive({
     validate(need(input$selectSubset != "", "Please select a type subset"))

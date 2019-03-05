@@ -1,9 +1,12 @@
-#' Shiny module UI for data upload
+#' Shiny module UI for data upload module
 #'
-#' The matrix responds to inputs, new plotdata, and has a linked drilldown component.
+#' Generates Shiny UI for the dataUpload module, which contains the main file input
+#' and two optional features including a file-remove button and infolink,
+#' the second of which is intended to be useful for communicating file upload requirements
+#' or instructions.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @return
+#' @return UI components.
 #' @export
 dataUploadUI <- function(id) {
   ns <- NS(id)
@@ -19,24 +22,27 @@ dataUploadUI <- function(id) {
   )
 }
 
-#' Shiny server functions for dataset upload module
+#' Shiny server function for data upload module
 #'
-#' It is also possible to perform a mock upload of a saved dataset, e.g. for demonstration purposes.
+#' The most basic implementation is to process and return any input to fileInput in the UI.
+#' File uploads can have "reset" behavior if the removable optional feature is specified, where a remove button
+#' will be rendered after upload. The module also optionally incorporates \code{\link{infoOutput}} functionality.
+#' Finally, it is possible to perform a mock upload of a saved dataset, e.g. for demonstration purposes.
 #' Saved datasets are expected to be .csv files that reside in a relative "Data/" directory.
 #' For instance, if the name is "SampleCohort", the dataset will be "uploaded" from "Data/SampleCohort.csv".
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param removable Logical flag to indicate whether data upload will have "removable" feature. See details.
+#' @param removable Logical flag to indicate whether data upload will have "removable" feature. Defaults to FALSE. See details.
 #' @param infoRmd Optional, an Rmarkdown help file for infoOutput, e.g. requirements.
-#' @param appdata Optional, the names (including extension) of one or more files stored in appdata that can be
-#' "uploaded". Used for providing examples.
+#' @param appdata Optional, the name (including extension) of one or more files stored in appdata that can be
+#' mock-uploaded. See details.
 #' @return The uploaded file as a reactive data.table object.
 dataUpload <- function(input, output, session,
                        removable = F, infoRmd = NULL, appdata = NULL) {
 
   uploaded <- reactiveVal(NULL)
 
-  # render info link if infoRmd is specified
+  # Optional info link  ------------------------------------------------------- #
   if(!is.null(infoRmd)) {
     output$info <- renderUI({
       infoOutput(session$ns("reqs"))
@@ -44,6 +50,7 @@ dataUpload <- function(input, output, session,
     modal <- callModule(info, "reqs", infoRmd = infoRmd)
   }
 
+  # ---------------------------------------------------------------------------- #
   observeEvent(input$upload, {
     data <- fread(input$upload$datapath, header = T)
     uploaded(data)

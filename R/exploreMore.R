@@ -1,4 +1,4 @@
-#' Dataset comparison UI
+#' Shiny module UI for attribute-by-attribute comparison of two datasets
 #'
 #' Allows comparison of two datasets (cohorts, in the original case).
 #'
@@ -37,7 +37,7 @@ exploreMoreUI <- function(id, s1Label = "", s1Data, s2Label = "", s2Data, placeh
   )
 }
 
-#' Server function for generating comparative histodot plots
+#' Shiny module server for generating comparative histodot plots of attributes in two datasets
 #'
 #' Compare the composition between two datasets. In the cohort matching use case, if there is match data,
 #' the plots show which subsets are matched and provides a means of visualizing the match results.

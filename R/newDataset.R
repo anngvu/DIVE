@@ -1,11 +1,11 @@
 #' Shiny module UI for a dataset input
 #'
-#' A differentiated version of dataUploadUI with additional fields.
+#' An extension of \code{\link{dataUploadUI}} to include an additional text field.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param label Name of the dataset.
 #' @param type Optional, a keyword to describe type of dataset, included in label text for additional UI customization.
-#' @return A \code{shiny::\link[shiny]{tagList}} containing inputs for cohort data.
+#' @return A \code{shiny::\link[shiny]{tagList}} containing input UI.
 #' @export
 newDatasetInput <- function(id, label = id, type = "") {
   ns <- NS(id)
@@ -29,11 +29,12 @@ newDatasetInput <- function(id, label = id, type = "") {
       ))
 }
 
-#' Shiny server functions for dataset upload module
+#' Shiny module server function for handling new dataset input
 #'
-#' It is also possible to perform a mock upload of a saved dataset, e.g. for demonstration purposes.
-#' Saved datasets are expected to be .csv files that reside in a relative "Data/" directory.
-#' For instance, if the name is "SampleCohort", the dataset will be "uploaded" from "Data/SampleCohort.csv".
+#' This is essentially the \code{\link{dataUpload}} module, but the uploaded data
+#' is modified to include a key-like column before it is returned as the reactive object.
+#' Use \code{\link{dataUpload}} if there is no need for \code{refkey},
+#' which is used to track the dataset in the same manner as in \code{\link{refSubset}}.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param refkey Optional, a named list containing name/label for creating a key-like column.
@@ -51,20 +52,14 @@ newDataset <- function(input, output, session,
   upload <- callModule(dataUpload, "upload", infoRmd = infoRmd, appdata = appdata)
 
   # ------------------------------------------------------------- #
-  processNew <- function(dataset) {
-    names(dataset) <- make.names(names(dataset))
+  observeEvent(upload(), {
+    dataset <- upload()
     if(!is.null(refkey)) {
       name <- isolate(input$name)
       name <- if(name != "") name else refkey[[1]]
       dataset[[names(refkey)]] <- rep(name, nrow(dataset))
     }
     newData(dataset)
-  }
-
-  observeEvent(upload(), {
-    dataset <- upload()
-    # If data looks good...
-    processNew(dataset)
   })
 
   return(newData)

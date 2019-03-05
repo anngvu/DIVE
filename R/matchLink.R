@@ -1,4 +1,4 @@
-#' UI for interactive drag-and-drop variable harmonization of two datasets
+#' Shiny module UI for interactive drag-and-drop variable harmonization of two datasets
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @return Interactive drag-and-drop UI elements.
@@ -30,11 +30,11 @@ matchLinkUI <- function(id) {
   ))
 }
 
-#' Server function for interactive drag-and-drop variable harmonization of two datasets
+#' Server module function for interactive drag-and-drop variable harmonization of two datasets
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param refData Reactive subsetted reference data.table.
-#' @param cohortX Reactive data.table dataset, which typically comes from the newCohortInput module.
+#' @param cohortX Reactive data.table dataset, which typically comes from the \code{\link{newCohortInput}} module.
 #' @param vars Optional, a named list of a variable set (or sets) allowed for matching.
 #' If not provided, the first 10 variables in the reference cohort dataset is used.
 #' @param guess Optional, name of the function to call for initial guessing of harmonized variables;
