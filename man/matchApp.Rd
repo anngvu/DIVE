@@ -4,23 +4,24 @@
 \alias{matchApp}
 \title{Shiny app server for matching and exploration of two datasets}
 \usage{
-matchApp(input, output, session, REFDATA = npodX, NGRAPH = npodgraph,
-  NGRAPHDATA = ndata, REFKEY = list(Cohort = "nPOD", Cohort =
-  "CohortX"), VARS = list(Clinical = c("BMI", "db.duration", "age.onset",
-  "Cpeptide", "HbA1c", "peak.gluc", "GADA.pos", "IA2A.pos", "mIAA.pos",
-  "ZnT8A.pos", "AutoAb.count"), Demographic = c("age", "sex_Female",
-  "sex_Male", "race_Caucasian", "race_AfricanAmerican",
-  "race_Hispanic.Latino", "race_Asian", "race_AmericanIndian",
-  "race_Multiracial")), GUESS = guessMatch, SUBSETFEAT = "donor.type",
-  INFORMD = "help/cohort_exchange.Rmd",
+matchApp(input, output, session, REFDATA = npodX, HPCG = hpcg,
+  COLORS = colors <- c(`Autoab Pos` = "orange", `Cystic fibrosis` =
+  "aquamarine4", `Gastric Bypass` = "bisque4", `Gestational diabetes` =
+  "deeppink2", `Monogenic Diabetes` = "red4", `No diabetes` = "royalblue2",
+  `Other-Diabetes` = "indianred4", `Other-No Diabetes` = "steelblue2", T1D
+  = "red", `T1D Medalist` = "maroon", T2D = "purple", Pending = "gray",
+  Pregnancy = "pink", Transplant = "darkseagreen4"), REFKEY = list(Cohort
+  = "nPOD", Cohort = "CohortX"), VARS = list(Clinical = c("BMI",
+  "db.duration", "age.onset", "Cpeptide", "HbA1c", "peak.gluc", "GADA.pos",
+  "IA2A.pos", "mIAA.pos", "ZnT8A.pos", "AutoAb.count"), Demographic =
+  c("age", "sex_Female", "sex_Male", "race_Caucasian",
+  "race_AfricanAmerican", "race_Hispanic.Latino", "race_Asian",
+  "race_AmericanIndian", "race_Multiracial")), GUESS = guessMatch,
+  SUBSETFEAT = "donor.type", INFORMD = "help/cohort_exchange.Rmd",
   APPDATA = "examplecohort2020.csv")
 }
 \arguments{
 \item{REFDATA}{A data matrix, e.g. a correlation matrix, which must have variables as rownames.}
-
-\item{NGRAPH}{A matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.}
-
-\item{NGRAPHDATA}{The non-reactive data used for generating the matrix.}
 
 \item{REFKEY}{Passed to refSubsetInput.}
 
@@ -34,6 +35,10 @@ If not given, all variables in REFDATA are used without a category.}
 \item{INFORMD}{Link to to help file}
 
 \item{APPDATA}{See ?}
+
+\item{NGRAPH}{A matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.}
+
+\item{NGRAPHDATA}{The non-reactive data used for generating the matrix.}
 }
 \description{
 Shiny app server for matching and exploration of two datasets

@@ -35,7 +35,7 @@ matchAppUI <- function(id,
     fluidRow(style="margin-top:50px; margin-bottom:50px; margin-right:100px",
              column(1),
              column(10, tabsetPanel(id = ns("tabs"),
-                      tabPanel("Reference cohort graph", cohortGraphOutput(ns("nPODg")))
+                      tabPanel("Reference cohort graph", HPCGraphOutput(ns("nPODg")))
                     )
             )
     )
@@ -61,7 +61,18 @@ matchAppUI <- function(id,
 #' @param APPDATA See ?
 #' @export
 matchApp <- function(input, output, session,
-                     REFDATA = npodX, NGRAPH = npodgraph, NGRAPHDATA = ndata,
+                     REFDATA = npodX, HPCG = hpcg,
+                     COLORS = colors <-c("Autoab Pos" = "orange", "Cystic fibrosis" = "aquamarine4",
+                                         "Gastric Bypass" = "bisque4",
+                                         "Gestational diabetes" = "deeppink2",
+                                         "Monogenic Diabetes" = "red4",
+                                         "No diabetes" = "royalblue2",
+                                         "Other-Diabetes" = "indianred4",
+                                         "Other-No Diabetes" = "steelblue2",
+                                         "T1D" = "red",
+                                         "T1D Medalist" = "maroon", "T2D" = "purple",
+                                         "Pending" = "gray",
+                                         "Pregnancy" = "pink", "Transplant" = "darkseagreen4"),
                      REFKEY = list(Cohort = "nPOD", Cohort = "CohortX"),
                      VARS = list(
                        Clinical = c("BMI", "db.duration", "age.onset",
@@ -76,9 +87,9 @@ matchApp <- function(input, output, session,
                      INFORMD = "help/cohort_exchange.Rmd",
                      APPDATA = "examplecohort2020.csv") {
 
-  cohortGraph <- callModule(cohortGraph, "nPODg",
-                            cohgraph = NGRAPH,
-                            cohdata = NGRAPHDATA)
+  cohortGraph <- callModule(HPCGraph, "nPODg",
+                            hpcg = HPCG,
+                            colors = COLORS)
 
   nPOD <- callModule(refSubset, "nPOD",
                      refData = REFDATA,

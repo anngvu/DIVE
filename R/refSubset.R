@@ -49,7 +49,7 @@ refSubsetInput <- function(id, name = id, label = "", subsets) {
 #' @return A reactive subsetted data.table.
 #' @export
 refSubset <- function(input, output, session,
-                      refData, subsetfeat, refkey, infoRmd) {
+                      refData, subsetfeat, refkey, infoRmd = NULL) {
 
   # Optional info link  ------------------------------------------------------- #
   if(!is.null(infoRmd)) {
