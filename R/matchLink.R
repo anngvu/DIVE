@@ -18,14 +18,14 @@ matchLinkUI <- function(id) {
              ),
              column(1),
              column(8,
-                    fluidRow(
-                      column(6,
-                             uiOutput(ns("varBank"))
+                    fluidRow(div(id = "matchVars",
+                      column(6, div(id = "matchVarBank",
+                             uiOutput(ns("varBank")))
                       ),
-                      column(6,
-                             uiOutput(ns("varSets"))
+                      column(6, div(id = "matchVarLinked",
+                             uiOutput(ns("varSets")))
                       )
-                    )
+                    ))
             )
   ))
 }

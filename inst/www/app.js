@@ -82,7 +82,7 @@ function introCX4(message) {
     }
   };
   $(document).on('shiny:value', userInitiatesRun);
-  var nextsteps = message.steps.slice(5,6);
+  var nextsteps = message.steps.slice(5,9);
   intro.setOptions({
     steps: nextsteps,
     'doneLabel': 'OK'
@@ -97,7 +97,7 @@ function introCX4(message) {
 }
 
 function introCX5(message) {
-  var nextsteps = message.steps.slice(6,7);
+  var nextsteps = message.steps.slice(9,10);
   intro.setOptions({
     steps: nextsteps,
     'doneLabel': 'Try exploring data <strong>after</strong> matching',
@@ -110,7 +110,7 @@ function introCX5(message) {
 }
 
 function introCX6(message) {
-  var nextsteps = message.steps.slice(7,9);
+  var nextsteps = message.steps.slice(10,11);
   intro.setOptions({
     steps: nextsteps,
     'doneLabel': 'Done with demo'
