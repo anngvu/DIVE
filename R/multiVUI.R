@@ -1,7 +1,7 @@
 #' Shiny module UI for presenting high dimensional data with other features in multi-column view
 #'
 #' UI based on the idea of a "visual spreadsheet" or "line up" view. The associated
-#' server function provides more details of the implementation.
+#' server function \code{\link{multiV}} provides more details of the implementation.
 #' 
 #' The original use case presumes the high dimensional data to be genomics data, e.g.
 #' gene or protein expression that can be represented with heatmap matrices. 
@@ -22,7 +22,7 @@ multiVUI <- function(id) {
 
 #' Shiny module server for presenting high dimensional data with other features in multi-column view
 #'
-#' This module attempts to integratively visualizing one or more 
+#' This module attempts to integratively visualize one or more 
 #' high-dimensional gene/protein/methylation datasets with other phenotype or clinical features.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.

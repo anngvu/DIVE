@@ -1,7 +1,7 @@
 #' Shiny module UI for data upload module
 #'
-#' Generates Shiny UI for the dataUpload module, which contains the main file input
-#' and two optional features including a file-remove button and infolink,
+#' Generates Shiny UI for a data upload module, which contains the main file input
+#' and two optional features: a file-remove button and infolink,
 #' the second of which is intended to be useful for communicating file upload requirements
 #' or instructions.
 #'
@@ -25,8 +25,9 @@ dataUploadUI <- function(id) {
 #' Shiny server function for data upload module
 #'
 #' The most basic implementation is to process and return any input to fileInput in the UI.
-#' File uploads can have "reset" behavior if the removable optional feature is specified, where a remove button
-#' will be rendered after upload. The module also optionally incorporates \code{\link{infoOutput}} functionality.
+#' File uploads can have "reset" behavior if the removable optional feature is specified,
+#' where a remove button will be rendered after upload.
+#' The module also optionally incorporates \code{\link{infoOutput}} functionality.
 #' Finally, it is possible to perform a mock upload of a saved dataset, e.g. for demonstration purposes.
 #' Saved datasets are expected to be .csv files that reside in a relative "Data/" directory.
 #' For instance, if the name is "SampleCohort", the dataset will be "uploaded" from "Data/SampleCohort.csv".

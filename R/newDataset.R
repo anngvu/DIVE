@@ -33,13 +33,12 @@ newDatasetInput <- function(id, label = id, type = "") {
 #'
 #' This is essentially the \code{\link{dataUpload}} module, but the uploaded data
 #' is modified to include a key-like column before it is returned as the reactive object.
-#' Use \code{\link{dataUpload}} if there is no need for \code{refkey},
+#' Use \code{\link{dataUpload}} if there is no need for \preformatted{refkey},
 #' which is used to track the dataset in the same manner as in \code{\link{refSubset}}.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param refkey Optional, a named list containing name/label for creating a key-like column.
-#' @param appdata Optional, character name that can be used to accession a saved dataset. See details.
-#' @param infoRmd Optional, relative path to an info Rmarkdown file for this module.
+#' @inheritParams dataUpload
 #' @return A reactive data.table of the processed upload.
 #' @export
 newDataset <- function(input, output, session,
