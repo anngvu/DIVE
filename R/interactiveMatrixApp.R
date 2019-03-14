@@ -2,6 +2,7 @@
 #'
 #' See matrixCtrlUI
 #'
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
 #' @export
 interactiveMatrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
@@ -24,6 +25,7 @@ interactiveMatrixAppUI <- function(id, CSS = system.file("www/", "app.css", pack
 #'
 #' See matrixCtrlUI
 #'
+#' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param M A data matrix, e.g. a correlation matrix, which must have variables as rownames.
 #' @param N A matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.
 #' @param CDATA The non-reactive data used for generating the matrix.

@@ -27,11 +27,15 @@ matrixCtrlUI <- function(id) {
 #' as well as handling of user inputs to pass on appropriate plot objects.
 #'
 #' See \code{\link{metadata}} for an example data object that can be passed into the parameter
-#' \preformatted{metadata}. Since the filter UI is composed mainly of drop-down selections, one way to expand and improve it is to integrate
-#' with an "add-on" or "augmenting" widget that provides an alternative and more intuitive or interesting
-#' route of input for users. Foe example, in addition to a drop-down selection of geographical locations,
-#' a map widget can be available to allow users to choose more visually. Because the widget may only need to appear for
-#' certain metadata, the server function needs to return when the widget should be called (displayed).
+#' \preformatted{metadata}. Since the filter UI is composed mainly of drop-down selections,
+#' one way to expand and improve it is to integrate with an "add-on" or "augmenting" widget
+#' that provides an alternative and more intuitive or interesting route of input for users.
+#' For example, in addition to a drop-down selection of geographical locations,
+#' a map widget can be available to allow users to choose more visually.
+#' Because the widget may only need to appear for certain metadata,
+#' the server function needs to return when the widget should be called (displayed).
+#' The function returns an object representing the original data with user-applied filters
+#' that is the main input to be visualized with \code{\link{interactiveMatrix}}.
 #'
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.

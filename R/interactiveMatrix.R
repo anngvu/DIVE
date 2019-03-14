@@ -33,12 +33,12 @@ interactiveMatrixUI <- function(id) {
 #'
 #' The matrix responds to inputs, new plotdata, and has a linked drilldown component.
 #'
-#' The plotting logic works with matrixCtrlUI, which returns reactive values required,
-#' including state$plot for the main plot, state$cdata for the drilldown, and state$newdata
-#' storing variable names of new data.
+#' The matrix display logic works with \code{\link{matrixCtrl}}, which returns the reactive
+#' data in a \preformatted{state} object. In addition, the matrix is linked to a scatter
+#' plot that accesses underlying data for a user-clicked cell.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param state Reactive state variables used for plot functions. See details.
+#' @param state Reactive state object from \code{\link{matrixCtrl}}.
 #' @param factorx Optional, names and/or patterns for variables that should be displayed as factors in plots.
 #' @param dcolors List of manual color mappings for variables used for coloring data points.
 #' @export
@@ -71,8 +71,6 @@ interactiveMatrix <- function(input, output, session,
                          x0 = -0.04, x1 = -0.01, y0 = min(i)-1, y1 = max(i)-1,
                          xref = "paper", yref = "y")
      }
-     # newtxt <- list(showarrow = F, x =-0.04, y = min(i)-2, text = ">",
-     #                 xref = "paper", yref = "y", font = list(family = 'sans serif', size = 14))
    }
    p <- plot_ly(x = rownames(M), y = colnames(M), z = M,
                 type = "heatmap", source = "matrix", colorscale = "RdBu",

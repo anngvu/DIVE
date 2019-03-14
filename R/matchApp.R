@@ -23,6 +23,7 @@ matchAppUI <- function(id,
                                       "Other diabetes" = list("T2D", "Gestational diabetes"),
                                       "Other" = list("Transplant", "Cystic fibrosis", "Pregnancy", "Gastric Bypass")),
                        CSS = system.file("www/", "app.css", package = "DIVE")) {
+
   ns <- NS(id)
   fluidPage(theme = shinythemes::shinytheme("lumen"), includeCSS(CSS),
 
@@ -49,6 +50,7 @@ matchAppUI <- function(id,
 #' This server function puts together a number of modular server module components with the correct
 #' logic to power the interactive capabilities of the matching application.
 #'
+#' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param REFDATA A data matrix, e.g. a correlation matrix, which must have variables as rownames.
 #' @param REFKEY Passed to refSubsetInput.
 #' @param NGRAPH A matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.
