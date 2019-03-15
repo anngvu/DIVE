@@ -12,7 +12,9 @@ geneVUI <- function(id) {
                               choices = NULL, selected = NULL,
                               options = list(maxItems = 50))),
            div(class = "forceInline", br(),
-               actionButton(ns("xlist"), "Quick list", icon = icon("plus")))
+               actionButton(ns("xlist"), "Quick list", icon = icon("plus"))),
+           div(class = "forceInline",
+               selectInput(ns("GO"), "Use Gene Ontology term set", choices = NULL))
   )
 }
 
@@ -52,6 +54,8 @@ geneV <- function(input, output, session,
   observeEvent(input$IDs, {
     selected(input$IDs)
   })
+
+
 
   return(selected)
 

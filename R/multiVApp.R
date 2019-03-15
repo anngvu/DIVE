@@ -24,18 +24,25 @@ multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @export
 multiVApp <- function(input, output, session,
-                      HDATA = xm_t, CDATA = cdata, CHOICES = gene_symbols) {
+                      HDATA = list("genomics1" = xm_t, "px1" = px1_t, "px2" = px2_t), 
+                      CDATA = cdata, 
+                      CHOICES = gene_symbols) {
   
-  track <- 0 # 
-  selected <- callModule(geneV, "gene", choices = CHOICES)
+  selected <- callModule(geneV, "gene", choices = CHOICES) # controls selection for all multiVUIs
   
-  view <- callModule(multiVCtrl, "ctrl", hdlist = list("genomics1" = xm_t, "px1" = px1_t, "px2" = px2_t))
+  view <- callModule(multiVCtrl, "ctrl", hdlist = HDATA)
   
+  # each dataset gets its own track (row), served by its own multiVUI module
   observeEvent(view(), {
-    track <<- track + 1
-    insertUI(selector = "#displaytrack", immediate = T,
-             ui = multiVUI(id = session$ns(paste0("track", track))))
-    callModule(multiV, paste0("track", track), hdata = isolate(view()), cdata = CDATA, selected = selected)
+    trackID <- session$ns(names(view()))
+    if(!is.null(view()[[1]])) {
+      insertUI(selector = "#displaytrack", immediate = T,
+               ui = tags$div(id = trackID, multiVUI(id = trackID)))
+      callModule(multiV, id = names(view()), hdata = isolate(view()[[1]]), cdata = CDATA, selected = selected)
+    } else {
+      removeUI(selector = paste0("#", trackID))
+    }
+    
   })
   
 }
