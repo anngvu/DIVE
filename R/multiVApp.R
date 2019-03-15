@@ -12,7 +12,7 @@ multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
   fluidPage(theme = shinythemes::shinytheme("lumen"), includeCSS(CSS),
             multiVCtrlUI(ns("ctrl")),
             geneVUI(ns("gene")),
-            div(id = "multiVUI-track")
+            div(id = "displaytrack")
   )
 }
 
@@ -26,13 +26,17 @@ multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
 multiVApp <- function(input, output, session,
                       HDATA = xm_t, CDATA = cdata, CHOICES = gene_symbols) {
   
+  track <- 0 # 
   selected <- callModule(geneV, "gene", choices = CHOICES)
   
-  view <- callModule(multiVCtrl, "ctrl")
+  view <- callModule(multiVCtrl, "ctrl", hdlist = list("genomics1" = xm_t, "px1" = px1_t, "px2" = px2_t))
+  
   observeEvent(view(), {
-    insertUI(selector = "multiVUI-track", multiVUI(session$ns("track")))
-    callModule(multiV, session$ns("track"), hdata = view(), cdata = CDATA, selected = selected)
-  }
+    track <<- track + 1
+    insertUI(selector = "#displaytrack", immediate = T,
+             ui = multiVUI(id = session$ns(paste0("track", track))))
+    callModule(multiV, paste0("track", track), hdata = isolate(view()), cdata = CDATA, selected = selected)
+  })
   
 }
 
