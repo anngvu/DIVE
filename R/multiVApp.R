@@ -42,7 +42,6 @@ multiVApp <- function(input, output, session,
     } else {
       removeUI(selector = paste0("#", trackID))
     }
-    
   })
   
 }

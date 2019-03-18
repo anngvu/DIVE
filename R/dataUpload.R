@@ -8,13 +8,13 @@
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @return UI components.
 #' @export
-dataUploadUI <- function(id) {
+dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>") {
   ns <- NS(id)
   tags$div(id = ns("dataUploadUI"),
     fluidRow(
       column(8, style="margin-top:-5px;", tags$div(id = ns("main"),
                     tags$div(id = ns("upload"), class = "forceInline",
-                             fileInput(ns("upload"), HTML("<strong>Upload data to compare</strong>"), multiple = FALSE,
+                             fileInput(ns("upload"), HTML(label), multiple = FALSE,
                                        accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"),
                                        buttonLabel = "Data")))),
       column(4, br(), uiOutput(ns("info")))

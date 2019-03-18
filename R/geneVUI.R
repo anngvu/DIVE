@@ -14,7 +14,7 @@ geneVUI <- function(id) {
            div(class = "forceInline", br(),
                actionButton(ns("xlist"), "Quick list", icon = icon("plus"))),
            div(class = "forceInline",
-               selectInput(ns("GO"), "Use Gene Ontology term set", choices = NULL))
+               selectInput(ns("GO"), "With Gene Ontology annotation", choices = NULL))
   )
 }
 
@@ -26,6 +26,7 @@ geneVUI <- function(id) {
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param choices Choices for selectInput.
+#' @param prelist Optional, a named list of source files that store pre-compiled sets for convenient access.
 #' @return A vector that can be used to subset a high dimensional matrix, i.e. the parameter
 #' selected in multiV.
 #' @export
@@ -39,23 +40,25 @@ geneV <- function(input, output, session,
 
   observeEvent(input$xlist, {
     showModal(modalDialog(
-      HTML("<strong>Pre-compiled lists</strong><br><li>"),
-      actionLink("T1Dbase", "T1Dbase genes"),
-      HTML("<br><br><strong>Upload list</strong><br>"),
-      helpText("Text file should have one gene per line"),
-      fileInput(ns("upload"), "", multiple = FALSE, width = "300px",
-                accept = c("text/plain"),
-                buttonLabel = "My list"),
+      HTML("<strong>Pre-compiled, curated lists</strong><br><li>"),
+      getLinkInput(session$ns("precompiled"), labels = "T1Dbase"),
+      HTML("<br><br><strong>Upload my custom list</strong><br>"),
+      helpText("Your list should be a text file with one gene per line."),
+      dataUploadUI("customlist", label = ""),
       easyClose = TRUE,
       footer = NULL
     ))
   })
 
+  prelist <- callModule(getLink, "precompiled", sources = system.file("appdata/t1dbase.txt", package = "DIVE"))
+
   observeEvent(input$IDs, {
-    selected(input$IDs)
+    if(is.null(input$IDs)) selected(choices) else selected(input$IDs)
+  }, ignoreNULL = FALSE)
+
+  observeEvent(prelist(), {
+    selected(choices[prelist()])
   })
-
-
 
   return(selected)
 
