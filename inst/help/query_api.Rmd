@@ -1,0 +1,30 @@
+---
+title: "Data exploration"
+output: html_document
+---
+
+**How do I use the query field?**
+
+We use the [mygene.info](http://mygene.info/) API to map annotations, i.e. ontologies, and other information to gene sets. 
+The quick-start examples below demonstrates supported queries.
+
+
+Example query text      | Result
+------------------------|---------------------------------------------------------------
+`tumor suppressor`      | Search everything; get any genes/proteins that matches query.
+`name:insulin`          | Search by gene name.
+`GO:0030070`            | Get all genes/proteins annotated with the Gene Ontology term [insulin processing](http://amigo.geneontology.org/amigo/term/GO:0030070)
+`refseq:NM_001798`      | Get the gene/protein corresponding to the RNA sequence.
+`refseq:NP_439892`      | Get the gene/protein corresponding to the protein sequence.
+`chrX:151,073,054-151,383,976` | Get all genes/proteins within this chrX interval (use with or without commas). However, note that `chrX` is not recognized as a valid query to retrieva all genes on Chromosome X.
+
+
+You can use AND/OR/NOT boolean operators and grouping to form complicated queries:
+
+Example query text                       | Operator/grouping
+-----------------------------------------|---------------------------------------------------------------
+`tumor AND suppressor`                   | AND operator
+`CDK2 OR BTK`                            | OR operator
+`"tumor suppressor" NOT receptor`        | NOT operator
+`(interleukin OR insulin) AND receptor`  | grouping with parentheses
+

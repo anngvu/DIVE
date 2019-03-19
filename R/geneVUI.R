@@ -18,7 +18,7 @@ geneVUI <- function(id) {
            div(class = "forceInline", br(),
                actionButton(ns("query"), "Query")),
            div(class = "forceInline", br(),
-               infoOutput("query", label = "", i = "question-circle"))
+               infoOutput(ns("querytips"), label = "tips", i = "question-circle"))
            )
 }
 
@@ -36,6 +36,8 @@ geneVUI <- function(id) {
 #' @export
 geneV <- function(input, output, session,
                   choices) {
+
+  callModule(info, "querytips", infoRmd = system.file("help/query_api.Rmd", package = "DIVE"))
 
   selected <- reactiveVal(choices)
 
@@ -66,8 +68,9 @@ geneV <- function(input, output, session,
   })
 
   observeEvent(input$query, {
-    result <- mygene::query(input$qtext, species = "human")
-    if(result$total > 0) {
+    result <- tryCatch({ mygene::query(input$qtext, species = "human") },
+                       error = function(e) { return(NA) })
+    if(!is.na(result) && result$total > 0) {
       selected(result$hits$entrezgene)
     } else {
       showModal(modalDialog("No results", easyClose = T))
