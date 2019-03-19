@@ -14,8 +14,12 @@ geneVUI <- function(id) {
            div(class = "forceInline", br(),
                actionButton(ns("xlist"), "Quick list", icon = icon("plus"))),
            div(class = "forceInline",
-               selectInput(ns("GO"), "With Gene Ontology annotation", choices = NULL))
-  )
+               textInput(ns("qtext"), "", placeholder = "search query...")),
+           div(class = "forceInline", br(),
+               actionButton(ns("query"), "Query")),
+           div(class = "forceInline", br(),
+               infoOutput("query", label = "", i = "question-circle"))
+           )
 }
 
 #' Shiny module server for filtering high dimensional genomics data
@@ -58,6 +62,16 @@ geneV <- function(input, output, session,
 
   observeEvent(prelist(), {
     selected(choices[prelist()])
+    removeModal()
+  })
+
+  observeEvent(input$query, {
+    result <- mygene::query(input$qtext, species = "human")
+    if(result$total > 0) {
+      selected(result$hits$entrezgene)
+    } else {
+      showModal(modalDialog("No results", easyClose = T))
+    }
   })
 
   return(selected)

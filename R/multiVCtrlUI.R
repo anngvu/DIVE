@@ -13,7 +13,7 @@ multiVCtrlUI <- function(id) {
     fluidRow(style="margin-top:30px; margin-bottom:20px; margin-right:100px",
            div(class = "forceInline", selectizeInput(ns("dataset"), "nPOD high-throughput datasets",
                                       choices = NULL, selected = NULL, multiple = T)),
-           div(class = "forceInline", dataUploadUI(ns("hdata")))
+           div(class = "forceInline", dataUploadUI(ns("hdata"), label = "<strong>My data</strong>"))
     )
   )
 }
