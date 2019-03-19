@@ -36,10 +36,11 @@ multiVApp <- function(input, output, session,
   # each dataset gets its own track (row), served by its own multiVUI module
   observeEvent(view(), {
     trackID <- session$ns(names(view()))
-    if(!is.null(view()[[1]])) {
+    trackdata <- view()[[1]]
+    if(!is.null(trackdata)) {
       insertUI(selector = "#displaytrack", immediate = T,
-               ui = tags$div(id = trackID, multiVUI(id = trackID)))
-      callModule(multiV, id = names(view()), hdata = isolate(view()[[1]]), cdata = CDATA, selected = selected)
+               ui = tags$div(id = trackID, style = paste0("height:", 30 * nrow(trackdata), "px"), multiVUI(id = trackID)))
+      callModule(multiV, id = names(view()), hdata = isolate(trackdata), cdata = CDATA, selected = selected)
     } else {
       removeUI(selector = paste0("#", trackID))
     }

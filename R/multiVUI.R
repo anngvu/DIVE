@@ -10,15 +10,9 @@
 #' @export
 multiVUI <- function(id) {
   ns <- NS(id)
-  tags$div(
-    fluidRow(style="margin-top:30px; margin-bottom:20px; margin-right:100px",
-                     column(8, shinycssloaders::withSpinner(plotlyOutput(ns("heatmap")), color = "gray")),
-                     column(1, ""),
-                     column(1, ""),
-                     column(1 ),
-                     column(1 )
+  tags$div(style="margin-top:10px; margin-bottom:10px; margin-right:50px",
+          shinycssloaders::withSpinner(plotlyOutput(ns("heatmap")), color = "gray")
           )
-    )
 }
 
 #' Shiny module server for presenting high dimensional data with other features in multi-column view
@@ -28,12 +22,12 @@ multiVUI <- function(id) {
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param hdata A numeric matrix of of the high dimensional data.
-#' @param cdata Data.frame or data.table that can be joined to high-dimensional data. See details.
+#' @param cdata Optional, a data.frame or data.table that can be joined to high-dimensional data. See details.
 #' @param selected A vector used to subset the columns of hdata.
 #' @param slabel Optional, a vector that can map column names of hdata to plot labels.
 #' @export
 multiV <- function(input, output, session,
-                   hdata, cdata, selected, slabel = NULL) {
+                   hdata, cdata = NULL, selected, slabel = NULL) {
 
   plotdata <- reactive({
     if(!length(selected())) hdata else hdata[, colnames(hdata) %in% selected(), drop = F]
@@ -42,8 +36,10 @@ multiV <- function(input, output, session,
   output$heatmap <- renderPlotly({
     xlabs <- if(!is.null(slabel)) slabel[colnames(plotdata())] else colnames(plotdata())
     ylabs <- rownames(plotdata())
-    plot_ly(z = plotdata(), x = xlabs, y = ylabs, type = "heatmap", colors = "RdBu") %>%
+    plot_ly(z = plotdata(), x = xlabs, y = ylabs, type = "heatmap", colors = "RdBu", height = 28 * nrow(hdata)) %>%
       layout(xaxis = list(type = "category"), yaxis = list(type = "category"))
   })
+
+
 
 }

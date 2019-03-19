@@ -16,9 +16,9 @@ Example query text      | Result
 `GO:0030070`            | Get all genes/proteins annotated with the Gene Ontology term [insulin processing](http://amigo.geneontology.org/amigo/term/GO:0030070)
 `refseq:NM_001798`      | Get the gene/protein corresponding to the RNA sequence.
 `refseq:NP_439892`      | Get the gene/protein corresponding to the protein sequence.
-`chrX:151,073,054-151,383,976` | Get all genes/proteins within this chrX interval (use with or without commas). However, note that `chrX` is not recognized as a valid query to retrieva all genes on Chromosome X.
+`chrX:151,073,054-151,383,976` | Get all genes/proteins within this chrX interval (use with or without commas). However, note that `chrX` is not recognized as a valid query to retrieva all genes on Chromosome X.  
 
-
+<br/>
 You can use AND/OR/NOT boolean operators and grouping to form complicated queries:
 
 Example query text                       | Operator/grouping
