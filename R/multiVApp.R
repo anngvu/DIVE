@@ -11,9 +11,10 @@ multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
   ns <- NS(id)
   fluidPage(theme = shinythemes::shinytheme("lumen"), includeCSS(CSS),
             multiVCtrlUI(ns("ctrl")),
-            # only show geneVUI if one or more highthroughput datasets are selected
+            selectVUI(ns("cdata")),
             conditionalPanel(condition = paste0("input['", ns("ctrl-dataset"), "']"), geneVUI(ns("gene"))),
-            div(id = "displaytrack")
+            div(id = "displaytrack"),
+            div(verbatimTextOutput(ns("test")))
   )
 }
 
@@ -31,7 +32,13 @@ multiVApp <- function(input, output, session,
 
   view <- callModule(multiVCtrl, "ctrl", hdlist = HDATA)
 
-  selected <- callModule(geneV, "gene", choices = CHOICES) # controls selection for all multiVUIs
+  vselect <- callModule(selectV, "cdata", data = CDATA, selected = "donor.type")
+
+  gselect <- callModule(geneV, "gene", choices = CHOICES) # controls selection for all multiVUIs
+
+  output$test <- renderPrint({
+
+  })
 
   # each dataset gets its own track (row), served by its own multiVUI module
   observeEvent(view(), {
@@ -40,7 +47,7 @@ multiVApp <- function(input, output, session,
     if(!is.null(trackdata)) {
       insertUI(selector = "#displaytrack", immediate = T,
                ui = tags$div(id = trackID, style = paste0("height:", 30 * nrow(trackdata), "px"), multiVUI(id = trackID)))
-      callModule(multiV, id = names(view()), hdata = isolate(trackdata), cdata = CDATA, selected = selected)
+      callModule(multiV, id = names(view()), hdata = isolate(trackdata), cdata = vselect, selected = gselect)
     } else {
       removeUI(selector = paste0("#", trackID))
     }

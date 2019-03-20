@@ -29,17 +29,46 @@ multiVUI <- function(id) {
 multiV <- function(input, output, session,
                    hdata, cdata = NULL, selected, slabel = NULL) {
 
-  plotdata <- reactive({
+  hplot <- reactive({
     if(!length(selected())) hdata else hdata[, colnames(hdata) %in% selected(), drop = F]
   })
 
-  output$heatmap <- renderPlotly({
-    xlabs <- if(!is.null(slabel)) slabel[colnames(plotdata())] else colnames(plotdata())
-    ylabs <- rownames(plotdata())
-    plot_ly(z = plotdata(), x = xlabs, y = ylabs, type = "heatmap", colors = "RdBu", height = 28 * nrow(hdata)) %>%
-      layout(xaxis = list(type = "category"), yaxis = list(type = "category"))
+  cplot <- reactive({
+    if(!is.null(cdata)) cdata()[as.character(ID) %in% rownames(hdata), ] else return(NULL)
   })
 
+  output$heatmap <- renderPlotly({
+    y <- as.character(cplot()[["ID"]])
+    notID <- names(cplot()) != "ID"
+    vcat <- sapply(cplot(), function(v) class(v) == "character" | class(v) == "factor")
 
+    cplotlist1 <- lapply(names(cplot())[vcat & notID],
+                         function(v) {
+                             plot_ly(x = 1, y = y, name = v, type = "bar", orientation = "h") %>%
+                             layout(xaxis = list(title = v, zeroline = FALSE, showline = FALSE,
+                                                 showticklabels = FALSE, showgrid = FALSE),
+                                    yaxis = list(type = "category"))
+                         }
+    )
+    cplotlist2 <- lapply(names(cplot())[!vcat & notID],
+                         function(v) {
+                            x <- cplot()[[v]]
+                            x[is.na(x)] <- 0
+                            plot_ly(x = x, y = y, name = v, type = "bar", orientation = "h") %>%
+                            layout(xaxis = list(title = v), yaxis = list(type = "category"))
+                         }
+    )
+
+    cplots <- subplot(subplot(cplotlist1, shareY = T, titleX = T), subplot(cplotlist2, shareY = T, titleX = T),
+                      titleX = T, shareY = T, widths = c(0.3, 0.7))
+
+    xlabs <- if(!is.null(slabel)) slabel[colnames(hplot())] else colnames(hplot())
+    ylabs <- rownames(hplot())
+    h <- plot_ly(z = hplot(), x = xlabs, y = ylabs, type = "heatmap", colors = "RdBu", height = 28 * nrow(hdata)) %>%
+      layout(xaxis = list(type = "category"), yaxis = list(type = "category"),
+             plot_bgcolor = "#F5F5F5")
+    subplot(cplots, h, titleX = T, shareY = T, widths = c(0.3, 0.7)) %>%
+      config(displayModeBar = F)
+  })
 
 }

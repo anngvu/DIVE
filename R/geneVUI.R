@@ -7,7 +7,8 @@
 #' @export
 geneVUI <- function(id) {
   ns <- NS(id)
-  fluidRow(div(class = "forceInline",
+  tags$div(id = "geneVUI",
+          div(class = "forceInline",
                selectizeInput(ns("IDs"), "Genes/proteins of interest",
                               choices = NULL, selected = NULL,
                               options = list(maxItems = 50))),
@@ -19,7 +20,7 @@ geneVUI <- function(id) {
                actionButton(ns("query"), "Query")),
            div(class = "forceInline", br(),
                infoOutput(ns("querytips"), label = "tips", i = "question-circle"))
-           )
+          )
 }
 
 #' Shiny module server for filtering high dimensional genomics data

@@ -9,12 +9,10 @@
 #' @export
 multiVCtrlUI <- function(id) {
   ns <- NS(id)
-  tags$div(
-    fluidRow(style="margin-top:30px; margin-bottom:20px; margin-right:100px",
+  tags$div(id = "multiVCtrlUI", style="margin-top:30px; margin-bottom:20px; margin-right:100px",
            div(class = "forceInline", selectizeInput(ns("dataset"), HTML("<strong>High-throughput datasets</strong>"),
                                       choices = NULL, selected = NULL, multiple = T)),
            div(class = "forceInline", dataUploadUI(ns("hdata"), label = "<strong>My data</strong>"))
-    )
   )
 }
 
