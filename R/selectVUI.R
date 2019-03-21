@@ -27,12 +27,13 @@ selectV <- function(input, output, session,
   output$select <- renderUI({
     selectizeInput(session$ns("var"), "Variable",
                    choices = names(data)[names(data) != key], selected = selected,
-                   options = list(maxItems = 50))
+                   options = list(maxItems = 3))
   })
 
   V <- eventReactive(input$var, {
+    if(is.null(input$var)) return(NULL)
     data[, c(key, input$var), with = F]
-  })
+  }, ignoreNULL = F)
 
   return(V)
 

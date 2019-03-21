@@ -34,7 +34,7 @@ multiV <- function(input, output, session,
     xlabs <- if(!is.null(slabel)) slabel[colnames(plotdata)] else colnames(plotdata)
     ylabs <- rownames(plotdata)
     plot_ly(z = plotdata, x = xlabs, y = ylabs, type = "heatmap", colors = "RdBu", height = 28 * nrow(hdata)) %>%
-      layout(xaxis = list(type = "category"), yaxis = list(type = "category"),
+      layout(xaxis = list(type = "category", showgrid = FALSE), yaxis = list(type = "category"),
              plot_bgcolor = "#F5F5F5")
   })
 
@@ -45,27 +45,32 @@ multiV <- function(input, output, session,
     y <- as.character(plotdata[[key]])
     notID <- names(plotdata) != key
     vcat <- sapply(plotdata, function(v) class(v) == "character" | class(v) == "factor")
-    cplotlist1 <- lapply(names(plotdata)[vcat & notID],
-                         function(v) {
-                           plot_ly(x = 1, y = y, name = v, type = "bar", orientation = "h") %>%
-                             layout(xaxis = list(title = v, zeroline = FALSE, showline = FALSE,
-                                                 showticklabels = FALSE, showgrid = FALSE),
-                                    yaxis = list(type = "category"))
+    cplotcat <- lapply(names(plotdata)[vcat & notID],
+                           function(v) {
+                             plot_ly(x = 1, y = y, name = v, type = "bar", orientation = "h", showlegend = F,
+                                     color = factor(plotdata[[v]]), text = plotdata[[v]],
+                                     hoverinfo = "text") %>%
+                               layout(xaxis = list(title = v, tickangle = 90, zeroline = FALSE, showline = FALSE,
+                                                   showticklabels = FALSE, showgrid = FALSE),
+                                      yaxis = list(type = "category"))
                          })
-    if(any(!vcat & notID)) {
-      cplotlist2 <- lapply(names(plotdata)[!vcat & notID],
+    cplotnum <- lapply(names(plotdata)[!vcat & notID],
                            function(v) {
                              x <- plotdata[[v]]
+                             hoverx <- sapply(x, function(p) if(is.na(p)) "NA" else as.character(p))
+                             NAtext <- ifelse(is.na(x), "  NA", "")
                              x[is.na(x)] <- 0
-                             plot_ly(x = x, y = y, name = v, type = "bar", orientation = "h") %>%
-                               layout(xaxis = list(title = v), yaxis = list(type = "category"))
+                             plot_ly(x = x, y = y, customdata = hoverx, name = v, type = "bar", orientation = "h", showlegend = F,
+                                     text = hoverx, hoverinfo = "text") %>%
+                               add_text(text = NAtext, textposition = "right", textfont = list(color = toRGB("red"))) %>%
+                               layout(xaxis = list(title = v, tickangle = 90, showgrid = FALSE), yaxis = list(type = "category"))
                            })
-      cplots <- subplot(subplot(cplotlist1, shareY = T, titleX = T),
-                        subplot(cplotlist2, shareY = T, titleX = T),
-                        titleX = T, shareY = T, widths = c(0.3, 0.7))
-      return(cplots)
+    if(length(cplotcat) && length(cplotnum)) {
+       subplot(subplot(cplotcat, shareY = T, titleX = T),
+               subplot(cplotnum, shareY = T, titleX = T),
+               titleX = T, shareY = T, widths = c(0.3, 0.7))
     } else {
-      return(subplot(cplotlist1, shareY = T, titleX = T))
+       subplot(c(cplotcat, cplotnum), shareY = T, titleX = T)
     }
   })
 
