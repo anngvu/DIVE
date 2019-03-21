@@ -7,8 +7,8 @@
 selectVUI <- function(id) {
   ns <- NS(id)
   tags$div(id = "selectVUI",
-           div(class = "forceInline", uiOutput(ns("select")))
-  )
+           uiOutput(ns("select"))
+           )
 }
 
 #' Shiny module server for selecting columns from a data table
@@ -24,17 +24,38 @@ selectVUI <- function(id) {
 selectV <- function(input, output, session,
                     data, key = "ID", selected = NULL) {
 
+  Vdata <- reactiveVal(data[, c(key, selected), with = F])
+
   output$select <- renderUI({
-    selectizeInput(session$ns("var"), "Variable",
-                   choices = names(data)[names(data) != key], selected = selected,
-                   options = list(maxItems = 3))
+    tags$div(
+      div(class = "forceInline",
+          selectizeInput(session$ns("var"), "Variable",
+                         choices = names(data)[names(data) != key], selected = selected,
+                         options = list(maxItems = 3))
+          ),
+      div(class = "forceInline",
+          selectInput(session$ns("sortby"), "Sort by", choices = selected, selected = selected))
+      )
   })
 
-  V <- eventReactive(input$var, {
-    if(is.null(input$var)) return(NULL)
-    data[, c(key, input$var), with = F]
+  observeEvent(input$var, {
+    if(is.null(input$var)) {
+      Vdata(NULL)
+    } else {
+      selected <- if(input$sortby %in% input$var) input$sortby else last(input$var)
+      updateSelectizeInput(session, "sortby", choices = input$var, selected = selected)
+      data <- data[, c(key, input$var), with = F]
+      setorderv(data, cols = selected, na.last = T)
+      Vdata(data)
+    }
   }, ignoreNULL = F)
 
-  return(V)
+  observeEvent(input$sortby, {
+    data <- copy(Vdata())
+    setorderv(data, cols = input$sortby, na.last = T)
+    Vdata(data)
+  })
+
+  return(Vdata)
 
 }

@@ -29,11 +29,19 @@ multiVUI <- function(id) {
 multiV <- function(input, output, session,
                    hdata, cdata = reactive({ NULL }), key = "ID", selected = reactive({ NULL }), slabel = NULL) {
 
-  hplot <- reactive({
+  hplotdata <- reactive({
     plotdata <- if(!length(selected())) hdata else hdata[, colnames(hdata) %in% selected(), drop = F]
-    xlabs <- if(!is.null(slabel)) slabel[colnames(plotdata)] else colnames(plotdata)
-    ylabs <- rownames(plotdata)
-    plot_ly(z = plotdata, x = xlabs, y = ylabs, type = "heatmap", colors = "RdBu", height = 28 * nrow(hdata)) %>%
+    if(!is.null(cdata())) {
+      ckey <- cdata()[as.character(get(key)) %in% rownames(hdata), as.character(get(key))]
+      plotdata <- plotdata[ckey, ]
+    }
+    plotdata
+  })
+
+  hplot <- reactive({
+    xlabs <- if(!is.null(slabel)) slabel[colnames(hplotdata())] else colnames(hplotdata())
+    ylabs <- rownames(hplotdata())
+    plot_ly(z = hplotdata(), x = xlabs, y = ylabs, type = "heatmap", colors = "RdBu", height = 28 * nrow(hdata)) %>%
       layout(xaxis = list(type = "category", showgrid = FALSE), yaxis = list(type = "category"),
              plot_bgcolor = "#F5F5F5")
   })
@@ -41,7 +49,7 @@ multiV <- function(input, output, session,
 
   cplot <- reactive({
     if(is.null(cdata())) return(NULL)
-    plotdata <- cdata()[as.character(get(key)) %in% rownames(hdata), ]
+    plotdata <- cdata()[as.character(get(key)) %in% rownames(hplotdata()), ]
     y <- as.character(plotdata[[key]])
     notID <- names(plotdata) != key
     vcat <- sapply(plotdata, function(v) class(v) == "character" | class(v) == "factor")
@@ -52,7 +60,7 @@ multiV <- function(input, output, session,
                                      hoverinfo = "text") %>%
                                layout(xaxis = list(title = v, tickangle = 90, zeroline = FALSE, showline = FALSE,
                                                    showticklabels = FALSE, showgrid = FALSE),
-                                      yaxis = list(type = "category"))
+                                      yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
                          })
     cplotnum <- lapply(names(plotdata)[!vcat & notID],
                            function(v) {
@@ -63,7 +71,8 @@ multiV <- function(input, output, session,
                              plot_ly(x = x, y = y, customdata = hoverx, name = v, type = "bar", orientation = "h", showlegend = F,
                                      text = hoverx, hoverinfo = "text") %>%
                                add_text(text = NAtext, textposition = "right", textfont = list(color = toRGB("red"))) %>%
-                               layout(xaxis = list(title = v, tickangle = 90, showgrid = FALSE), yaxis = list(type = "category"))
+                               layout(xaxis = list(title = v, tickangle = 90, showgrid = FALSE),
+                                      yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
                            })
     if(length(cplotcat) && length(cplotnum)) {
        subplot(subplot(cplotcat, shareY = T, titleX = T),

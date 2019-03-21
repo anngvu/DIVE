@@ -10,9 +10,11 @@ multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
 
   ns <- NS(id)
   fluidPage(theme = shinythemes::shinytheme("lumen"), includeCSS(CSS),
-            multiVCtrlUI(ns("ctrl")),
-            selectVUI(ns("cdata")),
-            conditionalPanel(condition = paste0("input['", ns("ctrl-dataset"), "']"), geneVUI(ns("gene"))),
+            fluidRow(multiVCtrlUI(ns("ctrl"))),
+            fluidRow(
+              column(4, selectVUI(ns("cdata"))),
+              column(8, conditionalPanel(condition = paste0("input['", ns("ctrl-dataset"), "']"), geneVUI(ns("gene"))))
+              ),
             div(id = "displaytrack"),
             div(verbatimTextOutput(ns("test")))
   )
