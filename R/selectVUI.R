@@ -31,10 +31,10 @@ selectV <- function(input, output, session,
       div(class = "forceInline",
           selectizeInput(session$ns("var"), "Variable",
                          choices = names(data)[names(data) != key], selected = selected,
-                         options = list(maxItems = 3))
+                         width = "450px", options = list(maxItems = 3))
           ),
       div(class = "forceInline",
-          selectInput(session$ns("sortby"), "Sort by", choices = selected, selected = selected))
+          selectInput(session$ns("sortby"), "Sort by", choices = selected, selected = selected, width = "300px"))
       )
   })
 

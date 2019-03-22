@@ -19,7 +19,9 @@ geneVUI <- function(id) {
            div(class = "forceInline", br(),
                actionButton(ns("query"), "Query")),
            div(class = "forceInline", br(),
-               infoOutput(ns("querytips"), label = "tips", i = "question-circle"))
+               infoOutput(ns("querytips"), label = "tips", i = "question-circle")),
+          div(class = "forceInline", br(),
+              textOutput(ns("querystatus")))
           )
 }
 
@@ -41,6 +43,7 @@ geneV <- function(input, output, session,
   callModule(info, "querytips", infoRmd = system.file("help/query_api.Rmd", package = "DIVE"))
 
   selected <- reactiveVal(choices)
+  querystatus <- reactiveVal("")
 
   updateSelectizeInput(session, "IDs", "Genes/proteins of interest", choices = choices,
                        selected = character(0), options = list(maxItems = 50), server = T)
@@ -73,9 +76,14 @@ geneV <- function(input, output, session,
                        error = function(e) { return(NA) })
     if(!is.na(result) && result$total > 0) {
       selected(result$hits$entrezgene)
+      querystatus("")
     } else {
-      showModal(modalDialog("No results", easyClose = T))
+      querystatus("No results.")
     }
+  })
+
+  output$querystatus <- renderText({
+    querystatus()
   })
 
   return(selected)

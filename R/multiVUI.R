@@ -55,6 +55,7 @@ multiV <- function(input, output, session,
     vcat <- sapply(plotdata, function(v) class(v) == "character" | class(v) == "factor")
     cplotcat <- lapply(names(plotdata)[vcat & notID],
                            function(v) {
+                             # Note: plotly issue will spew a lot of warnings
                              plot_ly(x = 1, y = y, name = v, type = "bar", orientation = "h", showlegend = F,
                                      color = factor(plotdata[[v]]), text = plotdata[[v]],
                                      hoverinfo = "text") %>%
