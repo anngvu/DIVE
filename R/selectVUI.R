@@ -18,18 +18,19 @@ selectVUI <- function(id) {
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param data A data table.
 #' @param key A key column that is kept for every selected subset. Defaults to "ID".
+#' @param label Label for variable select input.
 #' @param selected Optional, initial selection.
 #' @return The subsetted data table.
 #' @export
 selectV <- function(input, output, session,
-                    data, key = "ID", selected = NULL) {
+                    data, key = "ID", label = "Clinical/Phenotype/Experimental variable(s)", selected = NULL) {
 
   Vdata <- reactiveVal(data[, c(key, selected), with = F])
 
   output$select <- renderUI({
     tags$div(
       div(class = "forceInline",
-          selectizeInput(session$ns("var"), "Variable",
+          selectizeInput(session$ns("var"), label = label,
                          choices = names(data)[names(data) != key], selected = selected,
                          width = "450px", options = list(maxItems = 3))
           ),

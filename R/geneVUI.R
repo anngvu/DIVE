@@ -8,7 +8,7 @@
 geneVUI <- function(id) {
   ns <- NS(id)
   tags$div(id = "geneVUI",
-          div(class = "forceInline",
+           div(class = "forceInline",
                selectizeInput(ns("IDs"), "Genes/proteins of interest",
                               choices = NULL, selected = NULL,
                               options = list(maxItems = 50))),
@@ -20,8 +20,9 @@ geneVUI <- function(id) {
                actionButton(ns("query"), "Query")),
            div(class = "forceInline", br(),
                infoOutput(ns("querytips"), label = "tips", i = "question-circle")),
-          div(class = "forceInline", br(),
-              textOutput(ns("querystatus")))
+           div(class = "forceInline", br(),
+               textOutput(ns("querystatus"))),
+           helpText("Note: Expression values may not be available in all assays.")
           )
 }
 

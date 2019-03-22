@@ -41,15 +41,26 @@ multiV <- function(input, output, session,
   hplot <- reactive({
     xlabs <- if(!is.null(slabel)) slabel[colnames(hplotdata())] else colnames(hplotdata())
     ylabs <- rownames(hplotdata())
-    plot_ly(z = hplotdata(), x = xlabs, y = ylabs, type = "heatmap", colors = "RdBu", height = 28 * nrow(hdata)) %>%
+    plot_ly(z = hplotdata(), x = xlabs, y = ylabs,
+            type = "heatmap", colors = "RdBu", height = 28 * nrow(hdata),
+            colorbar = list(title = "relative\nexpression", thickness = 10, x = -0.09)) %>%
       layout(xaxis = list(type = "category", showgrid = FALSE), yaxis = list(type = "category"),
              plot_bgcolor = "#F5F5F5")
   })
 
+  cplotdata <- reactive({
+    if(is.null(cdata())) return(NULL)
+    if(!is.null(hplotdata())) {
+      plotdata <- cdata()[as.character(get(key)) %in% rownames(hplotdata()), ]
+    } else {
+      plotdata <- cdata()
+    }
+    plotdata
+  })
 
   cplot <- reactive({
-    if(is.null(cdata())) return(NULL)
-    plotdata <- cdata()[as.character(get(key)) %in% rownames(hplotdata()), ]
+    if(is.null(cplotdata())) return(NULL)
+    plotdata <- cplotdata()
     y <- as.character(plotdata[[key]])
     notID <- names(plotdata) != key
     vcat <- sapply(plotdata, function(v) class(v) == "character" | class(v) == "factor")
@@ -59,7 +70,7 @@ multiV <- function(input, output, session,
                              plot_ly(x = 1, y = y, name = v, type = "bar", orientation = "h", showlegend = F,
                                      color = factor(plotdata[[v]]), text = plotdata[[v]],
                                      hoverinfo = "text") %>%
-                               layout(xaxis = list(title = v, tickangle = 90, zeroline = FALSE, showline = FALSE,
+                               layout(xaxis = list(title = v, zeroline = FALSE, showline = FALSE,
                                                    showticklabels = FALSE, showgrid = FALSE),
                                       yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
                          })
@@ -72,7 +83,7 @@ multiV <- function(input, output, session,
                              plot_ly(x = x, y = y, customdata = hoverx, name = v, type = "bar", orientation = "h", showlegend = F,
                                      text = hoverx, hoverinfo = "text") %>%
                                add_text(text = NAtext, textposition = "right", textfont = list(color = toRGB("red"))) %>%
-                               layout(xaxis = list(title = v, tickangle = 90, showgrid = FALSE),
+                               layout(xaxis = list(title = v, showgrid = FALSE),
                                       yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
                            })
     if(length(cplotcat) && length(cplotnum)) {
@@ -87,8 +98,10 @@ multiV <- function(input, output, session,
   output$heatmap <- renderPlotly({
     if(is.null(cplot())) {
       hplot() %>% config(displayModeBar = F)
+    } else if(is.null(hplot())) {
+      cplot() %>% config(displayModeBar = F)
     } else {
-      subplot(cplot(), hplot(), titleX = T, shareY = T, widths = c(0.3, 0.7)) %>%
+      subplot(hplot(), cplot(), titleX = T, shareY = T, widths = c(0.7, 0.3)) %>%
         config(displayModeBar = F)
     }
   })
