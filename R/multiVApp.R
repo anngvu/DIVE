@@ -10,11 +10,13 @@ multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
 
   ns <- NS(id)
   fluidPage(theme = shinythemes::shinytheme("lumen"), includeCSS(CSS),
-            fluidRow(
-              column(9, multiVCtrlUI(ns("ctrl"))),
-              column(3, "")
+            fluidRow(style = "background: WhiteSmoke;",
+              column(1, br(), br(), h4("DATA SOURCES", style = "color: gray")),
+              column(7, multiVCtrlUI(ns("ctrl"))),
+              column(1, br(), br(), h4("DATA TOOLS", style = "color: gray")),
+              column(3, br(), br(), subgroupVUI(ns("subgroups")))
             ),
-            fluidRow(
+            fluidRow(style = "padding-top: 50px;",
               conditionalPanel(condition = paste0("input['", ns("ctrl-dataset"), "']"),
                                column(9, geneVUI(ns("gene"))),
                                column(3, selectVUI(ns("cdata"))))
@@ -42,9 +44,11 @@ multiVApp <- function(input, output, session,
 
   gselect <- callModule(geneV, "gene", choices = CHOICES) # controls selection for all multiVUIs
 
-  output$test <- renderPrint({
+  subgroups <- callModule(subgroupV, "subgroups")
 
-  })
+  # output$test <- renderPrint({
+  #
+  # })
 
   # each dataset gets its own track (row), served by its own multiVUI module
   observeEvent(view(), {
