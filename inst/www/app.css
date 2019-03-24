@@ -82,3 +82,12 @@ Match app
 .custom-highlight {
   background-color: white;
 }
+
+.subgroups-panel {
+  display: inline-block;
+  width: 500px;
+  border-radius: 4px;
+  background: white;
+  padding: 10px;
+  border: 2px solid gray;
+}

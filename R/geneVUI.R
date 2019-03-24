@@ -73,14 +73,17 @@ geneV <- function(input, output, session,
   })
 
   observeEvent(input$query, {
-    result <- tryCatch({ mygene::query(input$qtext, species = "human") },
-                       error = function(e) { return(NA) })
-    if(!is.na(result) && result$total > 0) {
-      selected(result$hits$entrezgene)
-      querystatus("")
-    } else {
-      querystatus("No results.")
-    }
+    withProgress(expr =
+    {
+      result <- tryCatch({ mygene::query(input$qtext, species = "human") },
+                         error = function(e) { return(NA) })
+      if(!is.na(result) && result$total > 0) {
+        selected(result$hits$entrezgene)
+        querystatus("")
+      } else {
+        querystatus("No results.")
+      }
+    }, value = 0.5, message = "loading...", style = "old")
   })
 
   output$querystatus <- renderText({

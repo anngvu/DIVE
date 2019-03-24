@@ -3,7 +3,7 @@ library(DIVE)
 
 
 ui <- navbarPage("nPOD DIVE", id = "main", selected = "intro",
-                 theme = shinythemes::shinytheme("lumen"),
+                 theme = shinythemes::shinytheme("paper"),
                  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "introjs.min.css"),
                            tags$script(src = "intro.min.js")),
                  includeScript("www/app.js"),

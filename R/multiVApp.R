@@ -9,17 +9,20 @@
 multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
 
   ns <- NS(id)
-  fluidPage(theme = shinythemes::shinytheme("lumen"), includeCSS(CSS),
+  fluidPage(theme = shinythemes::shinytheme("paper"), includeCSS(CSS),
             fluidRow(style = "background: WhiteSmoke;",
-              column(1, br(), br(), h4("DATA SOURCES", style = "color: gray")),
+              column(1, br(), h4("DATA SOURCES")),
               column(7, multiVCtrlUI(ns("ctrl"))),
-              column(1, br(), br(), h4("DATA TOOLS", style = "color: gray")),
-              column(3, br(), br(), subgroupVUI(ns("subgroups")))
+              column(1, br(), h4("DATA TOOLS")),
+              column(3, br(), br(),
+                     actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup")),
+                     absolutePanel(style = "z-index: 10;", tags$div(id = "views"),
+                                   top = 100, right = 400, width = 1000, draggable = T))
             ),
             fluidRow(style = "padding-top: 50px;",
               conditionalPanel(condition = paste0("input['", ns("ctrl-dataset"), "']"),
-                               column(9, geneVUI(ns("gene"))),
-                               column(3, selectVUI(ns("cdata"))))
+                               column(8, geneVUI(ns("gene"))),
+                               column(4, selectVUI(ns("cdata"))))
               ),
             div(id = "displaytrack"),
             div(verbatimTextOutput(ns("test")))
@@ -38,13 +41,18 @@ multiVApp <- function(input, output, session,
                       CDATA = cdata,
                       CHOICES = gene_symbols) {
 
+  observeEvent(input$newSubgroupVUI, {
+    N <- input$newSubgroupVUI
+    insertUI(paste0("#views"),
+             ui = subgroupVUI(id = session$ns(paste0("panel", N) )) )
+    callModule(subgroupV, id = paste0("panel", N) )
+  })
+
   view <- callModule(multiVCtrl, "ctrl", hdlist = HDATA)
 
   vselect <- callModule(selectV, "cdata", data = CDATA, selected = "donor.type")
 
   gselect <- callModule(geneV, "gene", choices = CHOICES) # controls selection for all multiVUIs
-
-  subgroups <- callModule(subgroupV, "subgroups")
 
   # output$test <- renderPrint({
   #

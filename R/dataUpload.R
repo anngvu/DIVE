@@ -16,7 +16,7 @@ dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>") 
                     tags$div(id = ns("upload"), class = "forceInline",
                              fileInput(ns("upload"), HTML(label), multiple = FALSE,
                                        accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"),
-                                       buttonLabel = "Data")))),
+                                       buttonLabel = "Data", placeholder = "  no file selected")))),
       column(4, br(), uiOutput(ns("info")))
     )
   )

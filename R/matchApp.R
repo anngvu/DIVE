@@ -25,7 +25,7 @@ matchAppUI <- function(id,
                        CSS = system.file("www/", "app.css", package = "DIVE")) {
 
   ns <- NS(id)
-  fluidPage(theme = shinythemes::shinytheme("lumen"), includeCSS(CSS),
+  fluidPage(theme = shinythemes::shinytheme("paper"), includeCSS(CSS),
 
     fluidRow(style="margin-top:30px; margin-bottom:50px; margin-right:100px",
              column(6, style="border-right: 1px solid lightgray;",

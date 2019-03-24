@@ -1,32 +1,28 @@
-#' Shiny module UI for comparing high-dimensional data by subgroups
+#' Shiny app UI for creating comparison plots between grouped data
 #'
-#' Inserts a panel UI of the requested data view comparison
+#'
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @export
 subgroupVUI <- function(id) {
+
   ns <- NS(id)
-  tags$div(id = "subgroupVUI",
-           actionButton(ns("new"), " Subgroup view", icon = icon("object-ungroup")),
-           absolutePanel(uiOutput(ns("view")), draggable = T)
+  tags$div(id = ns("viewport"), class = "subgroups-panel",
+           div(align = "right", actionButton(ns("remove"), "", icon = icon("times"))),
+           selectInput(ns("which1"), "Which", choices = ""),
+           selectInput(ns("which2"), "Which", choices = "")
   )
 }
 
-#' Shiny module server for comparing high-dimensional data by subgroups
-#'
-#' Handles creation of a panel UI of the requested data view comparison
+#' Shiny module server for creating comparison plots between grouped data
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
+#' @return
 #' @export
-subgroupV <- function(input, output, session,
-                                   subgroups = NULL) {
-   
-  observeEvent(input$new, {
-    insertUI(paste0("#", session$ns("view")), 
-             ui = tags$div(class = "absdiv", style = "background: white; padding: 10px; border: 1px solid black;",
-                      h4("Subgroup selection"), 
-                      selectInput(session$ns("which"), "Which", choices = "")
-                      )
-    )
-  })
+subgroupV <- function(input, output, session) {
+
+  observeEvent(input$remove, {
+    removeUI(selector = paste0("#", session$ns("viewport")))
+  }, once = T)
+
 }
