@@ -37,7 +37,9 @@ multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @export
 multiVApp <- function(input, output, session,
-                      HDATA = list("genomics1" = xm_t, "px1" = px1_t, "px2" = px2_t),
+                      HDATA = list("Yip et al. (unpublished)" = xm_t,
+                                   "Nyalwidhe et al. 2017" = px1_t,
+                                   "Liu et al. 2016" = px2_t),
                       CDATA = cdata,
                       CHOICES = gene_symbols) {
 
@@ -48,7 +50,9 @@ multiVApp <- function(input, output, session,
     callModule(subgroupV, id = paste0("panel", N) )
   })
 
-  view <- callModule(multiVCtrl, "ctrl", hdlist = HDATA)
+  view <- callModule(multiVCtrl, "ctrl", hdlist = HDATA,
+                     choices = list(Genomics = list("Yip et al. (unpublished)"),
+                                    Proteomics = list("Nyalwidhe et al. 2017", "Liu et al. 2016")))
 
   vselect <- callModule(selectV, "cdata", data = CDATA, selected = "donor.type")
 
@@ -65,7 +69,7 @@ multiVApp <- function(input, output, session,
     if(!is.null(trackdata)) {
       insertUI(selector = "#displaytrack", immediate = T,
                ui = tags$div(id = trackID, style = paste0("height:", 30 * nrow(trackdata), "px"), multiVUI(id = trackID)))
-      callModule(multiV, id = names(view()), hdata = isolate(trackdata), cdata = vselect, selected = gselect)
+      callModule(multiV, id = names(view()), hdata = isolate(trackdata), cdata = vselect, selected = gselect, slabel = gene_symbols_map)
     } else {
       removeUI(selector = paste0("#", trackID))
     }

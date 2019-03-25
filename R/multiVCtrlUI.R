@@ -24,19 +24,19 @@ multiVCtrlUI <- function(id) {
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param hdlist A list containing high dimensional datasets;
 #' the names of each element are used as choices in the selection menu.
-#' @return A data matrix for the parameter \preformatted{hdata} in the \code{\link{multiV}} module.
+#' @return A list containing the data matrix for the parameter \preformatted{hdata} in the \code{\link{multiV}} module.
 #' @export
 multiVCtrl <- function(input, output, session,
-                      hdlist) {
+                      hdlist, choices = names(hdlist)) {
 
   inview <- c()
   view <- reactiveVal(NULL)
 
-  updateSelectizeInput(session, "dataset", choices = c(names(hdlist)), selected = NULL)
+  updateSelectizeInput(session, "dataset", choices = choices, selected = NULL)
 
   observe({
     if(!length(input$dataset)) {
-      dataset <- list(NULL)
+      dataset <- list(NULL) # set return to NULL
       names(dataset) <-  paste0("i", which(names(hdlist) %in% inview))
       inview <<- c()
     } else {

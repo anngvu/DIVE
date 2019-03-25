@@ -32,20 +32,26 @@ multiV <- function(input, output, session,
   hplotdata <- reactive({
     plotdata <- if(!length(selected())) hdata else hdata[, colnames(hdata) %in% selected(), drop = F]
     if(!is.null(cdata())) {
+      # manually order rows by order given in cdata()
       ckey <- cdata()[as.character(get(key)) %in% rownames(hdata), as.character(get(key))]
-      plotdata <- plotdata[ckey, ]
+      plotdata <- plotdata[ckey, , drop = F]
     }
     plotdata
   })
 
   hplot <- reactive({
+    # if(!length(hplotdata())) return(NULL)
     xlabs <- if(!is.null(slabel)) slabel[colnames(hplotdata())] else colnames(hplotdata())
     ylabs <- rownames(hplotdata())
-    plot_ly(z = hplotdata(), x = xlabs, y = ylabs,
-            type = "heatmap", colors = "RdBu", height = 28 * nrow(hdata),
+    showticklabs <- if(length(hplotdata()) <= 50) TRUE else FALSE # only show labels when readable
+    plot_ly(z = hplotdata(), x = xlabs, y = ylabs, # name = "relative expression",
+            type = "heatmap", colors = "RdBu", height = 25 * nrow(hdata),
+            # text = paste(~y, "\nsampleID": ~x, "\nrelative expression:", ~z),
+            # hoverinfo = "text",
             colorbar = list(title = "relative\nexpression", thickness = 10, x = -0.09)) %>%
-      layout(xaxis = list(type = "category", showgrid = FALSE), yaxis = list(type = "category"),
-             plot_bgcolor = "#F5F5F5")
+      layout(xaxis = list(type = "category", showgrid = FALSE, ticks = "", showticklabels = showticklabs),
+            yaxis = list(type = "category", ticks = ""),
+            plot_bgcolor = "#F5F5F5")
   })
 
   cplotdata <- reactive({
@@ -66,7 +72,7 @@ multiV <- function(input, output, session,
     vcat <- sapply(plotdata, function(v) class(v) == "character" | class(v) == "factor")
     cplotcat <- lapply(names(plotdata)[vcat & notID],
                            function(v) {
-                             # Note: plotly issue will spew a lot of warnings
+                             # Note: there's a plotly issue that will make it spew a lot of warnings
                              plot_ly(x = 1, y = y, name = v, type = "bar", orientation = "h", showlegend = F,
                                      color = factor(plotdata[[v]]), text = plotdata[[v]],
                                      hoverinfo = "text") %>%
@@ -99,7 +105,8 @@ multiV <- function(input, output, session,
     if(is.null(cplot())) {
       hplot() %>% config(displayModeBar = F)
     } else if(is.null(hplot())) {
-      cplot() %>% config(displayModeBar = F)
+      # cplot() %>% config(displayModeBar = F)
+      NULL
     } else {
       subplot(hplot(), cplot(), titleX = T, shareY = T, widths = c(0.7, 0.3)) %>%
         config(displayModeBar = F)

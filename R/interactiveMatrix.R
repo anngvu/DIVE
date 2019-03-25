@@ -73,7 +73,7 @@ interactiveMatrix <- function(input, output, session,
      }
    }
    p <- plot_ly(x = rownames(M), y = colnames(M), z = M,
-                type = "heatmap", source = "matrix", colorscale = "RdBu",
+                type = "heatmap", colorscale = "RdBu", source = "matrix",
                 hoverinfo = "text",
                 text = matrix(paste0("x: ", rep(row.names(M), each = nrow(M)),
                                      "<br>y: ", rep(row.names(M), ncol(M)),
