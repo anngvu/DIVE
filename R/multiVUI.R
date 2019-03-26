@@ -105,8 +105,7 @@ multiV <- function(input, output, session,
     if(is.null(cplot())) {
       hplot() %>% config(displayModeBar = F)
     } else if(is.null(hplot())) {
-      # cplot() %>% config(displayModeBar = F)
-      NULL
+      cplot() %>% config(displayModeBar = F)
     } else {
       subplot(hplot(), cplot(), titleX = T, shareY = T, widths = c(0.7, 0.3)) %>%
         config(displayModeBar = F)

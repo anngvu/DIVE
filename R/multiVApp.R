@@ -13,11 +13,13 @@ multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
             fluidRow(style = "background: WhiteSmoke;",
               column(1, br(), h4("DATA SOURCES")),
               column(7, multiVCtrlUI(ns("ctrl"))),
-              column(1, br(), h4("DATA TOOLS")),
-              column(3, br(), br(),
-                     actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup")),
-                     absolutePanel(style = "z-index: 10;", tags$div(id = "views"),
-                                   top = 100, right = 400, width = 1000, draggable = T))
+              #conditionalPanel(condition = paste0("input['", ns("ctrl-dataset"), "']"),
+                    column(1, br(), h4("DATA TOOLS")),
+                    column(3, br(), br(),
+                           actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup")),
+                           absolutePanel(style = "z-index: 10;", tags$div(id = "views"),
+                                        top = 100, right = 400, width = 1000, draggable = T))
+                                #)
             ),
             fluidRow(style = "padding-top: 50px;",
               conditionalPanel(condition = paste0("input['", ns("ctrl-dataset"), "']"),
@@ -43,13 +45,6 @@ multiVApp <- function(input, output, session,
                       CDATA = cdata,
                       CHOICES = gene_symbols) {
 
-  observeEvent(input$newSubgroupVUI, {
-    N <- input$newSubgroupVUI
-    insertUI(paste0("#views"),
-             ui = subgroupVUI(id = session$ns(paste0("panel", N) )) )
-    callModule(subgroupV, id = paste0("panel", N) )
-  })
-
   view <- callModule(multiVCtrl, "ctrl", hdlist = HDATA,
                      choices = list(Genomics = list("Yip et al. (unpublished)"),
                                     Proteomics = list("Nyalwidhe et al. 2017", "Liu et al. 2016")))
@@ -57,6 +52,13 @@ multiVApp <- function(input, output, session,
   vselect <- callModule(selectV, "cdata", data = CDATA, selected = "donor.type")
 
   gselect <- callModule(geneV, "gene", choices = CHOICES) # controls selection for all multiVUIs
+
+  observeEvent(input$newSubgroupVUI, {
+    N <- input$newSubgroupVUI
+    insertUI(paste0("#views"),
+             ui = subgroupVUI(id = session$ns(paste0("panel", N) ), hdchoices = names(HDATA), cchoices = names(CDATA) ))
+    callModule(subgroupV, id = paste0("panel", N), cdata = CDATA, hdata = HDATA )
+  })
 
   # output$test <- renderPrint({
   #
@@ -69,7 +71,7 @@ multiVApp <- function(input, output, session,
     if(!is.null(trackdata)) {
       insertUI(selector = "#displaytrack", immediate = T,
                ui = tags$div(id = trackID, style = paste0("height:", 30 * nrow(trackdata), "px"), multiVUI(id = trackID)))
-      callModule(multiV, id = names(view()), hdata = isolate(trackdata), cdata = vselect, selected = gselect, slabel = gene_symbols_map)
+      callModule(multiV, id = names(view()), hdata = trackdata, cdata = vselect, selected = gselect, slabel = gene_symbols_map)
     } else {
       removeUI(selector = paste0("#", trackID))
     }

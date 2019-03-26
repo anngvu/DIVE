@@ -12,7 +12,7 @@ multiVCtrlUI <- function(id) {
   tags$div(id = "multiVCtrlUI", style="margin-top:30px; margin-bottom:20px; margin-right:100px",
            div(class = "forceInline", selectizeInput(ns("dataset"), HTML("<strong>High-throughput datasets</strong>"),
                                       choices = NULL, selected = NULL, multiple = T)),
-           div(class = "forceInline", dataUploadUI(ns("hdata"), label = "<strong>My data</strong>")),
+           div(class = "forceInline", dataUploadUI(ns("upload"), label = "<strong>My data</strong>")),
            div(class = "forceInline", br(), actionButton(ns("GEO"), "Use GEO (beta)"))
           )
 }
@@ -51,6 +51,13 @@ multiVCtrl <- function(input, output, session,
       names(dataset) <- paste0("i", which(names(hdlist) %in% hdname)) # replace name with index # in hdlist
     }
     view(dataset)
+  })
+
+  udata <- callModule(dataUpload, "upload")
+
+  observeEvent(udata(), {
+    # process data
+
   })
 
   return(view)
