@@ -9,18 +9,16 @@
 multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
 
   ns <- NS(id)
-  fluidPage(theme = shinythemes::shinytheme("paper"), includeCSS(CSS),
+  fluidPage(theme = shinythemes::shinytheme("paper"), includeCSS(CSS), shinyWidgets::chooseSliderSkin("Flat"),
             fluidRow(style = "background: WhiteSmoke;",
               column(1, br(), h4("DATA SOURCES")),
               column(7, multiVCtrlUI(ns("ctrl"))),
-              #conditionalPanel(condition = paste0("input['", ns("ctrl-dataset"), "']"),
-                    column(1, br(), h4("DATA TOOLS")),
-                    column(3, br(), br(),
-                           actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup")),
-                           absolutePanel(style = "z-index: 10;", tags$div(id = "views"),
-                                        top = 100, right = 400, width = 1000, draggable = T))
-                                #)
+              column(1, br(), h4("DATA TOOLS")),
+              column(3, br(), br(),
+                           actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup")))
+
             ),
+            fluidRow(absolutePanel(style = "z-index: 10;", tags$div(id = "views"), draggable = T)),
             fluidRow(style = "padding-top: 50px;",
               conditionalPanel(condition = paste0("input['", ns("ctrl-dataset"), "']"),
                                column(8, geneVUI(ns("gene"))),
@@ -40,14 +38,15 @@ multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
 #' @export
 multiVApp <- function(input, output, session,
                       HDATA = list("Yip et al. (unpublished)" = xm_t,
-                                   "Nyalwidhe et al. 2017" = px1_t,
-                                   "Liu et al. 2016" = px2_t),
+                                   "Liu et al. 2016" = px1_t,
+                                   "Nyalwidhe et al. 2017" = px2_t),
                       CDATA = cdata,
                       CHOICES = gene_symbols) {
 
   view <- callModule(multiVCtrl, "ctrl", hdlist = HDATA,
                      choices = list(Genomics = list("Yip et al. (unpublished)"),
-                                    Proteomics = list("Nyalwidhe et al. 2017", "Liu et al. 2016")))
+                                    Proteomics = list("Liu et al. 2016", "Nyalwidhe et al. 2017")),
+                     infoRmd = system.file("help/ht_upload.rmd", package = "DIVE"))
 
   vselect <- callModule(selectV, "cdata", data = CDATA, selected = "donor.type")
 

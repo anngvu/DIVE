@@ -10,10 +10,14 @@
 multiVCtrlUI <- function(id) {
   ns <- NS(id)
   tags$div(id = "multiVCtrlUI", style="margin-top:30px; margin-bottom:20px; margin-right:100px",
-           div(class = "forceInline", selectizeInput(ns("dataset"), HTML("<strong>High-throughput datasets</strong>"),
-                                      choices = NULL, selected = NULL, multiple = T)),
-           div(class = "forceInline", dataUploadUI(ns("upload"), label = "<strong>My data</strong>")),
-           div(class = "forceInline", br(), actionButton(ns("GEO"), "Use GEO (beta)"))
+           div(class = "forceInline", style = "margin-right: 30px;",
+               selectizeInput(ns("dataset"), HTML("<strong>Available high-throughput datasets</strong>"),
+                              choices = NULL, selected = NULL, multiple = T,
+                              options = list(placeholder = "select one or more datasets to view"))),
+           div(class = "forceInline", style = "margin-right: 30px;",
+               dataUploadUI(ns("upload"), label = "<strong>Upload your own data</strong>")),
+           div(class = "forceInline", style = "margin-right: 30px;",
+               br(), actionButton(ns("GEO"), "Use GEO (beta)"))
           )
 }
 
@@ -27,7 +31,7 @@ multiVCtrlUI <- function(id) {
 #' @return A list containing the data matrix for the parameter \preformatted{hdata} in the \code{\link{multiV}} module.
 #' @export
 multiVCtrl <- function(input, output, session,
-                      hdlist, choices = names(hdlist)) {
+                      hdlist, choices = names(hdlist), infoRmd = NULL) {
 
   inview <- c()
   view <- reactiveVal(NULL)
@@ -53,7 +57,7 @@ multiVCtrl <- function(input, output, session,
     view(dataset)
   })
 
-  udata <- callModule(dataUpload, "upload")
+  udata <- callModule(dataUpload, "upload", infoRmd = infoRmd)
 
   observeEvent(udata(), {
     # process data

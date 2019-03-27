@@ -20,6 +20,7 @@ Imports:
     reshape2,
     shinycssloaders,
     shinyjqui,
+    shinyWidgets,
     r2d3,
     jsonlite,
     optmatch

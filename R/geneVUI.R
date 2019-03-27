@@ -83,7 +83,7 @@ geneV <- function(input, output, session,
       } else {
         querystatus("No results.")
       }
-    }, value = 0.5, message = "loading...", style = "old")
+    }, value = 0.5, message = "looking up...")
   })
 
   output$querystatus <- renderText({
