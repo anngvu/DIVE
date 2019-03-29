@@ -15,7 +15,7 @@ interactiveMatrix(input, output, session, state,
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
-\item{state}{Reactive state variables used for plot functions. See details.}
+\item{state}{Reactive state object from \code{\link{matrixCtrl}}.}
 
 \item{factorx}{Optional, names and/or patterns for variables that should be displayed as factors in plots.}
 
@@ -25,7 +25,7 @@ interactiveMatrix(input, output, session, state,
 The matrix responds to inputs, new plotdata, and has a linked drilldown component.
 }
 \details{
-The plotting logic works with matrixCtrlUI, which returns reactive values required,
-including state$plot for the main plot, state$cdata for the drilldown, and state$newdata
-storing variable names of new data.
+The matrix display logic works with \code{\link{matrixCtrl}}, which returns the reactive
+data in a \preformatted{state} object. In addition, the matrix is linked to a scatter
+plot that accesses underlying data for a user-clicked cell.
 }

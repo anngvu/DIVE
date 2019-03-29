@@ -21,6 +21,8 @@ matchApp(input, output, session, REFDATA = npodX, HPCG = hpcg,
   APPDATA = "examplecohort2020.csv")
 }
 \arguments{
+\item{input, output, session}{Standard \code{shiny} boilerplate.}
+
 \item{REFDATA}{A data matrix, e.g. a correlation matrix, which must have variables as rownames.}
 
 \item{REFKEY}{Passed to refSubsetInput.}

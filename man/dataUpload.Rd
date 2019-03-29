@@ -22,8 +22,9 @@ The uploaded file as a reactive data.table object.
 }
 \description{
 The most basic implementation is to process and return any input to fileInput in the UI.
-File uploads can have "reset" behavior if the removable optional feature is specified, where a remove button
-will be rendered after upload. The module also optionally incorporates \code{\link{infoOutput}} functionality.
+File uploads can have "reset" behavior if the removable optional feature is specified,
+where a remove button will be rendered after upload.
+The module also optionally incorporates \code{\link{infoOutput}} functionality.
 Finally, it is possible to perform a mock upload of a saved dataset, e.g. for demonstration purposes.
 Saved datasets are expected to be .csv files that reside in a relative "Data/" directory.
 For instance, if the name is "SampleCohort", the dataset will be "uploaded" from "Data/SampleCohort.csv".

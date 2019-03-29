@@ -11,6 +11,8 @@ interactiveMatrixApp(input, output, session, M = cordata$corM,
   appdata = "pilot.csv")
 }
 \arguments{
+\item{input, output, session}{Standard \code{shiny} boilerplate.}
+
 \item{M}{A data matrix, e.g. a correlation matrix, which must have variables as rownames.}
 
 \item{N}{A matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.}

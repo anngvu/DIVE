@@ -11,9 +11,10 @@ newDataset(input, output, session, refkey, infoRmd, appdata)
 
 \item{refkey}{Optional, a named list containing name/label for creating a key-like column.}
 
-\item{infoRmd}{Optional, relative path to an info Rmarkdown file for this module.}
+\item{infoRmd}{Optional, an Rmarkdown help file for infoOutput, e.g. requirements.}
 
-\item{appdata}{Optional, character name that can be used to accession a saved dataset. See details.}
+\item{appdata}{Optional, the name (including extension) of one or more files stored in appdata that can be
+mock-uploaded. See details.}
 }
 \value{
 A reactive data.table of the processed upload.
@@ -21,6 +22,6 @@ A reactive data.table of the processed upload.
 \description{
 This is essentially the \code{\link{dataUpload}} module, but the uploaded data
 is modified to include a key-like column before it is returned as the reactive object.
-Use \code{\link{dataUpload}} if there is no need for \code{refkey},
+Use \code{\link{dataUpload}} if there is no need for \preformatted{refkey},
 which is used to track the dataset in the same manner as in \code{\link{refSubset}}.
 }

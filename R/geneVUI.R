@@ -35,11 +35,11 @@ geneVUI <- function(id) {
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param choices Choices for selectInput.
 #' @param prelist Optional, a named list of source files that store pre-compiled sets for convenient access.
-#' @return A vector that can be used to subset a high dimensional matrix, i.e. the parameter
-#' selected in multiV.
+#' @return A vector that can be used to subset a high dimensional matrix,
+#' which should be passed in to the parameter \code{selected} in the \code{\link{multiV}} server module.
 #' @export
 geneV <- function(input, output, session,
-                  choices) {
+                  choices, prelist = NULL) {
 
   callModule(info, "querytips", infoRmd = system.file("help/query_api.Rmd", package = "DIVE"))
 
@@ -50,9 +50,15 @@ geneV <- function(input, output, session,
                        selected = character(0), options = list(maxItems = 50), server = T)
 
   observeEvent(input$xlist, {
+    prelistdiv <- if(!is.null(prelist)) {
+      tags$div(HTML("<strong>Pre-compiled, curated lists</strong><br><li>"),
+               getLinkInput(session$ns("precompiled"), labels = names(prelist)))
+    } else {
+      NULL
+    }
+
     showModal(modalDialog(
-      HTML("<strong>Pre-compiled, curated lists</strong><br><li>"),
-      getLinkInput(session$ns("precompiled"), labels = "T1Dbase"),
+      prelistdiv,
       HTML("<br><br><strong>Upload my custom list</strong><br>"),
       helpText("Your list should be a text file with one gene per line."),
       dataUploadUI("customlist", label = ""),
@@ -61,14 +67,14 @@ geneV <- function(input, output, session,
     ))
   })
 
-  prelist <- callModule(getLink, "precompiled", sources = system.file("appdata/t1dbase.txt", package = "DIVE"))
+  prelistgo <- callModule(getLink, "precompiled", sources = prelist)
 
   observeEvent(input$IDs, {
     if(is.null(input$IDs)) selected(choices) else selected(input$IDs)
   }, ignoreNULL = FALSE)
 
-  observeEvent(prelist(), {
-    selected(choices[prelist()])
+  observeEvent(prelistgo(), {
+    selected(choices[prelistgo()])
     removeModal()
   })
 

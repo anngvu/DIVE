@@ -9,12 +9,15 @@
 multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
 
   ns <- NS(id)
-  fluidPage(theme = shinythemes::shinytheme("paper"), includeCSS(CSS), shinyWidgets::chooseSliderSkin("Flat"),
+  fluidPage(theme = shinythemes::shinytheme("paper"),
+            if(!is.null(CSS)) includeCSS(CSS),
+            shinyWidgets::chooseSliderSkin("Flat"),
+
             fluidRow(style = "background: WhiteSmoke;",
               column(1, br(), h4("DATA SOURCES")),
-              column(7, multiVCtrlUI(ns("ctrl"))),
+              column(8, multiVCtrlUI(ns("ctrl"))),
               column(1, br(), h4("DATA TOOLS")),
-              column(3, br(), br(),
+              column(2, br(), br(),
                            actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup")))
 
             ),
@@ -24,8 +27,7 @@ multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
                                column(8, geneVUI(ns("gene"))),
                                column(4, selectVUI(ns("cdata"))))
               ),
-            div(id = "displaytrack"),
-            div(verbatimTextOutput(ns("test")))
+            div(id = "displaytrack")
   )
 }
 
@@ -48,9 +50,15 @@ multiVApp <- function(input, output, session,
                                     Proteomics = list("Liu et al. 2016", "Nyalwidhe et al. 2017")),
                      infoRmd = system.file("help/ht_upload.rmd", package = "DIVE"))
 
-  vselect <- callModule(selectV, "cdata", data = CDATA, selected = "donor.type")
+  # controls clinical/phenotyepe/experimental variable selection
+  vselect <- callModule(selectV, "cdata",
+                        data = CDATA,
+                        selected = "donor.type")
 
-  gselect <- callModule(geneV, "gene", choices = CHOICES) # controls selection for all multiVUIs
+  # controls gene selection for all multiVUIs
+  gselect <- callModule(geneV, "gene",
+                        choices = CHOICES,
+                        prelist = list("T1Dbase" = system.file("appdata/t1dbase.txt", package = "DIVE")))
 
   observeEvent(input$newSubgroupVUI, {
     N <- input$newSubgroupVUI
@@ -58,10 +66,6 @@ multiVApp <- function(input, output, session,
              ui = subgroupVUI(id = session$ns(paste0("panel", N) ), hdchoices = names(HDATA), cchoices = names(CDATA) ))
     callModule(subgroupV, id = paste0("panel", N), cdata = CDATA, hdata = HDATA )
   })
-
-  # output$test <- renderPrint({
-  #
-  # })
 
   # each dataset gets its own track (row), served by its own multiVUI module
   observeEvent(view(), {

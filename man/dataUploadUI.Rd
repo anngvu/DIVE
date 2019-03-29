@@ -4,7 +4,7 @@
 \alias{dataUploadUI}
 \title{Shiny module UI for data upload module}
 \usage{
-dataUploadUI(id)
+dataUploadUI(id, label = "<strong>Upload data to compare</strong>")
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
@@ -13,8 +13,8 @@ dataUploadUI(id)
 UI components.
 }
 \description{
-Generates Shiny UI for the dataUpload module, which contains the main file input
-and two optional features including a file-remove button and infolink,
+Generates Shiny UI for a data upload module, which contains the main file input
+and two optional features: a file-remove button and infolink,
 the second of which is intended to be useful for communicating file upload requirements
 or instructions.
 }

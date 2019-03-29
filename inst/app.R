@@ -4,7 +4,8 @@ library(DIVE)
 
 ui <- navbarPage("nPOD DIVE", id = "main", selected = "intro",
                  theme = shinythemes::shinytheme("paper"),
-                 tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "introjs.min.css"),
+                 tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
+                           tags$link(rel = "stylesheet", type = "text/css", href = "introjs.min.css"),
                            tags$script(src = "intro.min.js")),
                  includeScript("www/app.js"),
 
@@ -16,10 +17,10 @@ ui <- navbarPage("nPOD DIVE", id = "main", selected = "intro",
   navbarMenu("Integrative Data Views",
              tabPanel("Cohort Exchange", value = "cohort-exchange",
                       actionButton("demoCohortExchange", "Help Demo", icon = icon("play")),
-                      matchAppUI("match")),
+                      matchAppUI("match", CSS = NULL)),
              tabPanel("Data Exploration", value = "data-exploration-1",
                       actionButton("demoCorrelation", "Help Demo", icon = icon("play")),
-                      interactiveMatrixAppUI("cor")),
+                      interactiveMatrixAppUI("cor", CSS = NULL)),
              tabPanel("Data Exploration (high-throughput)", value = "data-exploration-2",
                       "")
   ),
