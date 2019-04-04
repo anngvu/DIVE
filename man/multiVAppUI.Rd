@@ -15,3 +15,7 @@ multiVAppUI(id, CSS = system.file("www/", "app.css", package = "DIVE"))
 Assembles the UI of various module components, i.e. \code{\link{multiVUI}}, \code{\link{geneVUI}},
 into a working one-page application
 }
+\seealso{
+Other multiVUI module: \code{\link{multiVApp}}
+}
+\concept{multiVUI module}

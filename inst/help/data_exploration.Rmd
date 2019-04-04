@@ -5,7 +5,7 @@ output: html_document
 
 **What kind of data?**
 
-You are uploading *nPOD* non-high-throughput numeric data. For high-throughput, image, or other complex data, please contact us or go to (OFFICIAL PROCESS TBD). For non-nPOD data comparisons, you may be intested in the Cohort Exchange.
+You are uploading *nPOD* non-high-throughput numeric data. For high-throughput, image, or other complex data, please contact us or go to (OFFICIAL PROCESS TBD). For non-nPOD data comparisons, you may be interested in the Cohort Exchange.
 
 **Format**
 

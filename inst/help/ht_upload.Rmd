@@ -1,0 +1,18 @@
+---
+title: "HT upload"
+output: html_document
+---
+
+**What kind of data?**
+
+Currently, you can upload *high-throughput* or *low-throughput clinical/experimental data*. 
+
+For high-throughput data only gene expression (microarray, RNA-seq) and protein expression in the familiar table format from Gene Expression Omnibus (GEO), where columns contain case sample IDs and rows are mapped to Entrez gene IDs. In the future we may be able to expand visualization capabilities to methylation data and others. 
+
+For low-throughput clinical/experimental data, there should be a column named "ID" containing case sample IDs, and the other column(s) containining measurements. Whether you have uploaded high-throughput or low-throughput data will be inferred by the presence of the "ID" column. 
+
+We're expecting that in most cases the data are associated with nPOD cases, but we don't actually require all sample IDs to be nPOD IDs. It is possible to upload non-nPOD data for visualization and comparison. 
+
+**Data confidentiality**
+
+Note that this DOES NOT automatically save your data within our server. To officially contribute your data, go to (OFFICIAL PROCESS TBD)

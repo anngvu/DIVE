@@ -18,8 +18,10 @@ When the datasets should be displayed as grouped, the choices can be passed in a
 \item{infoRmd}{Optional link to an Rmarkdown document containing details for the data upload module.}
 }
 \value{
-A list containing the data matrix for the parameter \preformatted{hdata} in the \code{\link{multiV}} module.
+A list containing the data matrix for the parameter \preformatted{hdata} in the \code{\link{multiV}} module,
+\code{\link{geneV}} and \code{\link{selectV}}.
 }
 \description{
-Implements sourcing datasets for \code{\link{multiVUI}} modules in the application page.
+\code{multiVCtrl} is the control hub that provides the data and parameters for \code{\link{multiVUI}},
+\code{\link{geneV}} and \code{\link{selectV}}.
 }

@@ -3,6 +3,8 @@
 #' Currently, this provides options to subset genomics data using a custom list input
 #' or GO and Reactome annotations.
 #'
+#' @family multiVApp module functions
+#'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @export
 geneVUI <- function(id) {
@@ -31,6 +33,8 @@ geneVUI <- function(id) {
 #' Currently, this provides options to subset genomics data using custom list input
 #' or GO and Reactome annotations. The output can be passed to multiple "tracks"
 #' in multiVUI for simultaneous filtering.
+#'
+#' @family multiVApp module functions
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param choices Choices for selectInput.

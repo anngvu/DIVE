@@ -15,3 +15,7 @@ multiVApp(input, output, session, HDATA = list(`Yip et al. (unpublished)`
 Assembles the logic of various module components, i.e. \code{\link{multiV}}, \code{\link{geneV}},
 into a working one-page application
 }
+\seealso{
+Other multiVUI module: \code{\link{multiVAppUI}}
+}
+\concept{multiVUI module}

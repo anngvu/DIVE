@@ -2,6 +2,8 @@
 #'
 #' UI for user to define groups for volcano plots.
 #'
+#' @family multiVApp module functions
+#'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param hdchoices List of high throughput datasets.
 #' @param cchoices Data that can be used to define groups.
@@ -18,15 +20,15 @@ subgroupVUI <- function(id, hdchoices, cchoices) {
            div(class = "forceInline", style = "height: 100px", selectInput(ns("groupby2"), "(B) group by", choices = removeID(cchoices))),
            div(class = "forceInline", style = "height: 100px", uiOutput(ns("by2"), inline = T)),
            div(style = "padding-bottom: 20px;", actionButton(ns("go"), "View")),
-           # shinycssloaders::withSpinner(color = "gray", size = 0.5,
-           plotlyOutput(ns("plot"))
-           #)
+           shinycssloaders::withSpinner(color = "gray", size = 0.5, plotlyOutput(ns("plot")))
   )
 }
 
 #' Shiny module server for creating comparison plots between subgrouped data
 #'
 #' This primarily allows creation of volcano plots for highthroughput datasets based on user-defined group contrasts.
+#'
+#' @family multiVApp module functions
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param cdata A data.table of clinical, phenotype, or other experimental data used to define groups.
@@ -36,10 +38,7 @@ subgroupV <- function(input, output, session,
                       cdata, hdata) {
 
   # updateSelectizeInput(session, "hdataset0", choices = LETTERS[1:5], selected = NULL)
-
-  # output$test <- renderPrint({
-  #   group1()
-  # })
+  plotOut <- reactiveVal(plotly_empty())
 
   # When feature variable is selected, render appropriate UI for values used to define groups
   output$by1 <- renderUI({
@@ -83,12 +82,12 @@ subgroupV <- function(input, output, session,
     else cdata[get(input$groupby2) %in% input$s2, ID]
   })
 
-  plotdata <- eventReactive(input$go, {
+  observeEvent(input$go, {
     # check for group size and whether groups overlap
     okgroupsize <- length(group1()) > 1 && length(group2()) > 1
     disjoint <- !length(intersect(group1(), group2()))
     if(!okgroupsize | !disjoint) {
-      message <- if(!okgroupsize) "Groups incompletely defined or contain fewer than two samples." else "Currently comparisons are only allowed for disjoint groups."
+      message <- if(!okgroupsize) "Groups unavailable or contain fewer than two samples." else "Currently comparisons are only allowed for disjoint groups."
       p <- plotly_empty() %>%
         layout(title = message, font = list(color = "gray")) %>%
         config(displayModeBar = F)
@@ -124,12 +123,11 @@ subgroupV <- function(input, output, session,
       incProgress()
     })
     }
-    p
+    plotOut(p)
   })
 
   output$plot <- renderPlotly({
-    req(!is.null(plotdata()))
-      plotdata()
+    plotOut()
   })
 
   observeEvent(input$remove, {

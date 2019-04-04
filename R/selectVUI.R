@@ -2,6 +2,8 @@
 #'
 #' A basic UI for choosing columns in a dataset.
 #'
+#' @family multiVApp module functions
+#'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @export
 selectVUI <- function(id) {
@@ -15,6 +17,8 @@ selectVUI <- function(id) {
 #'
 #' Returns the selected columns.
 #'
+#' @family multiVApp module functions
+#'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param data A data table.
 #' @param key A key column that is kept for every selected subset. Defaults to "ID".
@@ -25,13 +29,18 @@ selectVUI <- function(id) {
 selectV <- function(input, output, session,
                     data, key = "ID", label = "Clinical/Phenotype/Experimental variable(s)", selected = NULL) {
 
-  Vdata <- reactiveVal(data[, c(key, selected), with = F])
+  Vdata <- reactiveVal(NULL)
+
+  observeEvent(data, {
+    Vdata(data()[, c(key, selected), with = F])
+  })
 
   output$select <- renderUI({
+    choices <- names(data())[names(data()) != key]
     tags$div(
       div(class = "forceInline",
           selectizeInput(session$ns("var"), label = label,
-                         choices = names(data)[names(data) != key], selected = selected,
+                         choices = choices, selected = selected,
                          width = "450px", options = list(maxItems = 3))
           ),
       div(class = "forceInline",
@@ -45,7 +54,7 @@ selectV <- function(input, output, session,
     } else {
       selected <- if(input$sortby %in% input$var) input$sortby else last(input$var)
       updateSelectizeInput(session, "sortby", choices = input$var, selected = selected)
-      data <- data[, c(key, input$var), with = F]
+      data <- data()[, c(key, input$var), with = F]
       setorderv(data, cols = selected, na.last = T)
       Vdata(data)
     }

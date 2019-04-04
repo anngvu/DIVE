@@ -3,6 +3,8 @@
 #' Assembles the UI of various module components, i.e. \code{\link{multiVUI}}, \code{\link{geneVUI}},
 #' into a working one-page application
 #'
+#' @family multiVApp module functions
+#'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
 #' @export
@@ -36,6 +38,8 @@ multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
 #' Assembles the logic of various module components, i.e. \code{\link{multiV}}, \code{\link{geneV}},
 #' into a working one-page application
 #'
+#' @family multiVApp module functions
+#'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @export
 multiVApp <- function(input, output, session,
@@ -45,14 +49,15 @@ multiVApp <- function(input, output, session,
                       CDATA = cdata,
                       CHOICES = gene_symbols) {
 
-  view <- callModule(multiVCtrl, "ctrl", hdlist = HDATA,
+  view <- callModule(multiVCtrl, "ctrl",
+                     cdata = CDATA, hdlist = HDATA,
                      choices = list(Genomics = list("Yip et al. (unpublished)"),
                                     Proteomics = list("Liu et al. 2016", "Nyalwidhe et al. 2017")),
-                     infoRmd = system.file("help/ht_upload.rmd", package = "DIVE"))
+                     infoRmd = system.file("help/ht_upload.Rmd", package = "DIVE"))
 
-  # controls clinical/phenotyepe/experimental variable selection
+  # controls clinical/phenotype/experimental variable selection
   vselect <- callModule(selectV, "cdata",
-                        data = CDATA,
+                        data = reactive(view$cdata),
                         selected = "donor.type")
 
   # controls gene selection for all multiVUIs
@@ -68,13 +73,14 @@ multiVApp <- function(input, output, session,
   })
 
   # each dataset gets its own track (row), served by its own multiVUI module
-  observeEvent(view(), {
-    trackID <- session$ns(names(view()))
-    trackdata <- view()[[1]]
+  observeEvent(view$hddata, {
+    trackID <- session$ns(names(view$hddata))
+    trackdata <- view$hddata[[1]]
     if(!is.null(trackdata)) {
       insertUI(selector = "#displaytrack", immediate = T,
-               ui = tags$div(id = trackID, style = paste0("height:", 30 * nrow(trackdata), "px"), multiVUI(id = trackID)))
-      callModule(multiV, id = names(view()), hdata = trackdata, cdata = vselect, selected = gselect, slabel = gene_symbols_map)
+               ui = tags$div(id = trackID, style = paste0("height:", 30 * nrow(trackdata), "px"),
+                             multiVUI(id = trackID)))
+      callModule(multiV, id = names(view$hddata), hdata = trackdata, cdata = vselect, selected = gselect, slabel = gene_symbols_map)
     } else {
       removeUI(selector = paste0("#", trackID))
     }
@@ -82,6 +88,11 @@ multiVApp <- function(input, output, session,
 
 }
 
+#' Shiny app launcher for multi-view module
+#'
+#' @family multiVApp module functions
+#'
+#' @export
 multiVAppRun <- function() {
   ui <- multiVAppUI("default")
   server <- function(input, output, session) { callModule(multiVApp, "default") }

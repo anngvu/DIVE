@@ -21,33 +21,37 @@
 multiVCtrlUI <- function(id, menu = T, upload = T, GEO = T) {
   ns <- NS(id)
   tags$div(id = "multiVCtrlUI", style="margin-top:30px; margin-bottom:20px; margin-right:100px",
-           if(menu) div(class = "forceInline", style = "margin-right: 30px;",
+           if(menu) div(class = "forceInline", style = "margin-right: 40px;",
                selectizeInput(ns("dataset"), HTML("<strong>Available high-throughput datasets</strong>"),
                               choices = NULL, selected = NULL, multiple = T,
                               options = list(placeholder = "select one or more datasets to view"))),
-           if(upload) div(class = "forceInline", style = "margin-right: 30px;",
-               dataUploadUI(ns("upload"), label = "<strong>Upload your own data</strong>")),
-           if(GEO) div(class = "forceInline", style = "margin-right: 30px;",
-               br(), actionButton(ns("getGEO"), "Source GEO (beta)"))
+           if(upload) div(class = "forceInline", style = "margin-right: 40px;", br(),
+                          actionButton(ns("upload"), "Upload my data")),
+           if(GEO) div(class = "forceInline", style = "margin-right: 40px;", br(),
+                       actionButton(ns("getGEO"), "Source from GEO (beta)"))
           )
 }
 
 #' Shiny module server for controlling multi-column view
 #'
-#' Implements sourcing datasets for \code{\link{multiVUI}} modules in the application page.
+#' \code{multiVCtrl} is the control hub that provides the data and parameters for \code{\link{multiVUI}},
+#' \code{\link{geneV}} and \code{\link{selectV}}.
+#'
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param cdata Data.table of low-throughput data.
 #' @param hdlist A list containing high dimensional datasets; must have names to be used as choices in the selection menu.
 #' @param choices Names referencing datasets in hdlist, to be used in selection menu.
 #' When the datasets should be displayed as grouped, the choices can be passed in accordingly for \code{\link[shiny]{selectizeInput}}.
 #' @param infoRmd Optional link to an Rmarkdown document containing details for the data upload module.
-#' @return A list containing the data matrix for the parameter \preformatted{hdata} in the \code{\link{multiV}} module.
+#' @return A list containing the data matrix for the parameter \preformatted{hdata} in the \code{\link{multiV}} module,
+#' as well as parameters for \code{\link{geneV}} and \code{\link{selectV}}.
 #' @export
 multiVCtrl <- function(input, output, session,
-                      hdlist, choices = names(hdlist), infoRmd = NULL) {
+                      cdata, hdlist, choices = names(hdlist), infoRmd = NULL) {
 
   inview <- c()
-  view <- reactiveVal(NULL)
+  view <- reactiveValues(cdata = cdata, hddata = NULL)
 
   updateSelectizeInput(session, "dataset", choices = choices, selected = NULL)
 
@@ -67,17 +71,25 @@ multiVCtrl <- function(input, output, session,
       inview <<- isolate(input$dataset)
       names(dataset) <- paste0("i", which(names(hdlist) %in% hdname)) # replace name with index # in hdlist
     }
-    view(dataset)
+    view$hddata <- dataset
   })
 
-  udata <- callModule(dataUpload, "upload", infoRmd = infoRmd)
+  observeEvent(input$upload, {
+    showModal(
+      modalDialog(dataUploadUI(session$ns("upload"), label = "<strong>Upload my data</strong>"),
+                  includeMarkdown(infoRmd),
+                  footer = modalButton("Cancel"))
+    )
+  })
+
+  udata <- callModule(dataUpload, "upload")
 
   observeEvent(udata(), {
+    removeModal()
     # process data
 
   })
 
-  observe
 
   return(view)
 }
