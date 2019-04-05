@@ -37,6 +37,12 @@ multiVCtrlUI <- function(id, menu = T, upload = T, GEO = T) {
 #' \code{multiVCtrl} is the control hub that provides the data and parameters for \code{\link{multiVUI}},
 #' \code{\link{geneV}} and \code{\link{selectV}}.
 #'
+#' The server logic handles sourcing of datasets for three different methods:
+#' \enumerate{
+#'   \item Selecting datasets that are pre-processed and stored in memory.
+#'   \item User-uploaded data.
+#'   \item A beta (and least-supported) method of retrieving datasets from GEO.
+#' }
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param cdata Data.table of low-throughput data.
@@ -76,6 +82,7 @@ multiVCtrl <- function(input, output, session,
     view$hddata <- dataset
   })
 
+  # -- handling user-uploaded data --------------------------------------------------------------------------#
   observeEvent(input$upload, {
     showModal(
       modalDialog(dataUploadUI(session$ns("upload"), label = "<strong>Upload my data</strong>"),
@@ -98,7 +105,6 @@ multiVCtrl <- function(input, output, session,
       filename <- attr(data, "filename")
       hdata <- as.matrix(data, rownames = 1)
       hdata <- t(hdata)
-
       hdata <- setNames(list(hdata), filename)
       hdlist <<- c(hdlist, hdata)
       choices$Uploaded <- c(choices$Uploaded, list(filename))
@@ -107,16 +113,29 @@ multiVCtrl <- function(input, output, session,
     removeModal()
   })
 
+  # -- handling GEO data -----------------------------------------------------------------------------------#
   observeEvent(input$getGEO, {
     showModal(
-      modalDialog(getGEOInput(session$ns("GEO")),
+      modalDialog(title = "Get data from GEO",
+                  getGEOInput(session$ns("GEO")),
                   footer = modalButton("Cancel"))
     )
   })
 
   GEOdata <- callModule(getGEOMod, "GEO")
 
-  observeEvent(GEOdata, {
+  observeEvent(GEOdata$accession, {
+    hdata <- t(GEOdata$eset)
+    hdata <- setNames(list(hdata), GEOdata$accession)
+    hdlist <<- c(hdlist, hdata)
+    choices$GEO <- c(choices$GEO, list(GEOdata$accession))
+    updateSelectizeInput(session, "dataset", choices = choices, selected = GEOdata$accession)
+    if(!is.null(GEOdata$pData)) {
+      pData <- GEOdata$pData
+      pData[[key]] <- rownames(pData)
+      data <- merge(cdata, pData, by = "ID", all = T)
+      view$cdata <- data
+    }
     removeModal()
   })
 
