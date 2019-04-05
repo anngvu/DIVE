@@ -37,7 +37,7 @@ dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>") 
 #' @param infoRmd Optional, an Rmarkdown help file for infoOutput, e.g. requirements.
 #' @param appdata Optional, the name (including extension) of one or more files stored in appdata that can be
 #' mock-uploaded. See details.
-#' @return The uploaded file as a reactive data.table object.
+#' @return A data.table with a "filename" attribute containing the filename without extension.
 dataUpload <- function(input, output, session,
                        removable = F, infoRmd = NULL, appdata = NULL) {
 
@@ -53,7 +53,8 @@ dataUpload <- function(input, output, session,
 
   # ---------------------------------------------------------------------------- #
   observeEvent(input$upload, {
-    data <- fread(input$upload$datapath, header = T)
+    data <- fread(input$upload$datapath)
+    attr(data, "filename") <- gsub(".txt$|.csv$", "", input$upload$name)
     uploaded(data)
     if(removable) {
       insertUI(paste0("#", session$ns("main")), "beforeEnd",

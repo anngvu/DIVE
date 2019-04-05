@@ -89,11 +89,9 @@ subgroupV <- function(input, output, session,
     if(!okgroupsize | !disjoint) {
       message <- if(!okgroupsize) "Groups unavailable or contain fewer than two samples." else "Currently comparisons are only allowed for disjoint groups."
       p <- plotly_empty() %>%
-        layout(title = message, font = list(color = "gray")) %>%
-        config(displayModeBar = F)
+        layout(title = message, font = list(color = "gray"))
     } else {
     # do fit, return data frame with (A) p-values, (B) fold difference, (C) color
-    withProgress(value = 0.5, message = "doing comparison...", {
       xm <- t(hdata[[input$hdataset]])
       sampIDs <- colnames(xm)
       group <- factor(sampIDs)
@@ -102,32 +100,27 @@ subgroupV <- function(input, output, session,
       levels(group)[3] <- "ignore"
       fit <- fitDesign(xm, group = group)
       fit2 <- fitContrast(fit, contrast = "g1-g2")
-      incProgress()
-      # A
+    # A
       adjP <- p.adjust(fit2$p.value, method = "fdr")
       neglogAdjP <- -log(adjP)
-      incProgress()
-      # B
+    # B
       means1 <- rowMeans(xm[, sampIDs %in% group1()])
       means2 <- rowMeans(xm[, sampIDs %in% group2()])
       diffx <- means1-means2
-      incProgress()
-      # C
+    # C
       sigcolor <- ifelse(adjP < 0.05, "significant", "not significant")
       p <- plot_ly(x = diffx, y = neglogAdjP, type = "scatter", mode = "markers",
               hoverinfo = "text", text = paste("<br>-log(adjusted p): ", neglogAdjP, "<br>Difference: ", diffx),
               color = sigcolor, colors = c(significant = "deeppink", `not significant` = "gray"),
               showlegend = FALSE) %>%
-        layout(xaxis = list(title = "Fold Change Difference [Group 1 - Group 2]"), yaxis = list(title = "-log(adjusted p-value)")) %>%
-        config(displayModeBar = F)
-      incProgress()
-    })
+        layout(xaxis = list(title = "Fold Change Difference [Group 1 - Group 2]"), yaxis = list(title = "-log(adjusted p-value)"))
     }
     plotOut(p)
   })
 
   output$plot <- renderPlotly({
-    plotOut()
+    plotOut() %>%
+      config(displayModeBar = F)
   })
 
   observeEvent(input$remove, {

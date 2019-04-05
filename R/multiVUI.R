@@ -11,7 +11,8 @@
 multiVUI <- function(id) {
   ns <- NS(id)
   tags$div(style="margin-top:10px; margin-bottom:10px; margin-right:50px",
-           shinycssloaders::withSpinner(plotlyOutput(ns("heatmap")), color = "gray")
+           shinycssloaders::withSpinner(plotlyOutput(ns("heatmap")), color = "gray"),
+           verbatimTextOutput(ns("test"))
   )
 }
 
@@ -28,6 +29,10 @@ multiVUI <- function(id) {
 #' @export
 multiV <- function(input, output, session,
                    hdata, cdata = reactive({ NULL }), key = "ID", selected = reactive({ NULL }), slabel = NULL) {
+
+  output$test <- renderPrint({
+    hdata[1:10, 1:6]
+  })
 
   hplotdata <- reactive({
     plotdata <- if(!length(selected())) hdata else hdata[, colnames(hdata) %in% selected(), drop = F]

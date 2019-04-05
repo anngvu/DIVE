@@ -43,12 +43,14 @@ multiVCtrlUI <- function(id, menu = T, upload = T, GEO = T) {
 #' @param hdlist A list containing high dimensional datasets; must have names to be used as choices in the selection menu.
 #' @param choices Names referencing datasets in hdlist, to be used in selection menu.
 #' When the datasets should be displayed as grouped, the choices can be passed in accordingly for \code{\link[shiny]{selectizeInput}}.
+#' @param key Name of column that contains IDs in \preformatted{cdata} that link to samples in \preformatted{hdlist} datasets. Defaults to "ID".
+#' @param checkFun A check function used for checking data uploads.
 #' @param infoRmd Optional link to an Rmarkdown document containing details for the data upload module.
 #' @return A list containing the data matrix for the parameter \preformatted{hdata} in the \code{\link{multiV}} module,
 #' as well as parameters for \code{\link{geneV}} and \code{\link{selectV}}.
 #' @export
 multiVCtrl <- function(input, output, session,
-                      cdata, hdlist, choices = names(hdlist), infoRmd = NULL) {
+                      cdata, hdlist, choices = names(hdlist), key = "ID", checkFun = NULL, infoRmd = NULL) {
 
   inview <- c()
   view <- reactiveValues(cdata = cdata, hddata = NULL)
@@ -85,11 +87,48 @@ multiVCtrl <- function(input, output, session,
   udata <- callModule(dataUpload, "upload")
 
   observeEvent(udata(), {
-    removeModal()
-    # process data
+    # check which type of data
+    data <- udata()
+    if(key %in% names(data)) {
+      # low-throughput processing: check and modify column names if necessary
+      data <- merge(cdata, data, by = "ID", all = T)
+      view$cdata <- data
+    } else {
+      # high-throughput processing
+      filename <- attr(data, "filename")
+      hdata <- as.matrix(data, rownames = 1)
+      hdata <- t(hdata)
 
+      hdata <- setNames(list(hdata), filename)
+      hdlist <<- c(hdlist, hdata)
+      choices$Uploaded <- c(choices$Uploaded, list(filename))
+      updateSelectizeInput(session, "dataset", choices = choices, selected = filename)
+    }
+    removeModal()
+  })
+
+  observeEvent(input$getGEO, {
+    showModal(
+      modalDialog(getGEOInput(session$ns("GEO")),
+                  footer = modalButton("Cancel"))
+    )
+  })
+
+  GEOdata <- callModule(getGEOMod, "GEO")
+
+  observeEvent(GEOdata, {
+    removeModal()
   })
 
 
   return(view)
+}
+
+# Check fun, returns notification message
+xpMatrixCheck <- function() {
+  # check that IDs are nPOD IDs
+  "Detected that at least some are not nPOD samples."
+  "Detected that expression values are not annotated to gene Entrez IDs.
+  Please use the Custom Selection when filtering with your data.
+  Refer to upload guide for more details"
 }
