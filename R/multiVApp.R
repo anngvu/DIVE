@@ -78,7 +78,9 @@ multiVApp <- function(input, output, session,
     trackdata <- view$hddata[[1]]
     if(!is.null(trackdata)) {
       insertUI(selector = "#displaytrack", immediate = T,
-               ui = tags$div(id = trackID, style = paste0("height:", 30 * nrow(trackdata), "px"),
+               ui = tags$div(id = trackID,
+                             style = paste0("height:", (25 * nrow(trackdata)) + 60, "px;",
+                                            "margin-top:30px; margin-bottom:30px; margin-right:50px; background-color: pink; opacity: 0.5;"),
                              multiVUI(id = trackID)))
       callModule(multiV, id = names(view$hddata), hdata = trackdata, cdata = vselect, selected = gselect, slabel = gene_symbols_map)
     } else {

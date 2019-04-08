@@ -10,9 +10,10 @@
 #' @export
 multiVUI <- function(id) {
   ns <- NS(id)
-  tags$div(style="margin-top:10px; margin-bottom:10px; margin-right:50px",
-           shinycssloaders::withSpinner(plotlyOutput(ns("heatmap")), color = "gray"),
-           verbatimTextOutput(ns("test"))
+  tags$div(div(style = "margin-bottom: 10px;",
+               div(class = "forceInline", br(), actionButton(ns("customx"), "Local filter", icon = icon("plus"))),
+               div(class = "forceInline", id = ns("custom"))),
+           shinycssloaders::withSpinner(plotlyOutput(ns("heatmap")), color = "gray")
   )
 }
 
@@ -30,12 +31,41 @@ multiVUI <- function(id) {
 multiV <- function(input, output, session,
                    hdata, cdata = reactive({ NULL }), key = "ID", selected = reactive({ NULL }), slabel = NULL) {
 
-  output$test <- renderPrint({
-    hdata[1:10, 1:6]
+  localselect <- reactiveVal(NULL)
+  localhdata <- reactiveVal(hdata)
+
+  #-- Custom select --------------------------------------------------------------------------------------------------#
+  observeEvent(input$customx, {
+    if(input$customx %% 2) {
+      insertUI(selector = paste0("#", session$ns("custom")), immediate = T,
+               ui = tags$div(id = session$ns("customselect"),
+                             selectizeInput(session$ns("customselect"), "", choices = NULL, multiple = T)))
+      updateSelectizeInput(session, "customselect", choices = colnames(hdata), server = T)
+      updateActionButton(session, "customx", "Custom filter", icon = icon("minus"))
+    } else {
+      removeUI(selector = paste0("#", session$ns("customselect")))
+      localselect(NULL)
+      selected(selected())
+      updateActionButton(session, "customx", "Custom filter", icon = icon("plus"))
+    }
+  })
+
+  observeEvent(input$customselect, {
+    localselect(input$customselect)
+  })
+
+  #-- Plots ----------------------------------------------------------------------------------------------------------#
+
+  observe({
+    if(is.null(localselect())) { if(!length(selected())) localhdata(hdata) else localhdata(hdata[, colnames(hdata) %in% selected(), drop = F]) }
+  })
+
+  observe({
+    if(!length(localselect())) localhdata(hdata) else localhdata(hdata[, colnames(hdata) %in% localselect(), drop = F])
   })
 
   hplotdata <- reactive({
-    plotdata <- if(!length(selected())) hdata else hdata[, colnames(hdata) %in% selected(), drop = F]
+    plotdata <- localhdata()
     if(!is.null(cdata())) {
       # manually order rows by order given in cdata()
       ckey <- cdata()[as.character(get(key)) %in% rownames(hdata), as.character(get(key))]
@@ -45,7 +75,6 @@ multiV <- function(input, output, session,
   })
 
   hplot <- reactive({
-    # if(!length(hplotdata())) return(NULL)
     xlabs <- if(!is.null(slabel)) slabel[colnames(hplotdata())] else colnames(hplotdata())
     ylabs <- rownames(hplotdata())
     showticklabs <- if(length(hplotdata()) <= 50) TRUE else FALSE # only show labels when readable
