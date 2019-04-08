@@ -50,16 +50,19 @@ multiVCtrlUI <- function(id, menu = T, upload = T, GEO = T) {
 #' @param choices Names referencing datasets in hdlist, to be used in selection menu.
 #' When the datasets should be displayed as grouped, the choices can be passed in accordingly for \code{\link[shiny]{selectizeInput}}.
 #' @param key Name of column that contains IDs in \preformatted{cdata} that link to samples in \preformatted{hdlist} datasets. Defaults to "ID".
+#' @param vselect A default selected column in \preformatted{cdata} to display.
 #' @param checkFun A check function used for checking data uploads.
 #' @param infoRmd Optional link to an Rmarkdown document containing details for the data upload module.
 #' @return A list containing the data matrix for the parameter \preformatted{hdata} in the \code{\link{multiV}} module,
 #' as well as parameters for \code{\link{geneV}} and \code{\link{selectV}}.
 #' @export
 multiVCtrl <- function(input, output, session,
-                      cdata, hdlist, choices = names(hdlist), key = "ID", checkFun = NULL, infoRmd = NULL) {
+                      cdata, hdlist, choices = names(hdlist),
+                      key = "ID", vselect = "donor.type",
+                      checkFun = NULL, infoRmd = NULL) {
 
   inview <- c()
-  view <- reactiveValues(cdata = cdata, hddata = NULL)
+  view <- reactiveValues(cdata = cdata, hddata = NULL, vselect = vselect)
 
   updateSelectizeInput(session, "dataset", choices = choices, selected = NULL)
 
@@ -135,6 +138,9 @@ multiVCtrl <- function(input, output, session,
       pData[[key]] <- rownames(pData)
       data <- merge(cdata, pData, by = "ID", all = T)
       view$cdata <- data
+      view$vselect <- names(pData)[1]
+    } else {
+      view$vselect <- NULL
     }
     removeModal()
   })

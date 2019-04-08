@@ -58,7 +58,7 @@ multiVApp <- function(input, output, session,
   # controls clinical/phenotype/experimental variable selection
   vselect <- callModule(selectV, "cdata",
                         data = reactive(view$cdata),
-                        selected = "donor.type")
+                        selected = reactive(view$vselect))
 
   # controls gene selection for all multiVUIs
   gselect <- callModule(geneV, "gene",
@@ -68,8 +68,12 @@ multiVApp <- function(input, output, session,
   observeEvent(input$newSubgroupVUI, {
     N <- input$newSubgroupVUI
     insertUI(paste0("#views"),
-             ui = subgroupVUI(id = session$ns(paste0("panel", N) ), hdchoices = names(HDATA), cchoices = names(CDATA) ))
-    callModule(subgroupV, id = paste0("panel", N), cdata = CDATA, hdata = HDATA )
+             ui = subgroupVUI(id = session$ns(paste0("panel", N) ),
+                              hdchoices = names(HDATA),
+                              cchoices = names(CDATA) ))
+    callModule(subgroupV, id = paste0("panel", N),
+               cdata = CDATA,
+               hdata = HDATA )
   })
 
   # each dataset gets its own track (row), served by its own multiVUI module
@@ -82,7 +86,11 @@ multiVApp <- function(input, output, session,
                              style = paste0("height:", (25 * nrow(trackdata)) + 60, "px;",
                                             "margin-top:30px; margin-bottom:30px; margin-right:50px; background-color: pink; opacity: 0.5;"),
                              multiVUI(id = trackID)))
-      callModule(multiV, id = names(view$hddata), hdata = trackdata, cdata = vselect, selected = gselect, slabel = gene_symbols_map)
+      callModule(multiV, id = names(view$hddata),
+                 hdata = trackdata,
+                 cdata = vselect,
+                 selected = gselect,
+                 slabel = gene_symbols_map)
     } else {
       removeUI(selector = paste0("#", trackID))
     }

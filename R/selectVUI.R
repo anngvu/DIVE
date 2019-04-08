@@ -20,42 +20,42 @@ selectVUI <- function(id) {
 #' @family multiVApp module functions
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param data A data table.
+#' @param data A reactive data.table.
 #' @param key A key column that is kept for every selected subset. Defaults to "ID".
 #' @param label Label for variable select input.
 #' @param selected Optional, initial selection.
 #' @return The subsetted data table.
 #' @export
 selectV <- function(input, output, session,
-                    data, key = "ID", label = "Clinical/Phenotype/Experimental variable(s)", selected = NULL) {
+                    data, key = "ID", label = "Clinical/Phenotype/Experimental variable(s)", selected = reactive({ NULL }) )  {
 
   Vdata <- reactiveVal(NULL)
-
-  observeEvent(data, {
-    Vdata(data()[, c(key, selected), with = F])
-  })
 
   output$select <- renderUI({
     choices <- names(data())[names(data()) != key]
     tags$div(
       div(class = "forceInline",
           selectizeInput(session$ns("var"), label = label,
-                         choices = choices, selected = selected,
+                         choices = choices, selected = selected(),
                          width = "450px", options = list(maxItems = 3))
           ),
       div(class = "forceInline",
-          selectInput(session$ns("sortby"), "Sort by", choices = selected, selected = selected, width = "300px"))
+          selectInput(session$ns("sortby"), "Sort by", choices = selected(), selected = selected(), width = "300px"))
       )
+  })
+
+  observeEvent(data, {
+    Vdata(data()[, c(key, selected()), with = F])
   })
 
   observeEvent(input$var, {
     if(is.null(input$var)) {
       Vdata(NULL)
     } else {
-      selected <- if(input$sortby %in% input$var) input$sortby else last(input$var)
-      updateSelectizeInput(session, "sortby", choices = input$var, selected = selected)
+      sortby <- if(input$sortby %in% input$var) input$sortby else last(input$var)
+      updateSelectizeInput(session, "sortby", choices = input$var, selected = sortby)
       data <- data()[, c(key, input$var), with = F]
-      setorderv(data, cols = selected, na.last = T)
+      setorderv(data, cols = sortby, na.last = T)
       Vdata(data)
     }
   }, ignoreNULL = F)
