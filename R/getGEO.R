@@ -14,10 +14,12 @@ getGEOInput <- function(id, infoRmd = system.file("help/GEO_module.Rmd", package
 #' Shiny module server for importing data from GEO
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
+#' @return GEOdata as reactive values object containing \preformatted{$accession}, \preformatted{$eset} and \preformatted{pData}
 #' @export
 getGEOMod <- function(input, output, session) {
 
   characteristics <- reactiveVal(NULL)
+  GPL <- reactiveVal(NULL)
   GEOdata <- reactiveValues(accession = NULL, eset = NULL, pData = NULL)
 
   # Pull GEO with given GSE
@@ -26,16 +28,21 @@ getGEOMod <- function(input, output, session) {
     if(class(gse) != "try-error") {
       eset <- gse[[1]]
       GEOdata$eset <- Biobase::exprs(eset)
+      # extra phenotype metadata
       meta <- Biobase::pData(eset)
       charts <- grep(":", names(meta), value = T)
       characteristics(meta[, charts])
+      # extract platform annotation
+      gpl <- GEOquery::Table(GEOquery::getGEO(Biobase::annotation(eset)))
+      GPL(gpl)
+
       showModal(modalDialog(title = "Step 2",
         selectizeInput(session$ns("characteristics"),
                                   HTML("<strong>Which characteristics do you want to import as relevant clinical/phenotype/experimental data?</strong>"),
                                   choices = charts, selected = charts, multiple = T, width = "100%"),
         helpText("(clear all selections to import none)"),
-        actionButton(session$ns("selectC"), "Import"),
-        br(), br(), h5("Sample characteristics preview"),
+        actionButton(session$ns("importC"), "OK"),
+        br(), br(), h5("Characteristics (preview)"),
         tableOutput(session$ns("pChars")),
         footer = modalButton("Cancel")
       ))
@@ -45,12 +52,31 @@ getGEOMod <- function(input, output, session) {
 
   })
 
+  observeEvent(input$importC, {
+    showModal(modalDialog(title = "Step 3",
+                          selectizeInput(session$ns("annofield"),
+                                         HTML("<strong>Which annotation field to use for lookup and filtering?</strong>"),
+                                         choices = colnames(GPL()), width = "100%"),
+                          helpText("Choosing the column containing Entrez gene ID (NOT symbol) is recommended,
+                                   but if it is not available, choose the annotation most useful for you."),
+                          actionButton(session$ns("annotate"), "OK"),
+                          br(), br(), h5("Annotation table (preview)"),
+                          tableOutput(session$ns("gplTable")),
+                          footer = modalButton("Cancel")
+    ))
+  })
+
   output$pChars <- renderTable({
     head(characteristics())
   }, spacing = "xs")
 
-  observeEvent(input$selectC, {
+  output$gplTable <- renderTable({
+    head(GPL())
+  }, spacing = "xs")
+
+  observeEvent(input$annotate, {
     if(length(input$characteristics)) GEOdata$pData <- characteristics()[, input$characteristics, drop = F]
+    rownames(GEOdata$eset) <- as.character(GPL()[, input$annofield])
     GEOdata$accession <- trimws(input$GSE)
   })
 
