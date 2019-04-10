@@ -27,25 +27,32 @@ getGEOMod <- function(input, output, session) {
     gse <- try(GEOquery::getGEO(trimws(input$GSE)))
     if(class(gse) != "try-error") {
       eset <- gse[[1]]
-      GEOdata$eset <- Biobase::exprs(eset)
-      # extra phenotype metadata
-      meta <- Biobase::pData(eset)
-      charts <- grep(":", names(meta), value = T)
-      characteristics(meta[, charts])
-      # extract platform annotation
-      gpl <- GEOquery::Table(GEOquery::getGEO(Biobase::annotation(eset)))
-      GPL(gpl)
+      xdata <- Biobase::exprs(eset)
+      if(!nrow(xdata)) {
+        showNotification("Unfortunately, it looks like the accession provides data only as non-standard supplementary file(s),
+                         which we don't support.",
+                         duration = NULL, type = "error")
+      } else {
+        GEOdata$eset <- xdata
+        # extra phenotype metadata
+        meta <- Biobase::pData(eset)
+        charts <- grep(":", names(meta), value = T)
+        characteristics(meta[, charts])
+        # extract platform annotation
+        gpl <- GEOquery::Table(GEOquery::getGEO(Biobase::annotation(eset)))
+        GPL(gpl)
 
-      showModal(modalDialog(title = "Step 2",
-        selectizeInput(session$ns("characteristics"),
-                                  HTML("<strong>Which characteristics do you want to import as relevant clinical/phenotype/experimental data?</strong>"),
-                                  choices = charts, selected = charts, multiple = T, width = "100%"),
-        helpText("(clear all selections to import none)"),
-        actionButton(session$ns("importC"), "OK"),
-        br(), br(), h5("Characteristics (preview)"),
-        tableOutput(session$ns("pChars")),
-        footer = modalButton("Cancel")
-      ))
+        showModal(modalDialog(title = "Step 2",
+          selectizeInput(session$ns("characteristics"),
+                                    HTML("<strong>Which characteristics do you want to import as relevant clinical/phenotype/experimental data?</strong>"),
+                                    choices = charts, selected = charts, multiple = T, width = "100%"),
+          helpText("(clear all selections to import none)"),
+          actionButton(session$ns("importC"), "OK"),
+          br(), br(), h5("Characteristics (preview)"),
+          tableOutput(session$ns("pChars")),
+          footer = modalButton("Cancel")
+        ))
+      }
     } else {
 
     }

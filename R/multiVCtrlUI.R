@@ -106,14 +106,20 @@ multiVCtrl <- function(input, output, session,
     } else {
       # high-throughput processing
       filename <- attr(data, "filename")
-      hdata <- as.matrix(data, rownames = 1)
-      hdata <- t(hdata)
-      hdata <- setNames(list(hdata), filename)
-      hdlist <<- c(hdlist, hdata)
-      choices$Uploaded <- c(choices$Uploaded, list(filename))
-      updateSelectizeInput(session, "dataset", choices = choices, selected = filename)
+      if(filename %in% names(hdlist)) {
+        showNotification("Dataset with same file name already exists (overwrites not allowed).
+                         To upload a different version, change file name to reflect that.",
+                         type = "warning", duration = NULL)
+      } else {
+        hdata <- as.matrix(data, rownames = 1)
+        hdata <- t(hdata)
+        hdata <- setNames(list(hdata), filename)
+        hdlist <<- c(hdlist, hdata)
+        choices$Uploaded <<- c(choices$Uploaded, list(filename))
+        updateSelectizeInput(session, "dataset", choices = choices, selected = c(input$dataset, filename))
+        removeModal()
+      }
     }
-    removeModal()
   })
 
   # -- handling GEO data -----------------------------------------------------------------------------------#
