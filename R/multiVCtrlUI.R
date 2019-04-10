@@ -117,6 +117,7 @@ multiVCtrl <- function(input, output, session,
         hdlist <<- c(hdlist, hdata)
         choices$Uploaded <<- c(choices$Uploaded, list(filename))
         updateSelectizeInput(session, "dataset", choices = choices, selected = c(input$dataset, filename))
+        # view$vselect <- NULL # to do: more sophisticated to infer most appropriate vselect as default
         removeModal()
       }
     }
@@ -133,7 +134,7 @@ multiVCtrl <- function(input, output, session,
 
   GEOdata <- callModule(getGEOMod, "GEO")
 
-  observeEvent(GEOdata$accession, {
+  observeEvent(GEOdata$call, {
     hdata <- t(GEOdata$eset)
     hdata <- setNames(list(hdata), GEOdata$accession)
     hdlist <<- c(hdlist, hdata)

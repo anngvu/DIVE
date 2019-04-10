@@ -13,14 +13,23 @@ getGEOInput <- function(id, infoRmd = system.file("help/GEO_module.Rmd", package
 
 #' Shiny module server for importing data from GEO
 #'
+#' Handles importing GEO data by guiding user through a number of modals.
+#'
+#' Returns a reactive values object containing \preformatted{$accession},
+#' \preformatted{$eset}, \preformatted{$pData} and \preformatted{$call}.
+#' The variable \preformatted{$call} is an internal counter for use with
+#' other modules that need to update when new GEO dataset has been processed
+#' completely through the annotation step
+#' (even when it has the same accession number).
+#'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @return GEOdata as reactive values object containing \preformatted{$accession}, \preformatted{$eset} and \preformatted{pData}
+#' @return GEOdata as reactive values object. See details.
 #' @export
 getGEOMod <- function(input, output, session) {
 
   characteristics <- reactiveVal(NULL)
   GPL <- reactiveVal(NULL)
-  GEOdata <- reactiveValues(accession = NULL, eset = NULL, pData = NULL)
+  GEOdata <- reactiveValues(accession = NULL, eset = NULL, pData = NULL, call = NULL)
 
   # Pull GEO with given GSE
   observeEvent(input$get, {
@@ -33,6 +42,7 @@ getGEOMod <- function(input, output, session) {
                          which we don't support.",
                          duration = NULL, type = "error")
       } else {
+        GEOdata$accession <- trimws(input$GSE)
         GEOdata$eset <- xdata
         # extra phenotype metadata
         meta <- Biobase::pData(eset)
@@ -84,7 +94,7 @@ getGEOMod <- function(input, output, session) {
   observeEvent(input$annotate, {
     if(length(input$characteristics)) GEOdata$pData <- characteristics()[, input$characteristics, drop = F]
     rownames(GEOdata$eset) <- as.character(GPL()[, input$annofield])
-    GEOdata$accession <- trimws(input$GSE)
+    GEOdata$call <- input$annotate
   })
 
   # Checks: species is human, 1-channel data
