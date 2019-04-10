@@ -34,18 +34,19 @@ getGEOMod <- function(input, output, session) {
   # Pull GEO with given GSE
   observeEvent(input$get, {
     gse <- try(GEOquery::getGEO(trimws(input$GSE)))
-    if(class(gse) != "try-error") {
+    if(class(gse) == "try-error") {
+      showNotification("Something went wrong. Try again later or let us know about the issue with the GSE you were trying to pull.",
+                       duration = NULL, type = "error")
+    } else {
       eset <- gse[[1]]
       xdata <- Biobase::exprs(eset)
-      if(!nrow(xdata)) {
-        showNotification("Unfortunately, it looks like the accession provides data only as non-standard supplementary file(s),
-                         which we don't support.",
-                         duration = NULL, type = "error")
+      meta <- Biobase::pData(eset)
+      fchecks <- checkGEO(xdata, meta)
+      if(length(fchecks)) {
+        showNotification(fchecks, duration = NULL, type = "error")
       } else {
         GEOdata$accession <- trimws(input$GSE)
         GEOdata$eset <- xdata
-        # extra phenotype metadata
-        meta <- Biobase::pData(eset)
         charts <- grep(":", names(meta), value = T)
         characteristics(meta[, charts])
         # extract platform annotation
@@ -63,10 +64,7 @@ getGEOMod <- function(input, output, session) {
           footer = modalButton("Cancel")
         ))
       }
-    } else {
-
     }
-
   })
 
   observeEvent(input$importC, {
@@ -105,4 +103,10 @@ getGEOMod <- function(input, output, session) {
 
   return(GEOdata)
 
+}
+
+checkGEO <- function(xdata, meta) {
+  if(!nrow(xdata)) return("Unfortunately, it looks like the accession provides data only as non-standard supplementary file(s),
+  which we don't support.")
+  if(meta$channel_count[1] != 1) return("Unfortunately, we don't support visualization of GEO data outside certain platforms/formats (one-channel arrays, RNA-seq).")
 }

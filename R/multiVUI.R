@@ -77,7 +77,7 @@ multiV <- function(input, output, session,
   hplot <- reactive({
     xlabs <- if(!is.null(slabel)) slabel[colnames(hplotdata())] else colnames(hplotdata())
     ylabs <- rownames(hplotdata())
-    showticklabs <- if(length(hplotdata()) <= 50) TRUE else FALSE # only show labels when readable
+    showticklabs <- if(ncol(hplotdata()) <= 50) TRUE else FALSE # only show labels when readable
     plot_ly(z = hplotdata(), x = xlabs, y = ylabs, # name = "relative expression",
             type = "heatmap", colors = "RdBu", height = 25 * nrow(hdata),
             # text = paste(~y, "\nsampleID": ~x, "\nrelative expression:", ~z),

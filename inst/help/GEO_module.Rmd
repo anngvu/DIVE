@@ -5,5 +5,5 @@ output: html_document
 
 **Notes**
 
-We will pull any GEO data that includes __human__ gene expression (microarray, RNA-seq) and protein expression (mouse data not currently supported). In the future we may be able to expand visualization capabilities to methylation data and others.
+Currently, supported GEO data are limited to certain platforms with manageable data size: gene expression (microarray, RNA-seq) and protein expression. We may be able to expand visualization capabilities in the future.
 
