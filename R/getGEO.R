@@ -31,58 +31,24 @@ getGEOMod <- function(input, output, session) {
   GPL <- reactiveVal(NULL)
   GEOdata <- reactiveValues(accession = NULL, eset = NULL, pData = NULL, call = NULL)
 
-  # Pull GEO with given GSE
-  observeEvent(input$get, {
-  withProgress(value = 0.2, message = "downloading...", expr = {
-    gse <- try(GEOquery::getGEO(trimws(input$GSE)))
-    if(class(gse) == "try-error") {
-      showNotification("Something went wrong. Try again later or let us know which GSE couldn't be pulled.",
-                       duration = NULL, type = "error")
-    } else {
-      setProgress(value = 0.3, message = "checking data...")
-      eset <- gse[[1]]
-      xdata <- Biobase::exprs(eset)
-      pdata <- Biobase::pData(eset)
-      meta <- otherInfo(experimentData(eset))
-      if(!nrow(xdata) & grepl("sequencing", meta$type)) {
-        setProgress(value = 0.5, message = "sourcing sequencing data...")
-        sra <- regmatches(meta$relation, regexpr("(https://www.ncbi.nlm.nih.gov/sra?term=)?SRP[0-9]+", meta$relation))
-        xdata <- getRecount(sra)
-      }
+  Step2 <- function() {
+    showModal(modalDialog(title = "Step 2",
+                          selectizeInput(session$ns("characteristics"),
+                                         HTML("<strong>Which characteristics do you want to import as relevant clinical/phenotype/experimental data?</strong>"),
+                                         choices = names(characteristics()), selected = names(characteristics()), multiple = T, width = "100%"),
+                          helpText("(clear all selections to import none)"),
+                          actionButton(session$ns("importC"), "OK"),
+                          br(), br(), h5("Characteristics (preview)"),
+                          tableOutput(session$ns("pChars")),
+                          footer = modalButton("Cancel")
+    ))
+  }
 
-      if(nrow(xdata)) {
-        setProgress(value = 0.7, message = "parsing data...")
-        GEOdata$eset <- xdata
-        GEOdata$accession <- trimws(input$GSE)
-        charts <- grep(":", names(pdata), value = T)
-        characteristics(pdata[, charts])
-        showModal(modalDialog(title = "Step 2",
-          selectizeInput(session$ns("characteristics"),
-                                    HTML("<strong>Which characteristics do you want to import as relevant clinical/phenotype/experimental data?</strong>"),
-                                    choices = charts, selected = charts, multiple = T, width = "100%"),
-          helpText("(clear all selections to import none)"),
-          actionButton(session$ns("importC"), "OK"),
-          br(), br(), h5("Characteristics (preview)"),
-          tableOutput(session$ns("pChars")),
-          footer = modalButton("Cancel")
-        ))
-
-        # extract platform annotation; when there is no annotation, use rownames of xdata
-        gpl <- GEOquery::Table(GEOquery::getGEO(Biobase::annotation(eset)))
-        if(!length(gpl)) gpl <- data.frame(Gene = rownames(xdata))
-        GPL(gpl)
-      } else {
-        showNotification("Processed sequencing data not available.", duration = NULL, type = "error")
-      }
-    }
-  })
-  })
-
-  observeEvent(input$importC, {
+  Step3 <- function() {
     showModal(modalDialog(title = "Step 3",
                           selectizeInput(session$ns("annofield"),
-                                         HTML("<strong>Which annotation field to use for lookup and filtering?</strong>"),
-                                         choices = colnames(GPL()), width = "100%"),
+                                         HTML("<strong>Choose annotation field to use for lookup and filtering?</strong>"),
+                                         choices = names(GPL()), width = "100%"),
                           helpText("Choosing the column containing Entrez gene ID (NOT symbol) is recommended,
                                    but if it is not available, choose the annotation most useful for you."),
                           actionButton(session$ns("annotate"), "OK"),
@@ -90,6 +56,51 @@ getGEOMod <- function(input, output, session) {
                           tableOutput(session$ns("gplTable")),
                           footer = modalButton("Cancel")
     ))
+  }
+
+
+  # Pull GEO with given GSE
+  observeEvent(input$get, {
+  withProgress(value = 0.2, message = "downloading...", expr = {
+    gse <- try(GEOquery::getGEO(trimws(input$GSE)))
+    if(class(gse) == "try-error") {
+      showNotification("Something went wrong. Try again later or let us know which accession failed.",
+                       duration = NULL, type = "error")
+    } else {
+      setProgress(value = 0.3, message = "checking data...")
+      eset <- gse[[1]]
+      meta <- otherInfo(experimentData(eset))
+      xdata <- Biobase::exprs(eset)
+      pdata <- Biobase::pData(eset)
+      characteristics(pdata[, grep(":", names(pdata))])
+
+      if(!nrow(xdata) && grepl("sequencing", meta$type)) {
+        setProgress(value = 0.5, message = "sourcing sequencing data...")
+        sra <- regmatches(meta$relation, regexpr("(https://www.ncbi.nlm.nih.gov/sra?term=)?SRP[0-9]+", meta$relation))
+        recounted <- getRecount(sra)
+        if(!is.null(recounted)) {
+          xdata <- recounted$xdata
+          characteristics(recounted$pdata)
+        }
+      }
+
+      if(nrow(xdata)) {
+        setProgress(value = 0.8, message = "parsing data...")
+        GEOdata$accession <- trimws(input$GSE)
+        GEOdata$eset <- xdata
+        gpl <- GEOquery::Table(GEOquery::getGEO(Biobase::annotation(eset)))
+        if(!length(gpl)) gpl <- data.frame(gene_id = rownames(xdata)) # when no annotation, use rownames of xdata
+        GPL(gpl)
+        Step2()
+      } else {
+        showNotification("Processed data not available.", duration = NULL, type = "error")
+      }
+    }
+  })
+  })
+
+  observeEvent(input$importC, {
+    Step3()
   })
 
   output$pChars <- renderTable({
@@ -131,8 +142,16 @@ checkGEO <- function(xdata, meta,
 
 
 getRecount <- function(sra) {
-  link <- recount::download_study(sra, download = F)
-  load(url(link))
-  counts <- SummarizedExperiment::assay(rse_gene)
-  return(counts)
+  link <- NULL
+  try(link <- recount::download_study(sra, download = F), silent = T)
+  if(!is.null(link)) {
+    attempt <- 0
+    while(attempt <= 1) {
+      attempt <- attempt + 1
+      try(load(url(link)), silent = T)
+    }
+    xdata <- SummarizedExperiment::assay(rse_gene)
+    pdata <- geo_characteristics(colData(rse_gene))
+    return(list(xdata = xdata, pdata = pdata))
+  }
 }
