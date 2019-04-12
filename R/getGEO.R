@@ -33,26 +33,29 @@ getGEOMod <- function(input, output, session) {
 
   # Pull GEO with given GSE
   observeEvent(input$get, {
+  withProgress(value = 0.2, message = "downloading...", expr = {
     gse <- try(GEOquery::getGEO(trimws(input$GSE)))
     if(class(gse) == "try-error") {
-      showNotification("Something went wrong. Try again later or let us know about the issue with the GSE you were trying to pull.",
+      showNotification("Something went wrong. Try again later or let us know which GSE couldn't be pulled.",
                        duration = NULL, type = "error")
     } else {
+      setProgress(value = 0.3, message = "checking data...")
       eset <- gse[[1]]
       xdata <- Biobase::exprs(eset)
-      meta <- Biobase::pData(eset)
-      fchecks <- checkGEO(xdata, meta)
-      if(length(fchecks)) {
-        showNotification(fchecks, duration = NULL, type = "error")
-      } else {
-        GEOdata$accession <- trimws(input$GSE)
-        GEOdata$eset <- xdata
-        charts <- grep(":", names(meta), value = T)
-        characteristics(meta[, charts])
-        # extract platform annotation
-        gpl <- GEOquery::Table(GEOquery::getGEO(Biobase::annotation(eset)))
-        GPL(gpl)
+      pdata <- Biobase::pData(eset)
+      meta <- otherInfo(experimentData(eset))
+      if(!nrow(xdata) & grepl("sequencing", meta$type)) {
+        setProgress(value = 0.5, message = "sourcing sequencing data...")
+        sra <- regmatches(meta$relation, regexpr("(https://www.ncbi.nlm.nih.gov/sra?term=)?SRP[0-9]+", meta$relation))
+        xdata <- getRecount(sra)
+      }
 
+      if(nrow(xdata)) {
+        setProgress(value = 0.7, message = "parsing data...")
+        GEOdata$eset <- xdata
+        GEOdata$accession <- trimws(input$GSE)
+        charts <- grep(":", names(pdata), value = T)
+        characteristics(pdata[, charts])
         showModal(modalDialog(title = "Step 2",
           selectizeInput(session$ns("characteristics"),
                                     HTML("<strong>Which characteristics do you want to import as relevant clinical/phenotype/experimental data?</strong>"),
@@ -63,8 +66,16 @@ getGEOMod <- function(input, output, session) {
           tableOutput(session$ns("pChars")),
           footer = modalButton("Cancel")
         ))
+
+        # extract platform annotation; when there is no annotation, use rownames of xdata
+        gpl <- GEOquery::Table(GEOquery::getGEO(Biobase::annotation(eset)))
+        if(!length(gpl)) gpl <- data.frame(Gene = rownames(xdata))
+        GPL(gpl)
+      } else {
+        showNotification("Processed sequencing data not available.", duration = NULL, type = "error")
       }
     }
+  })
   })
 
   observeEvent(input$importC, {
@@ -95,18 +106,33 @@ getGEOMod <- function(input, output, session) {
     GEOdata$call <- input$annotate
   })
 
-  # Checks: species is human, 1-channel data
-
-  # Get metadata
-
-  #
-
   return(GEOdata)
 
 }
 
-checkGEO <- function(xdata, meta) {
-  if(!nrow(xdata)) return("Unfortunately, it looks like the accession provides data only as non-standard supplementary file(s),
-  which we don't support.")
-  if(meta$channel_count[1] != 1) return("Unfortunately, we don't support visualization of GEO data outside certain platforms/formats (one-channel arrays, RNA-seq).")
+checkGEO <- function(xdata, meta,
+                     supported = c("Expression profiling by array",
+                       "Expression profiling by high throughput sequencing",
+                       "Protein profiling by protein array",
+                       "Methylation profiling by array",
+                       "Methylation profiling by high throughput sequencing")
+                     ) {
+
+  if(!nrow(xdata) & grepl("sequencing", meta$type)) {
+    sra <- regmatches(meta$relation, regexpr("(https://www.ncbi.nlm.nih.gov/sra?term=)?SRP[0-9]+", meta$relation))
+    data <- getRecount(sra)
+    return(data)
+  } else {
+    return("Unfortunately, no processed data is available and we don't use non-standard supplementary file(s).")
+  }
+  # if(pdata$channel_count[1] != 1) return("Unfortunately, we don't support visualization of GEO data outside certain platforms/formats (one-channel arrays, RNA-seq).")
+}
+
+
+
+getRecount <- function(sra) {
+  link <- recount::download_study(sra, download = F)
+  load(url(link))
+  counts <- SummarizedExperiment::assay(rse_gene)
+  return(counts)
 }

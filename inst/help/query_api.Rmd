@@ -5,7 +5,7 @@ output: html_document
 
 **How do I use the query field?**
 
-We use the [mygene.info](http://mygene.info/) API to map annotations, i.e. ontologies, and other information to gene sets. 
+We use the [mygene.info](http://mygene.info/) API to map annotations, i.e. from ontologies, and other information to the data to make it more searchable/filterable. 
 The quick-start examples below demonstrates supported queries.
 
 

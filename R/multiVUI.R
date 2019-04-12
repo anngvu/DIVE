@@ -10,10 +10,12 @@
 #' @export
 multiVUI <- function(id) {
   ns <- NS(id)
-  tags$div(div(style = "margin-bottom: 10px;",
-               div(class = "forceInline", br(), actionButton(ns("customx"), "Local filter", icon = icon("plus"))),
+  tags$div(style = "margin-bottom:30px;",
+    div(style = "margin-bottom: 10px;",
+               div(class = "forceInline", br(), actionButton(ns("cluster"), "Cluster")),
+               div(class = "forceInline", br(), actionButton(ns("addcustom"), "Local filter", icon = icon("plus"))),
                div(class = "forceInline", id = ns("custom"))),
-           shinycssloaders::withSpinner(plotlyOutput(ns("heatmap")), color = "gray")
+           shinycssloaders::withSpinner(plotlyOutput(ns("heatmap"), height = "100%"), color = "gray")
   )
 }
 
@@ -34,19 +36,29 @@ multiV <- function(input, output, session,
   localselect <- reactiveVal(NULL)
   localhdata <- reactiveVal(hdata)
 
+  #-- Clustering -----------------------------------------------------------------------------------------------------#
+  observeEvent(input$cluster, {
+    withProgress(value = 0.5, message = "working...",
+      expr = {
+              gene_clust <- hclust(dist(t(hdata)))
+              hdata <- hdata[, gene_clust$order]
+              localhdata(hdata)
+              })
+  })
+
   #-- Custom select --------------------------------------------------------------------------------------------------#
-  observeEvent(input$customx, {
-    if(input$customx %% 2) {
+  observeEvent(input$addcustom, {
+    if(input$addcustom %% 2) {
       insertUI(selector = paste0("#", session$ns("custom")), immediate = T,
                ui = tags$div(id = session$ns("customselect"),
                              selectizeInput(session$ns("customselect"), "", choices = NULL, multiple = T)))
       updateSelectizeInput(session, "customselect", choices = colnames(hdata), server = T)
-      updateActionButton(session, "customx", "Custom filter", icon = icon("minus"))
+      updateActionButton(session, "addcustom", "Custom filter", icon = icon("minus"))
     } else {
       removeUI(selector = paste0("#", session$ns("customselect")))
       localselect(NULL)
       selected(selected())
-      updateActionButton(session, "customx", "Custom filter", icon = icon("plus"))
+      updateActionButton(session, "addcustom", "Custom filter", icon = icon("plus"))
     }
   })
 

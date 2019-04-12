@@ -17,18 +17,18 @@ multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
 
             fluidRow(style = "background: WhiteSmoke;",
               column(1, br(), h4("DATA SOURCES")),
-              column(8, multiVCtrlUI(ns("ctrl"))),
+              column(7, multiVCtrlUI(ns("ctrl"))),
               column(1, br(), h4("DATA TOOLS")),
-              column(2, br(), br(),
-                           actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup")))
-
-            ),
+              column(3, br(), br(),
+                     div(class = "forceInline", actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup"))),
+                     div(class = "forceInline", actionButton(ns("ML"), "Learn", icon = icon("cog")))
+            )),
             fluidRow(absolutePanel(style = "z-index: 10;", tags$div(id = "views"), draggable = T)),
             fluidRow(style = "padding-top: 50px;",
               conditionalPanel(condition = paste0("input['", ns("ctrl-dataset"), "']"),
                                column(8, geneVUI(ns("gene"))),
-                               column(4, selectVUI(ns("cdata"))))
-              ),
+                               column(4, selectVUI(ns("cdata")))
+            )),
             div(id = "displaytrack")
   )
 }
@@ -83,8 +83,6 @@ multiVApp <- function(input, output, session,
     if(!is.null(trackdata)) {
       insertUI(selector = "#displaytrack", immediate = T,
                ui = tags$div(id = trackID,
-                             style = paste0("height:", (25 * nrow(trackdata)) + 60, "px;",
-                                            "margin-top:30px; margin-bottom:30px; margin-right:50px; background-color: pink; opacity: 0.5;"),
                              multiVUI(id = trackID)))
       callModule(multiV, id = names(view$hddata),
                  hdata = trackdata,
