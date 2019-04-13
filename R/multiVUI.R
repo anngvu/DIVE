@@ -38,9 +38,12 @@ multiV <- function(input, output, session,
 
   #-- Clustering -----------------------------------------------------------------------------------------------------#
   observeEvent(input$cluster, {
-    withProgress(value = 0.5, message = "working...",
+    withProgress(value = 0.2, message = "creating distance matrix...",
       expr = {
-              gene_clust <- hclust(dist(t(hdata)))
+              gene_clust <- dist(t(hdata))
+              setProgress(value = 0.5, message = "clustering...")
+              gene_clust <- hclust(gene_clust)
+              setProgress(value = 0.9, message = "reordering columns...")
               hdata <- hdata[, gene_clust$order]
               localhdata(hdata)
               })
@@ -90,8 +93,10 @@ multiV <- function(input, output, session,
     xlabs <- if(!is.null(slabel)) slabel[colnames(hplotdata())] else colnames(hplotdata())
     ylabs <- rownames(hplotdata())
     showticklabs <- if(ncol(hplotdata()) <= 50) TRUE else FALSE # only show labels when readable
+    # infer color scale for type of data
+    if(min(hplotdata()) == 0) colorscale <- "Greys" else colorscale <- "RdBu"
     plot_ly(z = hplotdata(), x = xlabs, y = ylabs, # name = "relative expression",
-            type = "heatmap", colors = "RdBu", height = 25 * nrow(hdata),
+            type = "heatmap", height = 25 * nrow(hdata), colors = colorscale,
             # text = paste(~y, "\nsampleID": ~x, "\nrelative expression:", ~z),
             # hoverinfo = "text",
             colorbar = list(title = "relative\nexpression", thickness = 10, x = -0.09)) %>%

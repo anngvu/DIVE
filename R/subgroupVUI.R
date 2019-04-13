@@ -8,17 +8,16 @@
 #' @param hdchoices List of high throughput datasets.
 #' @param cchoices Data that can be used to define groups.
 #' @export
-subgroupVUI <- function(id, hdchoices, cchoices) {
+subgroupVUI <- function(id) {
 
   ns <- NS(id)
   tags$div(id = ns("viewport"), class = "subgroups-panel",
            div(align = "right", actionButton(ns("remove"), "", icon = icon("times"))),
-           # verbatimTextOutput(ns("test")),
-           selectInput(ns("hdataset"), "HT dataset", choices = hdchoices),
-           div(class = "forceInline", style = "height: 100px", selectInput(ns("groupby1"), "(A) group by", choices = removeID(cchoices))),
-           div(class = "forceInline", style = "height: 100px", uiOutput(ns("by1"), inline = T)),
-           div(class = "forceInline", style = "height: 100px", selectInput(ns("groupby2"), "(B) group by", choices = removeID(cchoices))),
-           div(class = "forceInline", style = "height: 100px", uiOutput(ns("by2"), inline = T)),
+           uiOutput(ns("selecthd")),
+           div(class = "forceInline", style = "height: 100px", uiOutput(ns("select1"))),
+           div(class = "forceInline", style = "height: 100px", uiOutput(ns("by1"))),
+           div(class = "forceInline", style = "height: 100px", uiOutput(ns("select2"))),
+           div(class = "forceInline", style = "height: 100px", uiOutput(ns("by2"))),
            div(style = "padding-bottom: 20px;", actionButton(ns("go"), "View")),
            shinycssloaders::withSpinner(color = "gray", size = 0.5, plotlyOutput(ns("plot")))
   )
@@ -35,23 +34,40 @@ subgroupVUI <- function(id, hdchoices, cchoices) {
 #' @param hdata A list of named high-dimensional (high-throughput datasets)
 #' @export
 subgroupV <- function(input, output, session,
-                      cdata, hdata) {
+                      cdata, hdlist) {
 
   # updateSelectizeInput(session, "hdataset0", choices = LETTERS[1:5], selected = NULL)
   plotOut <- reactiveVal(plotly_empty())
 
-  # When feature variable is selected, render appropriate UI for values used to define groups
+  output$selecthd <- renderUI({
+    selectInput(session$ns("hdataset"), "HT dataset", choices = names(hdlist))
+  })
+
+  output$select1 <- renderUI({
+    selectInput(session$ns("groupby1"), "(B) group by", choices = names(cdata))
+  })
+
+  output$select2 <- renderUI({
+    selectInput(session$ns("groupby2"), "(B) group by", choices = names(cdata))
+  })
+
+
+  # When feature variable is selected, render appropriate UI used to define groups
+  # and constrain choices to levels available in selected ht dataset
   output$by1 <- renderUI({
     if(is.null(input$groupby1)) return(NULL)
     x <- cdata[[input$groupby1]]
     if(class(x) == "character" | class(x) == "factor") {
+      choices <- cdata[ID %in% rownames(hdlist[[input$hdataset]]), unique(get(input$groupby1))]
       tags$div(
-        selectizeInput(session$ns("s1"), "factor level(s)", choices = unique(x), multiple = T, width = 200)
+        selectizeInput(session$ns("s1"), "factor level(s)", choices = choices, multiple = T, width = 200)
       )
     } else {
-      x <- x[!is.na(x)]
+      x <- na.omit(cdata[ID %in% rownames(hdlist[[input$hdataset]]), get(input$groupby1)])
       if(length(x)) {
-        sliderInput(session$ns("s1"), label = "range", min = min(x), max = max(x), value = c(min(x), max(x)), width = 200)
+        sliderInput(session$ns("s1"), label = "range",
+                    min = min(x), max = max(x), value = c(min(x), max(x)),
+                    width = 200, ticks = F)
       }
     }
   })
@@ -60,26 +76,37 @@ subgroupV <- function(input, output, session,
     if(is.null(input$groupby2)) return(NULL)
     x <- cdata[[input$groupby2]]
     if(class(x) == "character" | class(x) == "factor") {
+      choices <- cdata[ID %in% rownames(hdlist[[input$hdataset]]), unique(get(input$groupby2))]
       tags$div(
-        selectizeInput(session$ns("s2"), label = "factor level(s)", choices = unique(x), multiple = T, width = 200)
+        selectizeInput(session$ns("s2"), label = "factor level(s)", choices = choices, multiple = T, width = 200)
       )
     } else {
-      x <- x[!is.na(x)]
+      x <- na.omit(cdata[ID %in% rownames(hdlist[[input$hdataset]]), get(input$groupby2)])
       if(length(x)) {
-        sliderInput(session$ns("s2"), label = "range", min = min(x), max = max(x), value = c(min(x), max(x)), width = 200)
+        sliderInput(session$ns("s2"), label = "range",
+                    min = min(x), max = max(x), value = c(min(x), max(x)),
+                    width = 200, ticks = F)
       }
     }
   })
 
   # Get the nPOD IDs for each group defined
   group1 <- reactive({
-    if(is.numeric(input$s1)) cdata[which(findInterval(cdata[[input$groupby1]], input$s1, rightmost.closed = T) == 1), ID]
-    else cdata[get(input$groupby1) %in% input$s1, ID]
+    if(is.numeric(input$s1)) {
+      intersect(cdata[which(findInterval(cdata[[input$groupby1]], input$s1, rightmost.closed = T) == 1), ID],
+                rownames(hdlist[[input$hdataset]]))
+    } else {
+      intersect(cdata[get(input$groupby1) %in% input$s1, ID], rownames(hdlist[[input$hdataset]]))
+    }
   })
 
   group2 <- reactive({
-    if(is.numeric(input$s2)) cdata[which(findInterval(cdata[[input$groupby2]], input$s2,  rightmost.closed = T) == 1), ID]
-    else cdata[get(input$groupby2) %in% input$s2, ID]
+    if(is.numeric(input$s2)) {
+      intersect(cdata[which(findInterval(cdata[[input$groupby2]], input$s2,  rightmost.closed = T) == 1), ID],
+                rownames(hdlist[[input$hdataset]]))
+    } else {
+      intersect(cdata[get(input$groupby2) %in% input$s2, ID], rownames(hdlist[[input$hdataset]]))
+    }
   })
 
   observeEvent(input$go, {
@@ -87,12 +114,12 @@ subgroupV <- function(input, output, session,
     okgroupsize <- length(group1()) > 1 && length(group2()) > 1
     disjoint <- !length(intersect(group1(), group2()))
     if(!okgroupsize | !disjoint) {
-      message <- if(!okgroupsize) "Groups unavailable or contain fewer than two samples." else "Currently comparisons are only allowed for disjoint groups."
+      message <- if(!okgroupsize) "One or both groups contain fewer than two samples." else "Comparisons only allowed for disjoint groups."
       p <- plotly_empty() %>%
         layout(title = message, font = list(color = "gray"))
     } else {
     # do fit, return data frame with (A) p-values, (B) fold difference, (C) color
-      xm <- t(hdata[[input$hdataset]])
+      xm <- t(hdlist[[input$hdataset]])
       sampIDs <- colnames(xm)
       group <- factor(sampIDs)
       levels(group) <- list(g1 = group1(), g2 = group2())
@@ -112,8 +139,9 @@ subgroupV <- function(input, output, session,
       p <- plot_ly(x = diffx, y = neglogAdjP, type = "scatter", mode = "markers",
               hoverinfo = "text", text = paste("<br>-log(adjusted p): ", neglogAdjP, "<br>Difference: ", diffx),
               color = sigcolor, colors = c(significant = "deeppink", `not significant` = "gray"),
-              showlegend = FALSE) %>%
-        layout(xaxis = list(title = "Fold Change Difference [Group 1 - Group 2]"), yaxis = list(title = "-log(adjusted p-value)"))
+              showlegend = T) %>%
+        layout(xaxis = list(title = "Fold Change Difference [Group 1 - Group 2]"), yaxis = list(title = "-log(adjusted p-value)"),
+               legend = list(orientation = "h", y = 1.02, yanchor = "bottom"))
     }
     plotOut(p)
   })

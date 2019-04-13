@@ -27,7 +27,7 @@ selectVUI <- function(id) {
 #' @return The subsetted data table.
 #' @export
 selectV <- function(input, output, session,
-                    data, key = "ID", label = "Clinical/Phenotype/Experimental variable(s)", selected = reactive({ NULL }) )  {
+                    data, key = "ID", label = HTML("<strong>Phenotype/Experimental variable(s)</strong>"), selected = reactive({ NULL }) )  {
 
   Vdata <- reactiveVal(NULL)
 

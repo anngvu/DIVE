@@ -62,25 +62,25 @@ multiVCtrl <- function(input, output, session,
                       checkFun = NULL, infoRmd = NULL) {
 
   inview <- c()
-  view <- reactiveValues(cdata = cdata, hddata = NULL, vselect = vselect)
+  view <- reactiveValues(cdata = cdata, hdlist = hdlist, hddata = NULL, vselect = vselect)
 
   updateSelectizeInput(session, "dataset", choices = choices, selected = NULL)
 
   observe({
     if(!length(input$dataset)) {
       dataset <- list(NULL) # set return to NULL
-      names(dataset) <-  paste0("i", which(names(hdlist) %in% inview))
+      names(dataset) <-  paste0("i", which(names(view$hdlist) %in% inview))
       inview <<- c()
     } else {
       hdname <- setdiff(input$dataset, inview)
       if(length(hdname)) {
-        dataset <- hdlist[hdname]
+        dataset <- view$hdlist[hdname]
       } else {  # remove from view
         hdname <- setdiff(inview, input$dataset)
         dataset <- list(NULL)
       }
       inview <<- isolate(input$dataset)
-      names(dataset) <- paste0("i", which(names(hdlist) %in% hdname)) # replace name with index # in hdlist
+      names(dataset) <- paste0("i", which(names(view$hdlist) %in% hdname)) # replace name with index # in hdlist
     }
     view$hddata <- dataset
   })
@@ -106,7 +106,7 @@ multiVCtrl <- function(input, output, session,
     } else {
       # high-throughput processing
       filename <- attr(data, "filename")
-      if(filename %in% names(hdlist)) {
+      if(filename %in% names(view$hdlist)) {
         showNotification("Dataset with same file name already exists (overwrites not allowed).
                          To upload a different version, change file name to reflect that.",
                          type = "warning", duration = NULL)
@@ -114,7 +114,7 @@ multiVCtrl <- function(input, output, session,
         hdata <- as.matrix(data, rownames = 1)
         hdata <- t(hdata)
         hdata <- setNames(list(hdata), filename)
-        hdlist <<- c(hdlist, hdata)
+        view$hdlist <- c(view$hdlist, hdata)
         choices$Uploaded <<- c(choices$Uploaded, list(filename))
         updateSelectizeInput(session, "dataset", choices = choices, selected = c(input$dataset, filename))
         # view$vselect <- NULL # to do: more sophisticated to infer most appropriate vselect as default
@@ -137,7 +137,7 @@ multiVCtrl <- function(input, output, session,
   observeEvent(GEOdata$call, {
     hdata <- t(GEOdata$eset)
     hdata <- setNames(list(hdata), GEOdata$accession)
-    hdlist <<- c(hdlist, hdata)
+    view$hdlist <- c(view$hdlist, hdata)
     choices$GEO <- c(choices$GEO, list(GEOdata$accession))
     updateSelectizeInput(session, "dataset", choices = choices, selected = GEOdata$accession)
     if(!is.null(GEOdata$pData)) {

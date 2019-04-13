@@ -11,7 +11,7 @@ geneVUI <- function(id) {
   ns <- NS(id)
   tags$div(id = "geneVUI",
            div(class = "forceInline",
-               selectizeInput(ns("IDs"), "Genes/gene products of interest",
+               selectizeInput(ns("IDs"), HTML("<strong>Genes/gene products of interest</strong>"),
                               choices = NULL, selected = NULL,
                               options = list(maxItems = 50))),
            div(class = "forceInline", br(),

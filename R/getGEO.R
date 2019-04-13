@@ -69,7 +69,7 @@ getGEOMod <- function(input, output, session) {
     } else {
       setProgress(value = 0.3, message = "checking data...")
       eset <- gse[[1]]
-      meta <- otherInfo(experimentData(eset))
+      meta <- Biobase::otherInfo(Biobase::experimentData(eset))
       xdata <- Biobase::exprs(eset)
       pdata <- Biobase::pData(eset)
       characteristics(pdata[, grep(":", names(pdata))])
@@ -85,7 +85,7 @@ getGEOMod <- function(input, output, session) {
       }
 
       if(nrow(xdata)) {
-        setProgress(value = 0.8, message = "parsing data...")
+        setProgress(value = 0.8, message = "processing data...")
         GEOdata$accession <- trimws(input$GSE)
         GEOdata$eset <- xdata
         gpl <- GEOquery::Table(GEOquery::getGEO(Biobase::annotation(eset)))
@@ -140,18 +140,20 @@ checkGEO <- function(xdata, meta,
 }
 
 
-
 getRecount <- function(sra) {
   link <- NULL
   try(link <- recount::download_study(sra, download = F), silent = T)
+  rse_gene <- NULL
   if(!is.null(link)) {
     attempt <- 0
-    while(attempt <= 1) {
+    while(is.null(rse_gene) && attempt <= 1) {
       attempt <- attempt + 1
       try(load(url(link)), silent = T)
     }
-    xdata <- SummarizedExperiment::assay(rse_gene)
-    pdata <- geo_characteristics(colData(rse_gene))
+    scaled <- recount::scale_counts(rse_gene)
+    xdata <- SummarizedExperiment::assay(scaled)
+    pdata <- recount::geo_characteristics(SummarizedExperiment::colData(rse_gene))
+    rownames(pdata) <- SummarizedExperiment::colData(rse_gene)$run
     return(list(xdata = xdata, pdata = pdata))
   }
 }

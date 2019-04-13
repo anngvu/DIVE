@@ -68,12 +68,10 @@ multiVApp <- function(input, output, session,
   observeEvent(input$newSubgroupVUI, {
     N <- input$newSubgroupVUI
     insertUI(paste0("#views"),
-             ui = subgroupVUI(id = session$ns(paste0("panel", N) ),
-                              hdchoices = names(HDATA),
-                              cchoices = names(CDATA) ))
+             ui = subgroupVUI(id = session$ns(paste0("panel", N))))
     callModule(subgroupV, id = paste0("panel", N),
-               cdata = CDATA,
-               hdata = HDATA )
+               cdata = view$cdata,
+               hdlist = view$hdlist)
   })
 
   # each dataset gets its own track (row), served by its own multiVUI module
