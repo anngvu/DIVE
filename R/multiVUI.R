@@ -12,10 +12,17 @@ multiVUI <- function(id) {
   ns <- NS(id)
   tags$div(style = "margin-bottom:30px;",
     div(style = "margin-bottom: 10px;",
-               div(class = "forceInline", br(), actionButton(ns("cluster"), "Cluster")),
-               div(class = "forceInline", br(), actionButton(ns("addcustom"), "Local filter", icon = icon("plus"))),
-               div(class = "forceInline", id = ns("custom"))),
-           shinycssloaders::withSpinner(plotlyOutput(ns("heatmap"), height = "100%"), color = "gray")
+        div(class = "forceInline", actionButton(ns("show"), label = NULL, icon = icon("cog"))),
+        conditionalPanel(condition = "input.show%2==1", ns = ns, class = "forceInline",
+          div(class = "forceInline", id = ns("custom")),
+          div(class = "forceInline", actionLink(ns("addcustom"), "LOCAL FILTER", icon = icon("plus"))),
+          div(class = "forceInline", actionLink(ns("cluster"), "CLUSTER", icon = icon("sitemap"))),
+          div(class = "forceInline", "Show most variable"),
+          div(style = "display: inline-block; margin-top: -5px;", numericInput(ns("test"), label = NULL, value = 10, min = 1, max = 100, step = 1, width = 50)),
+          div(style = "display: inline-block;", icon("percent"))
+        )
+    ),
+    shinycssloaders::withSpinner(plotlyOutput(ns("heatmap"), height = "100%"), color = "gray")
   )
 }
 
@@ -41,7 +48,7 @@ multiV <- function(input, output, session,
     withProgress(value = 0.2, message = "creating distance matrix...",
       expr = {
               gene_clust <- dist(t(hdata))
-              setProgress(value = 0.5, message = "clustering...")
+              setProgress(value = 0.7, message = "clustering...")
               gene_clust <- hclust(gene_clust)
               setProgress(value = 0.9, message = "reordering columns...")
               hdata <- hdata[, gene_clust$order]
@@ -54,14 +61,15 @@ multiV <- function(input, output, session,
     if(input$addcustom %% 2) {
       insertUI(selector = paste0("#", session$ns("custom")), immediate = T,
                ui = tags$div(id = session$ns("customselect"),
-                             selectizeInput(session$ns("customselect"), "", choices = NULL, multiple = T)))
+                             selectizeInput(session$ns("customselect"), label = NULL, choices = NULL,
+                                            multiple = T, options = list(placeholder = "filter in this dataset"))))
       updateSelectizeInput(session, "customselect", choices = colnames(hdata), server = T)
-      updateActionButton(session, "addcustom", "Custom filter", icon = icon("minus"))
+      updateActionButton(session, "addcustom", "LOCAL FILTER", icon = icon("minus"))
     } else {
       removeUI(selector = paste0("#", session$ns("customselect")))
       localselect(NULL)
       selected(selected())
-      updateActionButton(session, "addcustom", "Custom filter", icon = icon("plus"))
+      updateActionButton(session, "addcustom", "LOCAL FILTER", icon = icon("plus"))
     }
   })
 

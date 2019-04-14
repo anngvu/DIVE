@@ -13,7 +13,7 @@ geneVUI <- function(id) {
            div(class = "forceInline",
                selectizeInput(ns("IDs"), HTML("<strong>Genes/gene products of interest</strong>"),
                               choices = NULL, selected = NULL,
-                              options = list(maxItems = 50))),
+                              options = list(maxItems = 50, placeholder = "globally filter across all datasets"))),
            div(class = "forceInline", br(),
                actionButton(ns("xlist"), "Quick list", icon = icon("plus"))),
            div(class = "forceInline",
