@@ -18,7 +18,8 @@ multiVUI <- function(id) {
           div(class = "forceInline", actionLink(ns("addcustom"), "LOCAL FILTER", icon = icon("plus"))),
           div(class = "forceInline", actionLink(ns("cluster"), "CLUSTER", icon = icon("sitemap"))),
           div(class = "forceInline", "Show most variable"),
-          div(style = "display: inline-block; margin-top: -5px;", numericInput(ns("test"), label = NULL, value = 10, min = 1, max = 100, step = 1, width = 50)),
+          div(style = "display: inline-block; margin-top: -5px;",
+              numericInput(ns("mostvarprct"), label = NULL, value = 20, min = 1, max = 100, step = 1, width = 50)),
           div(style = "display: inline-block;", icon("percent"))
         )
     ),
@@ -79,6 +80,9 @@ multiV <- function(input, output, session,
 
   #-- Plots ----------------------------------------------------------------------------------------------------------#
 
+  # Global vs. local selection control
+  # local select takes precedence over global select; when local select option is displayed, global subsetting is ignored
+  # to restore plot listening to global selection, local select must be removed
   observe({
     if(is.null(localselect())) { if(!length(selected())) localhdata(hdata) else localhdata(hdata[, colnames(hdata) %in% selected(), drop = F]) }
   })
@@ -87,13 +91,30 @@ multiV <- function(input, output, session,
     if(!length(localselect())) localhdata(hdata) else localhdata(hdata[, colnames(hdata) %in% localselect(), drop = F])
   })
 
+  # Subsetting by most variable
+
+  mostvarprct <- reactiveVal(20)
+
+  observe({
+    if(min(input$mostvarprct) < 0.1) {
+      updateNumericInput(session, "mostvarprct", value = 0.1)
+    } else if(max(input$mostvarprct) > 100) {
+      updateNumericInput(session, "mostvarprct", value = 100)
+    } else {
+      mostvarprct(input$mostvarprct)
+    }
+  })
+
+
+  # Plot subsetting by phenotype variables
   hplotdata <- reactive({
     plotdata <- localhdata()
-    if(!is.null(cdata())) {
-      # manually order rows by order given in cdata()
+    if(!is.null(cdata())) { # manually order rows by order given in cdata()
       ckey <- cdata()[as.character(get(key)) %in% rownames(hdata), as.character(get(key))]
       plotdata <- plotdata[ckey, , drop = F]
     }
+    # subset to only most variable n specified by input$mostvariable
+    plotdata <- subMostVar(plotdata, percent = mostvarprct())
     plotdata
   })
 
@@ -172,3 +193,12 @@ multiV <- function(input, output, session,
   })
 
 }
+
+# Subset a matrix by the most variable n features (columns)
+subMostVar <- function(xm, n, percent) {
+  n <- as.integer(ncol(xm) * (percent/100))
+  vars <- apply(xm, 2, var)
+  selected <- names(sort(vars, decreasing = T)[1:n])
+  xm[, selected]
+}
+
