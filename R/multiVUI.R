@@ -19,7 +19,7 @@ multiVUI <- function(id) {
           div(class = "forceInline", actionLink(ns("cluster"), "CLUSTER", icon = icon("sitemap"))),
           div(class = "forceInline", "Show most variable"),
           div(style = "display: inline-block; margin-top: -5px;",
-              numericInput(ns("mostvarprct"), label = NULL, value = 20, min = 1, max = 100, step = 1, width = 50)),
+              numericInput(ns("hivarprct"), label = NULL, value = 10, min = 1, max = 100, step = 5, width = 50)),
           div(style = "display: inline-block;", icon("percent"))
         )
     ),
@@ -43,6 +43,7 @@ multiV <- function(input, output, session,
 
   localselect <- reactiveVal(NULL)
   localhdata <- reactiveVal(hdata)
+  hivarprct <- reactiveVal(10)
 
   #-- Clustering -----------------------------------------------------------------------------------------------------#
   observeEvent(input$cluster, {
@@ -91,17 +92,16 @@ multiV <- function(input, output, session,
     if(!length(localselect())) localhdata(hdata) else localhdata(hdata[, colnames(hdata) %in% localselect(), drop = F])
   })
 
-  # Subsetting by most variable
-
-  mostvarprct <- reactiveVal(20)
-
+  # Subsetting by highest variance features
   observe({
-    if(min(input$mostvarprct) < 0.1) {
-      updateNumericInput(session, "mostvarprct", value = 0.1)
-    } else if(max(input$mostvarprct) > 100) {
-      updateNumericInput(session, "mostvarprct", value = 100)
+    if(!length(input$hivarprct) | !is.numeric(input$hivarprct)) {
+      updateNumericInput(session, "hivarprct", value = 10)
+    } else if(input$hivarprct < 0.1) {
+      updateNumericInput(session, "hivarprct", value = 1)
+    } else if(input$hivarprct > 100) {
+      updateNumericInput(session, "hivarprct", value = 100)
     } else {
-      mostvarprct(input$mostvarprct)
+      hivarprct(input$hivarprct)
     }
   })
 
@@ -113,9 +113,9 @@ multiV <- function(input, output, session,
       ckey <- cdata()[as.character(get(key)) %in% rownames(hdata), as.character(get(key))]
       plotdata <- plotdata[ckey, , drop = F]
     }
-    # subset to only most variable n specified by input$mostvariable
-    plotdata <- subMostVar(plotdata, percent = mostvarprct())
-    plotdata
+    # subset to highest variance
+    selected <- subHiVar(plotdata, percent = hivarprct())
+    plotdata[, colnames(plotdata) %in% selected, drop = F] # for some reason plotdata[, selected, drop = F] gives subscript out of bounds
   })
 
   hplot <- reactive({
@@ -195,10 +195,11 @@ multiV <- function(input, output, session,
 }
 
 # Subset a matrix by the most variable n features (columns)
-subMostVar <- function(xm, n, percent) {
-  n <- as.integer(ncol(xm) * (percent/100))
-  vars <- apply(xm, 2, var)
-  selected <- names(sort(vars, decreasing = T)[1:n])
-  xm[, selected]
+subHiVar <- function(data, n, percent) {
+  n <- round(ncol(data) * (percent/100))
+  n <- ifelse(n < 1, 1, n)
+  vars <- apply(data, 2, var)
+  selected <- names(sort(vars, decreasing = T))[1:n]
+  return(selected)
 }
 
