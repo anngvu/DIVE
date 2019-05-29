@@ -92,7 +92,7 @@ multiV <- function(input, output, session,
     if(!length(localselect())) localhdata(hdata) else localhdata(hdata[, colnames(hdata) %in% localselect(), drop = F])
   })
 
-  # Subsetting by highest variance features
+  # Subsetting by highest variance features and constraining user input
   observe({
     if(!length(input$hivarprct) | !is.numeric(input$hivarprct)) {
       updateNumericInput(session, "hivarprct", value = 10)
