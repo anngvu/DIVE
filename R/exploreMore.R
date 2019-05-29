@@ -53,7 +53,7 @@ exploreMore <- function(input, output, session,
                        s1Data, s2Data, results,
                        factorx = "grp$|cat$|score$|bin$|count$|pos$|risk$") {
 
-  # Update select menu to emphasize attributes that were used for matching
+  # Update select menu to partition attributes that were used for matching from all "Other" non-matching attributes
   observeEvent(results$params, {
     refli <- list(Matched = names(results$params), Other = removeID(setdiff(names(s1Data), names(results$params))))
     extli <- list(Matched = unname(results$params), Other = removeID(setdiff(names(s2Data()), results$params)))
@@ -108,6 +108,7 @@ exploreMore <- function(input, output, session,
   observeEvent(input$s1Attrs, {
     # Plot on same scale automatically for matched attributes
     if(input$s1Attrs %in% names(results$params)) {
+      updateSelectInput(session, "s2Attrs", selected = results$params[names(results$params) == input$s1Attrs])
       plotMatched(input$s1Attrs)
     } else {
       if(input$s1Attrs == "") return()
@@ -119,7 +120,7 @@ exploreMore <- function(input, output, session,
   observeEvent(input$s2Attrs, {
     if(input$s2Attrs %in% results$params) {
       y <- names(results$params)[input$s2Attrs == results$params]
-      plotMatched(y)
+      updateSelectInput(session, "s1Attrs", selected = y)
     } else {
       if(input$s2Attrs == "") return()
       plotS2(input$s2Attrs)

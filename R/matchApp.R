@@ -87,7 +87,7 @@ matchApp <- function(input, output, session,
                      ),
                      GUESS = guessMatch,
                      SUBSETFEAT = "donor.type",
-                     INFORMD = "help/cohort_exchange.Rmd",
+                     INFORMD = system.file("help/cohort_exchange.Rmd", package = "DIVE"),
                      APPDATA = "examplecohort2020.csv") {
 
   cohortGraph <- callModule(HPCGraph, "nPODg",

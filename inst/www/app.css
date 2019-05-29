@@ -49,6 +49,11 @@ Match app
   background: PaleGreen;
 }
 
+.used:hover {
+  background: #2196f3;
+  color: white;
+}
+
 .unused {
   background: gainsboro;
 }

@@ -39,11 +39,12 @@ matchLinkUI <- function(id) {
 #' If not provided, the first 10 variables in the reference cohort dataset is used.
 #' @param guess Optional, name of the function to call for initial guessing of harmonized variables;
 #' no initial guesses made if argument is provided or function does not exist.
-#' @param infoRmd Optional, relative path to an info Rmarkdown file that can be pulled up in a modal.
+#' @param infoRmd Optional, relative path to an info Rmarkdown file that will be pulled up in a modal.
+#' Recommend using for providing methods details of the matching algorithm.
 #' @return Reactive list of parameter values.
 #' @export
 matchLink <- function(input, output, session,
-                            refData, cohortX, vars, guess, infoRmd) {
+                            refData, cohortX, vars, guess, infoRmd = system.file("help/matching_methods.Rmd", package = "DIVE")) {
 
   modal <- callModule(info, "help", infoRmd)
 

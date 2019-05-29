@@ -18,9 +18,9 @@ refSubsetInput <- function(id, name = id, label = "", subsets) {
       ),
       column(4,
              div(id = "refData",
-                 selectInput(ns("selectSubset"),
+                 selectizeInput(ns("selectSubset"),
                              label,
-                             choices = subsets, multiple = T)
+                             choices = subsets, multiple = T, options = list(placeholder = "(one or more types)"))
              )
       ),
       column(4,
