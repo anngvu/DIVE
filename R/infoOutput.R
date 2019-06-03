@@ -5,7 +5,7 @@
 #' @param i Icon type to display next to label.
 #' @return An actionLink.
 #' @export
-infoOutput <- function(id, label = "data requirements", i = "exclamation-circle") {
+infoOutput <- function(id, label = "data req's", i = "exclamation-circle") {
   ns <- NS(id)
   actionLink(ns("moreInfo"), icon = icon(i), label)
 }

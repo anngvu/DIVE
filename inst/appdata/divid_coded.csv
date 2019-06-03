@@ -1,0 +1,7 @@
+ID	Age	.Male	BMI	Diagnosis.to.biopsy.weeks	HbA1c.prct	HbA1.mmolpermol	Insulin.unitsperkgperday	.Anti-GAD	.Anti-insulin	.Anti-ZnT8	.Anti-IA2	HLA.risk
+DiViD1	25	0	21	4	6.7	50	0.5	1	1	1	1	1
+DiViD2	24	1	20.9	3	10.3	89	0.35	1	0	1	1	1
+DiViD3	34	0	23.7	9	7.1	54	0.17	1	0	1	1	1
+DiViD4	31	1	25.6	5	7.4	57	0.4	1	1	0	1	1
+DiViD5	24	0	28.6	5	7.4	57	0.36	1	0	0	1	1
+DiViD6	35	1	26.7	5	7.1	54	0.52	1	0	0	0	1

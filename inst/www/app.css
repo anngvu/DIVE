@@ -22,7 +22,7 @@ body {
 
 .progress-bar {
   background-color: MediumSpringGreen;
-  color: black;
+  color: transparent;
 }
 
 /*
@@ -63,6 +63,12 @@ Match app
   vertical-align: middle;
   margin-bottom: 5px;
 }
+
+.large-name, #match-CohortX-name {
+  color: #444444;
+  font-size: 34px;
+}
+
 
 #overlap {
   border-right: black 2px;

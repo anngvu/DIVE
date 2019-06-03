@@ -30,16 +30,15 @@ matchAppUI <- function(id,
 
     fluidRow(style="margin-top:30px; margin-bottom:50px; margin-right:100px",
              column(6, style="border-right: 1px solid lightgray;",
-                    newDatasetInput(ns("CohortX"), "CohortX", type = "cohort")),
-                    column(6, refSubsetInput(ns("nPOD"), "nPOD", label = HTML("<strong>Select type of matches to get</strong>"),
-                                           subsets = SUBSETS)
-                     )),
+                    newDatasetInput(ns("CohortX"))),
+             column(6, refSubsetInput(ns("nPOD"), "nPOD", label = HTML("<strong>Select type of matches to get</strong>"),
+                                      subsets = SUBSETS))
+             ),
     fluidRow(style="margin-top:50px; margin-bottom:50px; margin-right:100px",
              column(1),
-             column(10, tabsetPanel(id = ns("tabs"),
-                      tabPanel("Reference cohort graph", HPCGraphOutput(ns("nPODg")))
-                    )
-            )
+             column(10,
+                    tabsetPanel(id = ns("tabs"),
+                                tabPanel("Reference cohort graph", HPCGraphOutput(ns("nPODg")))))
     )
   )
 }
@@ -94,15 +93,20 @@ matchApp <- function(input, output, session,
                             hpcg = HPCG,
                             colors = COLORS)
 
-  nPOD <- callModule(refSubset, "nPOD",
-                     refData = REFDATA,
-                     subsetfeat = SUBSETFEAT,
-                     refkey = REFKEY[1])
-
   newCohort <- callModule(newDataset, "CohortX",
                           refkey = REFKEY[2],
                           infoRmd = INFORMD,
                           appdata = APPDATA)
+
+  crossCheck <- callModule(intermediate, "internal",
+                        data = newCohort,
+                        Fun = xCheckID)
+
+  nPOD <- callModule(refSubset, "nPOD",
+                     refData = REFDATA,
+                     subsetfeat = SUBSETFEAT,
+                     refkey = REFKEY[1],
+                     exclude = crossCheck)
 
   parameters <- callModule(matchLink, "params",
                            refData = nPOD,
@@ -163,7 +167,7 @@ matchApp <- function(input, output, session,
 #'
 #' @export
 matchAppRun <- function() {
-  ui <- matchAppUI("default")
-  server <- function(input, output, session) { callModule(matchApp, "default") }
+  ui <- matchAppUI("match")
+  server <- function(input, output, session) { callModule(matchApp, "match") }
   shinyApp(ui = ui, server = server)
 }

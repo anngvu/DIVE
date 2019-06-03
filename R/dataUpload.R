@@ -1,4 +1,4 @@
-#' Shiny module UI for data upload module
+#' Shiny module UI for data table upload module
 #'
 #' Generates Shiny UI for a data upload module, which contains the main file input
 #' and two optional features: a file-remove button and infolink,
@@ -22,10 +22,15 @@ dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>") 
   )
 }
 
-#' Shiny server function for data upload module
+#' Shiny server function for data table upload module
 #'
-#' The most basic implementation is to process and return any input to fileInput in the UI.
-#' File uploads can have "reset" behavior if the removable optional feature is specified,
+#' At its most basic, the module checks for and returns a data table from \code{fileInput}
+#' (if the uploaded file is not data in table format, the return will be \code{NULL}).
+#' However, a check function can be named to perform additional "light" data checking or modification operations
+#' and thus customize the module somewhat for different situations. Some example check functions
+#' simply look for specific column names or types. For more intense data processing that might involve
+#' multiple functions and/or side effects, one should really make a specialized module and pass the data into that.
+#' File uploads can have "reset" behavior by specifying the optional \code{removable} parameter,
 #' where a remove button will be rendered after upload.
 #' The module also optionally incorporates \code{\link{infoOutput}} functionality.
 #' Finally, it is possible to perform a mock upload of a saved dataset, e.g. for demonstration purposes.
@@ -34,12 +39,15 @@ dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>") 
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param removable Logical flag to indicate whether data upload will have "removable" feature. Defaults to FALSE. See details.
+#' @param checkFun Optional, a custom check function for an additional layer of checking/modifying uploaded data.
+#' It should return a list containing message and result (result should be \code{NULL} for unsuccessful data).
 #' @param infoRmd Optional, an Rmarkdown help file for infoOutput, e.g. requirements.
 #' @param appdata Optional, the name (including extension) of one or more files stored in appdata that can be
 #' mock-uploaded. See details.
-#' @return A data.table with a "filename" attribute containing the filename without extension.
+#' @return A data.table with a "filename" attribute containing the filename without extension,
+#' or \code{NULL} if the file input was not a table or returned as \code{NULL} from \code{checkFun}.
 dataUpload <- function(input, output, session,
-                       removable = F, infoRmd = NULL, appdata = NULL) {
+                       removable = F, checkFun = NULL, infoRmd = NULL, appdata = NULL) {
 
   uploaded <- reactiveVal(NULL)
 
@@ -54,12 +62,24 @@ dataUpload <- function(input, output, session,
   # ---------------------------------------------------------------------------- #
   observeEvent(input$upload, {
     data <- fread(input$upload$datapath)
-    attr(data, "filename") <- gsub(".txt$|.csv$", "", input$upload$name)
-    uploaded(data)
-    if(removable) {
-      insertUI(paste0("#", session$ns("main")), "beforeEnd",
-             tags$div(id = session$ns("remove-btn"), class = "forceInline",
-             br(), actionButton(session$ns("remove"), "", icon = icon("times"))))
+    # basic data check
+
+    # additional checks if checkFun is specified
+    if(!is.null(checkFun)) {
+      checked <- checkFun(data)
+      data <- checked$result
+      message <- checked$message
+      if(!is.null(message)) showModal(modalDialog(HTML(message), title = "Data upload status", easyClose = F))
+    }
+    # set new data if successful
+    if(!is.null(data)) {
+      attr(data, "filename") <- gsub(".txt$|.csv$", "", input$upload$name)
+      uploaded(data)
+      if(removable) {
+        insertUI(paste0("#", session$ns("main")), "beforeEnd",
+               tags$div(id = session$ns("remove-btn"), class = "forceInline",
+               br(), actionButton(session$ns("remove"), "", icon = icon("times"))))
+      }
     }
   })
 

@@ -4,29 +4,21 @@
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param label Name of the dataset.
-#' @param type Optional, a keyword to describe type of dataset, included in label text for additional UI customization.
 #' @return A \code{shiny::\link[shiny]{tagList}} containing input UI.
 #' @export
-newDatasetInput <- function(id, label = id, type = "") {
+newDatasetInput <- function(id) {
   ns <- NS(id)
   tags$div(id = "newDatasetInput",
     fluidRow(
       column(1),
-      column(3,
-             h3(label)
+      column(4,
+             div(id = "dataUpload",
+                 textInput(ns("name"), "", value = "CohortX", width = 200))
       ),
-      column(8,
-          dataUploadUI(ns("upload")),
-          fluidRow(
-             column(8, div(id = "dataUpload",
-                 textInput(ns("name"), "Label (optional)", value = "",
-                           placeholder = "e.g. 'TEDDY', 'pilot'.."))
-                 ),
-             column(4, br(),
-                 checkboxInput(ns("external"), paste("External", type), value = T)
-             ))
+      column(7,
+          dataUploadUI(ns("upload")))
       )
-      ))
+    )
 }
 
 #' Shiny module server function for handling new dataset input
@@ -42,13 +34,16 @@ newDatasetInput <- function(id, label = id, type = "") {
 #' @return A reactive data.table of the processed upload.
 #' @export
 newDataset <- function(input, output, session,
-                      refkey, infoRmd, appdata) {
+                      refkey, checkFun = NULL, infoRmd = NULL, appdata = NULL) {
 
   # ------------------------------------------------------------- #
 
   newData <- reactiveVal(NULL)
 
-  upload <- callModule(dataUpload, "upload", infoRmd = infoRmd, appdata = appdata)
+  upload <- callModule(dataUpload, "upload",
+                       checkFun = checkFun,
+                       infoRmd = infoRmd,
+                       appdata = appdata)
 
   # ------------------------------------------------------------- #
   observeEvent(upload(), {

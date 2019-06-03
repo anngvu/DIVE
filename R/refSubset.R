@@ -14,7 +14,7 @@ refSubsetInput <- function(id, name = id, label = "", subsets) {
     fluidRow(
       column(1),
       column(3,
-             h3(name)
+             span(class = "large-name", name)
       ),
       column(4,
              div(id = "refData",
@@ -34,22 +34,28 @@ refSubsetInput <- function(id, name = id, label = "", subsets) {
 #'
 #' Server function for creating a reactive subsetted dataset following user interaction.
 #'
-#' When multiple instances of the module are used to create subsets from different datasets
-#' (as opposed to subsets from the same dataset), it might be necessary to use refkey to track
-#' the origin of the subset, and especially if the subsets are to be merged on some common
-#' column later. For the most generic example, when datasets come from different sources,
-#' refkey can be called "Source" and the values might be S1 and S2.
+#' When many instances of the module are used to create subsets from different datasets
+#' (as opposed to different subsets from the same dataset), it might be necessary to use refkey
+#' to track the dataset origin of the subset, and especially if the subsets are to be merged
+#' on some common column. Generically speaking, datasets can come from different sources/locations,
+#' so refkey can be called "Source" and the values might then be S1 and S2.
+#'
+#' On the other hand, when this is used to create subsets from the same dataset,
+#' an "exclude list" can be passed in to make sure that the subset doesn't contain
+#' certain indices/IDs. This is desirable for creating subsets that don't overlap
+#' with another or for filtering out rows that don't pass some criteria.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param refData The reference data.table.
 #' @param subsetfeat The name of the column containing subset factors.
 #' @param refkey Optional, a named list containing name/label for creating a key-like column,
 #' where the name is the name of the column. See details for intended purpose.
+#' @param exclude Optional, a list of IDs to exclude.
 #' @param infoRmd Optional, relative path to an info Rmarkdown file that can be pulled up in a modal.
 #' @return A reactive subsetted data.table.
 #' @export
 refSubset <- function(input, output, session,
-                      refData, subsetfeat, refkey, infoRmd = NULL) {
+                      refData, subsetfeat, refkey, exclude = reactive({}), infoRmd = NULL) {
 
   # Optional info link  ------------------------------------------------------- #
   if(!is.null(infoRmd)) {
@@ -64,6 +70,7 @@ refSubset <- function(input, output, session,
   subsetDT <- reactive({
     validate(need(input$selectSubset != "", "Please select a type subset"))
     SS <- refData[get(subsetfeat) %in% input$selectSubset]
+    if(length(exclude())) SS <- SS[!ID %in% exclude() ]
     if(!is.null(refkey)) SS[, (names(refkey)) := refkey[[1]] ]
     SS
   })
