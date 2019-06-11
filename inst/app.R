@@ -33,10 +33,10 @@ ui <- navbarPage("nPOD DIVE", id = "main", selected = "intro",
   tabPanel("Get Data", value = "source-data", # icon = icon("database"),
            checkboxInput("filterDT", "Only display sources where individual-level data is readily available.", value = T, width = 500),
            helpText("'Get from original source' link points to the original data in a supplemental file
-                               or to an external database where data has been deposited. The original sources can provide more detail about
-                               methodology, definitions and other metadata, but are in a variety of formats not universally machine-readable (e.g. PDF, Excel).
-                               To facililate re-use, curated data can also be downloaded all at once (except for some high-throughput datasets)
-                               as a collection of plain text tab-delimited  files."),
+                    or to an external database where data has been deposited. The original sources can provide more detail about
+                    methodology, definitions and other metadata, but are in a variety of formats not universally machine-readable (e.g. PDF, Excel).
+                    To facililate re-use, curated data can also be downloaded all at once (except for some high-throughput datasets)
+                    as a collection of plain text tab-delimited  files."),
            downloadButton("downloadCollection", label = "Download Collection"),
            DT::dataTableOutput("sourceDT")
   ),
