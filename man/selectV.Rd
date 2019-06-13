@@ -5,13 +5,13 @@
 \title{Shiny module server for selecting columns from a data table}
 \usage{
 selectV(input, output, session, data, key = "ID",
-  label = "Clinical/Phenotype/Experimental variable(s)",
-  selected = NULL)
+  label = HTML("<strong>Phenotype/Experimental variable(s)</strong>"),
+  selected = reactive({     NULL }))
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
-\item{data}{A data table.}
+\item{data}{A reactive data.table.}
 
 \item{key}{A key column that is kept for every selected subset. Defaults to "ID".}
 
@@ -25,3 +25,11 @@ The subsetted data table.
 \description{
 Returns the selected columns.
 }
+\seealso{
+Other multiVApp module functions: \code{\link{geneVUI}},
+  \code{\link{geneV}}, \code{\link{multiVAppRun}},
+  \code{\link{multiVApp}}, \code{\link{multiVUIApp}},
+  \code{\link{selectVUI}}, \code{\link{subgroupVUI}},
+  \code{\link{subgroupV}}
+}
+\concept{multiVApp module functions}

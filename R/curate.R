@@ -1,5 +1,5 @@
 # Gives metadata fields in metadata
-metadata <- function() {
+metadata_fields <- function() {
   list(
     SourceType = "Source Type",
     Publication = "Source Publication",
@@ -79,9 +79,9 @@ curateUI <- function(id, metadata) {
         div(class = "forceInline", textInput(ns("Tags"), "Tags")),
         div(class = "forceInline", textInput(ns("VarWithinD"), "Variance within Disease")),
         div(class = "forceInline", textInput(ns("VarDvsCtrl"), "Variance Disease vs Control")),
-        div(class = "forceInline", textInput(ns("Relevance"), "Bigger Picture Relevance Summary")),
-        div(class = "forceInline", textInput(ns("InternalNotes"), "Internal Notes")),
-        div(class = "forceInline", textInput(ns("PublicNotes"), "Notes"))
+        div(class = "forceInline", textInput(ns("Relevance"), "Relevance Summary")),
+        div(class = "forceInline", textInput(ns("PrivateNote"), "PrivateNote")),
+        div(class = "forceInline", textInput(ns("PublicNote"), "Note"))
       ),
 
       # Additional tracking and metrics

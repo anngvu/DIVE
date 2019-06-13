@@ -13,3 +13,11 @@ geneVUI(id)
 Currently, this provides options to subset genomics data using a custom list input
 or GO and Reactome annotations.
 }
+\seealso{
+Other multiVApp module functions: \code{\link{geneV}},
+  \code{\link{multiVAppRun}}, \code{\link{multiVApp}},
+  \code{\link{multiVUIApp}}, \code{\link{selectVUI}},
+  \code{\link{selectV}}, \code{\link{subgroupVUI}},
+  \code{\link{subgroupV}}
+}
+\concept{multiVApp module functions}

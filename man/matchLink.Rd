@@ -4,7 +4,8 @@
 \alias{matchLink}
 \title{Server module function for interactive drag-and-drop variable harmonization of two datasets}
 \usage{
-matchLink(input, output, session, refData, cohortX, vars, guess, infoRmd)
+matchLink(input, output, session, refData, cohortX, vars, guess,
+  infoRmd = system.file("help/matching_methods.Rmd", package = "DIVE"))
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
@@ -19,7 +20,8 @@ If not provided, the first 10 variables in the reference cohort dataset is used.
 \item{guess}{Optional, name of the function to call for initial guessing of harmonized variables;
 no initial guesses made if argument is provided or function does not exist.}
 
-\item{infoRmd}{Optional, relative path to an info Rmarkdown file that can be pulled up in a modal.}
+\item{infoRmd}{Optional, relative path to an info Rmarkdown file that will be pulled up in a modal.
+Recommend using for providing methods details of the matching algorithm.}
 }
 \value{
 Reactive list of parameter values.

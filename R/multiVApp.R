@@ -8,7 +8,7 @@
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
 #' @export
-multiVAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
+multiVUIApp <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
 
   ns <- NS(id)
   fluidPage(theme = shinythemes::shinytheme("paper"),
@@ -100,7 +100,7 @@ multiVApp <- function(input, output, session,
 #'
 #' @export
 multiVAppRun <- function() {
-  ui <- multiVAppUI("default")
+  ui <- multiVUIApp("default")
   server <- function(input, output, session) { callModule(multiVApp, "default") }
   shinyApp(ui = ui, server = server)
 }

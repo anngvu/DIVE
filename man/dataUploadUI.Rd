@@ -2,7 +2,7 @@
 % Please edit documentation in R/dataUpload.R
 \name{dataUploadUI}
 \alias{dataUploadUI}
-\title{Shiny module UI for data upload module}
+\title{Shiny module UI for data table upload module}
 \usage{
 dataUploadUI(id, label = "<strong>Upload data to compare</strong>")
 }

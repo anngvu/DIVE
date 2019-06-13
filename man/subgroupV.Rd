@@ -4,7 +4,7 @@
 \alias{subgroupV}
 \title{Shiny module server for creating comparison plots between subgrouped data}
 \usage{
-subgroupV(input, output, session, cdata, hdata)
+subgroupV(input, output, session, cdata, hdlist)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
@@ -16,3 +16,11 @@ subgroupV(input, output, session, cdata, hdata)
 \description{
 This primarily allows creation of volcano plots for highthroughput datasets based on user-defined group contrasts.
 }
+\seealso{
+Other multiVApp module functions: \code{\link{geneVUI}},
+  \code{\link{geneV}}, \code{\link{multiVAppRun}},
+  \code{\link{multiVApp}}, \code{\link{multiVUIApp}},
+  \code{\link{selectVUI}}, \code{\link{selectV}},
+  \code{\link{subgroupVUI}}
+}
+\concept{multiVApp module functions}

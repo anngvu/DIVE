@@ -65,7 +65,7 @@ dataUpload <- function(input, output, session,
     # basic data check
 
     # additional checks if checkFun is specified
-    if(!is.null(checkFun)) {
+    if(is.function(checkFun)) {
       checked <- checkFun(data)
       data <- checked$result
       message <- checked$message

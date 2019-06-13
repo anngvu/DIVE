@@ -12,3 +12,11 @@ selectVUI(id)
 \description{
 A basic UI for choosing columns in a dataset.
 }
+\seealso{
+Other multiVApp module functions: \code{\link{geneVUI}},
+  \code{\link{geneV}}, \code{\link{multiVAppRun}},
+  \code{\link{multiVApp}}, \code{\link{multiVUIApp}},
+  \code{\link{selectV}}, \code{\link{subgroupVUI}},
+  \code{\link{subgroupV}}
+}
+\concept{multiVApp module functions}

@@ -17,7 +17,8 @@ matchApp(input, output, session, REFDATA = npodX, HPCG = hpcg,
   c("age", "sex_Female", "sex_Male", "race_Caucasian",
   "race_AfricanAmerican", "race_Hispanic.Latino", "race_Asian",
   "race_AmericanIndian", "race_Multiracial")), GUESS = guessMatch,
-  SUBSETFEAT = "donor.type", INFORMD = "help/cohort_exchange.Rmd",
+  SUBSETFEAT = "donor.type",
+  INFORMD = system.file("help/cohort_exchange.Rmd", package = "DIVE"),
   APPDATA = "examplecohort2020.csv")
 }
 \arguments{

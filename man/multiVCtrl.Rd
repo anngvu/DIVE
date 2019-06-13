@@ -4,24 +4,41 @@
 \alias{multiVCtrl}
 \title{Shiny module server for controlling multi-column view}
 \usage{
-multiVCtrl(input, output, session, hdlist, choices = names(hdlist),
-  infoRmd = NULL)
+multiVCtrl(input, output, session, cdata, hdlist,
+  choices = names(hdlist), key = "ID", vselect = "donor.type",
+  checkFun = NULL, infoRmd = NULL)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
+
+\item{cdata}{Data.table of low-throughput data.}
 
 \item{hdlist}{A list containing high dimensional datasets; must have names to be used as choices in the selection menu.}
 
 \item{choices}{Names referencing datasets in hdlist, to be used in selection menu.
 When the datasets should be displayed as grouped, the choices can be passed in accordingly for \code{\link[shiny]{selectizeInput}}.}
 
+\item{key}{Name of column that contains IDs in \preformatted{cdata} that link to samples in \preformatted{hdlist} datasets. Defaults to "ID".}
+
+\item{vselect}{A default selected column in \preformatted{cdata} to display.}
+
+\item{checkFun}{A check function used for checking data uploads.}
+
 \item{infoRmd}{Optional link to an Rmarkdown document containing details for the data upload module.}
 }
 \value{
 A list containing the data matrix for the parameter \preformatted{hdata} in the \code{\link{multiV}} module,
-\code{\link{geneV}} and \code{\link{selectV}}.
+as well as parameters for \code{\link{geneV}} and \code{\link{selectV}}.
 }
 \description{
 \code{multiVCtrl} is the control hub that provides the data and parameters for \code{\link{multiVUI}},
 \code{\link{geneV}} and \code{\link{selectV}}.
+}
+\details{
+The server logic handles sourcing of datasets for three different methods:
+\enumerate{
+  \item Selecting datasets that are pre-processed and stored in memory.
+  \item User-uploaded data.
+  \item A beta (and least-supported) method of retrieving datasets from GEO.
+}
 }

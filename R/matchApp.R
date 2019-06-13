@@ -95,6 +95,7 @@ matchApp <- function(input, output, session,
 
   newCohort <- callModule(newDataset, "CohortX",
                           refkey = REFKEY[2],
+                          checkFun = checkCohortData,
                           infoRmd = INFORMD,
                           appdata = APPDATA)
 

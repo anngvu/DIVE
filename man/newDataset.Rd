@@ -4,12 +4,16 @@
 \alias{newDataset}
 \title{Shiny module server function for handling new dataset input}
 \usage{
-newDataset(input, output, session, refkey, infoRmd, appdata)
+newDataset(input, output, session, refkey, checkFun = NULL,
+  infoRmd = NULL, appdata = NULL)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
 \item{refkey}{Optional, a named list containing name/label for creating a key-like column.}
+
+\item{checkFun}{Optional, a custom check function for an additional layer of checking/modifying uploaded data.
+It should return a list containing message and result (result should be \code{NULL} for unsuccessful data).}
 
 \item{infoRmd}{Optional, an Rmarkdown help file for infoOutput, e.g. requirements.}
 

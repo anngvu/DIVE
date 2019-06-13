@@ -4,7 +4,7 @@
 \alias{infoOutput}
 \title{Shiny module UI to display a modal with additional info}
 \usage{
-infoOutput(id, label = "data requirements", i = "exclamation-circle")
+infoOutput(id, label = "data req's", i = "exclamation-circle")
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}

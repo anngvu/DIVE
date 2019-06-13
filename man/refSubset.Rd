@@ -5,7 +5,7 @@
 \title{Shiny server module function for returning a subsetted dataset}
 \usage{
 refSubset(input, output, session, refData, subsetfeat, refkey,
-  infoRmd = NULL)
+  exclude = reactive({ }), infoRmd = NULL)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
@@ -17,6 +17,8 @@ refSubset(input, output, session, refData, subsetfeat, refkey,
 \item{refkey}{Optional, a named list containing name/label for creating a key-like column,
 where the name is the name of the column. See details for intended purpose.}
 
+\item{exclude}{Optional, a list of IDs to exclude.}
+
 \item{infoRmd}{Optional, relative path to an info Rmarkdown file that can be pulled up in a modal.}
 }
 \value{
@@ -26,9 +28,14 @@ A reactive subsetted data.table.
 Server function for creating a reactive subsetted dataset following user interaction.
 }
 \details{
-When multiple instances of the module are used to create subsets from different datasets
-(as opposed to subsets from the same dataset), it might be necessary to use refkey to track
-the origin of the subset, and especially if the subsets are to be merged on some common
-column later. For the most generic example, when datasets come from different sources,
-refkey can be called "Source" and the values might be S1 and S2.
+When many instances of the module are used to create subsets from different datasets
+(as opposed to different subsets from the same dataset), it might be necessary to use refkey
+to track the dataset origin of the subset, and especially if the subsets are to be merged
+on some common column. Generically speaking, datasets can come from different sources/locations,
+so refkey can be called "Source" and the values might then be S1 and S2.
+
+On the other hand, when this is used to create subsets from the same dataset,
+an "exclude list" can be passed in to make sure that the subset doesn't contain
+certain indices/IDs. This is desirable for creating subsets that don't overlap
+with another or for filtering out rows that don't pass some criteria.
 }

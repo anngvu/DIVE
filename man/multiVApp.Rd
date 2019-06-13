@@ -16,6 +16,10 @@ Assembles the logic of various module components, i.e. \code{\link{multiV}}, \co
 into a working one-page application
 }
 \seealso{
-Other multiVUI module: \code{\link{multiVAppUI}}
+Other multiVApp module functions: \code{\link{geneVUI}},
+  \code{\link{geneV}}, \code{\link{multiVAppRun}},
+  \code{\link{multiVUIApp}}, \code{\link{selectVUI}},
+  \code{\link{selectV}}, \code{\link{subgroupVUI}},
+  \code{\link{subgroupV}}
 }
-\concept{multiVUI module}
+\concept{multiVApp module functions}

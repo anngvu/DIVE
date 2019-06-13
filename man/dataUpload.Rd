@@ -2,15 +2,18 @@
 % Please edit documentation in R/dataUpload.R
 \name{dataUpload}
 \alias{dataUpload}
-\title{Shiny server function for data upload module}
+\title{Shiny server function for data table upload module}
 \usage{
-dataUpload(input, output, session, removable = F, infoRmd = NULL,
-  appdata = NULL)
+dataUpload(input, output, session, removable = F, checkFun = NULL,
+  infoRmd = NULL, appdata = NULL)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
 \item{removable}{Logical flag to indicate whether data upload will have "removable" feature. Defaults to FALSE. See details.}
+
+\item{checkFun}{Optional, a custom check function for an additional layer of checking/modifying uploaded data.
+It should return a list containing message and result (result should be \code{NULL} for unsuccessful data).}
 
 \item{infoRmd}{Optional, an Rmarkdown help file for infoOutput, e.g. requirements.}
 
@@ -18,11 +21,17 @@ dataUpload(input, output, session, removable = F, infoRmd = NULL,
 mock-uploaded. See details.}
 }
 \value{
-The uploaded file as a reactive data.table object.
+A data.table with a "filename" attribute containing the filename without extension,
+or \code{NULL} if the file input was not a table or returned as \code{NULL} from \code{checkFun}.
 }
 \description{
-The most basic implementation is to process and return any input to fileInput in the UI.
-File uploads can have "reset" behavior if the removable optional feature is specified,
+At its most basic, the module checks for and returns a data table from \code{fileInput}
+(if the uploaded file is not data in table format, the return will be \code{NULL}).
+However, a check function can be named to perform additional "light" data checking or modification operations
+and thus customize the module somewhat for different situations. Some example check functions
+simply look for specific column names or types. For more intense data processing that might involve
+multiple functions and/or side effects, one should really make a specialized module and pass the data into that.
+File uploads can have "reset" behavior by specifying the optional \code{removable} parameter,
 where a remove button will be rendered after upload.
 The module also optionally incorporates \code{\link{infoOutput}} functionality.
 Finally, it is possible to perform a mock upload of a saved dataset, e.g. for demonstration purposes.

@@ -4,14 +4,12 @@
 \alias{newDatasetInput}
 \title{Shiny module UI for a dataset input}
 \usage{
-newDatasetInput(id, label = id, type = "")
+newDatasetInput(id)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
 \item{label}{Name of the dataset.}
-
-\item{type}{Optional, a keyword to describe type of dataset, included in label text for additional UI customization.}
 }
 \value{
 A \code{shiny::\link[shiny]{tagList}} containing input UI.

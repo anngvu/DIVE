@@ -40,12 +40,22 @@ interactiveMatrixApp <- function(input, output, session,
                                  infoRmd = "help/data_exploration.Rmd",
                                  appdata = "pilot.csv") {
 
-  cellfilter <- callModule(cellPack, "cellfilter", json = widgetdata)
-  upload <- callModule(dataUpload, "upload", removable = T, infoRmd, appdata)
+  cellfilter <- callModule(cellPack, "cellfilter",
+                           json = widgetdata)
+
+  upload <- callModule(dataUpload, "upload",
+                       removable = T,
+                       checkFun = checkForID,
+                       infoRmd,
+                       appdata)
+
   display <- callModule(matrixCtrl, "ctrl", M, N, CDATA, METADATA,
                         newdata = upload, widget = cellfilter)
+
   matrix <- callModule(interactiveMatrix, "matrix", state = display)
+
   output$usewidget <- reactive({ if(display$optgroup == widgetopt) 1 else 0 })
+
   outputOptions(output, "usewidget", suspendWhenHidden = FALSE)
 }
 

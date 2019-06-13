@@ -4,7 +4,7 @@
 \alias{subgroupVUI}
 \title{Shiny app UI for creating comparison plots between subgrouped data}
 \usage{
-subgroupVUI(id, hdchoices, cchoices)
+subgroupVUI(id)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
@@ -16,3 +16,11 @@ subgroupVUI(id, hdchoices, cchoices)
 \description{
 UI for user to define groups for volcano plots.
 }
+\seealso{
+Other multiVApp module functions: \code{\link{geneVUI}},
+  \code{\link{geneV}}, \code{\link{multiVAppRun}},
+  \code{\link{multiVApp}}, \code{\link{multiVUIApp}},
+  \code{\link{selectVUI}}, \code{\link{selectV}},
+  \code{\link{subgroupV}}
+}
+\concept{multiVApp module functions}
