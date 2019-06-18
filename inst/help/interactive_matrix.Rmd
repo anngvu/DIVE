@@ -1,5 +1,5 @@
 ---
-title: "Data exploration"
+title: "Interactive matrix comparisons"
 output: html_document
 ---
 

@@ -23,5 +23,6 @@ Imports:
     shinyWidgets,
     r2d3,
     jsonlite,
-    optmatch
+    optmatch,
+    DT
 RoxygenNote: 6.1.1

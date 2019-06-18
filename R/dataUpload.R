@@ -8,18 +8,16 @@
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @return UI components.
 #' @export
-dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>") {
+dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>", buttonlabel = "Data", placeholder = "  no file selected") {
   ns <- NS(id)
   tags$div(id = ns("dataUploadUI"),
-    fluidRow(
-      column(8, style="margin-top:-5px;", tags$div(id = ns("main"),
+      tags$div(class = "forceInline", style="margin-top:-5px;", tags$div(id = ns("main"),
                     tags$div(id = ns("upload"), class = "forceInline",
                              fileInput(ns("upload"), HTML(label), multiple = FALSE,
                                        accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"),
-                                       buttonLabel = "Data", placeholder = "  no file selected")))),
-      column(4, br(), uiOutput(ns("info")))
+                                       buttonLabel = buttonlabel, placeholder = placeholder)))),
+      tags$div(class = "forceInline", br(), uiOutput(ns("info")))
     )
-  )
 }
 
 #' Shiny server function for data table upload module
@@ -38,6 +36,7 @@ dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>") 
 #' For instance, if the name is "SampleCohort", the dataset will be "uploaded" from "Data/SampleCohort.csv".
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param asDT Logical flag to indicate whether data returned should be a data.table. If FALSE, \code{readLines} is used on file.
 #' @param removable Logical flag to indicate whether data upload will have "removable" feature. Defaults to FALSE. See details.
 #' @param checkFun Optional, a custom check function for an additional layer of checking/modifying uploaded data.
 #' It should return a list containing message and result (result should be \code{NULL} for unsuccessful data).
@@ -46,8 +45,9 @@ dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>") 
 #' mock-uploaded. See details.
 #' @return A data.table with a "filename" attribute containing the filename without extension,
 #' or \code{NULL} if the file input was not a table or returned as \code{NULL} from \code{checkFun}.
+#' @export
 dataUpload <- function(input, output, session,
-                       removable = F, checkFun = NULL, infoRmd = NULL, appdata = NULL) {
+                       asDT = T, removable = F, checkFun = NULL, infoRmd = NULL, appdata = NULL) {
 
   uploaded <- reactiveVal(NULL)
 
@@ -56,15 +56,13 @@ dataUpload <- function(input, output, session,
     output$info <- renderUI({
       infoOutput(session$ns("reqs"))
     })
-    modal <- callModule(info, "reqs", infoRmd = infoRmd)
+    modal <- callModule(info, "reqs", infoRmd)
   }
 
   # ---------------------------------------------------------------------------- #
   observeEvent(input$upload, {
-    data <- fread(input$upload$datapath)
-    # basic data check
-
-    # additional checks if checkFun is specified
+    data <- if(asDT) fread(input$upload$datapath) else readLines(input$upload$datapath)
+    # perform check if checkFun is specified
     if(is.function(checkFun)) {
       checked <- checkFun(data)
       data <- checked$result
@@ -75,6 +73,7 @@ dataUpload <- function(input, output, session,
     if(!is.null(data)) {
       attr(data, "filename") <- gsub(".txt$|.csv$", "", input$upload$name)
       uploaded(data)
+      # add remove button if removable
       if(removable) {
         insertUI(paste0("#", session$ns("main")), "beforeEnd",
                tags$div(id = session$ns("remove-btn"), class = "forceInline",

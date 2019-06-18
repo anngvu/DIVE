@@ -37,7 +37,7 @@ interactiveMatrixApp <- function(input, output, session,
                                  M = cordata$corM, N = cordata$corN, CDATA = cdata, METADATA = metadata,
                                  widgetopt = "Cell/Tissue",
                                  widgetdata = system.file("www/", "test.json", package = "DIVE"),
-                                 infoRmd = "help/data_exploration.Rmd",
+                                 infoRmd = system.file("help/interactive_matrix.Rmd", package = "DIVE"),
                                  appdata = "pilot.csv") {
 
   cellfilter <- callModule(cellPack, "cellfilter",
@@ -46,8 +46,8 @@ interactiveMatrixApp <- function(input, output, session,
   upload <- callModule(dataUpload, "upload",
                        removable = T,
                        checkFun = checkForID,
-                       infoRmd,
-                       appdata)
+                       infoRmd = infoRmd,
+                       appdata = appdata)
 
   display <- callModule(matrixCtrl, "ctrl", M, N, CDATA, METADATA,
                         newdata = upload, widget = cellfilter)

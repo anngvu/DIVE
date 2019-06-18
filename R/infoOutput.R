@@ -7,7 +7,7 @@
 #' @export
 infoOutput <- function(id, label = "data req's", i = "exclamation-circle") {
   ns <- NS(id)
-  actionLink(ns("moreInfo"), icon = icon(i), label)
+  actionLink(ns("moreInfo"), label = label, icon = icon(i))
 }
 
 #' Server module function for displaying an info modal

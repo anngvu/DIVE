@@ -128,8 +128,8 @@ curate <- function(input, output, session,
 #' Launch an interface to view and modify metadata of curated data
 #'
 #' @export
-curationAppRun <- function() {
-  ui <- curationUI("metadata")
+curateR <- function() {
+  ui <- curateUI("metadata")
   server <- function(input, output, session) { callModule(curate, "metadata") }
   shinyApp(ui = ui, server = server)
 }

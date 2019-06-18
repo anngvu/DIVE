@@ -1,8 +1,7 @@
 #' Create master data table from a collection of datasets
 #'
-#' \code{createFromCollection} builds one large master dataset given the
-#' directory where a collection of curated datasets resides. This data object is required for
-#' the Shiny application.
+#' Builds one large master dataset given the directory where a collection of curated datasets resides.
+#' This data object is required for the Shiny application.
 #'
 #' @param cdir Directory path (relative to working directory) to the collection of dataset files.
 #' @param filepattern Pattern for grep to identify qualifying files in the directory, e.g. "*.txt".
@@ -43,7 +42,7 @@ mergeMore <- function(data, inputpath) {
 
 #' Make data object for Shiny app
 #'
-#' \code{cdataMake} is a wrapper to create the \code{cdata} object
+#' A wrapper to create the \code{cdata} object
 #'
 #' @inheritParams createFromCollection
 #' @param other A list of of paths to other data files not in the main collection but
@@ -57,6 +56,16 @@ cdataMake <- function(cdir = "./Collection/Main/", filepattern = "*.txt", exclud
   if(length(other)) cdata <- Reduce(mergeMore, other, cdata)
   save(cdata, file = paste0(outdir, "cdata.Rdata"))
 }
+
+# create a mapping of cases to variable for easy lookup
+cases2Variable <- function() {
+  c2v <- split(!apply(cdata[, -1], 1, is.na), 1:nrow(cdata))
+  c2v <- lapply(c2v, function(x) names(cdata)[-1][x])
+  names(c2v) <- cdata$ID
+  save(c2v, file = "c2v.rda")
+}
+
+
 
 #' Check metadata for \preformatted{cdata}
 #'
