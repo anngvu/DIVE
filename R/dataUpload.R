@@ -77,7 +77,7 @@ dataUpload <- function(input, output, session,
       if(removable) {
         insertUI(paste0("#", session$ns("main")), "beforeEnd",
                tags$div(id = session$ns("remove-btn"), class = "forceInline",
-               br(), actionButton(session$ns("remove"), "", icon = icon("times"))))
+               br(), actionButton(session$ns("remove"), "", icon = icon("trash"))))
       }
     }
   })

@@ -26,20 +26,6 @@ createFromCollection <- function(cdir, filepattern, exclude, index) {
   return(cdata)
 }
 
-#' Merge a main data table with other misc data
-#'
-#' Use \code{mergeMore} to merge some other data with the master dataset.
-#'
-#' @param data A data.table
-#' @param inputpath Path to another dataset to merge with data.
-#' @return A data.table
-#' @export
-mergeMore <- function(data, inputpath) {
-  moredata <- fread(inputpath)
-  data <- merge(data, moredata, by = "ID", all = T)
-  return(data)
-}
-
 #' Make data object for Shiny app
 #'
 #' A wrapper to create the \code{cdata} object
@@ -50,22 +36,12 @@ mergeMore <- function(data, inputpath) {
 #' @param outdir Where to put \preformatted{cdata}. Defaults to App/Data.
 #' @export
 cdataMake <- function(cdir = "./Collection/Main/", filepattern = "*.txt", exclude = "!",
-                       other = list("./Collection/Other/coredata_ref.txt"),
-                       outdir = "./App/Data/") {
+                      other = list("./Collection/Other/coredata_ref.txt"),
+                      outdir = "./App/Data/") {
   cdata <- createFromCollection(cdir, filepattern, exclude)
   if(length(other)) cdata <- Reduce(mergeMore, other, cdata)
   save(cdata, file = paste0(outdir, "cdata.Rdata"))
 }
-
-# create a mapping of cases to variable for easy lookup
-cases2Variable <- function() {
-  c2v <- split(!apply(cdata[, -1], 1, is.na), 1:nrow(cdata))
-  c2v <- lapply(c2v, function(x) names(cdata)[-1][x])
-  names(c2v) <- cdata$ID
-  save(c2v, file = "c2v.rda")
-}
-
-
 
 #' Check metadata for \preformatted{cdata}
 #'
@@ -78,7 +54,38 @@ checkMeta <- function(cdata, metadata) {
 
 }
 
-# Non-exported function for combining rows, e.g.
+# -- Internal non-exported ----------------------------------------------------------------------------------#
+
+
+# Adds method to metadata using method key
+updateMethod <- function() {
+  metadata <- fread("Metadata.tsv")
+  methods <- fread("Methods.tsv")
+  metadata <- merge(metadata, methods[, .(MethodID, OBITerm)], by = "MethodID")
+}
+
+#' Merge a main data table with other misc data
+#'
+#' Use \code{mergeMore} to merge some other data with the master dataset.
+#'
+#' @param data A data.table
+#' @param inputpath Path to another dataset to merge with data.
+#' @return A data.table
+mergeMore <- function(data, inputpath) {
+  moredata <- fread(inputpath)
+  data <- merge(data, moredata, by = "ID", all = T)
+  return(data)
+}
+
+# create a mapping of cases to variable for easy lookup
+cases2Variable <- function() {
+  c2v <- split(!apply(cdata[, -1], 1, is.na), 1:nrow(cdata))
+  c2v <- lapply(c2v, function(x) names(cdata)[-1][x])
+  names(c2v) <- cdata$ID
+  save(c2v, file = "c2v.rda")
+}
+
+# For combining rows, e.g.
 # ---------------------------------------------
 #ID   var1 var2   var3  var4   var5
 #001      0.313      0.344   NA     NA     NA

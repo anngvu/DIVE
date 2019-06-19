@@ -22,7 +22,7 @@ ui <- navbarPage("nPOD DIVE", id = "main", selected = "intro",
                       actionButton("demoCorrelation", "Help Demo", icon = icon("play")),
                       interactiveMatrixAppUI("cor", CSS = NULL)),
              tabPanel("Data Exploration (high-throughput)", value = "data-exploration-2",
-                      "")
+                      multiVUIApp("default"))
   ),
   #-- MENU PG 5 ----------------------------------------------------------------------------------------#
   tabPanel("Vignettes", value = "stories" #icon = icon("asterisk")
@@ -30,15 +30,8 @@ ui <- navbarPage("nPOD DIVE", id = "main", selected = "intro",
   ),
 
   #-- MENU PG 6 ----------------------------------------------------------------------------------------#
-  tabPanel("Get Data", value = "source-data", # icon = icon("database"),
-           checkboxInput("filterDT", "Only display sources where individual-level data is readily available.", value = T, width = 500),
-           helpText("'Get from original source' link points to the original data in a supplemental file
-                    or to an external database where data has been deposited. The original sources can provide more detail about
-                    methodology, definitions and other metadata, but are in a variety of formats not universally machine-readable (e.g. PDF, Excel).
-                    To facililate re-use, curated data can also be downloaded all at once (except for some high-throughput datasets)
-                    as a collection of plain text tab-delimited  files."),
-           downloadButton("downloadCollection", label = "Download Collection"),
-           DT::dataTableOutput("sourceDT")
+  tabPanel("Browse and Download", value = "source-data", # icon = icon("database"),
+           browseUI("metadata")
   ),
 
   #-- PAGE 7 ----------------------------------------------------------------------------------------#
@@ -48,8 +41,11 @@ ui <- navbarPage("nPOD DIVE", id = "main", selected = "intro",
 )
 
 server <- function(input, output, session) {
+
   callModule(matchApp, "match")
   callModule(interactiveMatrixApp, "cor")
+  callModule(multiVApp, "default")
+
   observeEvent(input$demoCorrelation, {
     session$sendCustomMessage(type = "demoCorrelation",
                               message = list(steps = jsonlite::toJSON(read.table("help/data_exploration.txt", sep = "\t", header = T, comment.char = ""))))
@@ -58,7 +54,7 @@ server <- function(input, output, session) {
     session$sendCustomMessage(type = "demoCohortExchange",
                               message = list(steps = jsonlite::toJSON(read.table("help/cohort_exchange.txt", sep = "\t", header = T, comment.char = ""))))
   })
-
+  callModule(browse, "metadata")
 }
 
 shinyApp(ui = ui, server = server)

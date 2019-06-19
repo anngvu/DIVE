@@ -1,0 +1,12 @@
+name: alphaDIVE
+title: alphaDIVE
+username:
+account: datavu
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 987308
+bundleId: 2162859
+url: https://datavu.shinyapps.io/alphaDIVE/
+when: 1560906737.03417
+asMultiple: FALSE
+asStatic: FALSE

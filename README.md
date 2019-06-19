@@ -4,6 +4,8 @@ DIVE is an R/Shiny application that provides a proof-of-concept framework for cu
 
 This is still a work in progress and more details will be available as the application is finishing up on development and testing. Investigators who'd like to contribute data or help us with testing can submit a note at the issues page (https://github.com/avucoh/DIVE/issues) or email <avu@coh.org>.
 
+The current version of can be installed via `devtools::install_github("avucoh/DIVE")`
+
 ## Modules
 
 DIVE is composed of five stand-alone modules, each with different purposes and methods for interfacing with the data, described below. The first three modules are more "major" modules, while the last two modules are more "minor" modules. Though the modules can be run independently, when put together they can serve as a well-rounded web data portal. 
