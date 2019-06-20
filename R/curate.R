@@ -1,36 +1,6 @@
 # Gives metadata fields in metadata
 metadata_fields <- function() {
-  list(
-    SourceType = "Source Type",
-    Publication = "Source Publication",
-    Reference = "Reference",
-    Variable = "Variable Name",
-    Value = "Variable Value Type",
-    Description = "Variable Description",
-    Dimensions = "Dimensions",
-    Shared = "Shared",
-    Derived = "Derived From",
-    Level = "Level",
-    CellTissue = "Cell or Tissue",
-    TissueContext = "Tissue Context",
-    EFO = "EFO Annotation",
-    GO = "GO Process Annotation",
-    Entrez = "Entrez Gene IDs",
-    Entrez_file = "Entrez Gene IDs",
-    MethodRef = "Method Reference",
-    Method = "Method",
-    MethodDetails = "Method Details",
-    Tags = "Tags",
-    VarWithinD = "Variance within Disease",
-    VarDvsCtrl = "Variance Disease vs Control",
-    Relevance = "Bigger Picture Relevance Summary",
-    InternalNotes = "Internal Notes",
-    PublicNotes = "Notes",
-    LastReviewed = "Last Reviewed",
-    DataSource = "Source Figure or Table",
-    DataSourceLink = "Source Link",
-    Interest = "Interest"
-  )
+
 }
 
 curateUI <- function(id, metadata) {

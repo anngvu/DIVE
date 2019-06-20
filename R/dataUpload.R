@@ -8,14 +8,15 @@
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @return UI components.
 #' @export
-dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>", buttonlabel = "Data", placeholder = "  no file selected") {
+dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>", buttonlabel = "Data", placeholder = "  no file selected", width = 300) {
   ns <- NS(id)
+  dataUploadConf <<- list(label = label, buttonlabel = buttonlabel, placeholder = placeholder, width = width)
   tags$div(id = ns("dataUploadUI"),
       tags$div(class = "forceInline", style="margin-top:-5px;", tags$div(id = ns("main"),
-                    tags$div(id = ns("upload"), class = "forceInline",
-                             fileInput(ns("upload"), HTML(label), multiple = FALSE,
-                                       accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"),
-                                       buttonLabel = buttonlabel, placeholder = placeholder)))),
+              tags$div(id = ns("upload"), class = "forceInline",
+                       fileInput(ns("upload"), HTML(label), multiple = FALSE,
+                                 accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"),
+                                 buttonLabel = buttonlabel, placeholder = placeholder, width = width)))),
       tags$div(class = "forceInline", br(), uiOutput(ns("info")))
     )
 }
@@ -82,15 +83,20 @@ dataUpload <- function(input, output, session,
     }
   })
 
+  newUploadUI <- function(label = dataUploadConf$label, buttonlabel = dataUploadConf$buttonlabel,
+                          placeholder = dataUploadConf$placeholder, width = dataUploadConf$width) {
+    insertUI(paste0("#", session$ns("main")), "beforeEnd",
+             tags$div(id = session$ns("upload"), class = "forceInline",
+                      fileInput(session$ns("upload"), HTML(label), multiple = FALSE,
+                                accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"),
+                                buttonLabel = buttonlabel, placeholder = placeholder, width = width)))
+  }
+
   observeEvent(input$remove, {
     uploaded(NULL)
     removeUI(paste0("#", session$ns("upload")))
     removeUI(paste0("#", session$ns("remove-btn")))
-    insertUI(paste0("#", session$ns("main")), "beforeEnd",
-             tags$div(id = session$ns("upload"), class = "forceInline",
-                      fileInput(session$ns("upload"), HTML("<strong>Upload data to compare</strong>"), multiple = FALSE,
-                                accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"),
-                                buttonLabel = "Data")))
+    newUploadUI()
   })
 
   observeEvent(input$appdata, {

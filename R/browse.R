@@ -13,30 +13,46 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
             tabsetPanel(id = ns("tabs"),
                         tabPanel("By nPOD case",
                                  fluidRow(style = "margin-top: 20px; margin-left: 20px;", height = 100,
-                                          div(class = "forceInline", style = "margin-left: 10px;",
-                                              br(),
+                                          div(class = "forceInline", br(),
                                               actionButton(ns("prevSet"), "Prev 40"),
-                                              actionButton(ns("nextSet"), "Next 40")
+                                              actionButton(ns("nextSet"), "Next 40"),
+                                              htmlOutput(ns("index"))
+                                          ),
+                                          div(class = "forceInline", style = "margin-left: 10px;",
+                                              selectizeInput(ns("subset"), HTML("Browse"),
+                                                             choices = c("", unique(cdata[["donor.type"]])), selected = NULL,
+                                                             options = list(placeholder = "all in database"), width = 200)
+                                             ),
+                                          div(class = "forceInline", # style = "margin-left: 50px;",
+                                              selectizeInput(ns("selectID"), "Or select specific IDs",
+                                                             choices = c("", cdata[["ID"]]), selected = NULL, multiple = T,
+                                                             options = list(placeholder = "(max 10)",
+                                                                            maxItems = 10), width = 220)
                                               ),
-                                          div(class = "forceInline", style = "margin-left: 100px;",
-                                              dataUploadUI(ns("IDlist"), label = "<strong>View by custom list of IDs</strong>", buttonlabel = "Upload")
+                                          div(class = "forceInline", br(),
+                                              actionButton(ns("submitID"), "go")
+                                          ),
+                                          div(class = "forceInline", style = "margin-right: 150px;",
+                                              dataUploadUI(ns("IDlist"), label = "Or upload a list of IDs",
+                                                           buttonlabel = "Upload", width = 200)
                                               ),
-                                          div(class = "forceInline", style = "margin-left: 100px;",
-                                              selectInput(ns("class"), "Data annotation",
-                                                          choices = c("Contributor", "CellTissue", "Level", "ThemeTag", "GOTerm"))
+                                          div(class = "forceInline", style = "background-color: WhiteSmoke;",
+                                          div(class = "forceInline", style = "margin-left: 50px;",
+                                              selectInput(ns("class"), HTML("<strong>Data annotation</strong>"),
+                                                          choices = c("Contributor", "CellTissue", "Level", "ThemeTag", "GOTerm"), width = 200)
                                               ),
-                                         div(class = "forceInline", style = "margin-left: 100px;",
+                                         div(class = "forceInline",
                                              div(class = "forceInline", uiOutput(ns("expandUI")))
-                                         )
+                                         ))
                                  ),
                                  fluidRow(absolutePanel(style = "z-index: 10;", draggable = T,
                                                         conditionalPanel("input.expandon != ''", ns = ns,
-                                                          div(class = "subgroups-panel", style = "background-color: ghostwhite;",
+                                                          div(class = "subgroups-panel", style = "background-color: WhiteSmoke;",
                                                               div(align = "right", actionButton(ns("closepanel"), "", icon = icon("times"))),
                                                               plotlyOutput(ns("expandplot"), height = 750, width = 500))
                                                         )
                                           )),
-                                 fluidRow(flex = c(1, NA),
+                                 fluidRow(
                                    shinycssloaders::withSpinner(plotlyOutput(ns("cases"), height = 750), color = "gray")
                             )),
                         tabPanel("By all data",
@@ -54,12 +70,44 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
 
 browse <- function(input, output, session) {
 
-  customIDs <- callModule(dataUpload, "IDlist", asDT = F, removable = T, infoRmd = system.file("help/ID_list.Rmd", package = "DIVE"))
 
   visIDs <- reactiveVal(1:40)
+  cdataL <- reactiveVal(cdata)
+  customIDs <- reactiveVal(NULL)
+
+  uploadedIDs <- callModule(dataUpload, "IDlist", asDT = F, removable = T, infoRmd = system.file("help/ID_list.Rmd", package = "DIVE"))
+
+  observeEvent(uploadedIDs(), {
+    if(is.null(uploadedIDs())) customIDs(NULL) else customIDs(uploadedIDs())
+  }, ignoreNULL = F)
+
+  observeEvent(input$submitID, {
+    customIDs(input$selectID)
+  })
+
+  observeEvent(input$subset, {
+    if(input$subset == "") cdataL(cdata) else cdataL(cdata[donor.type == input$subset])
+    updateSelectizeInput(session, "selectID", selected = "")
+    end <- ifelse(nrow(cdataL()) < 40, nrow(cdataL()), 40)
+    visIDs(1:end)
+  })
+
+  observeEvent(customIDs(), {
+    if(is.null(customIDs())) cdataL(cdata) else cdataL(cdata[ID %in% customIDs()])
+    end <- ifelse(nrow(cdataL()) < 40, nrow(cdataL()), 40)
+    visIDs(1:end)
+  }, ignoreNULL = F)
+
+  output$index <- renderPrint({
+      helpText(paste0("displaying ", visIDs()[1], "-", visIDs()[length(visIDs())], " of ", nrow(cdataL())))
+  })
 
   observeEvent(input$nextSet, {
-    if(visIDs()[40] < nrow(cdata)) visIDs(visIDs() + 40)
+    if(last(visIDs()) < nrow(cdataL())) {
+      newrange <- visIDs() + 40
+      if(last(newrange) > nrow(cdataL())) newrange <- newrange[newrange <= nrow(cdataL())]
+      visIDs(newrange)
+    }
   })
 
   observeEvent(input$prevSet, {
@@ -68,7 +116,7 @@ browse <- function(input, output, session) {
 
   output$expandUI <- renderUI({
     tags$div(
-      div(class = "forceInline", selectInput(session$ns("expandon"), "Expand on", choices = c("", unique(withclass()$Data)), selected = ""))
+      div(class = "forceInline", selectInput(session$ns("expandon"), HTML("<strong>Expand on</strong>"), choices = c("", unique(withclass()$Data)), selected = ""))
     )
   })
 
@@ -77,8 +125,9 @@ browse <- function(input, output, session) {
   })
 
   varL <- reactive({
-    IDs <- if(is.null(customIDs())) visIDs() else cdata$ID %in% customIDs()
-    varL <- cdata[IDs, cdata[IDs, sapply(.SD, function(x) !all(is.na(x))), with = F] ]
+    IDs <- visIDs()
+    varL <- cdataL()[IDs, cdataL()[IDs, sapply(.SD, function(x) !all(is.na(x))), with = F] ]
+
     for(col in removeID(names(varL))) varL[[col]] <- as.integer(!is.na(varL[[col]]))
     varL <- melt(varL, id.var = "ID", variable.name = "VarID", value.name = "Available")
     varL <- merge(varL, metadata[, c("VarID", "Variable", input$class), with = F], by = "VarID")
@@ -90,7 +139,6 @@ browse <- function(input, output, session) {
   })
 
   output$cases <- renderPlotly({
-    input$class
     withclass <- withclass()
     p <- plot_ly(withclass, x = ~Data, y = ~ID, name = "Available", type = "scatter", mode = "markers",
                  marker = list(size = ~Available *6, color = "#404040", opacity = 1, line = list(color = "#404040")),

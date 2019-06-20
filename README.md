@@ -26,7 +26,7 @@ DIVE is composed of five stand-alone modules, each with different purposes and m
 
 - Intended users: Both nPOD and non-nPOD investigators
 - Description: Going beyond the limitations of the interactiveMatrix module, this module extends data interaction to high-throughput data and better combines data of different sources/dimensions through an alternate layout and additional capabilities.
-- To start just this module at the console: `multiVUIAppRun()`
+- To start just this module at the console: `multiVAppRun()`
 
 ### Browse and download (Browser App)
 
