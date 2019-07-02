@@ -9,11 +9,11 @@ interactiveMatrixUI <- function(id) {
   tags$div(
     fluidRow(
     column(8, align = "left",
-           div(id = "matrixOutput", style ="height: 1000px;",
-               shinycssloaders::withSpinner(plotlyOutput(ns("matrix")), color = "gray"))
+           div(id = "matrixOutput",
+               shinycssloaders::withSpinner(uiOutput(ns("heatmap")), color = "gray"))
     ),
     column(4,
-           div(id = "drilldownOutput", style = "margin-top: 20px; margin-left: 10px;",
+           div(id = "drilldownOutput",
                selectizeInput(ns("drilldown"), "Drill down to data for",
                               choices = "", selected = "",
                               options = list(maxItems = 2, placeholder = "select variable(s)"), width = "400px"),
@@ -33,9 +33,11 @@ interactiveMatrixUI <- function(id) {
 #'
 #' The matrix responds to inputs, new plotdata, and has a linked drilldown component.
 #'
-#' The matrix display logic works with \code{\link{matrixCtrl}}, which returns the reactive
-#' data in a \preformatted{state} object. In addition, the matrix is linked to a scatter
-#' plot that accesses underlying data for a user-clicked cell.
+#' The module handles interactive display of a matrix linked to a scatter
+#' plot that accesses underlying data for a user-clicked cell. It works with \code{\link{matrixCtrl}},
+#' which returns the reactive matric as part of a \preformatted{state} object. The general idea is that
+#' this module only handles visualization of a matrix while the actually matrix generation can be handled by
+#' other modules that feed into it.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param state Reactive state object from \code{\link{matrixCtrl}}.
@@ -43,48 +45,49 @@ interactiveMatrixUI <- function(id) {
 #' @param dcolors List of manual color mappings for variables used for coloring data points.
 #' @export
 interactiveMatrix <- function(input, output, session,
-                              state, factorx = "grp$|cat$|score$|bin$|count$|pos$",
-                              dcolors = list(
-                                donor.type = c("Autoab Pos" = "orange", "Cystic fibrosis" = "aquamarine4",
-                                               "Gastric Bypass" = "bisque4", "Gestational diabetes" = "deeppink2",
+                              state, factorx = "type$|grp$|cat$|score$|grade$|bin$|pos$",
+                              dcolors = list(donor.type =
+                                               c("Autoab Pos" = "orange", "Cystic fibrosis" = "aquamarine4",
+                                               "Gastric Bypass" = "bisque4", "Gestational diabetes" = "deeppink2",c
                                                "Monogenic Diabetes" = "red4", "No diabetes" = "royalblue2",
                                                "Other-Diabetes" = "indianred4", "Other-No Diabetes" = "steelblue2",
                                                "T1D" = "red", "T1D Medalist" = "maroon", "T2D" = "purple")))
   {
 
   #-- Main matrix plot -----------------------------------------------------------------------------------------------------#
+
+  output$heatmap <- renderUI({
+    if(nrow(state$filM)) plotlyOutput(session$ns("matrix")) else textOutput(session$ns("empty"))
+  })
+
   output$matrix <- renderPlotly({
-   interesting <- nrow(state$filM) > 1 & !all(abs(state$filM) == 1, na.rm = T)
-   if(!interesting) {
-     p <- plotly_empty() %>% layout(title = "No meaningful results. Try expanding filters.", font = list(color = "gray")) %>%
+     M <- state$filM
+     # bug? plotly doesn't display the plot if height is less than 100px
+     # max height should be ~1000px
+     px <- 1000/ncol(M)
+     height <- nrow(M) * px
+     height <- if(height < 100) 200 else height
+     newdata <- state$newdata
+
+     annotation_matrix <- matrix(paste0("x: ", rep(rownames(M), each = nrow(M)),
+                                        "<br>y: ", rep(colnames(M), ncol(M)),
+                                        "<br>Correlation: ", round(M, 3)),
+                                 ncol = ncol(M))
+     i <-  if(length(newdata)) which(rownames(M) %in% newdata) else 0 # identify new data rows
+
+     p <- plot_ly(x = rownames(M), y = colnames(M), z = M,
+                  type = "heatmap", colorscale = "RdBu", source = "matrix", hoverinfo = "text", text = annotation_matrix,
+                  height = height, colorbar = list(thickness = 8)) %>%
+       layout(xaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = "", linecolor = "gray", mirror = T),
+              yaxis = list(title = "", showgrid = F, tickmode = "array", tickvals = rownames(M)[i], ticktext = "NEW &#10132;",
+                           tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
+              plot_bgcolor = "gray") %>%
        config(displayModeBar = F)
-     return(p)
-   }
-   M <- state$filM
-   newdata <- state$newdata
-   newmarker <- list() # marker shape objects to indicate new data in the matrix
-   # newtxt <- list()
-   if(length(newdata)) {
-     i <- which(rownames(M) %in% newdata) # identify new data rows
-     if(length(i)) {
-       newmarker <- list(type = "line", line = list(color = "MediumSpringGreen", width = 7),
-                         x0 = -0.04, x1 = -0.01, y0 = min(i)-1, y1 = max(i)-1,
-                         xref = "paper", yref = "y")
-     }
-   }
-   p <- plot_ly(x = rownames(M), y = colnames(M), z = M,
-                type = "heatmap", colorscale = "RdBu", source = "matrix",
-                hoverinfo = "text",
-                text = matrix(paste0("x: ", rep(row.names(M), each = nrow(M)),
-                                     "<br>y: ", rep(row.names(M), ncol(M)),
-                                     "<br>Correlation: ", round(M, 3)),
-                              ncol = ncol(M)),
-                height = 1000, colorbar = list(thickness = 8)) %>%
-     layout(xaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = "", linecolor = "gray", mirror = T),
-            yaxis = list(title = "", showgrid = F, tickvals = -1, ticks = "", tickfont = list(color = "red", size = 0.9),
-                         linecolor = "gray", mirror = T),
-            plot_bgcolor = "gray", shapes = list(newmarker))
-   p %>% config(displayModeBar = F)
+     p
+  })
+
+  output$empty <- renderPrint({
+    "No meaningful results. Try expanding filters."
   })
 
   #-- Drilldown handling -----------------------------------------------------------------------------------------------------#
@@ -94,7 +97,7 @@ interactiveMatrix <- function(input, output, session,
 
   observe({
     s <- event_data("plotly_click", source = "matrix")
-    if(!length(s)) return()
+    if(is.null(s)) return()
     var1 <- s[["x"]]
     var2 <- s[["y"]]
     updateSelectizeInput(session, "drilldown", "Drill down to data for", selected = c(var1, var2))

@@ -15,13 +15,15 @@ multiVUIApp <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
             if(!is.null(CSS)) includeCSS(CSS),
             shinyWidgets::chooseSliderSkin("Flat"),
 
-            fluidRow(style = "background: WhiteSmoke;",
+            fluidRow(style = "background: WhiteSmoke; margin-top: -50px; margin-left: -50px; margin-right: -50px;",
+              tags$div(style = "margin-top: 50px; margin-left: 50px;",
               column(1, br(), h4("DATA SOURCES")),
               column(7, multiVCtrlUI(ns("ctrl"))),
               column(1, br(), h4("DATA TOOLS")),
               column(3, br(), br(),
                      div(class = "forceInline", actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup"))),
                      div(class = "forceInline", actionButton(ns("ML"), "Learn", icon = icon("cog")))
+              )
             )),
             fluidRow(absolutePanel(style = "z-index: 10;", tags$div(id = "views"), draggable = T)),
             fluidRow(style = "padding-top: 50px;",

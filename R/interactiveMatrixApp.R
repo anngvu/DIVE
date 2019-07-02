@@ -10,7 +10,7 @@ interactiveMatrixAppUI <- function(id, CSS = system.file("www/", "app.css", pack
   fluidPage(theme = shinythemes::shinytheme("paper"),
             if(!is.null(CSS)) includeCSS(CSS),
 
-            fluidRow(style="margin-top:30px; margin-bottom:20px; margin-right:100px",
+            fluidRow(style="margin-top:30px; margin-bottom:20px;",
                      column(8,
                             matrixCtrlUI(ns("ctrl")),
                             conditionalPanel(paste0("output['", ns("usewidget"), "'] ", "== 1"),
@@ -34,8 +34,11 @@ interactiveMatrixAppUI <- function(id, CSS = system.file("www/", "app.css", pack
 #' @param METADATA A data.table with "Variable" as a key column and any number of columns (metadata) to be used as filters.
 #' @export
 interactiveMatrixApp <- function(input, output, session,
-                                 M = cordata$corM, N = cordata$corN, CDATA = cdata, METADATA = metadata,
-                                 widgetopt = "Cell/Tissue",
+                                 M = cordata$M,
+                                 N = cordata$N,
+                                 CDATA = cdata,
+                                 METADATA = metadata[, .(VarID, Variable, Contributor, CellTissue, ThemeTag, MethodID)],
+                                 widgetopt = "CellTissue",
                                  widgetdata = system.file("www/", "test.json", package = "DIVE"),
                                  infoRmd = system.file("help/interactive_matrix.Rmd", package = "DIVE"),
                                  appdata = "pilot.csv") {
@@ -49,7 +52,8 @@ interactiveMatrixApp <- function(input, output, session,
                        infoRmd = infoRmd,
                        appdata = appdata)
 
-  display <- callModule(matrixCtrl, "ctrl", M, N, CDATA, METADATA,
+  display <- callModule(matrixCtrl, "ctrl",
+                        M, N, CDATA, METADATA,
                         newdata = upload, widget = cellfilter)
 
   matrix <- callModule(interactiveMatrix, "matrix", state = display)

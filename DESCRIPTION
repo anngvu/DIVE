@@ -14,7 +14,8 @@ Depends:
     plotly,
     data.table
 Imports:
-    shinythemes, 
+    shinythemes,
+    Hmisc,
     igraph,
     visNetwork,
     reshape2,

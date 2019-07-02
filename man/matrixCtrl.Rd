@@ -4,7 +4,7 @@
 \alias{matrixCtrl}
 \title{Shiny module server functions to generate filter UI for interactive matrix}
 \usage{
-matrixCtrl(input, output, session, M, N, cdata, metadata,
+matrixCtrl(input, output, session, M, N, cdata, metadata0,
   newdata = reactive({ }), widget = reactive({ }))
 }
 \arguments{
@@ -12,32 +12,34 @@ matrixCtrl(input, output, session, M, N, cdata, metadata,
 
 \item{M}{A non-reactive data matrix, e.g. a correlation matrix, which must have variables as rownames.}
 
-\item{N}{A non-reactive matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.}
+\item{N}{A non-reactive matrix of the same dimensions as M, used as a filter layer, e.g. sample size.}
 
 \item{cdata}{The non-reactive data used for generating the matrix.}
-
-\item{metadata}{A data.table with "Variable" as a key column and any number of columns (metadata) to be used as filters.}
 
 \item{newdata}{Optional, reactive data, e.g. from user upload, that can be merged with M.}
 
 \item{widget}{Optional, associated widget input. See details.}
+
+\item{metadata}{A data.table with "Variable" as a key column and any number of columns (metadata) to be used as filters.}
 }
 \value{
 Reactive state values to be used by the associated plotting module.
 }
 \description{
 Update/populate matrix filter UI options depending on available data and metadata,
-as well as handling of user inputs to pass on appropriate plot objects.
+as well as handling of user inputs to pass on to appropriate plot objects.
 }
 \details{
+What is available as filters relies on the underlying metadata.
 See \code{\link{metadata}} for an example data object that can be passed into the parameter
-\preformatted{metadata}. Since the filter UI is composed mainly of drop-down selections,
-one way to expand and improve it is to integrate with an "add-on" or "augmenting" widget
-that provides an alternative and more intuitive or interesting route of input for users.
-For example, in addition to a drop-down selection of geographical locations,
-a map widget can be available to allow users to choose more visually.
-Because the widget may only need to appear for certain metadata,
-the server function needs to return when the widget should be called (displayed).
-The function returns an object representing the original data with user-applied filters
-that is the main input to be visualized with \code{\link{interactiveMatrix}}.
+\preformatted{metadata}. The base UI implements these filters as drop-down selections,
+but the UI can also expand/integrate with an optional "add-on" or "augmenting" widget
+to provide an alternate, perhaps more intuitive route of filter input.
+For example, compared to a drop-down selection of geographical locations,
+a map widget would provide a better selection interface. Not all types of metadata
+can be integrated with a widget, and the module provides capability for only one widget.
+The server function needs to return when the widget should be called (displayed).
+
+The module returns an object representing the original data with user-applied filters,
+i.e. the main input to be visualized with \code{\link{interactiveMatrix}}.
 }

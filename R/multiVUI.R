@@ -33,7 +33,7 @@ multiVUI <- function(id) {
 #' high-dimensional gene/protein/methylation datasets with other phenotype or clinical features.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param hdata A numeric matrix of of the high dimensional data.
+#' @param hdata A numeric matrix representing high dimensional data.
 #' @param cdata Optional, a data.frame or data.table that can be joined to high-dimensional data. See details.
 #' @param selected A vector used to subset the columns of hdata.
 #' @param slabel Optional, a vector that can map column names of hdata to plot labels.
@@ -152,7 +152,7 @@ multiV <- function(input, output, session,
     vcat <- sapply(plotdata, function(v) class(v) == "character" | class(v) == "factor")
     cplotcat <- lapply(names(plotdata)[vcat & notID],
                            function(v) {
-                             # Note: there's a plotly issue that will make it spew a lot of warnings
+                             # Note: there's a plotly issue that will spew many warnings
                              plot_ly(x = 1, y = y, name = v, type = "bar", orientation = "h", showlegend = F,
                                      color = factor(plotdata[[v]]), text = plotdata[[v]],
                                      hoverinfo = "text") %>%

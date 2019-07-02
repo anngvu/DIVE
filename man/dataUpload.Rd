@@ -4,11 +4,13 @@
 \alias{dataUpload}
 \title{Shiny server function for data table upload module}
 \usage{
-dataUpload(input, output, session, removable = F, checkFun = NULL,
-  infoRmd = NULL, appdata = NULL)
+dataUpload(input, output, session, asDT = T, removable = F,
+  checkFun = NULL, infoRmd = NULL, appdata = NULL)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
+
+\item{asDT}{Logical flag to indicate whether data returned should be a data.table. If FALSE, \code{readLines} is used on file.}
 
 \item{removable}{Logical flag to indicate whether data upload will have "removable" feature. Defaults to FALSE. See details.}
 

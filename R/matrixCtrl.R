@@ -7,40 +7,38 @@
 matrixCtrlUI <- function(id) {
   ns <- NS(id)
   tags$div(id = "matrixCtrlUI",
-    fluidRow(
-      column(12,
-             div(class = "forceInline", numericInput(ns("minN"), HTML("mininum <i>N</i>"), min = 1, max = NA, step = 1, val = 5, width = "80px")),
-             div(class = "forceInline", selectInput(ns("optgroup"), "Filter by", choices = "", width = "175px")),
-             div(class = "forceInline", selectizeInput(ns("opt"), icon("search"), choices = "",
-                                                       multiple = T, width = "300px")),
-             div(class = "forceInline", br(), actionButton(ns("addopt"), "", icon = icon("plus"))),
-             div(class = "forceInline", selectizeInput(ns("applied"), "Applied tags", choices = "",
-                                                       multiple = T, options = list(placeholder = "none"), width = "300px")),
-             div(class = "forceInline", br(), actionButton(ns("reset"), "", icon = icon("times")))
-    ))
+           div(class = "forceInline", numericInput(ns("minN"), HTML("mininum <i>N</i>"), min = 1, max = NA, step = 1, val = 5, width = "80px")),
+           div(class = "forceInline", selectInput(ns("optgroup"), "Select rows by", choices = "", width = "150px")),
+           div(class = "forceInline", selectizeInput(ns("opt"), "Rows", choices = "", multiple = T)),
+           div(class = "forceInline", br(), actionButton(ns("getopt"), "", icon = icon("filter"))),
+           div(class = "forceInline", br(), actionButton(ns("reset"), "", icon = icon("undo"))),
+           div(class = "forceInline", uiOutput(ns("optcolselect"))),
+           div(class = "forceInline", br(), actionButton(ns("print"), "Print"))
   )
 }
 
 #' Shiny module server functions to generate filter UI for interactive matrix
 #'
 #' Update/populate matrix filter UI options depending on available data and metadata,
-#' as well as handling of user inputs to pass on appropriate plot objects.
+#' as well as handling of user inputs to pass on to appropriate plot objects.
 #'
+#' What is available as filters relies on the underlying metadata.
 #' See \code{\link{metadata}} for an example data object that can be passed into the parameter
-#' \preformatted{metadata}. Since the filter UI is composed mainly of drop-down selections,
-#' one way to expand and improve it is to integrate with an "add-on" or "augmenting" widget
-#' that provides an alternative and more intuitive or interesting route of input for users.
-#' For example, in addition to a drop-down selection of geographical locations,
-#' a map widget can be available to allow users to choose more visually.
-#' Because the widget may only need to appear for certain metadata,
-#' the server function needs to return when the widget should be called (displayed).
-#' The function returns an object representing the original data with user-applied filters
-#' that is the main input to be visualized with \code{\link{interactiveMatrix}}.
+#' \preformatted{metadata}. The base UI implements these filters as drop-down selections,
+#' but the UI can also expand/integrate with an optional "add-on" or "augmenting" widget
+#' to provide an alternate, perhaps more intuitive route of filter input.
+#' For example, compared to a drop-down selection of geographical locations,
+#' a map widget would provide a better selection interface. Not all types of metadata
+#' can be integrated with a widget, and the module provides capability for only one widget.
+#' The server function needs to return when the widget should be called (displayed).
+#'
+#' The module returns an object representing the original data with user-applied filters,
+#' i.e. the main input to be visualized with \code{\link{interactiveMatrix}}.
 #'
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param M A non-reactive data matrix, e.g. a correlation matrix, which must have variables as rownames.
-#' @param N A non-reactive matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.
+#' @param N A non-reactive matrix of the same dimensions as M, used as a filter layer, e.g. sample size.
 #' @param cdata The non-reactive data used for generating the matrix.
 #' @param metadata A data.table with "Variable" as a key column and any number of columns (metadata) to be used as filters.
 #' @param newdata Optional, reactive data, e.g. from user upload, that can be merged with M.
@@ -48,58 +46,126 @@ matrixCtrlUI <- function(id) {
 #' @return Reactive state values to be used by the associated plotting module.
 #' @export
 matrixCtrl <- function(input, output, session,
-                     M, N, cdata, metadata, newdata = reactive({ }), widget = reactive({ }) ) {
+                     M, N, cdata, metadata0, newdata = reactive({ }), widget = reactive({ }) ) {
+
+  # Keep only metadata relevant to M; ideally, metadata should already match M
+  metadata <- metadata[VarID %in% rownames(M)]
 
   default <- list(M = M, N = N, cdata = cdata, newdata = NULL, filM = M)
-  applied <- reactiveVal(data.frame(opt = character(0), optgroup = character(0))) # stores user selection in long format
-  state <- reactiveValues(applied = applied) # returned; initialized with default values above
+  state <- reactiveValues() # returned
+  optrows <- reactiveVal(NULL)
 
-  # clears selected filters
+  # reset all to default state
   reset <- function() {
-    updateSelectizeInput(session, "applied", choices = "", selected = character(0))
-    applied(isolate(applied())[0, ])
+    for(i in names(default)) state[[i]] <- default[[i]]
   }
+
+  reset()
+
+  #-- Filter options ---------------------------------------------------------------------------------------------------------#
 
   # need to return optgroup because widget visibility is tied to optgroup
   observe({
     state$optgroup <- input$optgroup
   })
 
-  #-- Filter options ---------------------------------------------------------------------------------------------------------#
-
   # Update optgroups based on metadata
-  updateSelectInput(session, "optgroup", choices = names(metadata), selected = "Variable")
+  updateSelectInput(session, "optgroup", choices = names(metadata), selected = "VarID")
 
   # Update list of options when an optgroup is selected
-  # It might seem strange to return options from the rownames of the current matrix
-  # instead of the more obvious usage of the Variable column in metadata,
-  # but this is a workaround to the fact that the matrix can change with incoming new data,
-  # and it's not worth it/doable to create a new metadata table
-  # (because metadata is not provided with the upload).
+  # Important note: It might seem strange to return options from the rownames of the current matrix
+  # instead of the more obvious usage of the column in metadata,
+  # but this is a workaround to the fact that the matrix can contain uploaded new data without metadata
+  # (metadata is not provided with the upload).
   opt <- reactive({
-    if(input$optgroup == "Variable") rownames(state$M) else metadata[[input$optgroup]]
+    if(input$optgroup == "VarID") rownames(state$M) else metadata[[input$optgroup]]
   })
 
   observe({
-    updateSelectizeInput(session, "opt", choices = unique(opt()), options = list(placeholder = tolower(paste0("select from ", input$optgroup, "s.."))))
+    updateSelectizeInput(session, "opt", choices = unique(opt()),
+                         options = list(placeholder = paste0("(select one or more from ", isolate(input$optgroup), ")")))
   })
 
   # Update options when input is given via widget
-  observe({
-    if(!is.null(widget())) {
+  observeEvent(widget(), {
       selected <- c(isolate(input$opt), widget())
       updateSelectizeInput(session, "opt", choices = unique(opt()), selected = selected)
+  })
+
+  #-- Filtering handling ----------------------------------------------------------------------------------------------------#
+  # Return an updated matrix given inputs from two filters
+
+  observeEvent(input$print, {
+    showModal(modalDialog(verbatimTextOutput(session$ns("matrixprint"))))
+  })
+
+  output$matrixprint <- renderPrint({
+    state$filM
+  })
+
+  # Reset to none selected
+  observeEvent(input$reset, {
+    updateSelectizeInput(session, "opt", choices = unique(opt()), selected = NULL)
+    optrows(NULL)
+  })
+
+  # Updating visible parts of matrix according to selected opt
+  observeEvent(optrows(), {
+    if(is.null(optrows())) {
+      state$filM <- state$M
+    } else {
+      state$filM <- filterUpdate(state$M, state$N, input$minN, optrows = optrows())
+    }
+  }, ignoreInit = T, ignoreNULL = F)
+
+  # Also give column filter options
+  output$optcolselect <- renderUI({
+    if(!is.null(optrows())) selectizeInput(session$ns("optcol"), "Columns", "", "", multiple = T)
+  })
+
+  filterUpdate <- function(M, N, minN, optrows = rownames(M)) {
+    whichopt <- which(rownames(M) %in% optrows)
+    m <- M[whichopt, , drop = F]
+    # exclude completely "dead" col with no values above N
+    # n <- apply(N[whichopt, , drop = F], 2, max)
+    # n <- which(n >= minN)
+    # m <- m[, n, drop = F]
+    return(m)
+  }
+
+  # Apply minimum N to current matrix filM
+  observe({
+    state$filM <- filterUpdate(isolate(state$M), isolate(state$N), input$minN)
+  })
+
+  # Get selected opts as VarID
+  observeEvent(input$getopt, {
+    if(length(input$opt)) {
+      rows <- metadata$VarID[ metadata[[input$optgroup]] %in% input$opt ]
+      optrows(rows)
     }
   })
+
+  # Handle removing terms from applied
+  # observe({
+  #   newcurrent <- input$applied
+  #   if(length(newcurrent)) {
+  #     current <- isolate(applied())
+  #     current <- current[current$opt %in% newcurrent, ]
+  #     applied(current)
+  #     updateSelectizeInput(session, "applied", choices =  newcurrent, selected = newcurrent)
+  #   } else {
+  #     resetApplied()
+  #   }
+  # })
 
   #-- New data handling ------------------------------------------------------------------------------------------------------#
 
   # Update M, cdata, and options given newdata, and reset to default when newdata is removed
-  observe({
+  observeEvent(newdata(), {
     if(is.null(newdata())) {
-      for(i in names(default)) state[[i]] <- default[[i]]
-    } else {
       reset()
+    } else {
       newDT <- newdata()
       names(newDT) <- make.names(names(newDT))
       cdata2 <- merge(cdata, newDT, by = "ID", all.x = T, all.y = F)
@@ -109,69 +175,7 @@ matrixCtrl <- function(input, output, session,
       state$N <- updated$N
       state$newdata <- names(newDT) # only the names of new variables need be stored, not full table
     }
-  })
-
-  #-- Filtering handling ----------------------------------------------------------------------------------------------------#
-  # Return an updated matrix given inputs from two filters
-  filterUpdate <- function(M, N, minN, optvars) {
-    has.n <- which(apply(N, 1, max) >= minN) # exclude completely "dead" rows with no values above N
-    has.opt <- which(rownames(M) %in% optvars)
-    keep <- intersect(has.n, has.opt)
-    M[N < minN] <- NA # gray out/remove r values calculated from less than specified n
-    M <- M[keep, keep]
-    return(M)
-  }
-
-  # Apply minimum N to current matrix filM
-  observeEvent(input$minN, {
-    state$filM <- filterUpdate(state$M, state$N, input$minN, rownames(state$filM))
-  })
-
-  # Add selected opts to "applied" list and update matrix accordingly
-  observeEvent(input$addopt, {
-    if(!length(input$opt)) return()
-    current <- applied()
-    opt <- data.frame(opt = input$opt, optgroup = input$optgroup)
-    current <- unique(rbind(current, opt))
-    applied(current)
-    # update selections
-    updateSelectizeInput(session, "opt", selected = character(0))
-    updateSelectizeInput(session, "applied", choices = current$opt, selected = current$opt)
-  })
-
-  # Updating visible parts of matrix according to applied
-  observe({
-    applied <- applied()
-    if(!nrow(applied)) {
-      state$filM <- state$M
-    } else {
-      applied <- split(applied$opt, f = applied$optgroup)
-      # map metadata terms to variables; 'Variable' optgroup potentially contains user-uploaded values,
-      # i.e. see workaround in opt()
-      has.opt <- lapply(names(applied)[names(applied) != "Variable"],
-                     function(optgroup) metadata$Variable[metadata[[optgroup]] %in% applied[[optgroup]]])
-      has.opt <- Reduce(union, c(has.opt, list(applied$Variable)))
-      state$filM <- filterUpdate(state$M, state$N, input$minN, has.opt)
-    }
-  })
-
-  # Handle removing terms from applied
-  observe({
-    newcurrent <- input$applied
-    if(length(newcurrent)) {
-      current <- isolate(applied())
-      current <- current[current$opt %in% newcurrent, ]
-      applied(current)
-      updateSelectizeInput(session, "applied", choices =  newcurrent, selected = newcurrent)
-    } else {
-      reset()
-    }
-  })
-
-  # Reset to none selected
-  observeEvent(input$reset, {
-    reset()
-  })
+  }, ignoreNULL = F)
 
   return(state)
 }

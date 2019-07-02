@@ -1,12 +1,21 @@
 body {
   /* Disables pull-to-refresh and overscroll glow effect. */
-  overscroll-behavior-y: none;
+  overflow-x: hidden;
 }
 
 .forceInline {
   display: inline-block;
   vertical-align: top;
   margin-right: 10px;
+}
+
+#matrixOutput {
+
+}
+
+#drilldownOutput {
+  margin-top: 20px;
+  margin-right: 20px;
 }
 
 #cellpackpanel {

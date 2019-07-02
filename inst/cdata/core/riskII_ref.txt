@@ -1,4 +1,4 @@
-"ID"	"riskII.grp"	"riskII.conservative"	"riskII"
+"ID"	"riskII.grp"	"riskII.cons.score"	"riskII.score"
 6097	"NP"	0	0
 6135	"NN"	0	0
 6156	"NN"	0	0

@@ -2,7 +2,7 @@ library(shiny)
 library(DIVE)
 
 
-ui <- navbarPage("nPOD DIVE", id = "main", selected = "intro",
+ui <- navbarPage("nPOD DIVE", id = "main", selected = "intro", collapsible = T,
                  theme = shinythemes::shinytheme("paper"),
                  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
                            tags$link(rel = "stylesheet", type = "text/css", href = "introjs.min.css"),

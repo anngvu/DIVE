@@ -10,7 +10,7 @@ multiV(input, output, session, hdata, cdata = reactive({     NULL }),
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
-\item{hdata}{A numeric matrix of of the high dimensional data.}
+\item{hdata}{A numeric matrix representing high dimensional data.}
 
 \item{cdata}{Optional, a data.frame or data.table that can be joined to high-dimensional data. See details.}
 

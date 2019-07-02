@@ -5,7 +5,7 @@
 \title{Server module server for plotting correlations matrix with drilldown interaction}
 \usage{
 interactiveMatrix(input, output, session, state,
-  factorx = "grp$|cat$|score$|bin$|count$|pos$",
+  factorx = "type$|grp$|cat$|score$|grade$|bin$|count$|pos$",
   dcolors = list(donor.type = c(`Autoab Pos` = "orange", `Cystic
   fibrosis` = "aquamarine4", `Gastric Bypass` = "bisque4", `Gestational
   diabetes` = "deeppink2", `Monogenic Diabetes` = "red4", `No diabetes` =
@@ -25,7 +25,9 @@ interactiveMatrix(input, output, session, state,
 The matrix responds to inputs, new plotdata, and has a linked drilldown component.
 }
 \details{
-The matrix display logic works with \code{\link{matrixCtrl}}, which returns the reactive
-data in a \preformatted{state} object. In addition, the matrix is linked to a scatter
-plot that accesses underlying data for a user-clicked cell.
+The module handles interactive display of a matrix linked to a scatter
+plot that accesses underlying data for a user-clicked cell. It works with \code{\link{matrixCtrl}},
+which returns the reactive matric as part of a \preformatted{state} object. The general idea is that
+this module only handles visualization of a matrix while the actually matrix generation can be handled by
+other modules that feed into it.
 }

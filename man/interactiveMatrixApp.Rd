@@ -5,9 +5,11 @@
 \title{Shiny app server for exploration of relationships in annotated data with an interactive matrix}
 \usage{
 interactiveMatrixApp(input, output, session, M = cordata$corM,
-  N = cordata$corN, CDATA = cdata, METADATA = metadata,
-  widgetopt = "Cell/Tissue", widgetdata = system.file("www/",
-  "test.json", package = "DIVE"), infoRmd = "help/data_exploration.Rmd",
+  N = cordata$corN, CDATA = cdata, METADATA = metadata[, .(VarID,
+  Variable, Contributor, CellTissue, ThemeTag, MethodID)],
+  widgetopt = "CellTissue", widgetdata = system.file("www/",
+  "test.json", package = "DIVE"),
+  infoRmd = system.file("help/interactive_matrix.Rmd", package = "DIVE"),
   appdata = "pilot.csv")
 }
 \arguments{

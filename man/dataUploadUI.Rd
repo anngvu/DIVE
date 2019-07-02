@@ -4,7 +4,9 @@
 \alias{dataUploadUI}
 \title{Shiny module UI for data table upload module}
 \usage{
-dataUploadUI(id, label = "<strong>Upload data to compare</strong>")
+dataUploadUI(id, label = "<strong>Upload data to compare</strong>",
+  buttonlabel = "Data", placeholder = "  no file selected",
+  width = 300)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}

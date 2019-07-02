@@ -1,4 +1,4 @@
-"ID"	"riskA"	"riskB"	"riskC"	"riskI"	"riskAB"
+"ID"	"riskA.score"	"riskB.score"	"riskC.score"	"riskI.score"	"riskAB.score"
 6012	0	0	0	0	0
 6019	0	0	0	0	0
 6122	0	0	0	0	0

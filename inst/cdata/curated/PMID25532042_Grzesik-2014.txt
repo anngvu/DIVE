@@ -1,4 +1,4 @@
-ID	x12LO	islet.area	beta.area	x12LO.pancreas	x12LO.islet	x12LO.beta
+ID	x12LO.pos	islet.area	beta.area	x12LO.pancreas	x12LO.islet	x12LO.beta
 6013	0	X	NA	X	X	X
 6016	0	X	NA	X	X	X
 6048	0	X	NA	X	X	X

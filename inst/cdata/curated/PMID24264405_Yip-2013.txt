@@ -1,4 +1,4 @@
-ID	Adora1	ADORA1.var
+ID	Adora1	ADORA1.var.pos
 6112	X	NA
 6075	X	NA
 6058	X	NA

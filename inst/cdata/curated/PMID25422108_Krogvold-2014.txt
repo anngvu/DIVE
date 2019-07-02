@@ -1,4 +1,4 @@
-ID	VP1
+ID	VP1.pos
 6001	X
 6024	X
 6030	X

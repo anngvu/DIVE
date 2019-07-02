@@ -101,8 +101,12 @@ dataUpload <- function(input, output, session,
 
   observeEvent(input$appdata, {
     if(input$appdata %in% appdata) {
-      datafile <- data.table::fread(paste0("appdata/", input$appdata))
-      uploaded(datafile)
+      data <- data.table::fread(paste0("appdata/", appdata))
+      if(is.function(checkFun)) {
+        checked <- checkFun(data)
+        data <- checked$result
+      }
+      uploaded(data)
     }
   })
 

@@ -1,6 +1,6 @@
 #' Create master data table from a collection of datasets
 #'
-#' Builds one large master dataset given the directory where a collection of curated datasets resides.
+#' Builds one large master dataset given the directory where a collection of datasets resides.
 #' This data object is required for the Shiny application.
 #'
 #' @param cdir Directory path (relative to working directory) to the collection of dataset files.
@@ -10,7 +10,7 @@
 #' especially useful if naming scheme of the collection files changes.
 #' @return A "master" data.table
 #' @export
-createFromCollection <- function(cdir, filepattern, exclude, index) {
+makeFromCollection <- function(cdir, filepattern, exclude, index) {
   files <- list.files(path = cdir, pattern = filepattern)
   cdata <- lapply(paste0(cdir, files), function(x) fread(x))
   if(!is.null(index) & is.function(index)) {
@@ -30,17 +30,31 @@ createFromCollection <- function(cdir, filepattern, exclude, index) {
 #'
 #' A wrapper to create the \code{cdata} object
 #'
-#' @inheritParams createFromCollection
-#' @param other A list of of paths to other data files not in the main collection but
-#' that should be part of the master data object; an empty list or "" if no other data to be incorporated.
-#' @param outdir Where to put \preformatted{cdata}. Defaults to App/Data.
+#' @inheritParams makeFromCollection
+#' @param other Optional, a list of of paths to other data files not in the main collection but
+#' that should be part of the master data object. NULL if no other data to be incorporated.
+#' @param outdir Where to put \code{cdata}. Defaults to App/Data.
 #' @export
-cdataMake <- function(cdir = "./Collection/Main/", filepattern = "*.txt", exclude = "!",
+makeCdata <- function(cdir = "./Collection/Main/", filepattern = "*.txt", exclude = "!",
                       other = list("./Collection/Other/coredata_ref.txt"),
                       outdir = "./App/Data/") {
-  cdata <- createFromCollection(cdir, filepattern, exclude)
+  cdata <- makeFromCollection(cdir, filepattern, exclude)
   if(length(other)) cdata <- Reduce(mergeMore, other, cdata)
   save(cdata, file = paste0(outdir, "cdata.Rdata"))
+}
+
+
+#' Merge a main data table with other misc data
+#'
+#' Use \code{mergeMore} to merge some other data with the master dataset.
+#'
+#' @param data A data.table
+#' @param inputpath Path to another dataset to merge with data.
+#' @return A data.table
+mergeMore <- function(data, inputpath) {
+  moredata <- fread(inputpath)
+  data <- merge(data, moredata, by = "ID", all = T)
+  return(data)
 }
 
 #' Check metadata for \preformatted{cdata}
@@ -54,27 +68,12 @@ checkMeta <- function(cdata, metadata) {
 
 }
 
-# -- Internal non-exported ----------------------------------------------------------------------------------#
-
 
 # Adds method to metadata using method key
 updateMethod <- function() {
   metadata <- fread("Metadata.tsv")
   methods <- fread("Methods.tsv")
   metadata <- merge(metadata, methods[, .(MethodID, OBITerm)], by = "MethodID")
-}
-
-#' Merge a main data table with other misc data
-#'
-#' Use \code{mergeMore} to merge some other data with the master dataset.
-#'
-#' @param data A data.table
-#' @param inputpath Path to another dataset to merge with data.
-#' @return A data.table
-mergeMore <- function(data, inputpath) {
-  moredata <- fread(inputpath)
-  data <- merge(data, moredata, by = "ID", all = T)
-  return(data)
 }
 
 # create a mapping of cases to variable for easy lookup

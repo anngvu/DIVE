@@ -2,19 +2,29 @@
 % Please edit documentation in R/data2cor.R
 \name{data2cor}
 \alias{data2cor}
-\title{Get a correlation matrix and shared samples for each correlation}
+\title{Get a heterogeneous correlation/association matrix and observations used}
 \usage{
 data2cor(cdata, exclude = "^ID|_SE$|_SEM$|_SD$")
 }
 \arguments{
 \item{cdata}{A data.table}
 
-\item{exclude}{Optional, pattern of columns to exclude, e.g. columns containing IDs, irrelevant or non-numeric values.}
+\item{exclude}{Optional, name pattern of column to exclude, e.g. columns containing IDs or other data where relationships are not calculated.}
 }
 \value{
-A list with M, the correlation matrix, and N, the number of samples.
+A list with M, the correlation matrix, and N, the number of samples matrix.
 }
 \description{
-After filtering the input data, get Spearman r using pairwise complete observations
-as well as the number of pairwise observations available.
+The correlation/association matrix is meant for exploratory data analysis and includes
+correlations computed with Pearson for interval vs interval variables,
+Spearman's rank correlation for ordinal vs ordinal variables,
+and Cramer's V for nomimal variables.
+}
+\details{
+This implementation first converts data.table into a cleaned matrix, discarding any non-numeric data
+and excluding certain columns unsuitable for correlation calculations (such as "ID" and SE/SD columns by default).
+Columns to be exluded can be specified through name patterns.
+Then either Pearson or Spearman correlation is calculated using \code{\link[Hmisc]{rcorr}}.
+However, for variables which are actually nominal and dummy-encoded, the correlations are replaced with association
+statistics eta.
 }
