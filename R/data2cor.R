@@ -16,14 +16,12 @@
 #' @param exclude Optional, name pattern of column to exclude, e.g. columns containing IDs or other data where relationships are not calculated.
 #' @return A list with M, the correlation matrix, and N, the number of samples matrix.
 #' @export
-data2cor <- function(cdata, exclude = "^ID$|_SE$|_SEM$|_SD$", nominal = "type$|grp$|cat$", ordinal = "score$|grade$|bin$",
-                     method = "spearman") {
+data2cor <- function(cdata, exclude = "^ID$|_SE$|_SEM$|_SD$", method = "spearman") {
   cordata <- Filter(is.numeric, cdata) # remove nominal category variables
   cordata <- cordata[, !grepl(exclude, names(cordata )), with = F] # don't do cor on _SE, etc.
-  cordata <- Filter(rem0Var, cordata)
+  cordata <- rem0Var(cordata)
   result <- Hmisc::rcorr(as.matrix(cordata), type = method)
-  M <- result$r
-  return(list(M = M, N = result$n))
+  return(list(M = result$r, N = result$n, P = result$P))
 }
 
 
@@ -38,6 +36,6 @@ makeAssociation <- function(cdata) {
   save(cordata, file = "Data/correlations.Rdata")
 }
 
-# Non-exported function to use with Filter, removes data with 0 variance
-rem0Var <- function(x) sd(na.omit(x)) != 0
+# Convenience function to use with Filter, removes data with 0 variance
+rem0Var <- function(dt) Filter(function(x) sd(na.omit(x)) != 0, dt)
 

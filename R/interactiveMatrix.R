@@ -45,10 +45,10 @@ interactiveMatrixUI <- function(id) {
 #' @param dcolors List of manual color mappings for variables used for coloring data points.
 #' @export
 interactiveMatrix <- function(input, output, session,
-                              state, factorx = "type$|grp$|cat$|score$|grade$|bin$|pos$",
+                              state, factorx = "type$|grp$|cat$|score$|grade$|bin$|pos$|^male$",
                               dcolors = list(donor.type =
                                                c("Autoab Pos" = "orange", "Cystic fibrosis" = "aquamarine4",
-                                               "Gastric Bypass" = "bisque4", "Gestational diabetes" = "deeppink2",c
+                                               "Gastric Bypass" = "bisque4", "Gestational diabetes" = "deeppink2",
                                                "Monogenic Diabetes" = "red4", "No diabetes" = "royalblue2",
                                                "Other-Diabetes" = "indianred4", "Other-No Diabetes" = "steelblue2",
                                                "T1D" = "red", "T1D Medalist" = "maroon", "T2D" = "purple")))
@@ -57,7 +57,7 @@ interactiveMatrix <- function(input, output, session,
   #-- Main matrix plot -----------------------------------------------------------------------------------------------------#
 
   output$heatmap <- renderUI({
-    if(nrow(state$filM)) plotlyOutput(session$ns("matrix")) else textOutput(session$ns("empty"))
+    if(nrow(state$filM)) plotlyOutput(session$ns("matrix")) else htmlOutput(session$ns("empty"))
   })
 
   output$matrix <- renderPlotly({
@@ -66,27 +66,22 @@ interactiveMatrix <- function(input, output, session,
      # max height should be ~1000px
      px <- 1000/ncol(M)
      height <- nrow(M) * px
-     height <- if(height < 100) 200 else height
+     height <- if(height < 200) 400 else height
      newdata <- state$newdata
+     show <- nrow(M) <= 20
 
-     annotation_matrix <- matrix(paste0("x: ", rep(rownames(M), each = nrow(M)),
-                                        "<br>y: ", rep(colnames(M), ncol(M)),
-                                        "<br>Correlation: ", round(M, 3)),
-                                 ncol = ncol(M))
-     i <-  if(length(newdata)) which(rownames(M) %in% newdata) else 0 # identify new data rows
-
-     p <- plot_ly(x = rownames(M), y = colnames(M), z = M,
-                  type = "heatmap", colorscale = "RdBu", source = "matrix", hoverinfo = "text", text = annotation_matrix,
+     p <- plot_ly(x = colnames(M), y = rownames(M), z = M,
+                  type = "heatmap", colorscale = "RdBu", source = "matrix", hovertemplate = "row: <b>%{x}</b><br>col: <b>%{y}</b><br>correlation: <b>%{z}</b>",
                   height = height, colorbar = list(thickness = 8)) %>%
        layout(xaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = "", linecolor = "gray", mirror = T),
-              yaxis = list(title = "", showgrid = F, tickmode = "array", tickvals = rownames(M)[i], ticktext = "NEW &#10132;",
-                           tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
+              yaxis = list(title = "", showgrid = F, showticklabels = show, ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
               plot_bgcolor = "gray") %>%
+       event_register("plotly_click") %>%
        config(displayModeBar = F)
      p
   })
 
-  output$empty <- renderPrint({
+  output$empty <- renderUI({
     "No meaningful results. Try expanding filters."
   })
 
