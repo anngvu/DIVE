@@ -5,7 +5,7 @@
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
 #' @export
-browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
+browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"), infoRmd = system.file("help/", "browse_data.Rmd", package = "DIVE")) {
 
   ns <- NS(id)
   fluidPage(theme = shinythemes::shinytheme("paper"),
@@ -21,7 +21,7 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
                                           div(class = "forceInline", style = "margin-left: 10px;",
                                               selectizeInput(ns("subset"), HTML("Browse"),
                                                              choices = c("", unique(cdata[["donor.type"]])), selected = NULL,
-                                                             options = list(placeholder = "all in database"), width = 200)
+                                                             options = list(placeholder = "all donors in database"), width = 200)
                                              ),
                                           div(class = "forceInline", # style = "margin-left: 50px;",
                                               selectizeInput(ns("selectID"), "Or select specific IDs",
@@ -56,11 +56,7 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
                                    shinycssloaders::withSpinner(plotlyOutput(ns("cases"), height = 750), color = "gray")
                             )),
                         tabPanel("By all data",
-                                 helpText("'Get from original source' link points to the original data in a supplemental file
-                    or to an external database where data has been deposited. The original sources can provide more detail about
-                    methodology, definitions and other metadata, but are in a variety of formats not universally machine-readable (e.g. PDF, Excel).
-                    To facililate re-use, curated data can also be downloaded all at once (except for some high-throughput datasets)
-                    as a collection of plain text tab-delimited  files."),
+                                 includeMarkdown(infoRmd),
                                  DT::DTOutput(ns("table")),
                                  downloadButton(ns("download"), label = "Download Collection")
                         )
@@ -167,8 +163,7 @@ browse <- function(input, output, session) {
     )
 
     subplot(marginVar, plotly_empty(), p, marginID,
-            nrows = 2,
-            shareX = T, shareY = T,
+            nrows = 2, shareX = T, shareY = T,
             widths = c(0.9, 0.1), heights = c(0.2, 0.8))
 
   })

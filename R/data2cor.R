@@ -1,16 +1,18 @@
 #' Get a heterogeneous correlation/association matrix and observations used
 #'
-#' The correlation/association matrix is meant for exploratory data analysis and includes
-#' correlations computed with Pearson for interval vs interval variables,
-#' Spearman's rank correlation for ordinal vs ordinal variables,
-#' and Cramer's V for nomimal variables.
+#' The correlation/association matrix is meant for exploratory data analysis and can generate
+#' Pearson or Spearman correlations for interval vs interval,
+#' interval vs ordinal, or ordinal vs ordinal variables.
 #'
 #' This implementation first converts data.table into a cleaned matrix, discarding any non-numeric data
 #' and excluding certain columns unsuitable for correlation calculations (such as "ID" and SE/SD columns by default).
 #' Columns to be exluded can be specified through name patterns.
-#' Then either Pearson or Spearman correlation is calculated using \code{\link[Hmisc]{rcorr}}.
-#' However, for variables which are actually nominal and dummy-encoded, the correlations are replaced with association
-#' statistics eta.
+#' Then either Pearson or Spearman correlation is calculated using \code{\link[Hmisc]{rcorr}}, and the method
+#' can be specified depending on the data input. Because the original use case includes ordinal data
+#' as well as data that might violate normality assumptions, Spearman's is set as the default.
+#' In the future it might be possible to extend the implementation to include nominal variables by using association statistics
+#' such as Cramer's V, eta, lambda (something like data2association) so the result is heterogeneous
+#' correlation/association matrix.
 #'
 #' @param cdata A data.table
 #' @param exclude Optional, name pattern of column to exclude, e.g. columns containing IDs or other data where relationships are not calculated.
@@ -25,7 +27,7 @@ data2cor <- function(cdata, exclude = "^ID$|_SE$|_SEM$|_SD$", method = "spearman
 }
 
 
-#' Wrapper to instantiate association data for Shiny app
+#' Wrapper to instantiate association/correlation data for Shiny app
 #'
 #' @param cdata A data.table
 #' @return A list with 1) corM, the correlation matrix, and 2) corN, the number of samples available

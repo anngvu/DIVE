@@ -50,7 +50,7 @@ matrixCtrl <- function(input, output, session,
   # Keep only metadata relevant to M; ideally, metadata should already match M
   metadata <- metadata[VarID %in% rownames(M)]
 
-  default <- list(M = M, N = N, cdata = cdata, newdata = NULL, filM = M)
+  default <- list(M = M, N = N, cdata = cdata, newdata = NULL, filM = M, rowmeta = NULL, colmeta = NULL)
   state <- reactiveValues() # returned
   optrows <- reactiveVal(NULL)
 
@@ -138,7 +138,14 @@ matrixCtrl <- function(input, output, session,
   # Get selected opts as VarID
   observeEvent(input$getopt, {
     if(length(input$opt)) {
-      rows <- if(input$optgroup == "VarID") input$opt else metadata$VarID[ metadata[[input$optgroup]] %in% input$opt ]
+      if(input$optgroup == "VarID") {
+        rows <- input$opt
+        state$rowmeta <- NULL
+      } else {
+        rows <- metadata$VarID[ metadata[[input$optgroup]] %in% input$opt ]
+        state$rowmeta <- metadata[[input$optgroup]][ metadata[[input$optgroup]] %in% input$opt ]
+        # state$colmeta <-
+      }
       optrows(rows)
     }
   })

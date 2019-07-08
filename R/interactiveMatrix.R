@@ -1,6 +1,6 @@
 #' Shiny module UI of matrix plot with drilldown components
 #'
-#' The matrix responds to inputs, new plotdata, and has a linked drilldown component.
+#' Creates app UI for a heatmap matrix responding to inputs, new plot data, that is linked to a drilldown scatterplot component.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @export
@@ -35,23 +35,21 @@ interactiveMatrixUI <- function(id) {
 #'
 #' The module handles interactive display of a matrix linked to a scatter
 #' plot that accesses underlying data for a user-clicked cell. It works with \code{\link{matrixCtrl}},
-#' which returns the reactive matric as part of a \preformatted{state} object. The general idea is that
-#' this module only handles visualization of a matrix while the actually matrix generation can be handled by
-#' other modules that feed into it.
+#' which returns the reactive matric as part of a \code{state} object. The general idea is that
+#' this module only handles visualization of a matrix while the actual matrix generation can be handled by
+#' other modules that feed into it. For the drilldown component that displays underlying data points,
+#' the type of data matters and may require setting aesthetic parameters to maintain consistency across modules.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param state Reactive state object from \code{\link{matrixCtrl}}.
-#' @param factorx Optional, names and/or patterns for variables that should be displayed as factors in plots.
-#' @param dcolors List of manual color mappings for variables used for coloring data points.
+#' @param factorx Names and/or patterns for variables that should be displayed as factors in scatterplot.
+#' @param dcolors Optional, a list of at least one categorical variable to use for scatterplot point colors
+#' and the manual color mappings for each in the list. If color mappings are not specified, random colors will be used
+#' and may not be consistent with other module plots.
 #' @export
 interactiveMatrix <- function(input, output, session,
                               state, factorx = "type$|grp$|cat$|score$|grade$|bin$|pos$|^male$",
-                              dcolors = list(donor.type =
-                                               c("Autoab Pos" = "orange", "Cystic fibrosis" = "aquamarine4",
-                                               "Gastric Bypass" = "bisque4", "Gestational diabetes" = "deeppink2",
-                                               "Monogenic Diabetes" = "red4", "No diabetes" = "royalblue2",
-                                               "Other-Diabetes" = "indianred4", "Other-No Diabetes" = "steelblue2",
-                                               "T1D" = "red", "T1D Medalist" = "maroon", "T2D" = "purple")))
+                              dcolors = NULL)
   {
 
   #-- Main matrix plot -----------------------------------------------------------------------------------------------------#
@@ -61,6 +59,7 @@ interactiveMatrix <- function(input, output, session,
   })
 
   output$matrix <- renderPlotly({
+
      M <- state$filM
      # bug? plotly doesn't display the plot if height is less than 100px
      # max height should be ~1000px
@@ -68,7 +67,7 @@ interactiveMatrix <- function(input, output, session,
      height <- nrow(M) * px
      height <- if(height < 200) 400 else height
      newdata <- state$newdata
-     show <- nrow(M) <= 20
+     show <- nrow(M) <= 20 # only show y axis-labels when a reasonable number of rows is being displayed
 
      p <- plot_ly(x = colnames(M), y = rownames(M), z = M,
                   type = "heatmap", colorscale = "RdBu", source = "matrix", hovertemplate = "row: <b>%{x}</b><br>col: <b>%{y}</b><br>correlation: <b>%{z}</b>",
@@ -78,7 +77,24 @@ interactiveMatrix <- function(input, output, session,
               plot_bgcolor = "gray") %>%
        event_register("plotly_click") %>%
        config(displayModeBar = F)
-     p
+
+     # group annotations for columns
+     if(is.null(isolate(state$colmeta))) {
+       colAnnot <- plotly_empty()
+     } else {
+       colAnnot <- plotly_empty()
+     }
+
+     # group annotations for rows
+     if(is.null(isolate(state$rowmeta))) {
+       rowAnnot <- plotly_empty()
+      } else {
+       rowAnnot <- plot_ly(x = 1, y = rownames(M), z = as.matrix(factor(state$rowmeta)))
+      }
+
+     subplot(plotly_empty(), colAnnot, p, rowAnnot,
+             nrows = 2, shareX = T, shareY = T,
+             widths = c(0.05, 0.95), heights = c(0.05, 0.95))
   })
 
   output$empty <- renderUI({
@@ -120,9 +136,6 @@ interactiveMatrix <- function(input, output, session,
       }
       if(colorby == dgroup) { # default is to color points by dgroup
         p <- p + scale_colour_manual(values = dcolors[[1]])
-      } else if(grepl(factorx, colorby)) { # allow color by limited set of categorical vars?
-        # not yet implemented!
-
       } else { # continuous color scale for interval variable
         p <- p + scale_colour_distiller(palette = "YlOrRd", na.value = "black")
       }
