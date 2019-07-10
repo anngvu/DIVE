@@ -21,7 +21,7 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"),
                                           div(class = "forceInline", style = "margin-left: 10px;",
                                               selectizeInput(ns("subset"), HTML("Browse"),
                                                              choices = c("", unique(cdata[["donor.type"]])), selected = NULL,
-                                                             options = list(placeholder = "all donors in database"), width = 200)
+                                                             options = list(placeholder = "all donors in database"), width = 220)
                                              ),
                                           div(class = "forceInline", # style = "margin-left: 50px;",
                                               selectizeInput(ns("selectID"), "Or select specific IDs",
@@ -136,11 +136,13 @@ browse <- function(input, output, session) {
 
   output$cases <- renderPlotly({
     withclass <- withclass()
-    p <- plot_ly(withclass, x = ~Data, y = ~ID, name = "Available", type = "scatter", mode = "markers",
+    p <- plot_ly(withclass, x = ~Data, y = ~ID, name = "Available", type = "scatter", mode = "markers", source = "main",
                  marker = list(size = ~Available *6, color = "#404040", opacity = 1, line = list(color = "#404040")),
                  showlegend = FALSE) %>%
       layout(xaxis = list(type = "category", title = "Data", showline = FALSE, showgrid = FALSE),
-             yaxis = list(type = "category", title = "Case", showline = FALSE, dtick = 1, tickfont = list(size = 9), showgrid = FALSE))
+             yaxis = list(type = "category", title = "Case", showline = FALSE, dtick = 1, tickfont = list(size = 9), showgrid = FALSE)) %>%
+      event_register("plotly_click")
+
 
     sumID <- withclass[, sum(Available), by = "ID"]
     marginID <- plot_ly(

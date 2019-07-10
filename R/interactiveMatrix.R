@@ -9,6 +9,15 @@ interactiveMatrixUI <- function(id) {
   tags$div(
     fluidRow(
     column(8, align = "left",
+           div(style = "margin-left: 20px; margin-bottom: 10px;",
+               div(class = "forceInline", actionButton(ns("show"), label = NULL, icon = icon("cog"))),
+               conditionalPanel(condition = "input.show%2==1", ns = ns, class = "forceInline",
+                                div(class = "forceInline", id = ns("custom")),
+                                div(class = "forceInline", actionLink(ns("cluster"), "CLUSTER", icon = icon("sitemap"))),
+                                div(class = "forceInline", actionLink(ns("showrowlabels"), "Row labels", icon = icon("eye")))
+
+               )
+           ),
            div(id = "matrixOutput",
                shinycssloaders::withSpinner(uiOutput(ns("heatmap")), color = "gray"))
     ),
@@ -65,36 +74,33 @@ interactiveMatrix <- function(input, output, session,
      # max height should be ~1000px
      px <- 1000/ncol(M)
      height <- nrow(M) * px
-     height <- if(height < 200) 400 else height
+     height <- if(height < 200) 400 else ifelse(height > 1000, 1000, height)
      newdata <- state$newdata
      show <- nrow(M) <= 20 # only show y axis-labels when a reasonable number of rows is being displayed
 
-     p <- plot_ly(x = colnames(M), y = rownames(M), z = M,
-                  type = "heatmap", colorscale = "RdBu", source = "matrix", hovertemplate = "row: <b>%{x}</b><br>col: <b>%{y}</b><br>correlation: <b>%{z}</b>",
+     p <- plot_ly(x = colnames(M), y = rownames(M), z = M, type = "heatmap", colorscale = "RdBu", name = "Exploratory\nMap",
+                  hovertemplate = "row: <b>%{x}</b><br>col: <b>%{y}</b><br>correlation: <b>%{z}</b>", xgap = 1, ygap = 1,
                   height = height, colorbar = list(thickness = 8)) %>%
-       layout(xaxis = list(title = "", showgrid = F, showticklabels = FALSE, ticks = "", linecolor = "gray", mirror = T),
-              yaxis = list(title = "", showgrid = F, showticklabels = show, ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
+       layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = "", linecolor = "gray", mirror = T),
+              yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
               plot_bgcolor = "gray") %>%
-       event_register("plotly_click") %>%
-       config(displayModeBar = F)
+       event_register("plotly_click")
 
-     # group annotations for columns
-     if(is.null(isolate(state$colmeta))) {
-       colAnnot <- plotly_empty()
+     # since plot_bgcolor can't be set for individual plots in subplot, layout adjusts to whether metadata is passed in
+     rowmeta <- isolate(state$rowmeta)
+     if(!is.null(rowmeta)) {
+       labels <- apply(as.matrix(factor(rowmeta)), 1, as.list)
+       z <- as.matrix(as.integer(factor(rowmeta)))
+       rowmeta <- plot_ly(y = rownames(M), x = 1,  z = z, customdata = labels, type = "heatmap", showscale = FALSE, name = "row metadata",
+               hovertemplate = "<b>%{customdata}</b>")
+       main <- subplot(plotly_empty(), plotly_empty(), p, rowmeta,
+                       nrows = 2, shareX = T, shareY = T, margin = 0.01,
+                       widths = c(0.97, 0.03), heights = c(0.03, 0.97))
      } else {
-       colAnnot <- plotly_empty()
+       main <- p
      }
-
-     # group annotations for rows
-     if(is.null(isolate(state$rowmeta))) {
-       rowAnnot <- plotly_empty()
-      } else {
-       rowAnnot <- plot_ly(x = 1, y = rownames(M), z = as.matrix(factor(state$rowmeta)))
-      }
-
-     subplot(plotly_empty(), colAnnot, p, rowAnnot,
-             nrows = 2, shareX = T, shareY = T,
-             widths = c(0.05, 0.95), heights = c(0.05, 0.95))
+     main$x$source <- "main"
+     main %>% config(displayModeBar = F)
   })
 
   output$empty <- renderUI({
@@ -107,11 +113,12 @@ interactiveMatrix <- function(input, output, session,
   })
 
   observe({
-    s <- event_data("plotly_click", source = "matrix")
-    if(is.null(s)) return()
-    var1 <- s[["x"]]
-    var2 <- s[["y"]]
-    updateSelectizeInput(session, "drilldown", "Drill down to data for", selected = c(var1, var2))
+    s <- event_data("plotly_click", source = "main")
+    if(!is.null(s)) {
+      var1 <- s[["x"]]
+      var2 <- s[["y"]]
+      updateSelectizeInput(session, "drilldown", "Drill down to data for", selected = c(var1, var2))
+    }
   })
 
   output$scatter <- renderPlotly({

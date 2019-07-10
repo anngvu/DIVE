@@ -57,11 +57,16 @@ interactiveMatrixApp <- function(input, output, session,
                         newdata = upload, widget = cellfilter)
 
   matrix <- callModule(interactiveMatrix, "matrix", state = display,
-                       dcolors = list(donor.type =
-                         c("Autoab Pos" = "orange", "Cystic fibrosis" = "aquamarine4",
-                           "Gastric Bypass" = "bisque4", "Gestational diabetes" = "deeppink2",
-                           "Monogenic Diabetes" = "indianred4", "Other-No Diabetes" = "steelblue2",
-                           "T1D" = "red", "T1D Medalist" = "maroon", "T2D" = "purple")))
+                       dcolors = list(
+                         donor.type =
+                         c("Autoab Pos" = "orange", "Cystic fibrosis" = "aquamarine4", "Transplant" = "gold",
+                           "Gastric Bypass" = "bisque4", "Gestational diabetes" = "deeppink2", "Pregnancy" = "pink",
+                           "Monogenic Diabetes" = "indianred4", "Fulminant" = "yellow", "Other-Diabetes" = "brown",
+                           "Other-No Diabetes" = "steelblue2", "No diabetes" = "dodgerblue",
+                           "T1D" = "red", "T1D Medalist" = "maroon", "T2D" = "purple", "Pending" = "gray")
+                         # sex = c(Male = "steelblue", Female = "deeppink2")
+                         )
+                       )
 
   output$usewidget <- reactive({ if(display$optgroup == widgetopt) 1 else 0 })
 

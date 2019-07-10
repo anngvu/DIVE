@@ -23,7 +23,7 @@ multiVUI <- function(id) {
           div(style = "display: inline-block;", icon("percent"))
         )
     ),
-    shinycssloaders::withSpinner(plotlyOutput(ns("heatmap"), height = "100%"), color = "gray")
+    div(shinycssloaders::withSpinner(plotlyOutput(ns("heatmap"), height = "100%"), color = "gray"))
   )
 }
 
@@ -105,7 +105,6 @@ multiV <- function(input, output, session,
     }
   })
 
-
   # Plot subsetting by phenotype variables
   hplotdata <- reactive({
     plotdata <- localhdata()
@@ -124,10 +123,9 @@ multiV <- function(input, output, session,
     showticklabs <- if(ncol(hplotdata()) <= 50) TRUE else FALSE # only show labels when readable
     # infer color scale for type of data
     if(min(hplotdata()) == 0) colorscale <- "Greys" else colorscale <- "RdBu"
-    plot_ly(z = hplotdata(), x = xlabs, y = ylabs, # name = "relative expression",
+    plot_ly(z = hplotdata(), x = xlabs, y = ylabs, name = "Expression\nMatrix",
             type = "heatmap", height = 25 * nrow(hdata), colors = colorscale,
-            # text = paste(~y, "\nsampleID": ~x, "\nrelative expression:", ~z),
-            # hoverinfo = "text",
+            hovertemplate = "transcript/protein: <b>%{x}</b><br>sampleID: <b>%{y}</b><br>expression value: <b>%{z}</b>",
             colorbar = list(title = "relative\nexpression", thickness = 10, x = -0.09)) %>%
       layout(xaxis = list(type = "category", showgrid = FALSE, ticks = "", showticklabels = showticklabs),
             yaxis = list(type = "category", ticks = ""),
