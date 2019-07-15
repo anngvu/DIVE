@@ -68,7 +68,7 @@ interactiveMatrixApp <- function(input, output, session,
                          )
                        )
 
-  output$usewidget <- reactive({ if(display$optgroup == widgetopt) 1 else 0 })
+  output$usewidget <- reactive({ if(display$optrowgroup == widgetopt) 1 else 0 })
 
   outputOptions(output, "usewidget", suspendWhenHidden = FALSE)
 }

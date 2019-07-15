@@ -14,8 +14,11 @@ interactiveMatrixUI <- function(id) {
                conditionalPanel(condition = "input.show%2==1", ns = ns, class = "forceInline",
                                 div(class = "forceInline", id = ns("custom")),
                                 div(class = "forceInline", actionLink(ns("cluster"), "CLUSTER", icon = icon("sitemap"))),
-                                div(class = "forceInline", actionLink(ns("showrowlabels"), "Row labels", icon = icon("eye")))
-
+                                div(class = "forceInline", actionLink(ns("showrlabs"), "Row labels", icon = icon("eye"))),
+                                div(class = "forceInline", actionLink(ns("showclabs"), "Col labels", icon = icon("eye"))),
+                                div(class = "forceInline", radioButtons(ns("palette"), label = NULL,
+                                                                        choices = c(RdBu = "Colorblind-friendly (default)", RdGn = "red-green", Agnostic = "sign-agnostic"),
+                                                                        inline = T))
                )
            ),
            div(id = "matrixOutput",
@@ -74,26 +77,54 @@ interactiveMatrix <- function(input, output, session,
      # max height should be ~1000px
      px <- 1000/ncol(M)
      height <- nrow(M) * px
-     height <- if(height < 200) 400 else ifelse(height > 1000, 1000, height)
+     height <- if(height < 400) 400 else ifelse(height > 1000, 1000, height)
      newdata <- state$newdata
      show <- nrow(M) <= 20 # only show y axis-labels when a reasonable number of rows is being displayed
-
-     p <- plot_ly(x = colnames(M), y = rownames(M), z = M, type = "heatmap", colorscale = "RdBu", name = "Exploratory\nMap",
-                  hovertemplate = "row: <b>%{x}</b><br>col: <b>%{y}</b><br>correlation: <b>%{z}</b>", xgap = 1, ygap = 1,
+     colorz <- colorRampPalette(c("#FD2F02", "#FE7253", "gray", "#404040", "gray", "#53DFFE", "#02D0FD"))
+     # colorz <- colorRampPalette(c("#FF008C", "gray", "#404040", "gray", "#00FF73")) # not colorblind friendly
+     p <- plot_ly(x = colnames(M), y = rownames(M), z = M, type = "heatmap", colors = colorz(1011), name = "Exploratory\nMap",
+                  hovertemplate = "row: <b>%{y}</b><br>col: <b>%{x}</b><br>correlation: <b>%{z}</b>", # xgap = 1, ygap = 1,
                   height = height, colorbar = list(thickness = 8)) %>%
        layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = "", linecolor = "gray", mirror = T),
               yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
-              plot_bgcolor = "gray") %>%
+              plot_bgcolor = "#404040") %>%
        event_register("plotly_click")
 
      # since plot_bgcolor can't be set for individual plots in subplot, layout adjusts to whether metadata is passed in
-     rowmeta <- isolate(state$rowmeta)
-     if(!is.null(rowmeta)) {
-       labels <- apply(as.matrix(factor(rowmeta)), 1, as.list)
-       z <- as.matrix(as.integer(factor(rowmeta)))
-       rowmeta <- plot_ly(y = rownames(M), x = 1,  z = z, customdata = labels, type = "heatmap", showscale = FALSE, name = "row metadata",
-               hovertemplate = "<b>%{customdata}</b>")
-       main <- subplot(plotly_empty(), plotly_empty(), p, rowmeta,
+     if(!is.null(state$rowmeta)) {
+
+       rvals <- scales::rescale(as.integer(state$rowmeta))
+       cvals <- scales::rescale(as.integer(state$colmeta))
+
+       if(state$optrowgroup == state$optcolgroup) {
+         rdomain <- cdomain <- c(min(rvals, cvals, na.rm = T), max(rvals, cvals, na.rm = T)) # consistent colors for when annotations are the same type
+         rpal <- cpal <- "Spectral"
+       } else {
+         rdomain <- cdomain <- NULL
+         cpal <- "Spectral"
+         rpal <- "Set3"
+       }
+       rowcolors <- scales::col_numeric(rpal, domain = rdomain)(rvals)
+       rcolorscale <- data.frame(rvals, rowcolors)
+
+       colcolors <- scales::col_numeric(cpal, domain = cdomain)(cvals)
+       ccolorscale <- data.frame(cvals, colcolors)
+
+       rtext <- matrix(as.character(state$rowmeta))
+       rowmeta <- plot_ly(y = rownames(M), x = 1, z = matrix(as.integer(state$rowmeta)), text = rtext,
+                          type = "heatmap", showscale = FALSE, name = "Row Group",
+                          colorscale = "Portland", hovertemplate = "<b>%{text}</b>") %>%
+         layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""),
+                yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""))
+
+       ctext <- matrix(as.character(state$colmeta), nrow = 1)
+       colmeta <- plot_ly(x = colnames(M), y = 1,  z = matrix(as.integer(state$colmeta), nrow = 1),
+                          type = "heatmap", showscale = FALSE, name = "Column Group", text = ctext,
+                          colorscale = "Portland", hovertemplate = "<b>%{text}</b>")  %>%
+         layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""),
+                yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""))
+
+       main <- subplot(colmeta, plotly_empty(), p, rowmeta,
                        nrows = 2, shareX = T, shareY = T, margin = 0.01,
                        widths = c(0.97, 0.03), heights = c(0.03, 0.97))
      } else {
