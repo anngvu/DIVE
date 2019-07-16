@@ -3,11 +3,12 @@
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param label Label, typically for specifying type of info.
 #' @param i Icon type to display next to label.
-#' @return An actionLink.
+#' @param link Defaults to actionLink, set false for showing actionButton
+#' @return An actionLink or actionButton to call an info module.
 #' @export
-infoOutput <- function(id, label = "data req's", i = "exclamation-circle") {
+infoOutput <- function(id, label = "data req's", i = "exclamation-circle", link = T) {
   ns <- NS(id)
-  actionLink(ns("moreInfo"), label = label, icon = icon(i))
+  if(link) actionLink(ns("moreInfo"), label = label, icon = icon(i)) else actionButton(ns("moreInfo"), label = label, icon = icon(i))
 }
 
 #' Server module function for displaying an info modal

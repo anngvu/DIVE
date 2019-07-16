@@ -5,7 +5,7 @@
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
 #' @export
-browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"), infoRmd = system.file("help/", "browse_data.Rmd", package = "DIVE")) {
+browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
 
   ns <- NS(id)
   fluidPage(theme = shinythemes::shinytheme("paper"),
@@ -46,32 +46,31 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"),
                                          ))
                                  ),
                                  fluidRow(absolutePanel(style = "z-index: 10;", draggable = T,
-                                                        conditionalPanel("input.expandon != ''", ns = ns,
-                                                          div(class = "subgroups-panel", style = "background-color: WhiteSmoke;",
-                                                              div(align = "right", actionButton(ns("closepanel"), "", icon = icon("times"))),
-                                                              plotlyOutput(ns("expandplot"), height = 750, width = 500))
-                                                        )
+                                                        uiOutput(ns("abspanel"))
                                           )),
                                  fluidRow(
                                    shinycssloaders::withSpinner(plotlyOutput(ns("cases"), height = 750), color = "gray")
                             )),
                         tabPanel("By all data",
-                                 includeMarkdown(infoRmd),
-                                 DT::DTOutput(ns("table")),
-                                 downloadButton(ns("download"), label = "Download Collection")
+                                 br(),
+                                 div(class = "forceInline", uiOutput(ns("info2"))),
+                                 div(class = "forceInline", downloadButton(ns("download"), label = "Download Collection")),
+                                 DT::DTOutput(ns("table"))
                         )
             )
   )
 }
 
-browse <- function(input, output, session) {
+browse <- function(input, output, session,
+                   infoRmd1 = system.file("help/ID_list.Rmd", package = "DIVE"),
+                   infoRmd2 = system.file("help/", "browse_data.Rmd", package = "DIVE")) {
 
 
   visIDs <- reactiveVal(1:40)
   cdataL <- reactiveVal(cdata)
   customIDs <- reactiveVal(NULL)
 
-  uploadedIDs <- callModule(dataUpload, "IDlist", asDT = F, removable = T, infoRmd = system.file("help/ID_list.Rmd", package = "DIVE"))
+  uploadedIDs <- callModule(dataUpload, "IDlist", asDT = F, removable = T, infoRmd = infoRmd1)
 
   observeEvent(uploadedIDs(), {
     if(is.null(uploadedIDs())) customIDs(NULL) else customIDs(uploadedIDs())
@@ -108,12 +107,6 @@ browse <- function(input, output, session) {
 
   observeEvent(input$prevSet, {
     if(visIDs()[1] != 1) visIDs(visIDs() - 40)
-  })
-
-  output$expandUI <- renderUI({
-    tags$div(
-      div(class = "forceInline", selectInput(session$ns("expandon"), HTML("<strong>Expand on</strong>"), choices = c("", unique(withclass()$Data)), selected = ""))
-    )
   })
 
   observeEvent(input$closepanel, {
@@ -170,6 +163,21 @@ browse <- function(input, output, session) {
 
   })
 
+  output$expandUI <- renderUI({
+    tags$div(
+      div(class = "forceInline", selectInput(session$ns("expandon"), HTML("<i class='fas fa-expand'></i>&nbsp;&nbsp;<strong>Expand on</strong>"),
+                                             choices = c("", unique(withclass()$Data)), selected = ""))
+    )
+  })
+
+  output$abspanel <- renderUI({
+    if(input$expandon != "") {
+      div(class = "subgroups-panel", style = "background-color: WhiteSmoke;",
+        div(align = "right", actionButton(session$ns("closepanel"), "", icon = icon("times"))),
+        plotlyOutput(session$ns("expandplot"), height = 750, width = 500))
+    }
+  })
+
   output$expandplot <- renderPlotly({
     if(!length(input$expandon)) return()
     xvars <- varL()[Data %in% input$expandon, .(Variable, ID, Available)]
@@ -182,15 +190,26 @@ browse <- function(input, output, session) {
       config(displayModeBar = F)
   })
 
+  # Tab 2 ------------------------------------------------------------------------------------------------------------------------------------------------#
+
+  # Optional info link  ------------------------------------------------------- #
+  if(!is.null(infoRmd2)) {
+    output$info2 <- renderUI({
+      infoOutput(session$ns("browse"), label = "Key", i = "question-circle", link = F)
+    })
+    modal <- callModule(info, "browse", infoRmd = infoRmd2)
+  }
+
+
   output$table <- DT::renderDataTable({
     show <- metadata[, .(Source, Contributor, Variable, Description, OBITerm, IndividualLevelData, InApp, DataSource, DataSourceLink)]
     # if(input$filterDT) {
     #   show <- show[IndividualLevelData == "Yes", ]
     # }
-    show[InApp == "yes", DataSourceLink := paste0("<a href='",DataSourceLink,"' target='_blank'"," title='",DataSourceLink,"'>Get from original source","</a>")]
-    show[InApp != "yes", DataSourceLink := ""]
+    show[DataSourceLink != "", DataSourceLink := paste0("<a href='",DataSourceLink,"' target='_blank'",
+                                                        " title='",DataSourceLink,"'><i class='fas fa-external-link-alt'></i></a>")]
 
-  }, escape = FALSE, rownames = F, options = list(dom = 'ftp', pageLength = 10))
+  }, escape = FALSE, rownames = F, options = list(dom = 'ftp', pageLength = 10), style = "bootstrap")
 
   # output$downloadCollection <- downloadHandler(
   #   filename = function() {
