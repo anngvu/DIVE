@@ -14,11 +14,9 @@ interactiveMatrixUI <- function(id) {
                conditionalPanel(condition = "input.show%2==1", ns = ns, class = "forceInline",
                                 div(class = "forceInline", id = ns("custom")),
                                 div(class = "forceInline", actionLink(ns("cluster"), "CLUSTER", icon = icon("sitemap"))),
-                                div(class = "forceInline", actionLink(ns("showrlabs"), "Row labels", icon = icon("eye"))),
-                                div(class = "forceInline", actionLink(ns("showclabs"), "Col labels", icon = icon("eye"))),
-                                div(class = "forceInline", radioButtons(ns("palette"), label = NULL,
-                                                                        choices = c(RdBu = "Colorblind-friendly (default)", RdGn = "red-green", Agnostic = "sign-agnostic"),
-                                                                        inline = T))
+                                div(class = "forceInline", actionLink(ns("showrlabs"), "+/- Row Labels")),
+                                div(class = "forceInline", actionLink(ns("showclabs"), "+/- Col Labels")),
+                                div(class = "forceInline", actionLink(ns("abspalette"), "Sign-agnostic", icon = icon("palette")))
                )
            ),
            div(id = "matrixOutput",
@@ -80,13 +78,17 @@ interactiveMatrix <- function(input, output, session,
      height <- if(height < 400) 400 else ifelse(height > 1000, 1000, height)
      newdata <- state$newdata
      show <- nrow(M) <= 20 # only show y axis-labels when a reasonable number of rows is being displayed
-     colorz <- colorRampPalette(c("#FD2F02", "#FE7253", "gray", "#404040", "gray", "#53DFFE", "#02D0FD"))
+     colorz <- if(input$abspalette %% 2) {
+       colorRampPalette(c("#E74F00", "#FFE168", "gray", "#404040", "gray", "#FFE168", "#E74F00"))
+     } else {
+       colorRampPalette(c("#E74F00", "#FF894C", "gray", "#404040", "gray", "#4CC2FF", "#0098E7"))
+     }
      # colorz <- colorRampPalette(c("#FF008C", "gray", "#404040", "gray", "#00FF73")) # not colorblind friendly
-     p <- plot_ly(x = colnames(M), y = rownames(M), z = M, type = "heatmap", colors = colorz(1011), name = "Exploratory\nMap",
+     p <- plot_ly(x = colnames(M), y = rownames(M), z = M, type = "heatmap", colors = colorz(101), name = "Exploratory\nMap",
                   hovertemplate = "row: <b>%{y}</b><br>col: <b>%{x}</b><br>correlation: <b>%{z}</b>", # xgap = 1, ygap = 1,
                   height = height, colorbar = list(thickness = 8)) %>%
-       layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = "", linecolor = "gray", mirror = T),
-              yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
+       layout(xaxis = list(title = "", showgrid = F, showticklabels = input$showclabs %% 2 == 1, ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
+              yaxis = list(title = "", showgrid = F, showticklabels = input$showrlabs %% 2 == 1, ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
               plot_bgcolor = "#404040") %>%
        event_register("plotly_click")
 
