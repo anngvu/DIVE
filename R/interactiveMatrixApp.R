@@ -51,7 +51,8 @@ interactiveMatrixApp <- function(input, output, session,
                        removable = T,
                        checkFun = checkForID,
                        infoRmd = infoRmd,
-                       appdata = appdata)
+                       appdata = appdata,
+                       checkappdata = T)
 
   display <- callModule(matrixCtrl, "ctrl",
                         M, N, CDATA, METADATA,

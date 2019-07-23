@@ -44,11 +44,12 @@ dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>", 
 #' @param infoRmd Optional, an Rmarkdown help file for infoOutput, e.g. requirements.
 #' @param appdata Optional, the name (including extension) of one or more files stored in appdata that can be
 #' mock-uploaded. See details.
+#' @param checkappdata Whether checkFun should be applied to appdata, normally FALSE.
 #' @return A data.table with a "filename" attribute containing the filename without extension,
 #' or \code{NULL} if the file input was not a table or returned as \code{NULL} from \code{checkFun}.
 #' @export
 dataUpload <- function(input, output, session,
-                       asDT = T, removable = F, checkFun = NULL, infoRmd = NULL, appdata = NULL) {
+                       asDT = T, removable = F, checkFun = NULL, infoRmd = NULL, appdata = NULL, checkappdata = F) {
 
   uploaded <- reactiveVal(NULL)
 
@@ -102,10 +103,10 @@ dataUpload <- function(input, output, session,
   observeEvent(input$appdata, {
     if(input$appdata %in% appdata) {
       data <- data.table::fread(paste0("appdata/", appdata))
-      # if(is.function(checkFun)) {
-      #   # checked <- checkFun(data)
-      #   # data <- checked$result
-      # }
+      if(checkappdata && is.function(checkFun)) {
+        checked <- checkFun(data)
+        data <- checked$result
+      }
       uploaded(data)
     }
   })
