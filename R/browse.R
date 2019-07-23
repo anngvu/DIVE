@@ -11,7 +11,7 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
   fluidPage(theme = shinythemes::shinytheme("paper"),
             if(!is.null(CSS)) includeCSS(CSS),
             tabsetPanel(id = ns("tabs"),
-                        tabPanel("By nPOD case",
+                        tabPanel("By donor",
                                  fluidRow(style = "margin-top: 20px; margin-left: 20px;", height = 100,
                                           div(class = "forceInline", br(),
                                               actionButton(ns("prevSet"), "Prev 40"),
@@ -51,7 +51,7 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
                                  fluidRow(
                                    shinycssloaders::withSpinner(plotlyOutput(ns("cases"), height = 750), color = "gray")
                             )),
-                        tabPanel("By all data",
+                        tabPanel("By data variables",
                                  br(),
                                  div(class = "forceInline", uiOutput(ns("info2"))),
                                  div(class = "forceInline", downloadButton(ns("download"), label = "Download Collection")),
@@ -171,6 +171,7 @@ browse <- function(input, output, session,
   })
 
   output$abspanel <- renderUI({
+    req(input$expandon)
     if(input$expandon != "") {
       div(class = "subgroups-panel", style = "background-color: WhiteSmoke;",
         div(align = "right", actionButton(session$ns("closepanel"), "", icon = icon("times"))),

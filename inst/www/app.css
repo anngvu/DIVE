@@ -9,6 +9,14 @@ body {
   margin-right: 10px;
 }
 
+.card {
+  position: fixed;
+  z-index: 999;
+  background-color: white;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  padding: 30px;
+}
+
 #matrixOutput {
 
 }
@@ -116,5 +124,6 @@ Match app
   padding: 10px;
   background: white;
   margin: 5px;
-  border: 2px solid gray;
+  /* border: 2px solid gray; */
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 }

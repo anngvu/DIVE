@@ -16,22 +16,22 @@ ui <- navbarPage("nPOD DIVE", id = "main", selected = "intro", collapsible = T,
   #-- MENU PG 2,3,4 ------------------------------------------------------------------------------------#
   navbarMenu("Integrative Data Views",
              tabPanel("Cohort Exchange", value = "cohort-exchange",
-                      actionButton("demoCohortExchange", "Help Demo", icon = icon("play")),
+                      actionButton("demoCohortExchange", "Guide", icon = icon("play")),
                       matchAppUI("match", CSS = NULL)),
              tabPanel("Data Exploration", value = "data-exploration-1",
-                      actionButton("demoCorrelation", "Help Demo", icon = icon("play")),
+                      actionButton("demoCorrelation", "Guide", icon = icon("play")),
                       interactiveMatrixAppUI("cor", CSS = NULL)),
              tabPanel("Data Exploration (high-throughput)", value = "data-exploration-2",
                       multiVUIApp("default"))
   ),
   #-- MENU PG 5 ----------------------------------------------------------------------------------------#
-  tabPanel("Vignettes", value = "stories" #icon = icon("asterisk")
-
-  ),
+  # tabPanel("Vignettes", value = "stories" #icon = icon("asterisk")
+  #
+  # ),
 
   #-- MENU PG 6 ----------------------------------------------------------------------------------------#
-  tabPanel("Browse and Download", value = "source-data", # icon = icon("database"),
-           browseUI("metadata")
+  tabPanel("Browse Data", value = "source-data", # icon = icon("database"),
+           browseUI("nPOD")
   ),
 
   #-- PAGE 7 ----------------------------------------------------------------------------------------#
@@ -48,13 +48,13 @@ server <- function(input, output, session) {
 
   observeEvent(input$demoCorrelation, {
     session$sendCustomMessage(type = "demoCorrelation",
-                              message = list(steps = jsonlite::toJSON(read.table("help/data_exploration.txt", sep = "\t", header = T, comment.char = ""))))
+                              message = list(steps = jsonlite::toJSON(fread("help/data_exploration.txt", sep = "\t", header = T))))
   })
   observeEvent(input$demoCohortExchange, {
     session$sendCustomMessage(type = "demoCohortExchange",
-                              message = list(steps = jsonlite::toJSON(read.table("help/cohort_exchange.txt", sep = "\t", header = T, comment.char = ""))))
+                              message = list(steps = jsonlite::toJSON(fread("help/cohort_exchange.txt", sep = "\t", header = T))))
   })
-  callModule(browse, "metadata")
+  callModule(browse, "nPOD")
 }
 
 shinyApp(ui = ui, server = server)

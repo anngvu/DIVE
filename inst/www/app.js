@@ -38,6 +38,7 @@ Shiny.addCustomMessageHandler("demoCohortExchange",
       'hideNext': true,
       'showBullets': false,
       'highlightClass': 'custom-highlight',
+      'exitOnOverlayClick': false,
       'doneLabel': 'Upload demo dataset' })
     .start()
     .oncomplete( function() {
@@ -51,7 +52,7 @@ function introCX2(message) {
   var nextsteps = message.steps.slice(2,4);
   intro.setOptions({
     steps: nextsteps,
-    'doneLabel': 'Try exploring data <strong>without</strong> matching'
+    'doneLabel': 'Try exploring data <strong><em>without</em></strong> matching'
   })
   .start()
   .oncomplete( function() {
@@ -64,7 +65,7 @@ function introCX3(message) {
   var nextsteps = message.steps.slice(4,5);
   intro.setOptions({
     steps: nextsteps,
-    'doneLabel': 'OK, now proceed with getting matches'
+    'doneLabel': 'OK, now proceed with matching'
   })
   .start()
   .oncomplete( function() {
@@ -100,7 +101,8 @@ function introCX5(message) {
   var nextsteps = message.steps.slice(9,10);
   intro.setOptions({
     steps: nextsteps,
-    'doneLabel': 'Try exploring data <strong>after</strong> matching',
+    'showButtons': true,
+    'doneLabel': 'Explore data <strong><em>after</em></strong> matching',
   })
   .start()
   .oncomplete( function() {

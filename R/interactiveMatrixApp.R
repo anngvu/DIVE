@@ -17,7 +17,8 @@ interactiveMatrixAppUI <- function(id, CSS = system.file("www/", "app.css", pack
                                              absolutePanel(id = "cellpackpanel", draggable = T, left = 300,
                                                            cellPackUI(ns("cellfilter")))
                             )),
-                     column(4, dataUploadUI(ns("upload")))
+                     column(3, dataUploadUI(ns("upload"))),
+                     column(1) # to do: enable bookmarking?
             ),
             fluidRow(interactiveMatrixUI(ns("matrix")))
   )
@@ -83,6 +84,6 @@ interactiveMatrixAppRun <- function() {
   server <- function(input, output, session) {
     callModule(interactiveMatrixApp, "default")
   }
-  shinyApp(ui = ui, server = server)
+  shinyApp(ui, server)
 }
 
