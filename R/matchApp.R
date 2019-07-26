@@ -1,8 +1,3 @@
-matchAppConfig <- function() {
-
-}
-
-
 #' Shiny app UI for matching application
 #'
 #' Shiny app UI for matching application

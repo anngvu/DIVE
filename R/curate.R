@@ -24,12 +24,13 @@ templateMetadata <- function() {
     ),
     # Technical curator annotations -- controlled vocabulary from ontologies and coded values
     Ontology = list(
+      list(type = "selectizeInput", id = "DataItem", args = list("DataItem", "DataItem", choices = O$OBI$Term, multiple = F)),
       list(type = "selectizeInput", id = "Level", args = list("Level", "Level", choices = CV$Level, multiple = F)),
       list(type = "selectizeInput", id = "CellTissue", args = list("CellTissue", "CellTissue", choices = O$CL$Term, multiple = T, options = list(maxOptions = 5))),
-      list(type = "selectizeInput", id = "CellTissueContext", args = list("CellTissueContext", "CellTissueContext", choices = O$CL$Term, multiple = T, options = list(maxOptions = 5))),
-      list(type = "selectizeInput", id = "EFOTerm", args = list("EFOTerm", "EFOTerm", choices = O$CL$Term, multiple = T, options = list(maxOptions = 5)))
-      # list(type = "selectizeInput", args = list("GOTerm", "GOTerm", choices = O$GO$Term, multiple = T))
-      # list(type = "selectizeInput", args = list("HPOTerm", "HPOTerm", choices = O$HPO$Term, multiple = T))
+      list(type = "selectizeInput", id = "CellTissueContext", args = list("CellTissueContext", "CellTissueContext", choices = O$CL$Term, multiple = F, options = list(maxOptions = 5))),
+      list(type = "selectizeInput", id = "EFOTerm", args = list("EFOTerm", "EFOTerm", choices = O$EFO$Term, multiple = T, options = list(maxOptions = 5))),
+      list(type = "selectizeInput", id = "GOTerm", args = list("GOTerm", "GOTerm", choices = O$GO$Term, multiple = T)),
+      list(type = "selectizeInput", id = "MPTerm", args = list("MPTerm", "MPTerm", choices = O$MP$Term, multiple = T))
     ),
     Method = list(
       list(type = "selectizeInput", id = "MethodID", args = list("MethodID", "MethodID", choices = methods$MethodID))
@@ -72,7 +73,7 @@ templateMethod <- function() {
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @export
-collectInput <- function(id) {
+collectDataInput <- function(id) {
   ns <- NS(id)
   uiOutput(ns("inputs"))
 }
@@ -83,47 +84,59 @@ collectInput <- function(id) {
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param template UI template.
-#' @param filldata A list of existing data values.
-#' @param nav Type of top-level input to navigate sections of the template, or NULL if everything in template should be displayed all in one page.
+#' @param filldata A list of existing data values that can be passed in. If NULL, works as if in "add" instead of "edit" mode.
 #' @param class Optional, class for ui CSS.
 #' @export
-collect <- function(input, output, session,
-                    template = reactive({ }), filldata = reactive({ }), nav = "radioButtons", class = "") { # class = "forceInline",
+collectData <- function(input, output, session,
+                    template = reactive({ }), filldata = reactive({ }), class = "") { # class = "forceInline",
+
+  edits <- reactiveVal(NULL)
 
   output$inputs <- renderUI({
     if(length(template())) {
       temp <- template()
-      for(i in seq_along(temp)) temp[[i]]$args[[1]] <- session$ns(temp[[i]]$args[[1]])
-      if(length(filldata())) temp <- initializeInput1(temp, filldata()) else temp <- initializeInput0(temp)
+      filldata <- filldata()
+      for(i in seq_along(temp)) temp[[i]]$args[[1]] <- session$ns(temp[[i]]$args[[1]]) # ns(inputId)
+      temp <- initInput(temp, filldata)
       ui <- lapply(temp, function(i) div(class = class, do.call(i$type, args = i$args)))
-      tags$div(class = "forceInline card", ui, actionLink(session$ns("done"), label = "OK", icon = icon("check")))
+      tags$div(class = "forceInline card",
+               ui,
+               actionLink(session$ns("done"), label = "OK", icon = icon("check")))
     }
   })
 
   # Checking input$done as a roundabout way to check that inputs have been rendered;
-  # selectize inputs have to be updated with server because client-side is extremely laggy when choices are ontologies
+  # selectize inputs have to be updated with server because client-side is extremely laggy when choices have thousannds of terms for ontologies
   observe({
     if(!is.null(input$done) && input$done == 0) {
-      temp <- template()
+      temp <- template() # whenever template changes
+      filldata <- filldata() # whenever filldata changes
       for(i in seq_along(temp)) {
-        if(temp[[i]]$type == "selectizeInput") updateSelectizeInput(session, inputId = temp[[i]]$args[[1]], choices = temp[[i]]$args$choices, server = T)
+        if(temp[[i]]$type == "selectizeInput") {
+          selected <- readCollapsed(filldata[[temp[[i]]$id]])
+          updateSelectizeInput(session, inputId = temp[[i]]$args[[1]], choices = temp[[i]]$args$choices, selected = selected, server = T)
+        }
       }
     }
   })
 
-  edits <- reactive({
-    reactiveValuesToList(input)
+  observeEvent(input$done, {
+    entries <- lapply(template(), function(x) if(x$type == "selectizeInput") writeCollapsed(input[[x$args[[1]]]]) else input[[x$args[[1]]]])
+    names(entries) <- sapply(template(), function(x) x$id)
+    edits(entries)
   })
 
-  observeEvent(input$done, {
-    return(edits)
-  })
+  return(edits)
 
 }
 
 # Note: whenever data.table::fread actually implements sep2, this will change to take advantage of that
 readCollapsed <- function(value, sep = "|") {
-  unlist(strsplit(value, split = sep, fixed = T))
+  ifelse(is.na(value), "", unlist(strsplit(value, split = sep, fixed = T)))
+}
+
+writeCollapsed <- function(value, sep = "|") {
+  paste0(value, collapse = sep)
 }
 
 templateInput <- function(x, value) {
@@ -135,51 +148,95 @@ templateInput <- function(x, value) {
   x
 }
 
-# Set selectizeInput to be updated later
-initializeInput0 <- function(template) {
-  lapply(template, function(i) { if(i$type == "selectizeInput") i$args$choices <- ""; i })
+# Handles populating fields with current data. If no current fill data, sets selectizeInput to be updated later.
+initInput <- function(template, filldata = NULL) {
+  if(length(filldata)) {
+    # Note: If table is out of sync with template, fill data won't exist for template i$id
+    values <- lapply(template, function(i) if(i$type == "selectizeInput") "" else filldata[[i$id]])
+    Map(templateInput, template, values)
+  } else {
+    lapply(template, function(i) { if(i$type == "selectizeInput") i$args$choices <- ""; i })
+  }
 }
 
 # fills in given data as value or choices depending on input type in template
-initializeInput1 <- function(template, filldata) {
-  values <- lapply(template, function(i) if(i$type == "selectizeInput") readCollapsed(filldata[[i$id]]) else filldata[[i$id]])
-  template <- Map(templateInput, template, values)
-  template
-}
+# initInput1 <- function(template, filldata) {
+#   values <- lapply(template, function(i) if(i$type == "selectizeInput") readCollapsed(filldata[[i$id]]) else filldata[[i$id]])
+#   template <- Map(templateInput, template, values)
+#   template
+# }
 
 # --------------------------------------------------------------------------------------------------------------------------#
 
+#' Shiny module UI for reviewing and editing table data
+#'
+#' The UI features a basic table representation of the data and an interface for collecting data.
+#'
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @export
 reviewUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
 
   ns <- NS(id)
-  fluidPage(theme = shinythemes::shinytheme("paper"), if(!is.null(CSS)) includeCSS(CSS),
-    uiOutput(ns("nav")),
-    actionButton(ns("new"), "", icon = icon("plus")),
-    collectInput(ns("edit")),
-    div(style = "margin-top: 30px;", DT::dataTableOutput(ns("table")))
+  fillPage(theme = shinythemes::shinytheme("paper"), if(!is.null(CSS)) includeCSS(CSS), padding = 20,
+      fillRow(flex = c(0.25, 0.75),
+      # column(3,
+             # actionButton(ns("new"), "", icon = icon("plus")), br(),
+             div(div(class = "forceInline", uiOutput(ns("nav"))), br(),
+                 actionLink(ns("new"), "Entry", icon = icon("plus")), br(),
+                 collectDataInput(ns("edit"))
+                 ),
+             #),
+             div(DT::dataTableOutput(ns("table")))
+            )
   )
 }
 
-review <- function(input, output, session, template, mydata) {
+#' Shiny module server for reviewing and editing table data
+#'
+#' The module composes the table data with the ability to edit current or new rows.
+#' The table is connected to the collectData module,
+#' which provides a data collection interface using a data template, the overall UI allows
+#' editing a current or new row of data.
+#'
+#' @param input,output,session Standard \code{shiny} boilerplate.
+#' @inheritParams collectData
+#' @param nav For templates containing multiple parts (sections),
+#' this determines whether a selectInput or radioButtons type navigation menu
+#' is generated for selecting which part of the template to be reviewed.
+#' It is not useful for templates of length 1.
+#' @export
+review <- function(input, output, session, template, dt, nav = c("radioButtons", "selectInput")) {
 
+  dt <- reactiveVal(dt)
   filldata <- reactiveVal(NULL)
+  active <- reactiveVal(1)
+  type <- match.arg(nav)
 
   output$nav <- renderUI({
-    radioButtons(session$ns("section"), label = "Section", choices = names(template), inline = T)
+    if(length(template) > 1) do.call(type, args = list(inputId = session$ns("section"), label = "Section", choices = names(template), inline = T))
+  })
+
+  observeEvent(input$section, {
+    active(input$section)
   })
 
   temp <- reactive({
-    req(input$section)
-    template[[input$section]]
+    template[[active()]]
   })
 
-  edits <- callModule(collect, "edit", template = temp, filldata = filldata)
+  edits <- callModule(collectData, "edit", template = temp, filldata = filldata)
 
+  observeEvent(edits(), {
+    edits <- edits()
+    dt_ <- copy(dt())
+    for(col in names(edits)) dt_[input$table_rows_selected, col] <- edits[[col]]
+    dt(dt_)
+  })
 
   observe({
     selected <- input$table_rows_selected
     if(length(selected)) {
-      values <- as.list(mydata[selected, ])
+      values <- as.list(dt()[selected, ])
       filldata(values)
     } else {
       filldata(NULL)
@@ -190,29 +247,22 @@ review <- function(input, output, session, template, mydata) {
     filldata(NULL)
   })
 
+
   output$table = DT::renderDataTable({
-    DT::datatable(mydata, options = list(pageLength = 15), rownames = F, style = "bootstrap", selection = "single")
+    showcols <- which(!(names(dt()) %in% sapply(temp(), function(x) x$id)))
+    DT::datatable(dt(), options = list(pageLength = 15, columnDefs = list(list(visible = F, targets = showcols))),
+                  style = "bootstrap", selection = "single")
   })
 }
 
-curateUI <- function(id) {
-  ns <- NS(id)
-  reviewUI(ns("method"))
-}
-
-curate <- function(input, output, session) {
-
-  callModule(review, id = "method", template = templateMetadata(), mydata = metadata)
-}
-
-#' Launch Shiny app for metadata curation
+#' Launch Shiny app for data curation
 #'
-#' Launch an interface to view and modify metadata of curated data
+#' Launch an interface to view and modify curated data
 #'
 #' @export
 curateR <- function() {
-  ui <- curateUI("main")
-  server <- function(input, output, session) { callModule(curate, "main") }
+  ui <- reviewUI("method")
+  server <- function(input, output, session) { callModule(review, id = "method", template = templateMetadata(), dt = metadata) }
   shinyApp(ui, server)
 }
 

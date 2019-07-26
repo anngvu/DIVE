@@ -203,14 +203,14 @@ browse <- function(input, output, session,
 
 
   output$table <- DT::renderDataTable({
-    show <- metadata[, .(Source, Contributor, Variable, Description, OBITerm, IndividualLevelData, InApp, DataSource, DataSourceLink)]
+    show <- metadata[, .(Source, Contributor, Variable, Description, IndividualLevelData, InApp, DataSource, DataSourceLink)]
     # if(input$filterDT) {
     #   show <- show[IndividualLevelData == "Yes", ]
     # }
     show[DataSourceLink != "", DataSourceLink := paste0("<a href='",DataSourceLink,"' target='_blank'",
                                                         " title='",DataSourceLink,"'><i class='fas fa-external-link-alt'></i></a>")]
 
-  }, escape = FALSE, rownames = F, options = list(dom = 'ftp', pageLength = 10), style = "bootstrap")
+  }, escape = FALSE, rownames = F, filter = "none", options = list(dom = 'ftp', pageLength = 10), style = "bootstrap")
 
   # output$downloadCollection <- downloadHandler(
   #   filename = function() {

@@ -9,7 +9,7 @@ The data should only be numeric/numeric factors. Columns containing text data wi
 
 **Format**
 
-The table should have a first column named 'ID', which are presumed case IDs. If there is no ID column, the upload will not proceed.
+The file should be a .csv or .tsv text file (not Excel). In the data table there must be a first column named 'ID', which are presumed case IDs. If there is no ID column, the upload will not proceed.
 
 **Data confidentiality**
 
