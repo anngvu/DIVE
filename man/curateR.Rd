@@ -2,10 +2,10 @@
 % Please edit documentation in R/curate.R
 \name{curateR}
 \alias{curateR}
-\title{Launch Shiny app for metadata curation}
+\title{Launch Shiny app for data curation}
 \usage{
 curateR()
 }
 \description{
-Launch an interface to view and modify metadata of curated data
+Launch an interface to view and modify curated data
 }

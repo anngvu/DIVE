@@ -4,19 +4,19 @@
 \alias{intermediate}
 \title{Shiny server module for intermediate data processing}
 \usage{
-intermediate(input, output, session, data, Fun)
+intermediate(input, output, data, Fun)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
 \item{data}{Reactive data.}
 
-\item{Fun}{Function for data processing.}
+\item{Fun}{Function to be applied to data.}
 }
 \value{
-Reactive object that depends on the return of the function used.
+Return value of Fun as reactive object.
 }
 \description{
 This module implements an additional customizable layer for intermediate data processing
-by passing data into a function and outputting results
+by passing data into a function and returning results as a reactive object.
 }

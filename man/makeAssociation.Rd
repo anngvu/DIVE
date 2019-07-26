@@ -2,7 +2,7 @@
 % Please edit documentation in R/data2cor.R
 \name{makeAssociation}
 \alias{makeAssociation}
-\title{Wrapper to instantiate association data for Shiny app}
+\title{Wrapper to instantiate association/correlation data for Shiny app}
 \usage{
 makeAssociation(cdata)
 }
@@ -14,5 +14,5 @@ A list with 1) corM, the correlation matrix, and 2) corN, the number of samples 
 when r was calculated using pairwise complete observation
 }
 \description{
-Wrapper to instantiate association data for Shiny app
+Wrapper to instantiate association/correlation data for Shiny app
 }

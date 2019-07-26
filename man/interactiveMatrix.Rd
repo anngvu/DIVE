@@ -5,21 +5,19 @@
 \title{Server module server for plotting correlations matrix with drilldown interaction}
 \usage{
 interactiveMatrix(input, output, session, state,
-  factorx = "type$|grp$|cat$|score$|grade$|bin$|count$|pos$",
-  dcolors = list(donor.type = c(`Autoab Pos` = "orange", `Cystic
-  fibrosis` = "aquamarine4", `Gastric Bypass` = "bisque4", `Gestational
-  diabetes` = "deeppink2", `Monogenic Diabetes` = "red4", `No diabetes` =
-  "royalblue2", `Other-Diabetes` = "indianred4", `Other-No Diabetes` =
-  "steelblue2", T1D = "red", `T1D Medalist` = "maroon", T2D = "purple")))
+  factorx = "type$|grp$|cat$|score$|grade$|bin$|pos$|^male$",
+  dcolors = NULL)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
 \item{state}{Reactive state object from \code{\link{matrixCtrl}}.}
 
-\item{factorx}{Optional, names and/or patterns for variables that should be displayed as factors in plots.}
+\item{factorx}{Names and/or patterns for variables that should be displayed as factors in scatterplot.}
 
-\item{dcolors}{List of manual color mappings for variables used for coloring data points.}
+\item{dcolors}{Optional, a list of at least one categorical variable to use for scatterplot point colors
+and the manual color mappings for each in the list. If color mappings are not specified, random colors will be used
+and may not be consistent with other module plots.}
 }
 \description{
 The matrix responds to inputs, new plotdata, and has a linked drilldown component.
@@ -27,7 +25,8 @@ The matrix responds to inputs, new plotdata, and has a linked drilldown componen
 \details{
 The module handles interactive display of a matrix linked to a scatter
 plot that accesses underlying data for a user-clicked cell. It works with \code{\link{matrixCtrl}},
-which returns the reactive matric as part of a \preformatted{state} object. The general idea is that
-this module only handles visualization of a matrix while the actually matrix generation can be handled by
-other modules that feed into it.
+which returns the reactive matric as part of a \code{state} object. The general idea is that
+this module only handles visualization of a matrix while the actual matrix generation can be handled by
+other modules that feed into it. For the drilldown component that displays underlying data points,
+the type of data matters and may require setting aesthetic parameters to maintain consistency across modules.
 }

@@ -10,5 +10,5 @@ interactiveMatrixUI(id)
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 }
 \description{
-The matrix responds to inputs, new plotdata, and has a linked drilldown component.
+Creates app UI for a heatmap matrix responding to inputs, new plot data, that is linked to a drilldown scatterplot component.
 }

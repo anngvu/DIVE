@@ -4,7 +4,8 @@
 \alias{infoOutput}
 \title{Shiny module UI to display a modal with additional info}
 \usage{
-infoOutput(id, label = "data req's", i = "exclamation-circle")
+infoOutput(id, label = "data req's", i = "exclamation-circle",
+  link = T)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
@@ -12,9 +13,11 @@ infoOutput(id, label = "data req's", i = "exclamation-circle")
 \item{label}{Label, typically for specifying type of info.}
 
 \item{i}{Icon type to display next to label.}
+
+\item{link}{Defaults to actionLink, set false for showing actionButton}
 }
 \value{
-An actionLink.
+An actionLink or actionButton to call an info module.
 }
 \description{
 Shiny module UI to display a modal with additional info

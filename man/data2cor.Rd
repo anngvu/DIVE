@@ -4,7 +4,7 @@
 \alias{data2cor}
 \title{Get a heterogeneous correlation/association matrix and observations used}
 \usage{
-data2cor(cdata, exclude = "^ID|_SE$|_SEM$|_SD$")
+data2cor(cdata, exclude = "^ID$|_SE$|_SEM$|_SD$", method = "spearman")
 }
 \arguments{
 \item{cdata}{A data.table}
@@ -15,16 +15,18 @@ data2cor(cdata, exclude = "^ID|_SE$|_SEM$|_SD$")
 A list with M, the correlation matrix, and N, the number of samples matrix.
 }
 \description{
-The correlation/association matrix is meant for exploratory data analysis and includes
-correlations computed with Pearson for interval vs interval variables,
-Spearman's rank correlation for ordinal vs ordinal variables,
-and Cramer's V for nomimal variables.
+The correlation/association matrix is meant for exploratory data analysis and can generate
+Pearson or Spearman correlations for interval vs interval,
+interval vs ordinal, or ordinal vs ordinal variables.
 }
 \details{
 This implementation first converts data.table into a cleaned matrix, discarding any non-numeric data
 and excluding certain columns unsuitable for correlation calculations (such as "ID" and SE/SD columns by default).
 Columns to be exluded can be specified through name patterns.
-Then either Pearson or Spearman correlation is calculated using \code{\link[Hmisc]{rcorr}}.
-However, for variables which are actually nominal and dummy-encoded, the correlations are replaced with association
-statistics eta.
+Then either Pearson or Spearman correlation is calculated using \code{\link[Hmisc]{rcorr}}, and the method
+can be specified depending on the data input. Because the original use case includes ordinal data
+as well as data that might violate normality assumptions, Spearman's is set as the default.
+In the future it might be possible to extend the implementation to include nominal variables by using association statistics
+such as Cramer's V, eta, lambda (something like data2association) so the result is heterogeneous
+correlation/association matrix.
 }

@@ -4,8 +4,8 @@
 \alias{interactiveMatrixApp}
 \title{Shiny app server for exploration of relationships in annotated data with an interactive matrix}
 \usage{
-interactiveMatrixApp(input, output, session, M = cordata$corM,
-  N = cordata$corN, CDATA = cdata, METADATA = metadata[, .(VarID,
+interactiveMatrixApp(input, output, session, M = cordata$M,
+  N = cordata$N, CDATA = cdata, METADATA = metadata[, .(VarID,
   Variable, Contributor, CellTissue, ThemeTag, MethodID)],
   widgetopt = "CellTissue", widgetdata = system.file("www/",
   "test.json", package = "DIVE"),

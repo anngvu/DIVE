@@ -9,6 +9,12 @@ makeCdata(cdir = "./Collection/Main/", filepattern = "*.txt",
   outdir = "./App/Data/")
 }
 \arguments{
+\item{cdir}{Directory path (relative to working directory) to the collection of dataset files.}
+
+\item{filepattern}{Pattern for grep to identify qualifying files in the directory, e.g. "*.txt".}
+
+\item{exclude}{A pattern for grep to exclude columns within a file from the final master dataset.}
+
 \item{other}{Optional, a list of of paths to other data files not in the main collection but
 that should be part of the master data object. NULL if no other data to be incorporated.}
 

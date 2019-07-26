@@ -4,23 +4,26 @@
 \alias{matrixCtrl}
 \title{Shiny module server functions to generate filter UI for interactive matrix}
 \usage{
-matrixCtrl(input, output, session, M, N, cdata, metadata0,
-  newdata = reactive({ }), widget = reactive({ }))
+matrixCtrl(input, output, session, M, N, cdata, metadata = NULL,
+  varkey = "VarID", newdata = reactive({ }), widget = reactive({ }))
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
-\item{M}{A non-reactive data matrix, e.g. a correlation matrix, which must have variables as rownames.}
+\item{M}{A non-reactive data matrix, e.g. a correlation matrix, which must have row names.}
 
 \item{N}{A non-reactive matrix of the same dimensions as M, used as a filter layer, e.g. sample size.}
 
 \item{cdata}{The non-reactive data used for generating the matrix.}
 
+\item{metadata}{Optional, a data.table with different types of metadata/annotation to be used as filters.
+If \code{NULL}, the only filter option are the row names/index in M.}
+
+\item{varkey}{The column in metadata that maps to row names in M.}
+
 \item{newdata}{Optional, reactive data, e.g. from user upload, that can be merged with M.}
 
 \item{widget}{Optional, associated widget input. See details.}
-
-\item{metadata}{A data.table with "Variable" as a key column and any number of columns (metadata) to be used as filters.}
 }
 \value{
 Reactive state values to be used by the associated plotting module.
