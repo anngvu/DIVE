@@ -1,12 +1,11 @@
 library(shiny)
 library(DIVE)
 
-
 ui <- navbarPage("nPOD DIVE", id = "main", selected = "intro", collapsible = T,
                  theme = shinythemes::shinytheme("paper"),
-                 tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
-                           tags$link(rel = "stylesheet", type = "text/css", href = "introjs.min.css"),
-                           tags$script(src = "intro.min.js")),
+                 tags$head(# tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
+                           tags$link(rel = "stylesheet", type = "text/css", href = "introjs.min.css")),
+                 includeScript("www/intro.min.js"),
                  includeScript("www/app.js"),
 
   #-- MENU PG 1 (HOME) ---------------------------------------------------------------------------------#
@@ -48,11 +47,11 @@ server <- function(input, output, session) {
 
   observeEvent(input$demoCorrelation, {
     session$sendCustomMessage(type = "demoCorrelation",
-                              message = list(steps = jsonlite::toJSON(fread("help/data_exploration.txt", sep = "\t", header = T))))
+                              message = list(steps = jsonlite::toJSON(fread("www/data_exploration.txt", sep = "\t", header = T))))
   })
   observeEvent(input$demoCohortExchange, {
     session$sendCustomMessage(type = "demoCohortExchange",
-                              message = list(steps = jsonlite::toJSON(fread("help/cohort_exchange.txt", sep = "\t", header = T))))
+                              message = list(steps = jsonlite::toJSON(fread("www/cohort_exchange.txt", sep = "\t", header = T))))
   })
   callModule(browse, "nPOD")
 }

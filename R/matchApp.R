@@ -47,6 +47,8 @@ matchAppUI <- function(id,
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param REFDATA A data matrix, e.g. a correlation matrix, which must have variables as rownames.
+#' @param HPCG Graph object representing the reference cohort.
+#' @param COLORS Colors
 #' @param REFKEY Passed to refSubsetInput.
 #' @param NGRAPH A matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.
 #' @param NGRAPHDATA The non-reactive data used for generating the matrix.
@@ -123,8 +125,8 @@ matchApp <- function(input, output, session,
   #-- Show output tabs ------------------------------------------------------------------------------------------#
 
   # Need to keep track of first upload since previous implementation of removing and adding new tabs
-  # (as opposed to new logic of adding tab if it's the first interaction and showing/hiding for all subsequent)
   # results in puzzling behavior where one must click twice on run to get results.
+  # (as opposed to logic of adding tab if it's the first interaction and showing/hiding for all subsequent)
   first <- reactiveValues(upload = TRUE, result = TRUE)
 
   observeEvent(newCohort(), {

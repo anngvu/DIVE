@@ -20,7 +20,7 @@ intermediateInput <- function(id) {
 #' @param Fun Function to be applied to data.
 #' @return Return value of Fun as reactive object.
 #' @export
-intermediate <- function(input, output,
+intermediate <- function(input, output, session,
                       data, Fun) {
 
   out <- reactive({

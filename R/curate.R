@@ -210,10 +210,15 @@ review <- function(input, output, session, template, dt, nav = c("radioButtons",
   dt <- reactiveVal(dt)
   filldata <- reactiveVal(NULL)
   active <- reactiveVal(1)
-  type <- match.arg(nav)
 
   output$nav <- renderUI({
-    if(length(template) > 1) do.call(type, args = list(inputId = session$ns("section"), label = "Section", choices = names(template), inline = T))
+    if(length(template) > 1) {
+      if(nav == "radioButtons") {
+        radioButtons(session$ns("section"), label = "Section", choices = names(template), inline = T)
+      } else {
+        selectInput(session$ns("section"), label = "Section", choices = names(template))
+      }
+    }
   })
 
   observeEvent(input$section, {
