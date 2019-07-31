@@ -26,6 +26,10 @@ matchApp(input, output, session, REFDATA = npodX, HPCG = hpcg,
 
 \item{REFDATA}{A data matrix, e.g. a correlation matrix, which must have variables as rownames.}
 
+\item{HPCG}{Graph object representing the reference cohort.}
+
+\item{COLORS}{Colors}
+
 \item{REFKEY}{Passed to refSubsetInput.}
 
 \item{VARS}{Optional, variables allowed to be used for matching within REFDATA organized in categories.

@@ -4,7 +4,7 @@
 \alias{intermediate}
 \title{Shiny server module for intermediate data processing}
 \usage{
-intermediate(input, output, data, Fun)
+intermediate(input, output, session, data, Fun)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}

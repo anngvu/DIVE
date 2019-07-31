@@ -2,6 +2,7 @@
 
 export(HPCGraph)
 export(HPCGraphOutput)
+export(browse)
 export(browseR)
 export(browseUI)
 export(cellPack)

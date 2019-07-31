@@ -66,16 +66,19 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
 #' Handles general browsing, filtering, subsetting of table data
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param dt_id Table data by ID.
+#' @param dt_var Table data by var.
 #' @param inforRmd1 Helpfile for uploading an ID list.
 #' @param inforRmd2 Helpfile for how browsing data works.
 #' @export
 browse <- function(input, output, session,
+                   dt_id = cdata, dt_var = metadata,
                    infoRmd1 = system.file("help/ID_list.Rmd", package = "DIVE"),
                    infoRmd2 = system.file("help/browse_data.Rmd", package = "DIVE")) {
 
 
   visIDs <- reactiveVal(1:40)
-  cdataL <- reactiveVal(cdata)
+  dataview <- reactiveVal(dt_id)
   customIDs <- reactiveVal(NULL)
 
   uploadedIDs <- callModule(dataUpload, "IDlist", asDT = F, removable = T, infoRmd = infoRmd1)
@@ -89,26 +92,26 @@ browse <- function(input, output, session,
   })
 
   observeEvent(input$subset, {
-    if(input$subset == "") cdataL(cdata) else cdataL(cdata[donor.type == input$subset])
+    if(input$subset == "") dataview(dt_id) else dataview(dt_id[donor.type == input$subset])
     updateSelectizeInput(session, "selectID", selected = "")
-    end <- ifelse(nrow(cdataL()) < 40, nrow(cdataL()), 40)
+    end <- ifelse(nrow(dataview()) < 40, nrow(dataview()), 40)
     visIDs(1:end)
   })
 
   observeEvent(customIDs(), {
-    if(is.null(customIDs())) cdataL(cdata) else cdataL(cdata[ID %in% customIDs()])
-    end <- ifelse(nrow(cdataL()) < 40, nrow(cdataL()), 40)
+    if(is.null(customIDs())) dataview(dt_id) else dataview(dt_id[ID %in% customIDs()])
+    end <- ifelse(nrow(dataview()) < 40, nrow(dataview()), 40)
     visIDs(1:end)
   }, ignoreNULL = F)
 
   output$index <- renderPrint({
-      helpText(paste0("displaying ", visIDs()[1], "-", visIDs()[length(visIDs())], " of ", nrow(cdataL())))
+      helpText(paste0("displaying ", visIDs()[1], "-", visIDs()[length(visIDs())], " of ", nrow(dataview())))
   })
 
   observeEvent(input$nextSet, {
-    if(last(visIDs()) < nrow(cdataL())) {
+    if(last(visIDs()) < nrow(dataview())) {
       newrange <- visIDs() + 40
-      if(last(newrange) > nrow(cdataL())) newrange <- newrange[newrange <= nrow(cdataL())]
+      if(last(newrange) > nrow(dataview())) newrange <- newrange[newrange <= nrow(dataview())]
       visIDs(newrange)
     }
   })
@@ -123,11 +126,11 @@ browse <- function(input, output, session,
 
   varL <- reactive({
     IDs <- visIDs()
-    varL <- cdataL()[IDs, cdataL()[IDs, sapply(.SD, function(x) !all(is.na(x))), with = F] ]
+    varL <- dataview()[IDs, dataview()[IDs, sapply(.SD, function(x) !all(is.na(x))), with = F] ]
 
     for(col in removeID(names(varL))) varL[[col]] <- as.integer(!is.na(varL[[col]]))
     varL <- melt(varL, id.var = "ID", variable.name = "VarID", value.name = "Available")
-    varL <- merge(varL, metadata[, c("VarID", "Variable", input$class), with = F], by = "VarID")
+    varL <- merge(varL, dt_var[, c("VarID", "Variable", input$class), with = F], by = "VarID")
     setnames(varL, input$class, "Data")
   })
 
@@ -211,7 +214,7 @@ browse <- function(input, output, session,
 
 
   output$table <- DT::renderDataTable({
-    show <- metadata[, .(Source, Contributor, Variable, Description, IndividualLevelData, InApp, DataSource, DataSourceLink)]
+    show <- dt_var[, .(Source, Contributor, Variable, Description, IndividualLevelData, InApp, DataSource, DataSourceLink)]
     # if(input$filterDT) {
     #   show <- show[IndividualLevelData == "Yes", ]
     # }
