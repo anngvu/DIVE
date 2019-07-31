@@ -61,9 +61,17 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
   )
 }
 
+#' Shiny module server functions for browsing metadata
+#'
+#' Handles general browsing, filtering, subsetting of table data
+#'
+#' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param inforRmd1 Helpfile for uploading an ID list.
+#' @param inforRmd2 Helpfile for how browsing data works.
+#' @export
 browse <- function(input, output, session,
                    infoRmd1 = system.file("help/ID_list.Rmd", package = "DIVE"),
-                   infoRmd2 = system.file("help/", "browse_data.Rmd", package = "DIVE")) {
+                   infoRmd2 = system.file("help/browse_data.Rmd", package = "DIVE")) {
 
 
   visIDs <- reactiveVal(1:40)
