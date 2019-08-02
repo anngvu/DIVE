@@ -1,5 +1,5 @@
 FROM rocker/shiny
-MAINTAINER Anh Vu, avu@coh.org
+MAINTAINER A N Vu, avu@coh.org
 
 RUN apt-get update && apt-get install -y \
   libssl-dev \
@@ -15,11 +15,14 @@ RUN R -e "install.packages(c('devtools'), repos='http://cran.rstudio.com/')" \
   && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
 RUN R -e "devtools::install_github('avucoh/DIVE')"
 
+# Copy config
+COPY shiny-server.conf /etc/shiny-server/shiny-server.conf
+
 # Copy the app to the image
-COPY app /srv/shiny-server/
+COPY app /srv/shiny-server/app
 
 # select port
-EXPOSE 3838
+EXPOSE 8080
 
 # allow permission
 RUN sudo chown -R shiny:shiny /srv/shiny-server
