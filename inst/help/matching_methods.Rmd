@@ -5,7 +5,11 @@ output: html_document
 
 **Matching methods**
 
-optmatch used
+The underlying matching is performed by the `optmatch` [R package](https://cran.r-project.org/web/packages/optmatch/index.html) "oriented to matching of treatment and control groups in observational studies". Specifically, the module imports `pairmatch` for optimal 1:1 matching. In `pairmatch`, units from the treatment group are matched with those in a larger control reservoir by minimizing a total distance metric. Note that we assume the "treatment group" submitted as CohortX is a smaller size subset than the available nPOD cohort match subset. If your group is actually larger than nPOD, matching can fail because then "there is too much competition for certain controls".
 
-**Tips**
+For citation and further description, see the reference paper: 
+
+> Hansen, B.B. and Klopfer, S.O. (2006) Optimal full matching and
+>  related designs via network flows, JCGS 15 609-627.
+ 
 

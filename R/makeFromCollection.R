@@ -1,23 +1,29 @@
 #' Create master data table from a collection of datasets
 #'
 #' Builds one large master dataset given the directory where a collection of datasets resides.
-#' This data object is required for the Shiny application.
+#'
+#' This method helps compile the \code{cdata} data object from a collection of datasets.
+#' Each dataset represents data from a source/study in the format of a uniquely named .csv/.tsv/.txt file
+#' within the specified directory. The files are read and merged together into one master data table.
+#' Because IDs for data across all datasets must be unique in the final master data table,
+#' namespaced IDs are created using the parent file name. A function can be passed into
+#' \code{index} for some control of this namespace index approach. For instance, instead of using the
+#' full file name, it might make more sense to map it to a shorter form or to an external key
+#' (as long as unique IDs can still be ensured) for namespacing, such that a data feature "Var1"
+#' from file "PMID123456_Doe-2000.txt" is identified as "Doe00_Var1" in the master data table.
 #'
 #' @param cdir Directory path (relative to working directory) to the collection of dataset files.
 #' @param filepattern Pattern for grep to identify qualifying files in the directory, e.g. "*.txt".
-#' @param exclude A pattern for grep to exclude columns within a file from the final master dataset.
-#' @param index Optional function for generating a custom index format from file names,
-#' especially useful if naming scheme of the collection files changes.
+#' @param exclude A \code{grep} pattern to exclude columns within a file from the final master dataset.
+#' @param index Optional, a function to help with namespacing. If not given, defaults to using file name. See details.
 #' @return A "master" data.table
 #' @export
-makeFromCollection <- function(cdir, filepattern, exclude, index) {
-  files <- list.files(path = cdir, pattern = filepattern)
+makeFromCollection <- function(cdir = getwd(), filepattern = "*.txt", exclude = "!", index = NULL) {
+  files <- list.files(cdir, pattern = filepattern)
   cdata <- lapply(paste0(cdir, files), function(x) fread(x))
-  if(!is.null(index) & is.function(index)) {
-    iref <- index(files)
-  } else {
-    iref <- indexFormat(files)
-  }
+  iref <- if(!is.null(index) & is.function(index)) index(files) else files
+  # problem if not unique
+  stopifnot(is.unique(iref))
   for(i in seq_along(cdata)) setnames(cdata[[i]], c("ID", paste0(iref[i], "_", names(cdata[[i]])[-1])))
   cdata <- rbindlist(cdata, use.names = T, fill = T)
   cdata <- cdata[, lapply(.SD, Agg), by = ID]
@@ -35,7 +41,7 @@ makeFromCollection <- function(cdir, filepattern, exclude, index) {
 #' that should be part of the master data object. NULL if no other data to be incorporated.
 #' @param outdir Where to put \code{cdata}. Defaults to App/Data.
 #' @export
-makeCdata <- function(cdir = "./Collection/Main/", filepattern = "*.txt", exclude = "!",
+makeCdata <- function(cdir = "./Collection/Main/", filepattern,
                       other = list("./Collection/Other/coredata_ref.txt"),
                       outdir = "./App/Data/") {
   cdata <- makeFromCollection(cdir, filepattern, exclude)
@@ -99,9 +105,8 @@ Agg <- function(x) {
   if(!length(result)) return(data.table::first(x)) else return(result)
 }
 
-# Each data feature is indexed to the source file;
-# an index key is created from the file name, so need to specify the key format.
-# e.g. "PMID20062967_Gianani-2010.txt" -> "Gianani10"
-indexFormat <- function(files) {
+
+#  "PMID20062967_Gianani-2010.txt" -> "Gianani10"
+indexDefault <- function(files) {
   sapply(strsplit(files, "_|-|\\."), function(x) paste0(x[2], substr(x[3], nchar(x[3])-1, nchar(x[3]))))
 }

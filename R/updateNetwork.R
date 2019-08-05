@@ -1,30 +1,31 @@
-#' Make igraph showing connections between datasets/sources
+#' Make igraph showing connections between investigations
 #'
-#' The method first calculates node and edge counts from the collection of datasets.
-#' Each dataset/source is a node whose size is proportional to the number of features (columns).
-#' More concretely, when each dataset file represents a published study,
-#' node size is proportional to the amount of data the study generated
-#' (currently, the log of the number of features in the dataset).
-#' Edge weights between datasets are counted as the number of overlapping IDs.
+#' This builds a network graph to represent connections between investigations (studies),
+#' where node sizes are proportional to the amount of data the study generated and
+#' edge weights are proportional to the number of shared samples between each study.
+#' (But edge weights can also set to be proportional to other relationship measures, i.e. correlation.)
+#' For edge weights, the method can be given an adjacency matrix
+#' or a table that can be used to be build an adjacency matrix.
+#' For nodes, a table that with a column (Source, Study, etc.) gives the ID for the node,
+#' and a numeric column (Dimensions, Counts, Features, etc.) is summed by each Source to give the node size.
+#' (Currently, node size is the log of the number of features to deal with studies with high-throughput data.)
 #'
-#' @param cdir Directory (relative to current working directory) to the collection of dataset files.
-#' @param filepattern Pattern to help select files within the directory. Defaults to selecting all files with extension .txt|.tsv|.csv.
+#' @param edges Directory containing collection of dataset files. Defaults to working directory.
 #' @param nodes Pattern for extracting node names from source file name. Defaults to using the file name without the extension.
-#' @param edges Column within the dataset used for calculating edges, e.g. "ID".
 #' @return List containing igraph object and data frame summarizing nodes and edges.
 #' @export
-networkGraph <- function(cdir, filepattern = "*[.](txt|tsv|csv)$", nodes = "([^\\.]*)", edges) {
+networkGraph <- function(cdir = getwd(), filepattern = "*[.](txt|tsv|csv)$", nodes = "([^\\.]*)", edges) {
   sources <- grep(filepattern, list.files(cdir), value = T)
   names(sources) <- regmatches(sources, regexpr(nodes, sources, perl = T))
+  # First, only check header for edge column and warn for any without edge column
   nodes <- lapply(sources, function(x) fread(paste0(cdir, "/",  x), nrows = 0))
-  # Check for edge column and warn for any without edge column
   noedge <- sapply(nodes, function(x) !any(grepl(edges, names(x))))
   nodes <- nodes[!noedge]
   if(any(noedge)) warning(paste("removed datasets with missing edge column:", paste(sources[noedge], collapse = ", ")))
   # Check if dataset ONLY contains edge column
   size0 <- lengths(nodes) == 1
   nodes <- nodes[!size0]
-  if(any(size0)) warning(paste("removed datasets with no real data:", paste(sources[size0], collapse = ", ")))
+  if(any(size0)) warning(paste("removed datasets with no data:", paste(sources[size0], collapse = ", ")))
   nodesize <- log(lengths(nodes)-1) + 1
   edgewt <- lapply(sources, function(x) fread(paste0(cdir, "/",  x), select = edges)[[1]])
   edgewt <- lapply(edgewt, function(x) sapply(edgewt, function(y) length(intersect(x, y))))
