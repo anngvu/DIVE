@@ -8,13 +8,13 @@ shinyServer(function(input, output, session) {
   callModule(multiVApp, "default")
   callModule(browse, "nPOD")
 
-  output$studynetwork <- renderVisNetwork({
+  output$studynetwork <- visNetwork::renderVisNetwork({
     studynetwork %>%
-      visIgraphLayout(randomSeed = 98) %>%
-      visInteraction(hover = T) %>%
-      visNodes(font = list(size = 20, face = "Helvetica", background = "white")) %>%
-      visEdges(color = list(highlight = "#ff0000", hover = "#ff0000", inherit = F)) %>%
-      visOptions(highlightNearest = list(enabled = TRUE, hover = T))
+      visNetwork::visIgraphLayout(randomSeed = 98) %>%
+      visNetwork::visInteraction(hover = T) %>%
+      visNetwork::visNodes(font = list(size = 20, face = "Helvetica", background = "white")) %>%
+      visNetwork::visEdges(color = list(highlight = "#ff0000", hover = "#ff0000", inherit = F)) %>%
+      visNetwork::visOptions(highlightNearest = list(enabled = TRUE, hover = T))
   })
 
   observeEvent(input$demoCorrelation, {

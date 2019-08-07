@@ -12,7 +12,7 @@ shinyUI(
              #-- MENU PG 1 (HOME) ---------------------------------------------------------------------------------#
              tabPanel("Home", value = "home",
                       fluidRow(
-                        column(7, div(style = "margin-top: -50px;", visNetworkOutput("studynetwork", height = "900px"))),
+                        column(7, div(style = "margin-top: -50px;", visNetwork::visNetworkOutput("studynetwork", height = "900px"))),
                         column(5, style = "padding-right: 100px;",
                                tabsetPanel(
                                  tabPanel("Connections in Investigations", br(), includeMarkdown("www/connections.Rmd")),
