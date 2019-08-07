@@ -2,16 +2,23 @@ library(shiny)
 library(DIVE)
 
 shinyUI(
-  navbarPage("nPOD DIVE", id = "main", selected = "intro", collapsible = T,
+  navbarPage("nPOD DIVE", id = "main", selected = "home", collapsible = T,
              theme = shinythemes::shinytheme("paper"),
              tags$head(# tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
                tags$link(rel = "stylesheet", type = "text/css", href = "introjs.min.css")),
              includeScript("www/intro.min.js"),
              includeScript("www/app.js"),
-             
+
              #-- MENU PG 1 (HOME) ---------------------------------------------------------------------------------#
-             tabPanel("Connections in Investigations", value = "home",
-                      fluidPage()
+             tabPanel("Home", value = "home",
+                      fluidRow(
+                        column(7, div(style = "margin-top: -50px;", visNetworkOutput("studynetwork", height = "900px"))),
+                        column(5, style = "padding-right: 100px;",
+                               tabsetPanel(
+                                 tabPanel("Connections in Investigations", br(), includeMarkdown("www/connections.Rmd")),
+                                 tabPanel("Project", br(), includeMarkdown("www/about.Rmd"))
+                        ))
+                      )
              ),
              #-- MENU PG 2,3,4 ------------------------------------------------------------------------------------#
              navbarMenu("Integrative Data Views",
@@ -28,12 +35,12 @@ shinyUI(
              # tabPanel("Vignettes", value = "stories" #icon = icon("asterisk")
              #
              # ),
-             
+
              #-- MENU PG 6 ----------------------------------------------------------------------------------------#
              tabPanel("Browse Data", value = "source-data", # icon = icon("database"),
                       browseUI("nPOD")
              ),
-             
+
              #-- PAGE 7 ----------------------------------------------------------------------------------------#
              tabPanel("Give Data", value = "give", # icon = icon("database"),
                       ""

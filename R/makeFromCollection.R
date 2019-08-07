@@ -27,7 +27,7 @@ makeFromCollection <- function(cdir = getwd(), filepattern = "*.txt", exclude = 
   for(i in seq_along(cdata)) setnames(cdata[[i]], c("ID", paste0(iref[i], "_", names(cdata[[i]])[-1])))
   cdata <- rbindlist(cdata, use.names = T, fill = T)
   cdata <- cdata[, lapply(.SD, Agg), by = ID]
-  cdata <- Filter(is.numeric, cdata) # subset columns that actually have data, i.e. is numeric
+  cdata <- Filter(is.numeric, cdata) # keep only columns that actually have data, i.e. is numeric
   cdata <- cdata[, grep(exclude, names(cdata), invert = T), with = F] # omit "!" columns
   return(cdata)
 }

@@ -154,6 +154,7 @@ browse <- function(input, output, session,
       y = sumID$ID,
       name = "Data Count",
       type = "bar",
+      orientation = "h", # must be explicit
       marker = list(color = "#2196f3"),
       showlegend = FALSE
     )  %>% config(displayModeBar = F)
