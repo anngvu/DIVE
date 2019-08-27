@@ -19,6 +19,7 @@
 #' and 'size' and/or 'color' column(s) specifying aesthetics.
 #' @param asVis Whether to keep as \code{\link[igraph]} or convert to interactive \code{\link[visNetwork]} object for the web (default).
 #' @return Either an \code{\link[igraph]} or \code{\link[visNetwork]} object representing desired relationship network.
+#' @export
 networkGraph <- function(adjm, nodemods = NULL) {
   network <- igraph::graph_from_adjacency_matrix(adjm, mode = "undirected", weighted = T, diag = F)
   grays <- gray.colors(max(E(network)$weight), start = 0.9, end = 0.1)
@@ -53,6 +54,7 @@ makeNetworkGraph <- function(randomSeed = NULL) {
 #' @param namepattern Pattern for extracting node names from source file name. Defaults to using the file name without the extension.
 #' @param connection Name of column used for calculating connections; should be present in all datasets. Defaults to "ID".
 #' @result An adjacency matrix.
+#' @export
 connectByCases <- function(cdir = getwd(), filepattern = "*[.](txt|tsv|csv)$", namepattern = "([^\\.]*)", connection = "ID") {
   sources <- grep(filepattern, list.files(cdir), value = T)
   names(sources) <- regmatches(sources, regexpr(namepattern, sources, perl = T))

@@ -4,22 +4,32 @@
 \alias{makeFromCollection}
 \title{Create master data table from a collection of datasets}
 \usage{
-makeFromCollection(cdir, filepattern, exclude, index)
+makeFromCollection(cdir = getwd(), filepattern = "*.txt",
+  exclude = "!", index = NULL)
 }
 \arguments{
 \item{cdir}{Directory path (relative to working directory) to the collection of dataset files.}
 
 \item{filepattern}{Pattern for grep to identify qualifying files in the directory, e.g. "*.txt".}
 
-\item{exclude}{A pattern for grep to exclude columns within a file from the final master dataset.}
+\item{exclude}{A \code{grep} pattern to exclude columns within a file from the final master dataset.}
 
-\item{index}{Optional function for generating a custom index format from file names,
-especially useful if naming scheme of the collection files changes.}
+\item{index}{Optional, a function to help with namespacing. If not given, defaults to using file name. See details.}
 }
 \value{
 A "master" data.table
 }
 \description{
 Builds one large master dataset given the directory where a collection of datasets resides.
-This data object is required for the Shiny application.
+}
+\details{
+This method helps compile the \code{cdata} data object from a collection of datasets.
+Each dataset represents data from a source/study in the format of a uniquely named .csv/.tsv/.txt file
+within the specified directory. The files are read and merged together into one master data table.
+Because IDs for data across all datasets must be unique in the final master data table,
+namespaced IDs are created using the parent file name. A function can be passed into
+\code{index} for some control of this namespace index approach. For instance, instead of using the
+full file name, it might make more sense to map it to a shorter form or to an external key
+(as long as unique IDs can still be ensured) for namespacing, such that a data feature "Var1"
+from file "PMID123456_Doe-2000.txt" is identified as "Doe00_Var1" in the master data table.
 }

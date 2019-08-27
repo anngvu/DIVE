@@ -11,13 +11,27 @@ shinyUI(
 
              #-- MENU PG 1 (HOME) ---------------------------------------------------------------------------------#
              tabPanel("Home", value = "home",
-                      fluidRow(
-                        column(7, div(style = "margin-top: -50px;", visNetwork::visNetworkOutput("studynetwork", height = "900px"))),
-                        column(5, style = "padding-right: 100px;",
-                               tabsetPanel(
-                                 tabPanel("Connections in Investigations", br(), includeMarkdown("www/connections.Rmd")),
-                                 tabPanel("Project", br(), includeMarkdown("www/about.Rmd"))
-                        ))
+                      fluidRow(# style = "margin-top: -70px;",
+                        column(6, style = "margin-left: -25px; margin-top: -50px;",
+                               div(shinycssloaders::withSpinner(visNetwork::visNetworkOutput("studynetwork", height = "900px")))
+                               ),
+                        column(6, style = "padding-right: 100px;",
+                               # summary widgets
+                               fluidRow(
+                                 htmlOutput("n_studies"),
+                                 htmlOutput("n_measures"),
+                                 htmlOutput("n_medianshared"),
+                                 htmlOutput("n_openaccess"),
+                                 htmlOutput("n_htdatasets"),
+                                 htmlOutput("t_last")
+                               ),
+                               fluidRow(
+                                 tabsetPanel(
+                                   tabPanel("Connections in Investigations", br(), includeMarkdown("www/connections.Rmd")),
+                                   tabPanel("Project", br(), includeMarkdown("www/about.Rmd"))
+                                )
+                              )
+                        )
                       )
              ),
              #-- MENU PG 2,3,4 ------------------------------------------------------------------------------------#

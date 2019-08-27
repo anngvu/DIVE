@@ -105,8 +105,8 @@ collectData <- function(input, output, session,
     }
   })
 
-  # Checking input$done as a roundabout way to check that inputs have been rendered;
-  # selectize inputs have to be updated with server because client-side is extremely laggy when choices have thousannds of terms for ontologies
+# Checking input$done as a roundabout way to check that inputs have been rendered;
+# selectize inputs have to be updated with server because client-side is extremely laggy when choices have thousannds of ontology terms
   observe({
     if(!is.null(input$done) && input$done == 0) {
       temp <- template() # whenever template changes

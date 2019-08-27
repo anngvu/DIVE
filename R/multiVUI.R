@@ -181,12 +181,12 @@ multiV <- function(input, output, session,
 
   output$heatmap <- renderPlotly({
     if(is.null(cplot())) {
-      hplot() %>% config(displayModeBar = F)
+      hplot() %>% plotly::config(displayModeBar = F)
     } else if(is.null(hplot())) {
-      cplot() %>% config(displayModeBar = F)
+      cplot() %>% plotly::config(displayModeBar = F)
     } else {
       subplot(hplot(), cplot(), titleX = T, shareY = T, widths = c(0.7, 0.3)) %>%
-        config(displayModeBar = F)
+        plotly::config(displayModeBar = F)
     }
   })
 

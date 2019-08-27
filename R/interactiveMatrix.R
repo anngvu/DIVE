@@ -133,7 +133,7 @@ interactiveMatrix <- function(input, output, session,
        main <- p
      }
      main$x$source <- "main"
-     main %>% config(displayModeBar = F)
+     main %>% plotly::config(displayModeBar = F)
   })
 
   output$empty <- renderUI({
@@ -182,7 +182,7 @@ interactiveMatrix <- function(input, output, session,
       if(input$plotsmooth) p <- p + stat_smooth(method = "lm")
       if(input$switchXY) p <- p + coord_flip()
       p <- ggplotly(p)
-      p %>% config(displayModeBar = F)
+      p %>% plotly::config(displayModeBar = F)
 
     } else { #-> do boxplot 1-variable view ----------------------------------------------------#
       tmp <- tmp[!is.na(tmp[[var1]]), ]
@@ -202,7 +202,7 @@ interactiveMatrix <- function(input, output, session,
       p$x$data[[1]]$marker$opacity <- 0 # manual specify since plotly doesn't translate this for boxplot
       p <- hide_legend(p)
       if(length(levels(tmp[[dgroup]])) > 4) p <- p %>% layout(xaxis = list(tickangle = 45))
-      p %>% config(displayModeBar = F)
+      p %>% plotly::config(displayModeBar = F)
     }
   })
 

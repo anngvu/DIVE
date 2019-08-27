@@ -157,7 +157,7 @@ browse <- function(input, output, session,
       orientation = "h", # must be explicit
       marker = list(color = "#2196f3"),
       showlegend = FALSE
-    )  %>% config(displayModeBar = F)
+    )  %>% plotly::config(displayModeBar = F)
 
     sumVar <- withclass[, sum(Available), by = "Data"]
     marginVar <- plot_ly(
@@ -200,7 +200,7 @@ browse <- function(input, output, session,
       layout(xaxis = list(type = "category", title = "Data", showline = FALSE, showgrid = FALSE),
              yaxis = list(type = "category", title = "Case", showline = FALSE, dtick = 1, tickfont = list(size = 9), showgrid = FALSE),
              plot_bgcolor = "transparent", paper_bgcolor = "transparent") %>%
-      config(displayModeBar = F)
+      plotly::config(displayModeBar = F)
   })
 
   # Tab 2 ------------------------------------------------------------------------------------------------------------------------------------------------#

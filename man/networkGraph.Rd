@@ -2,28 +2,34 @@
 % Please edit documentation in R/updateNetwork.R
 \name{networkGraph}
 \alias{networkGraph}
-\title{Make igraph showing connections between datasets/sources}
+\title{Make custom network graph representing relationships between studies or data}
 \usage{
-networkGraph(cdir, filepattern = "*[.](txt|tsv|csv)$",
-  nodes = "([^\\\\.]*)", edges)
+networkGraph(adjm, nodemods = NULL)
 }
 \arguments{
-\item{cdir}{Directory (relative to current working directory) to the collection of dataset files.}
+\item{adjm}{Adjacency matrix encoding relationships between source nodes.}
 
-\item{filepattern}{Pattern to help select files within the directory. Defaults to selecting all files with extension .txt|.tsv|.csv.}
+\item{nodemods}{Optional, a data.frame with 'node' column containing node names matching names in adjacency matrix,
+and 'size' and/or 'color' column(s) specifying aesthetics.}
 
-\item{nodes}{Pattern for extracting node names from source file name. Defaults to using the file name without the extension.}
+\item{edgemods}{An optional function of adjusting weight values in the adjacency matrix.
+For aesthetic reasons, weights are scaled by sqrt. Set to NULL if this is unnecessary.}
 
-\item{edges}{Column within the dataset used for calculating edges, e.g. "ID".}
+\item{asVis}{Whether to keep as \code{\link[igraph]} or convert to interactive \code{\link[visNetwork]} object for the web (default).}
 }
 \value{
-List containing igraph object and data frame summarizing nodes and edges.
+Either an \code{\link[igraph]} or \code{\link[visNetwork]} object representing desired relationship network.
 }
 \description{
-The method first calculates node and edge counts from the collection of datasets.
-Each dataset/source is a node whose size is proportional to the number of features (columns).
-More concretely, when each dataset file represents a published study,
-node size is proportional to the amount of data the study generated
-(currently, the log of the number of features in the dataset).
-Edge weights between datasets are counted as the number of overlapping IDs.
+This is a wrapper around several \code{\link[igraph]} methods to build a custom network graph
+with annotations representing relationships between experimental studies or data.
+In the original purpose, the "relationship" represented by the graph's weighted edges
+is the number of shared samples between each study, but the function is made generic
+with the idea that other relationships (e.g. correlation) can be represented as well.
+Edges and weights are set by passing in any appropriate adjacency matrix.
+After the graph is constructed, node sizes and colors are modified if a
+\code{data.frame} containing columns with values for those aesthetics has also been passed in.
+While node size is typically used to indicate the amount of data the study generated,
+color can be used for any other annotation. Finally, the resulting object is by default
+converted into an interactive \code{\link[visNetwork]} object so it can be part of the Shiny application.
 }

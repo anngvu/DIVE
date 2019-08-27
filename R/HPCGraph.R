@@ -27,7 +27,7 @@ HPCGraph <- function(input, output, session,
 
   output$graph <- renderPlotly({
     HPCG <- plotlyHPCG(hpcg, colors)
-    HPCG %>% config(displayModeBar = F)
+    HPCG %>% plotly::config(displayModeBar = F)
   })
 
   output$pie <- renderPlotly({
