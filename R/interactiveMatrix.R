@@ -83,7 +83,8 @@ interactiveMatrix <- function(input, output, session,
      } else {
        colorRampPalette(c("#E74F00", "#FF894C", "gray", "#404040", "gray", "#4CC2FF", "#0098E7"))
      }
-     # colorz <- colorRampPalette(c("#FF008C", "gray", "#404040", "gray", "#00FF73")) # not colorblind friendly
+     #colorz <- colorRampPalette(c("#FF008C", "gray", "#404040", "gray", "#00FF73")) # not colorblind friendly
+
      p <- plot_ly(x = colnames(M), y = rownames(M), z = M, type = "heatmap", colors = colorz(101), name = "Exploratory\nMap",
                   hovertemplate = "row: <b>%{y}</b><br>col: <b>%{x}</b><br>correlation: <b>%{z}</b>", # xgap = 1, ygap = 1,
                   height = height, colorbar = list(thickness = 8)) %>%

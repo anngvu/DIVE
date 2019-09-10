@@ -15,10 +15,11 @@
 #' @param cdir Directory path (relative to working directory) to the collection of dataset files.
 #' @param filepattern Pattern for grep to identify qualifying files in the directory, e.g. "*.txt".
 #' @param exclude A \code{grep} pattern to exclude columns within a file from the final master dataset.
+#' @param numdata Whether to keep only numeric data.
 #' @param index Optional, a function to help with namespacing. If not given, defaults to using file name. See details.
 #' @return A "master" data.table
 #' @export
-makeFromCollection <- function(cdir = getwd(), filepattern = "*.txt", exclude = "!", index = NULL) {
+makeFromCollection <- function(cdir = getwd(), filepattern = "*.txt", exclude = "!", numdata = T, index = NULL) {
   files <- list.files(cdir, pattern = filepattern)
   cdata <- lapply(paste0(cdir, files), function(x) fread(x))
   iref <- if(!is.null(index) & is.function(index)) index(files) else files
@@ -27,7 +28,7 @@ makeFromCollection <- function(cdir = getwd(), filepattern = "*.txt", exclude = 
   for(i in seq_along(cdata)) setnames(cdata[[i]], c("ID", paste0(iref[i], "_", names(cdata[[i]])[-1])))
   cdata <- rbindlist(cdata, use.names = T, fill = T)
   cdata <- cdata[, lapply(.SD, Agg), by = ID]
-  cdata <- Filter(is.numeric, cdata) # keep only columns that actually have data, i.e. is numeric
+  if(numdata) cdata <- Filter(is.numeric, cdata) # keep only numeric
   cdata <- cdata[, grep(exclude, names(cdata), invert = T), with = F] # omit "!" columns
   return(cdata)
 }

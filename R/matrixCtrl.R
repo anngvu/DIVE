@@ -65,13 +65,16 @@ matrixCtrl <- function(input, output, session,
     for(i in names(default)) state[[i]] <- default[[i]]
   }
 
+  # Call reset upon startup
   reset()
 
   # clears filters
   clear <- function() {
     updateSelectizeInput(session, "optrow", selected = character(0))
-    updateNumericInput(session, "minN", value = 7)
+    # updateNumericInput(session, "minN", value = 7)
     state$rowmeta <- NULL
+    state$colmeta <- NULL
+    optcol(NULL)
   }
 
   # Reset to none selected
@@ -87,7 +90,7 @@ matrixCtrl <- function(input, output, session,
   # Important note: It might seem strange to return options from the rownames of the current matrix
   # instead of the actual column in metadata, but this is to handle two cases:
   # 1) when metadata is not necessary and
-  # 2) when actualy matrix contains uploaded new data without metadata
+  # 2) when matrix contains uploaded new data without metadata
   optrow <- reactive({
     if(input$optrowgroup == varkey) rownames(state$M) else unique(metadata[[input$optrowgroup]])
   })
@@ -110,16 +113,16 @@ matrixCtrl <- function(input, output, session,
   # Updating visible parts of matrix according to selected row opt
   observeEvent(in.optrow(), {
     if(!length(in.optrow())) {
-      state$filM <- state$M
+      state$filM <- state$M # same as resetting
     } else {
       state$filM <- filterUpdate(state$M, state$N, input$minN, optrows = in.optrow())
-      optcol(colnames(state$filM)) # col choices depend on current rows selected
+      optcol(colnames(state$filM)) #! col choices depend on current rows selected
     }
   }, ignoreInit = T, ignoreNULL = F)
 
   # ---- Columns
 
-  #  Translate opt(cols), which is VarID, to metadata type input$optcolgroup
+  #  Translate opt(cols), which is VarID, to metadata type specified in input$optcolgroup
   optcolx <- reactive({
     req(input$optcolgroup)
     if(input$optcolgroup == varkey) optcol() else unique(metadata[[input$optcolgroup]][metadata[[varkey]] %in% optcol()])
@@ -175,7 +178,7 @@ matrixCtrl <- function(input, output, session,
   # Apply minimum N to current matrix filM
   observeEvent(input$minN, {
     optrows <- if(length(in.optrow())) in.optrow() else rownames(state$M)
-    optcols <- if(length(in.optcol())) in.optcol() else optcol()
+    optcols <- if(length(in.optcol())) in.optcol() else colnames(state$filM)
     state$filM <- filterUpdate(state$M, state$N, input$minN, optrows = optrows, optcols = optcols)
   })
 
