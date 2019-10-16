@@ -6,7 +6,8 @@
 \usage{
 multiVCtrl(input, output, session, cdata, hdlist,
   choices = names(hdlist), key = "ID", vselect = "donor.type",
-  checkFun = NULL, infoRmd = NULL)
+  checkFun = NULL, infoRmd = system.file("help/ht_upload.Rmd", package
+  = "DIVE"))
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}

@@ -18,8 +18,8 @@ UI for user to define groups for volcano plots.
 }
 \seealso{
 Other multiVApp module functions: \code{\link{geneVUI}},
-  \code{\link{geneV}}, \code{\link{multiVAppRun}},
-  \code{\link{multiVApp}}, \code{\link{multiVUIApp}},
+  \code{\link{geneV}}, \code{\link{multiVUIR}},
+  \code{\link{multiVUI}}, \code{\link{multiV}},
   \code{\link{selectVUI}}, \code{\link{selectV}},
   \code{\link{subgroupV}}
 }

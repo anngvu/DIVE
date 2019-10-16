@@ -27,8 +27,8 @@ Returns the selected columns.
 }
 \seealso{
 Other multiVApp module functions: \code{\link{geneVUI}},
-  \code{\link{geneV}}, \code{\link{multiVAppRun}},
-  \code{\link{multiVApp}}, \code{\link{multiVUIApp}},
+  \code{\link{geneV}}, \code{\link{multiVUIR}},
+  \code{\link{multiVUI}}, \code{\link{multiV}},
   \code{\link{selectVUI}}, \code{\link{subgroupVUI}},
   \code{\link{subgroupV}}
 }

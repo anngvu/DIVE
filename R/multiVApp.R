@@ -8,7 +8,7 @@
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
 #' @export
-multiVUIApp <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
+multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
 
   ns <- NS(id)
   fluidPage(theme = shinythemes::shinytheme("paper"),
@@ -44,27 +44,25 @@ multiVUIApp <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @export
-multiVApp <- function(input, output, session,
-                      HDATA = list("Yip et al. (unpublished)" = xm_t,
-                                   "Liu et al. 2016" = px1_t,
-                                   "Nyalwidhe et al. 2017" = px2_t),
-                      CDATA = cdata,
-                      CHOICES = gene_symbols) {
+multiV <- function(input, output, session,
+                      hdata = NULL,
+                      hcat = NULL,
+                      cdata = NULL,
+                      genes = DIVE::gene_symbols,
+                      prelist = NULL) {
 
   view <- callModule(multiVCtrl, "ctrl",
-                     cdata = CDATA, hdlist = HDATA,
-                     choices = list(Genomics = list("Yip et al. (unpublished)"),
-                                    Proteomics = list("Liu et al. 2016", "Nyalwidhe et al. 2017")),
-                     infoRmd = system.file("help/ht_upload.Rmd", package = "DIVE"))
+                     cdata = cdata, hdlist = hdata,
+                     choices = hcat)
 
   # controls clinical/phenotype/experimental variable selection
   vselect <- callModule(selectV, "cdata",
                         data = reactive(view$cdata),
                         selected = reactive(view$vselect))
 
-  # controls gene selection for all multiVUIs
+  # controls gene selection for all xVUI components in multiVUI
   gselect <- callModule(geneV, "gene",
-                        choices = CHOICES,
+                        choices = genes,
                         prelist = list("T1Dbase" = system.file("appdata/t1dbase.txt", package = "DIVE")))
 
   observeEvent(input$newSubgroupVUI, {
@@ -76,15 +74,15 @@ multiVApp <- function(input, output, session,
                hdlist = view$hdlist)
   })
 
-  # each dataset gets its own track (row), served by its own multiVUI module
+  # each dataset gets its own track (row), served by its own xVUI module
   observeEvent(view$hddata, {
     trackID <- session$ns(names(view$hddata))
     trackdata <- view$hddata[[1]]
     if(!is.null(trackdata)) {
       insertUI(selector = "#displaytrack", immediate = T,
                ui = tags$div(id = trackID,
-                             multiVUI(id = trackID)))
-      callModule(multiV, id = names(view$hddata),
+                             xVUI(id = trackID)))
+      callModule(xV, id = names(view$hddata),
                  hdata = trackdata,
                  cdata = vselect,
                  selected = gselect,
@@ -101,8 +99,8 @@ multiVApp <- function(input, output, session,
 #' @family multiVApp module functions
 #'
 #' @export
-multiVAppRun <- function() {
-  ui <- multiVUIApp("default")
-  server <- function(input, output, session) { callModule(multiVApp, "default") }
+multiVUIR <- function(ns, ...) {
+  ui <- multiVUI(ns)
+  server <- function(input, output, session) { callModule(multiV, "default", ...) }
   shinyApp(ui = ui, server = server)
 }

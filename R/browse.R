@@ -4,46 +4,41 @@
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
+#' @param theme Optional, name of theme for shinythemes.
 #' @export
-browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
+browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"), theme = "paper") {
 
   ns <- NS(id)
-  fluidPage(theme = shinythemes::shinytheme("paper"),
+  fluidPage(theme = shinythemes::shinytheme(theme),
             if(!is.null(CSS)) includeCSS(CSS),
             tabsetPanel(id = ns("tabs"),
-                        tabPanel("By donor",
+                        tabPanel("ID x Data Map",
                                  fluidRow(style = "margin-top: 20px; margin-left: 20px;", height = 100,
+                                          div(class = "forceInline", style = "background-color: WhiteSmoke;",
+                                              div(class = "forceInline", style = "margin-left: 20px;",
+                                                  uiOutput(ns("annotation"))
+                                              ),
+                                              div(class = "forceInline",
+                                                  div(class = "forceInline", uiOutput(ns("expandUI")))
+                                              )),
                                           div(class = "forceInline", br(),
                                               actionButton(ns("prevSet"), "Prev 40"),
                                               actionButton(ns("nextSet"), "Next 40"),
                                               htmlOutput(ns("index"))
                                           ),
-                                          div(class = "forceInline", style = "margin-left: 10px;",
-                                              selectizeInput(ns("subset"), HTML("Browse"),
-                                                             choices = c("", unique(cdata[["donor.type"]])), selected = NULL,
-                                                             options = list(placeholder = "all donors in database"), width = 220)
-                                             ),
-                                          div(class = "forceInline", # style = "margin-left: 50px;",
-                                              selectizeInput(ns("selectID"), "Or select specific IDs",
-                                                             choices = c("", cdata[["ID"]]), selected = NULL, multiple = T,
-                                                             options = list(placeholder = "(max 10)",
-                                                                            maxItems = 10), width = 220)
+                                          div(class = "forceInline",
+                                              uiOutput(ns("selectbyID"))
                                               ),
                                           div(class = "forceInline", br(),
-                                              actionButton(ns("submitID"), "go")
+                                              actionButton(ns("submit"), "go")
                                           ),
-                                          div(class = "forceInline", style = "margin-right: 150px;",
+                                          div(class = "forceInline",
                                               dataUploadUI(ns("IDlist"), label = "Or upload a list of IDs",
                                                            buttonlabel = "Upload", width = 200)
-                                              ),
-                                          div(class = "forceInline", style = "background-color: WhiteSmoke;",
-                                          div(class = "forceInline", style = "margin-left: 50px;",
-                                              selectInput(ns("class"), HTML("<strong>Data annotation</strong>"),
-                                                          choices = c("Contributor", "CellTissue", "Level", "ThemeTag", "GOTerm"), width = 200)
-                                              ),
-                                         div(class = "forceInline",
-                                             div(class = "forceInline", uiOutput(ns("expandUI")))
-                                         ))
+                                          ),
+                                          div(class = "forceInline", style = "margin-left: 10px;",
+                                             uiOutput(ns("selectbygroup"))
+                                          )
                                  ),
                                  fluidRow(absolutePanel(style = "z-index: 10;", draggable = T,
                                                         uiOutput(ns("abspanel"))
@@ -51,10 +46,9 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
                                  fluidRow(
                                    shinycssloaders::withSpinner(plotlyOutput(ns("cases"), height = 750), color = "gray")
                             )),
-                        tabPanel("By data variables",
+                        tabPanel("Data Dictionary",
                                  br(),
                                  div(class = "forceInline", uiOutput(ns("info2"))),
-                                 div(class = "forceInline", downloadButton(ns("download"), label = "Download Collection")),
                                  DT::DTOutput(ns("table"))
                         )
             )
@@ -63,19 +57,30 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
 
 #' Shiny module server functions for browsing metadata
 #'
-#' Handles general browsing, filtering, subsetting of table data
+#' Handles general browsing, filtering, subsetting of metadata table. The module requires two tables:
+#' a table of ID and all measured features, and a table of those measured features and metadata columns.
+#' Generally, users can select specific IDs or a group of IDs and see what features are available.
+#' A join of the two input tables on the feature name allows comparing IDs vs. selected metadata.
+#'
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param dt_id Table data by ID.
-#' @param dt_var Table data by var.
+#' @param index1 Name of ID column that serves as primary index.
+#' @param index2 Optional, name of another column for secondary index.
+#' @param dt_var Table data by var/feature.
+#' @param dt_var_ext Extended table to provide lookup details of metadata.
 #' @param inforRmd1 Helpfile for uploading an ID list.
 #' @param inforRmd2 Helpfile for how browsing data works.
 #' @export
 browse <- function(input, output, session,
-                   dt_id = cdata, dt_var = metadata,
+                   dt_id = NULL, index1 = "ID", index2 = NULL,
+                   dt_var = NULL, dt_var_index = NULL,
+                   dt_var_ext = NULL,
                    infoRmd1 = system.file("help/ID_list.Rmd", package = "DIVE"),
                    infoRmd2 = system.file("help/browse_data.Rmd", package = "DIVE")) {
 
+  setkeyv(dt_id, index1)
+  setindexv(dt_id, index2)
 
   visIDs <- reactiveVal(1:40)
   dataview <- reactiveVal(dt_id)
@@ -83,23 +88,50 @@ browse <- function(input, output, session,
 
   uploadedIDs <- callModule(dataUpload, "IDlist", asDT = F, removable = T, infoRmd = infoRmd1)
 
+  # Available filters
+  output$selectbyID <- renderUI({
+    selectizeInput(session$ns("selectID"), "Select by specific IDs",
+                   choices = c("", unique(dt_id[[index1]])), selected = NULL, multiple = T,
+                   options = list(placeholder = "(max 10)",
+                                  maxItems = 10), width = 220)
+  })
+
+  output$selectbygroup <- renderUI({
+    if(!is.null(index2)) {
+      selectizeInput(session$ns("subset"), "Browse",
+                   choices = c("", unique(dt_id[[index2]])), selected = NULL,
+                   options = list(placeholder = "all in database"), width = 220)
+    }
+  })
+
+  output$annotation <- renderUI({
+    selectInput(session$ns("class"), HTML("<strong>Data annotation</strong>"),
+                choices = names(dt_var), width = 200)
+  })
+
+  output$expandUI <- renderUI({
+      selectInput(session$ns("expandon"), HTML("<i class='fas fa-expand'></i>&nbsp;&nbsp;<strong>Expand on</strong>"),
+                  choices = c("", unique(id_data_map()$Data)), selected = "")
+
+  })
+
   observeEvent(uploadedIDs(), {
     if(is.null(uploadedIDs())) customIDs(NULL) else customIDs(uploadedIDs())
   }, ignoreNULL = F)
 
-  observeEvent(input$submitID, {
+  observeEvent(input$submit, {
     customIDs(input$selectID)
   })
 
   observeEvent(input$subset, {
-    if(input$subset == "") dataview(dt_id) else dataview(dt_id[donor.type == input$subset])
+    if(input$subset == "") dataview(dt_id) else dataview(dt_id[.(input$subset), on = index2])
     updateSelectizeInput(session, "selectID", selected = "")
     end <- ifelse(nrow(dataview()) < 40, nrow(dataview()), 40)
     visIDs(1:end)
   })
 
   observeEvent(customIDs(), {
-    if(is.null(customIDs())) dataview(dt_id) else dataview(dt_id[ID %in% customIDs()])
+    if(is.null(customIDs())) dataview(dt_id) else dataview(dt_id[customIDs()])
     end <- ifelse(nrow(dataview()) < 40, nrow(dataview()), 40)
     visIDs(1:end)
   }, ignoreNULL = F)
@@ -124,22 +156,24 @@ browse <- function(input, output, session,
     updateSelectInput(session, "expandon", selected = "")
   })
 
-  varL <- reactive({
+  #
+  id_data_map <- reactive({
     IDs <- visIDs()
-    varL <- dataview()[IDs, dataview()[IDs, sapply(.SD, function(x) !all(is.na(x))), with = F] ]
 
-    for(col in removeID(names(varL))) varL[[col]] <- as.integer(!is.na(varL[[col]]))
-    varL <- melt(varL, id.var = "ID", variable.name = "VarID", value.name = "Available")
-    varL <- merge(varL, dt_var[, c("VarID", "Variable", input$class), with = F], by = "VarID")
-    setnames(varL, input$class, "Data")
-  })
+    # Show only variables that were measured for at least one of the selected IDs
+    id_data_map <- dataview()[IDs, dataview()[IDs, sapply(.SD, function(x) !all(is.na(x))), with = F] ]
 
-  withclass <- reactive({
-    unique(varL()[, .(ID, Available, Data)])
+    # Basically a binary display for availability
+    for(col in removeID(names(id_data_map))) id_data_map[[col]] <- as.integer(!is.na(id_data_map[[col]]))
+    id_data_map <- melt(id_data_map, id.var = "ID", variable.name = "VarID", value.name = "Available")
+
+    # Join on variable name allows display of ID vs. selected metadata
+    id_data_map <- merge(id_data_map, dt_var[, c(dt_var_index, input$class), with = F], by.x = "VarID", by.y = dt_var_index)
+    setnames(id_data_map, input$class, "Data")
   })
 
   output$cases <- renderPlotly({
-    withclass <- withclass()
+    withclass <- unique(id_data_map()[, .(ID, Data, Available)])
     p <- plot_ly(withclass, x = ~Data, y = ~ID, name = "Available", type = "scatter", mode = "markers", source = "main",
                  marker = list(size = ~Available *6, color = "#404040", opacity = 1, line = list(color = "#404040")),
                  showlegend = FALSE) %>%
@@ -175,13 +209,6 @@ browse <- function(input, output, session,
 
   })
 
-  output$expandUI <- renderUI({
-    tags$div(
-      div(class = "forceInline", selectInput(session$ns("expandon"), HTML("<i class='fas fa-expand'></i>&nbsp;&nbsp;<strong>Expand on</strong>"),
-                                             choices = c("", unique(withclass()$Data)), selected = ""))
-    )
-  })
-
   output$abspanel <- renderUI({
     req(input$expandon)
     if(input$expandon != "") {
@@ -193,12 +220,12 @@ browse <- function(input, output, session,
 
   output$expandplot <- renderPlotly({
     if(!length(input$expandon)) return()
-    xvars <- varL()[Data %in% input$expandon, .(Variable, ID, Available)]
-    plot_ly(xvars, x = ~Variable, y = ~ID, type = "scatter", mode = "markers",
+    xvars <- id_data_map()[Data %in% input$expandon, .(VarID, ID, Available)]
+    plot_ly(xvars, x = ~VarID, y = ~ID, type = "scatter", mode = "markers",
             marker = list(size = ~Available *6, color = "#404040", opacity = 1, line = list(color = "#404040")),
             showlegend = FALSE) %>%
       layout(xaxis = list(type = "category", title = "Data", showline = FALSE, showgrid = FALSE),
-             yaxis = list(type = "category", title = "Case", showline = FALSE, dtick = 1, tickfont = list(size = 9), showgrid = FALSE),
+             yaxis = list(type = "category", title = "ID", showline = FALSE, dtick = 1, tickfont = list(size = 9), showgrid = FALSE),
              plot_bgcolor = "transparent", paper_bgcolor = "transparent") %>%
       plotly::config(displayModeBar = F)
   })
@@ -215,24 +242,14 @@ browse <- function(input, output, session,
 
 
   output$table <- DT::renderDataTable({
-    show <- dt_var[, .(Source, Contributor, Variable, Description, IndividualLevelData, InApp, DataSource, DataSourceLink)]
-    # if(input$filterDT) {
-    #   show <- show[IndividualLevelData == "Yes", ]
-    # }
-    show[DataSourceLink != "", DataSourceLink := paste0("<a href='",DataSourceLink,"' target='_blank'",
-                                                        " title='",DataSourceLink,"'><i class='fas fa-external-link-alt'></i></a>")]
+    # automatically convert links for display
+    for(col in names(dt_var_ext)) {
+      if(any(grepl("^http:", dt_var_ext[[col]]))) dt_var_ext[[col]] <- paste0("<a href='",dt_var_ext[[col]],"' target='_blank'",
+                                                                              " title='",dt_var_ext[[col]],"'><i class='fas fa-external-link-alt'></i></a>")
+    }
+    dt_var_ext
 
   }, escape = FALSE, rownames = F, filter = "none", options = list(dom = 'ftp', pageLength = 10), style = "bootstrap")
-
-  # output$downloadCollection <- downloadHandler(
-  #   filename = function() {
-  #     "Archive.zip"
-  #   },
-  #   content = function(file) {
-  #     file.copy("Collection/Archive.zip", file)
-  #   },
-  #   contentType = "application/zip"
-  # )
 
 }
 
@@ -241,8 +258,8 @@ browse <- function(input, output, session,
 #' Wrapper to launch app at console
 #'
 #' @export
-browseR <- function() {
-  ui <- browseUI("metadata")
-  server <- function(input, output, session) { callModule(browse, "metadata") }
+browseR <- function(ns, ...) {
+  ui <- browseUI(ns)
+  server <- function(input, output, session) { callModule(browse, ns, ...) }
   shinyApp(ui = ui, server = server)
 }

@@ -4,21 +4,32 @@
 \alias{browse}
 \title{Shiny module server functions for browsing metadata}
 \usage{
-browse(input, output, session, dt_id = cdata, dt_var = metadata,
-  infoRmd1 = system.file("help/ID_list.Rmd", package = "DIVE"),
-  infoRmd2 = system.file("help/browse_data.Rmd", package = "DIVE"))
+browse(input, output, session, dt_id = NULL, index1 = "ID",
+  index2 = NULL, dt_var = NULL, dt_var_index = NULL,
+  dt_var_ext = NULL, infoRmd1 = system.file("help/ID_list.Rmd", package
+  = "DIVE"), infoRmd2 = system.file("help/browse_data.Rmd", package =
+  "DIVE"))
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
 \item{dt_id}{Table data by ID.}
 
-\item{dt_var}{Table data by var.}
+\item{index1}{Name of ID column that serves as primary index.}
+
+\item{index2}{Optional, name of another column for secondary index.}
+
+\item{dt_var}{Table data by var/feature.}
+
+\item{dt_var_ext}{Extended table to provide lookup details of metadata.}
 
 \item{inforRmd1}{Helpfile for uploading an ID list.}
 
 \item{inforRmd2}{Helpfile for how browsing data works.}
 }
 \description{
-Handles general browsing, filtering, subsetting of table data
+Handles general browsing, filtering, subsetting of metadata table. The module requires two tables:
+a table of ID and all measured features, and a table of those measured features and metadata columns.
+Generally, users can select specific IDs or a group of IDs and see what features are available.
+A join of the two input tables on the feature name allows comparing IDs vs. selected metadata.
 }

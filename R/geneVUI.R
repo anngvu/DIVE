@@ -3,7 +3,7 @@
 #' Currently, this provides options to subset genomics data using a custom list input
 #' or GO and Reactome annotations.
 #'
-#' @family multiVApp module functions
+#' @family multiVUI module functions
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @export

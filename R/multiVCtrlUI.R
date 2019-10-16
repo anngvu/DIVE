@@ -59,7 +59,7 @@ multiVCtrlUI <- function(id, menu = T, upload = T, GEO = T) {
 multiVCtrl <- function(input, output, session,
                       cdata, hdlist, choices = names(hdlist),
                       key = "ID", vselect = "donor.type",
-                      checkFun = NULL, infoRmd = NULL) {
+                      checkFun = NULL, infoRmd = system.file("help/ht_upload.Rmd", package = "DIVE")) {
 
   inview <- c()
   view <- reactiveValues(cdata = cdata, hdlist = hdlist, hddata = NULL, vselect = vselect)

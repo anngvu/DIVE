@@ -5,7 +5,7 @@
 \title{Create master data table from a collection of datasets}
 \usage{
 makeFromCollection(cdir = getwd(), filepattern = "*.txt",
-  exclude = "!", index = NULL)
+  exclude = "!", numdata = T, index = NULL)
 }
 \arguments{
 \item{cdir}{Directory path (relative to working directory) to the collection of dataset files.}
@@ -13,6 +13,8 @@ makeFromCollection(cdir = getwd(), filepattern = "*.txt",
 \item{filepattern}{Pattern for grep to identify qualifying files in the directory, e.g. "*.txt".}
 
 \item{exclude}{A \code{grep} pattern to exclude columns within a file from the final master dataset.}
+
+\item{numdata}{Whether to keep only numeric data.}
 
 \item{index}{Optional, a function to help with namespacing. If not given, defaults to using file name. See details.}
 }

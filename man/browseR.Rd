@@ -4,7 +4,7 @@
 \alias{browseR}
 \title{Launch Shiny app for browsing metadata}
 \usage{
-browseR()
+browseR(ns, ...)
 }
 \description{
 Wrapper to launch app at console

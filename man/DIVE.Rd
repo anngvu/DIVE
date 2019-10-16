@@ -4,8 +4,7 @@
 \name{DIVE}
 \alias{DIVE}
 \alias{DIVE-package}
-\title{DIVE: Data Integration & Visual Exploration}
+\title{DIVE: Data Integration and Visual Exploration}
 \description{
-The DIVE package implements an approach to integration and interactive visual exploration of biological datasets with shared samples. 
-It includes five Shiny modules that can be run as stand-alone apps or part of a larger application. \url{https://github.com/avucoh/DIVE}
+The DIVE package implements an approach to integration and interactive visual exploration of biological datasets with shared samples. It includes five Shiny modules that can be run as stand-alone apps or part of a larger application. \url{https://github.com/avucoh/DIVE}
 }

@@ -14,8 +14,8 @@ A basic UI for choosing columns in a dataset.
 }
 \seealso{
 Other multiVApp module functions: \code{\link{geneVUI}},
-  \code{\link{geneV}}, \code{\link{multiVAppRun}},
-  \code{\link{multiVApp}}, \code{\link{multiVUIApp}},
+  \code{\link{geneV}}, \code{\link{multiVUIR}},
+  \code{\link{multiVUI}}, \code{\link{multiV}},
   \code{\link{selectV}}, \code{\link{subgroupVUI}},
   \code{\link{subgroupV}}
 }

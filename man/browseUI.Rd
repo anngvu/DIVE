@@ -4,12 +4,15 @@
 \alias{browseUI}
 \title{Shiny app UI for browsing metadata}
 \usage{
-browseUI(id, CSS = system.file("www/", "app.css", package = "DIVE"))
+browseUI(id, CSS = system.file("www/", "app.css", package = "DIVE"),
+  theme = "paper")
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
 \item{CSS}{Optional, location to an alternate CSS stylesheet to change the look and feel of the app.}
+
+\item{theme}{Optional, name of theme for shinythemes.}
 }
 \description{
 Shiny app UI for browsing metadata

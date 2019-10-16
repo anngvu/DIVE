@@ -1,203 +1,107 @@
-#' Shiny module UI for presenting high dimensional data with other features in multi-column view
+#' Shiny app UI for multi-views
 #'
-#' UI based on the idea of a "visual spreadsheet" or "line up" view. The associated
-#' server function \code{\link{multiV}} provides more details of the implementation.
+#' Assembles the UI of various module components, i.e. \code{\link{xVUI}}, \code{\link{geneVUI}},
+#' into a working one-page application
 #'
-#' The original use case presumes the high dimensional data to be genomics data, e.g.
-#' gene or protein expression that can be represented with heatmap matrices.
+#' @family multiVUI module functions
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
 #' @export
-multiVUI <- function(id) {
+multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
+
   ns <- NS(id)
-  tags$div(style = "margin-bottom:30px;",
-    div(style = "margin-bottom: 10px;",
-        div(class = "forceInline", actionButton(ns("show"), label = NULL, icon = icon("cog"))),
-        conditionalPanel(condition = "input.show%2==1", ns = ns, class = "forceInline",
-          div(class = "forceInline", id = ns("custom")),
-          div(class = "forceInline", actionLink(ns("addcustom"), "LOCAL FILTER", icon = icon("plus"))),
-          div(class = "forceInline", actionLink(ns("cluster"), "CLUSTER", icon = icon("sitemap"))),
-          div(class = "forceInline", "Show most variable"),
-          div(style = "display: inline-block; margin-top: -5px;",
-              numericInput(ns("hivarprct"), label = NULL, value = 10, min = 1, max = 100, step = 5, width = 50)),
-          div(style = "display: inline-block;", icon("percent"))
-        )
-    ),
-    div(shinycssloaders::withSpinner(plotlyOutput(ns("heatmap"), height = "100%"), color = "gray"))
+  fluidPage(theme = shinythemes::shinytheme("paper"),
+            if(!is.null(CSS)) includeCSS(CSS),
+            shinyWidgets::chooseSliderSkin("Flat"),
+
+            fluidRow(style = "background: WhiteSmoke; margin-top: -50px; margin-left: -50px; margin-right: -50px;",
+              tags$div(style = "margin-top: 50px; margin-left: 50px;",
+              column(1, br(), h4("DATA SOURCES")),
+              column(7, multiVCtrlUI(ns("ctrl"))),
+              column(1, br(), h4("DATA TOOLS")),
+              column(3, br(), br(),
+                     div(class = "forceInline", actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup"))),
+                     div(class = "forceInline", actionButton(ns("ML"), "Learn", icon = icon("cog")))
+              )
+            )),
+            fluidRow(absolutePanel(style = "z-index: 10;", tags$div(id = "views"), draggable = T)),
+            fluidRow(style = "padding-top: 50px;",
+              conditionalPanel(condition = paste0("input['", ns("ctrl-dataset"), "']"),
+                               column(8, geneVUI(ns("gene"))),
+                               column(4, selectVUI(ns("cdata")))
+            )),
+            div(id = "displaytrack")
   )
 }
 
-#' Shiny module server for presenting high dimensional data with other features in multi-column view
+#' Shiny app server for multi-views
 #'
-#' This module attempts to integratively visualize one or more
-#' high-dimensional gene/protein/methylation datasets with other phenotype or clinical features.
+#' Assembles the logic of various module components, i.e. \code{\link{multiV}}, \code{\link{geneV}},
+#' into a working one-page application
+#'
+#' @family multiVApp module functions
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param hdata A numeric matrix representing high dimensional data.
-#' @param cdata Optional, a data.frame or data.table that can be joined to high-dimensional data. See details.
-#' @param selected A vector used to subset the columns of hdata.
-#' @param slabel Optional, a vector that can map column names of hdata to plot labels.
 #' @export
 multiV <- function(input, output, session,
-                   hdata, cdata = reactive({ NULL }), key = "ID", selected = reactive({ NULL }), slabel = NULL) {
+                      hdata = NULL,
+                      hcat = NULL,
+                      cdata = NULL,
+                      genes = DIVE::gene_symbols,
+                      prelist = NULL,
+                      slabel = DIVE::gene_symbols_map) {
 
-  localselect <- reactiveVal(NULL)
-  localhdata <- reactiveVal(hdata)
-  hivarprct <- reactiveVal(10)
+  view <- callModule(multiVCtrl, "ctrl",
+                     cdata = cdata, hdlist = hdata,
+                     choices = hcat)
 
-  #-- Clustering -----------------------------------------------------------------------------------------------------#
-  observeEvent(input$cluster, {
-    withProgress(value = 0.2, message = "creating distance matrix...",
-      expr = {
-              gene_clust <- dist(t(hdata))
-              setProgress(value = 0.7, message = "clustering...")
-              gene_clust <- hclust(gene_clust)
-              setProgress(value = 0.9, message = "reordering columns...")
-              hdata <- hdata[, gene_clust$order]
-              localhdata(hdata)
-              })
+  # controls clinical/phenotype/experimental variable selection
+  vselect <- callModule(selectV, "cdata",
+                        data = reactive(view$cdata),
+                        selected = reactive(view$vselect))
+
+  # controls gene selection for all xVUI components in multiVUI
+  gselect <- callModule(geneV, "gene",
+                        choices = genes,
+                        prelist = prelist)
+
+  observeEvent(input$newSubgroupVUI, {
+    N <- input$newSubgroupVUI
+    insertUI(paste0("#views"),
+             ui = subgroupVUI(id = session$ns(paste0("panel", N))))
+    callModule(subgroupV, id = paste0("panel", N),
+               cdata = view$cdata,
+               hdlist = view$hdlist)
   })
 
-  #-- Custom select --------------------------------------------------------------------------------------------------#
-  observeEvent(input$addcustom, {
-    if(input$addcustom %% 2) {
-      insertUI(selector = paste0("#", session$ns("custom")), immediate = T,
-               ui = tags$div(id = session$ns("customselect"),
-                             selectizeInput(session$ns("customselect"), label = NULL, choices = NULL,
-                                            multiple = T, options = list(placeholder = "filter in this dataset"))))
-      updateSelectizeInput(session, "customselect", choices = colnames(hdata), server = T)
-      updateActionButton(session, "addcustom", "LOCAL FILTER", icon = icon("minus"))
+  # each dataset gets its own track (row), served by its own xVUI module
+  observeEvent(view$hddata, {
+    trackID <- session$ns(names(view$hddata))
+    trackdata <- view$hddata[[1]]
+    if(!is.null(trackdata)) {
+      insertUI(selector = "#displaytrack", immediate = T,
+               ui = tags$div(id = trackID,
+                             xVUI(id = trackID)))
+      callModule(xV, id = names(view$hddata),
+                 hdata = trackdata,
+                 cdata = vselect,
+                 selected = gselect,
+                 slabel = slabel)
     } else {
-      removeUI(selector = paste0("#", session$ns("customselect")))
-      localselect(NULL)
-      selected(selected())
-      updateActionButton(session, "addcustom", "LOCAL FILTER", icon = icon("plus"))
-    }
-  })
-
-  observeEvent(input$customselect, {
-    localselect(input$customselect)
-  })
-
-  #-- Plots ----------------------------------------------------------------------------------------------------------#
-
-  # Global vs. local selection control
-  # local select takes precedence over global select; when local select option is displayed, global subsetting is ignored
-  # to restore plot listening to global selection, local select must be removed
-  observe({
-    if(is.null(localselect())) { if(!length(selected())) localhdata(hdata) else localhdata(hdata[, colnames(hdata) %in% selected(), drop = F]) }
-  })
-
-  observe({
-    if(!length(localselect())) localhdata(hdata) else localhdata(hdata[, colnames(hdata) %in% localselect(), drop = F])
-  })
-
-  # Subsetting by highest variance features and constraining user input
-  observe({
-    if(!length(input$hivarprct) | !is.numeric(input$hivarprct)) {
-      updateNumericInput(session, "hivarprct", value = 10)
-    } else if(input$hivarprct < 0.1) {
-      updateNumericInput(session, "hivarprct", value = 1)
-    } else if(input$hivarprct > 100) {
-      updateNumericInput(session, "hivarprct", value = 100)
-    } else {
-      hivarprct(input$hivarprct)
-    }
-  })
-
-  # Plot subsetting by phenotype variables
-  hplotdata <- reactive({
-    plotdata <- localhdata()
-    if(!is.null(cdata())) { # manually order rows by order given in cdata()
-      ckey <- cdata()[as.character(get(key)) %in% rownames(hdata), as.character(get(key))]
-      plotdata <- plotdata[ckey, , drop = F]
-    }
-    # subset to highest variance
-    selected <- subHiVar(plotdata, percent = hivarprct())
-    plotdata[, colnames(plotdata) %in% selected, drop = F] # for some reason plotdata[, selected, drop = F] gives subscript out of bounds
-  })
-
-  hplot <- reactive({
-    xlabs <- if(!is.null(slabel)) slabel[colnames(hplotdata())] else colnames(hplotdata())
-    ylabs <- rownames(hplotdata())
-    showticklabs <- if(ncol(hplotdata()) <= 50) TRUE else FALSE # only show labels when readable
-    # infer color scale for type of data
-    if(min(hplotdata()) == 0) colorscale <- "Greys" else colorscale <- "RdBu"
-    plot_ly(z = hplotdata(), x = xlabs, y = ylabs, name = "Expression\nMatrix",
-            type = "heatmap", height = 25 * nrow(hdata), colors = colorscale,
-            hovertemplate = "transcript/protein: <b>%{x}</b><br>sampleID: <b>%{y}</b><br>expression value: <b>%{z}</b>",
-            colorbar = list(title = "relative\nexpression", thickness = 10, x = -0.09)) %>%
-      layout(xaxis = list(type = "category", showgrid = FALSE, ticks = "", showticklabels = showticklabs),
-            yaxis = list(type = "category", ticks = ""),
-            plot_bgcolor = "#F5F5F5")
-  })
-
-  cplotdata <- reactive({
-    if(is.null(cdata())) return(NULL)
-    if(!is.null(hplotdata())) {
-      plotdata <- cdata()[as.character(get(key)) %in% rownames(hplotdata()), ]
-    } else {
-      plotdata <- cdata()
-    }
-    plotdata
-  })
-
-  cplot <- reactive({
-    if(is.null(cplotdata())) return(NULL)
-    plotdata <- cplotdata()
-    y <- as.character(plotdata[[key]])
-    notID <- names(plotdata) != key
-    vcat <- sapply(plotdata, function(v) class(v) == "character" | class(v) == "factor")
-    cplotcat <- lapply(names(plotdata)[vcat & notID],
-                           function(v) {
-                             # Note: there's a plotly issue that will spew many warnings
-                             plot_ly(x = 1, y = y, name = v, type = "bar", orientation = "h", showlegend = F,
-                                     color = factor(plotdata[[v]]), text = plotdata[[v]],
-                                     hoverinfo = "text") %>%
-                               layout(xaxis = list(title = v, zeroline = FALSE, showline = FALSE,
-                                                   showticklabels = FALSE, showgrid = FALSE),
-                                      yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
-                         })
-    cplotnum <- lapply(names(plotdata)[!vcat & notID],
-                           function(v) {
-                             x <- plotdata[[v]]
-                             hoverx <- sapply(x, function(p) if(is.na(p)) "NA" else as.character(p))
-                             NAtext <- ifelse(is.na(x), "  NA", "")
-                             x[is.na(x)] <- 0
-                             plot_ly(x = x, y = y, customdata = hoverx, name = v, type = "bar", orientation = "h", showlegend = F,
-                                     text = hoverx, hoverinfo = "text") %>%
-                               add_text(text = NAtext, textposition = "right", textfont = list(color = toRGB("red"))) %>%
-                               layout(xaxis = list(title = v, showgrid = FALSE),
-                                      yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
-                           })
-    if(length(cplotcat) && length(cplotnum)) {
-       subplot(subplot(cplotcat, shareY = T, titleX = T),
-               subplot(cplotnum, shareY = T, titleX = T),
-               titleX = T, shareY = T, widths = c(0.3, 0.7))
-    } else {
-       subplot(c(cplotcat, cplotnum), shareY = T, titleX = T)
-    }
-  })
-
-  output$heatmap <- renderPlotly({
-    if(is.null(cplot())) {
-      hplot() %>% plotly::config(displayModeBar = F)
-    } else if(is.null(hplot())) {
-      cplot() %>% plotly::config(displayModeBar = F)
-    } else {
-      subplot(hplot(), cplot(), titleX = T, shareY = T, widths = c(0.7, 0.3)) %>%
-        plotly::config(displayModeBar = F)
+      removeUI(selector = paste0("#", trackID))
     }
   })
 
 }
 
-# Subset a matrix by the most variable n features (columns)
-subHiVar <- function(data, n, percent) {
-  n <- round(ncol(data) * (percent/100))
-  n <- ifelse(n < 1, 1, n)
-  vars <- apply(data, 2, var)
-  selected <- names(sort(vars, decreasing = T))[1:n]
-  return(selected)
+#' Shiny app launcher for multi-view module
+#'
+#' @family multiVUI module functions
+#'
+#' @export
+multiVUIR <- function(ns, ...) {
+  ui <- multiVUI(ns)
+  server <- function(input, output, session) { callModule(multiV, ns, ...) }
+  shinyApp(ui = ui, server = server)
 }
-
