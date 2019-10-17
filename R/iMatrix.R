@@ -91,13 +91,14 @@ iMatrix <- function(input, output, session,
               plot_bgcolor = "#404040") %>%
        event_register("plotly_click")
 
-     # since plot_bgcolor can't be set for individual plots in subplot, layout adjusts to whether metadata is passed in
+     # since plot_bgcolor can't be set for individual plots in subplot, layout adjusts depending on whether metadata is passed in
      if(!is.null(state$rowmeta)) {
 
        rvals <- scales::rescale(as.integer(state$rowmeta))
        cvals <- scales::rescale(as.integer(state$colmeta))
 
-       if(state$optrowgroup == state$optcolgroup) {
+       # state$optrowgroup == state$optcolgroup
+       if(F) {
          rdomain <- cdomain <- c(min(rvals, cvals, na.rm = T), max(rvals, cvals, na.rm = T)) # consistent colors for when annotations are the same type
          rpal <- cpal <- "Spectral"
        } else {

@@ -40,7 +40,7 @@ matrixMix <- function(input, output, session,
 
   upload <- callModule(dataUpload, "upload",
                        removable = T,
-                       checkFun = DIVE::checkForID,
+                       checkFun = checkForID,
                        informd = informd,
                        appdata = appdata,
                        checkappdata = T)

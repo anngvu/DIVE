@@ -100,6 +100,7 @@ dataUpload <- function(input, output, session,
     newUploadUI()
   })
 
+  # input$appdata comes from javascript
   observeEvent(input$appdata, {
     if(input$appdata %in% appdata) {
       data <- data.table::fread(paste0("appdata/", appdata))

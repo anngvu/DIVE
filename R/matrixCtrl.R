@@ -49,19 +49,22 @@ matrixCtrlUI <- function(id) {
 #' Basically, this keeps track of all the matrices as well as selected metadata.
 #' @export
 matrixCtrl <- function(input, output, session,
-                     M = NULL, N = NULL, cdata = NULL, metadata = NULL, vkey = NULL, newdata = reactive({ }),
-                     widgetmod = NULL, widgetopt = NULL) {
+                       M = NULL, N = NULL, cdata = NULL, metadata = NULL, vkey = NULL, newdata = reactive({ }),
+                       widgetmod = NULL, widgetopt = NULL
+                     ) {
 
   # If for some reason the metadata contains records for features that are actually not in M or are missing M,
-  # make sure that is reflected in the metadata selection options:
-  metadata <- metadata[get(vkey) %in% rownames(M), ]
+  # make sure that is reflected in the metadata selection options
+  # Then columns are in metadata are mapped to optrowgroups, with the vkey index the default group
+  if(!is.null(metadata)) {
+    metadata <- metadata[get(vkey) %in% rownames(M), ]
+    updateSelectInput(session, "optrowgroup", choices = names(metadata), selected = vkey)
+  }
 
   default <- list(M = M, N = N, cdata = cdata, newdata = NULL, rowmeta = NULL, colmeta = NULL, filM = M)
   state <- reactiveValues() # returned
   optcol <- reactiveVal(NULL)
 
-  # Update optrowgroups based on metadata
-  if(!is.null(metadata)) updateSelectInput(session, "optrowgroup", choices = names(metadata), selected = vkey)
 
   #-- Reset options --------------------------------------------------------------------------------------------------------#
   # reset all to default state
@@ -90,10 +93,11 @@ matrixCtrl <- function(input, output, session,
 
   #---- Rows
 
-  # Update metadata choices when an optrowgroup is selected
-  # Important note: It might seem strange to return options from the rownames of the current matrix
-  # instead of the actual column in metadata, but this is to handle two cases:
-  # 1) when metadata is not necessary and
+  # optrow holds metadata choices for the optrowgroup that is selected
+  # Important note: when optrowgroup is the same column used as vkey,
+  # it might seem strange to return options from the rownames of the current matrix
+  # instead of the actual column in metadata table, but this is to handle two cases:
+  # 1) when metadata is not given
   # 2) when matrix contains uploaded new data without metadata
   optrow <- reactive({
     if(input$optrowgroup == vkey) rownames(state$M) else unique(metadata[[input$optrowgroup]])
