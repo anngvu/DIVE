@@ -5,7 +5,8 @@
 \title{Shiny module server functions to generate filter UI for interactive matrix}
 \usage{
 matrixCtrl(input, output, session, M, N, cdata, metadata = NULL,
-  varkey = "VarID", newdata = reactive({ }), widget = reactive({ }))
+  varkey = "VarID", newdata = reactive({ }), widgetmod = NULL,
+  widgetopt = NULL)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}

@@ -23,10 +23,8 @@ or GO and Reactome annotations. The output can be passed to multiple "tracks"
 in multiVUI for simultaneous filtering.
 }
 \seealso{
-Other multiVApp module functions: \code{\link{geneVUI}},
-  \code{\link{multiVUIR}}, \code{\link{multiVUI}},
-  \code{\link{multiV}}, \code{\link{selectVUI}},
-  \code{\link{selectV}}, \code{\link{subgroupVUI}},
-  \code{\link{subgroupV}}
+Other multiVApp module functions: \code{\link{multiV}},
+  \code{\link{selectVUI}}, \code{\link{selectV}},
+  \code{\link{subgroupVUI}}, \code{\link{subgroupV}}
 }
 \concept{multiVApp module functions}

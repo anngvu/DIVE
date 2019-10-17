@@ -8,9 +8,7 @@
 #' @export
 cellPackUI <- function(id, width = "400px", height = "400px") {
   ns <- NS(id)
-  tagList(fluidRow(r2d3::d3Output(ns("cellpack"), width = width, height = height)),
-          fluidRow(textOutput(ns("out")))
-          )
+  r2d3::d3Output(ns("cellpack"), width = width, height = height)
 }
 
 #' Server module function for cellPack widget

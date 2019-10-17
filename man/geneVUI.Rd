@@ -14,10 +14,7 @@ Currently, this provides options to subset genomics data using a custom list inp
 or GO and Reactome annotations.
 }
 \seealso{
-Other multiVApp module functions: \code{\link{geneV}},
-  \code{\link{multiVUIR}}, \code{\link{multiVUI}},
-  \code{\link{multiV}}, \code{\link{selectVUI}},
-  \code{\link{selectV}}, \code{\link{subgroupVUI}},
-  \code{\link{subgroupV}}
+Other multiVUI module functions: \code{\link{multiVUIR}},
+  \code{\link{multiVUI}}
 }
-\concept{multiVApp module functions}
+\concept{multiVUI module functions}

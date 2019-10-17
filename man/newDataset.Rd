@@ -15,8 +15,6 @@ newDataset(input, output, session, refkey, checkFun = NULL,
 \item{checkFun}{Optional, a custom check function for an additional layer of checking/modifying uploaded data.
 It should return a list containing message and result (result should be \code{NULL} for unsuccessful data).}
 
-\item{infoRmd}{Optional, an Rmarkdown help file for infoOutput, e.g. requirements.}
-
 \item{appdata}{Optional, the name (including extension) of one or more files stored in appdata that can be
 mock-uploaded. See details.}
 }

@@ -48,6 +48,8 @@ makeNetworkGraph <- function(randomSeed = NULL) {
   return(visN)
 }
 
+#' Connect observations by ID
+#'
 # Helper for constructing an adjacency matrix based on shared case samples
 #' @param cdir Directory containing collection of dataset files. Defaults to working directory.
 #' @param filepattern Pattern for selecting files to include.

@@ -26,10 +26,8 @@ The subsetted data table.
 Returns the selected columns.
 }
 \seealso{
-Other multiVApp module functions: \code{\link{geneVUI}},
-  \code{\link{geneV}}, \code{\link{multiVUIR}},
-  \code{\link{multiVUI}}, \code{\link{multiV}},
-  \code{\link{selectVUI}}, \code{\link{subgroupVUI}},
-  \code{\link{subgroupV}}
+Other multiVApp module functions: \code{\link{geneV}},
+  \code{\link{multiV}}, \code{\link{selectVUI}},
+  \code{\link{subgroupVUI}}, \code{\link{subgroupV}}
 }
 \concept{multiVApp module functions}

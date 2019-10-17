@@ -19,10 +19,19 @@ xCheckID <- function(data, ref = cdata$ID) {
   return(IDs)
 }
 
-
-checkForID <- function(data, message = NULL, result = NULL) {
-  hasID <- "ID" %in% names(data)
-  if(!hasID) message <- "<strong>There is no ID column.</strong><br>"
-  if(is.null(message)) result <- data[, ID := as.character(ID)]
-  return(list(message = message, result = result))
+#' Check and make character ID column
+#'
+#' Checks for some sort of ID column, which can optionally be converted to character. Returns a message for failures.
+#' This is meant to work with dataset input modules.
+#'
+#' @param data A table.
+#' @param idcol Name of ID column, defaulting to "ID".
+#' @param fail Optional, message to return if ID check fails.
+#' @param aschar Convert ID column to character.
+#' @export
+checkForID <- function(data, idcol = "ID", fail = "<strong>There is no ID column.</strong><br>", aschar = T) {
+  hasID <- idcol %in% names(data)
+  message <- ifelse(hasID, "", fail)
+  if(length(message) && aschar) data[[idcol]] <- as.character(data[[idcol]])
+  return(list(message = message, result = data))
 }

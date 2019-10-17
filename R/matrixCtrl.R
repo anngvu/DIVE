@@ -12,7 +12,8 @@ matrixCtrlUI <- function(id) {
              div(class = "forceInline", selectInput(ns("optrowgroup"), "Select rows by", choices = "", width = "120px")),
              div(class = "forceInline", selectizeInput(ns("optrow"), "Rows", choices = "", multiple = T, width = "360px"))
            ),
-           div(class = "forceInline", uiOutput(ns("optcolselect")))
+           div(class = "forceInline", uiOutput(ns("optcolselect"))),
+           uiOutput(ns("usewidget"))
   )
 }
 
@@ -36,28 +37,31 @@ matrixCtrlUI <- function(id) {
 #'
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param M A non-reactive data matrix, e.g. a correlation matrix, which must have row names.
-#' @param N A non-reactive matrix of the same dimensions as M, used as a filter layer, e.g. sample size.
-#' @param cdata The non-reactive data used for generating the matrix.
+#' @param M A data matrix, e.g. a correlation matrix, which must have row names.
+#' @param N A matrix of the same dimensions as M, used as a filter layer, e.g. sample size.
+#' @param cdata The data used for generating the matrix.
 #' @param metadata Optional, a data.table with different types of metadata/annotation to be used as filters.
-#' If \code{NULL}, the only filter option are the row names/index in M.
-#' @param varkey The column in metadata that maps to row names in M.
+#' If not given, the only filter option will be the row names/index in M.
+#' @param vkey The column in metadata that maps to row names in M.
 #' @param newdata Optional, reactive data, e.g. from user upload, that can be merged with M.
-#' @param widget Optional, associated widget input. See details.
-#' @return Reactive state values to be used by the associated plotting module.
+#' @param widgetmod Optional, a widget extension module. See details.
+#' @return Reactive values in \code{state} object to be used by the associated plotting module.
+#' Basically, this keeps track of all the matrices as well as selected metadata.
 #' @export
 matrixCtrl <- function(input, output, session,
-                     M, N, cdata, metadata = NULL, varkey = "VarID", newdata = reactive({ }), widget = reactive({ }) ) {
+                     M = NULL, N = NULL, cdata = NULL, metadata = NULL, vkey = NULL, newdata = reactive({ }),
+                     widgetmod = NULL, widgetopt = NULL) {
 
-  # Make sure only what exists in M (relevant) is shown
-  metadata <- metadata[get(varkey) %in% rownames(M), ]
+  # If for some reason the metadata contains records for features that are actually not in M or are missing M,
+  # make sure that is reflected in the metadata selection options:
+  metadata <- metadata[get(vkey) %in% rownames(M), ]
 
   default <- list(M = M, N = N, cdata = cdata, newdata = NULL, rowmeta = NULL, colmeta = NULL, filM = M)
   state <- reactiveValues() # returned
   optcol <- reactiveVal(NULL)
 
   # Update optrowgroups based on metadata
-  if(!is.null(metadata)) updateSelectInput(session, "optrowgroup", choices = names(metadata), selected = varkey)
+  if(!is.null(metadata)) updateSelectInput(session, "optrowgroup", choices = names(metadata), selected = vkey)
 
   #-- Reset options --------------------------------------------------------------------------------------------------------#
   # reset all to default state
@@ -92,20 +96,20 @@ matrixCtrl <- function(input, output, session,
   # 1) when metadata is not necessary and
   # 2) when matrix contains uploaded new data without metadata
   optrow <- reactive({
-    if(input$optrowgroup == varkey) rownames(state$M) else unique(metadata[[input$optrowgroup]])
+    if(input$optrowgroup == vkey) rownames(state$M) else unique(metadata[[input$optrowgroup]])
   })
 
   observeEvent(optrow(), {
     updateSelectizeInput(session, "optrow", choices = optrow(), options = list(placeholder = paste0("match ", input$optrowgroup, "...")))
   })
 
-  # Translate opt(rows) to VarID "in the background"
+  # Translate opt(rows) to vkey "in the background"
   in.optrow <- reactive({
     if(length(input$optrow)) {
-      if(input$optrowgroup == varkey) {
+      if(input$optrowgroup == vkey) {
         return(input$optrow)
       } else {
-        return(metadata[[varkey]][ metadata[[input$optrowgroup]] %in% input$optrow ])
+        return(metadata[[vkey]][ metadata[[input$optrowgroup]] %in% input$optrow ])
       }
     }
   })
@@ -122,10 +126,10 @@ matrixCtrl <- function(input, output, session,
 
   # ---- Columns
 
-  #  Translate opt(cols), which is VarID, to metadata type specified in input$optcolgroup
+  #  Translate opt(cols), which is vkey, to metadata type specified in input$optcolgroup
   optcolx <- reactive({
     req(input$optcolgroup)
-    if(input$optcolgroup == varkey) optcol() else unique(metadata[[input$optcolgroup]][metadata[[varkey]] %in% optcol()])
+    if(input$optcolgroup == vkey) optcol() else unique(metadata[[input$optcolgroup]][metadata[[vkey]] %in% optcol()])
   })
 
   observeEvent(optcolx(), {
@@ -138,19 +142,19 @@ matrixCtrl <- function(input, output, session,
     if(length(in.optrow())) {
       div(class = "forceInline",
           div(class = "forceInline", br(), actionButton(session$ns("clear"), "Clear")),
-          div(class = "forceInline", selectInput(session$ns("optcolgroup"), "Select columns by", names(metadata), selected = varkey, width = "120px")),
+          div(class = "forceInline", selectInput(session$ns("optcolgroup"), "Select columns by", names(metadata), selected = vkey, width = "120px")),
           div(class = "forceInline", selectizeInput(session$ns("optcol"), "Columns", choices = optcol(), selected = NULL, multiple = T, width = "360px"))
       )
     }
   })
 
-  # Translate opt(cols) to VarID "in the background"
+  # Translate opt(cols) to vkey "in the background"
   in.optcol <- eventReactive(input$optcol, {
     if(length(input$optcol)) {
-      if(input$optcolgroup == varkey) {
+      if(input$optcolgroup == vkey) {
         input$optcol
       } else {
-        metadata[[varkey]][ metadata[[varkey]] %in% optcol() & metadata[[input$optcolgroup]] %in% input$optcol ]
+        metadata[[vkey]][ metadata[[vkey]] %in% optcol() & metadata[[input$optcolgroup]] %in% input$optcol ]
       }
     }
   }, ignoreNULL = F)
@@ -184,12 +188,12 @@ matrixCtrl <- function(input, output, session,
 
   # Update row/col meta whenever filM changes
   observe({
-    rowmeta <- metadata[[input$optrowgroup]][metadata[[varkey]] %in% rownames(state$filM)]
+    rowmeta <- metadata[[input$optrowgroup]][metadata[[vkey]] %in% rownames(state$filM)]
     rowmeta <- factor(rowmeta, levels = unique(metadata[[input$optrowgroup]]))
     state$rowmeta <- rowmeta
 
     optcolgroup <- if(is.null(input$optcolgroup)) input$optrowgroup else input$optcolgroup
-    colmeta <- metadata[[optcolgroup]][metadata[[varkey]] %in% colnames(state$filM)]
+    colmeta <- metadata[[optcolgroup]][metadata[[vkey]] %in% colnames(state$filM)]
     levels <- if(optcolgroup == input$optrowgroup) unique(metadata[[input$optrowgroup]]) else unique(metadata[[optcolgroup]])
     colmeta <- factor(colmeta, levels = levels)
     state$colmeta <- colmeta
@@ -211,24 +215,30 @@ matrixCtrl <- function(input, output, session,
       state$N <- updated$N
       state$newdata <- names(newDT) # only the names of new variables need be stored, not full table
       # select new data for view
-      updateSelectInput(session, "optrowgroup", selected = varkey)
+      updateSelectInput(session, "optrowgroup", selected = vkey)
 
     }
   }, ignoreNULL = F)
 
   # -- Misc widget -----------------------------------------------------------------------------------------------------------#
 
-  # need to return optgroup because widget visibility is tied to optgroup
-  observe({
-    state$optrowgroup <- input$optrowgroup
-    state$optcolgroup <- if(!is.null(input$optcolgroup)) input$optcolgroup else input$optrowgroup
-  })
+  # Show widget when widget-associated optrowgroup is selected
+  # output$usewidget <- renderUI({
+  #   if(input$optrowgroup == widgetopt) {
+  #     absolutePanel(id = "cellpackpanel", draggable = T, left = 300,
+  #                   cellPackUI(session$ns("widget")))
+  #   }
+  # })
+  #
+  # if(!is.null(widgetmod)) {
+  #   callModule(widgetmod, "widget")
+  # }
 
   # Update options when input is given via widget
-  observeEvent(widget(), {
-    selected <- c(isolate(input$optrow), widget())
-    updateSelectizeInput(session, "optrow", choices = optrow(), selected = selected)
-  })
+  # observeEvent(widget(), {
+  #   selected <- c(isolate(input$optrow), widget())
+  #   updateSelectizeInput(session, "optrow", choices = optrow(), selected = selected)
+  # })
 
   return(state)
 }

@@ -41,24 +41,24 @@ dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>", 
 #' @param removable Logical flag to indicate whether data upload will have "removable" feature. Defaults to FALSE. See details.
 #' @param checkFun Optional, a custom check function for an additional layer of checking/modifying uploaded data.
 #' It should return a list containing message and result (result should be \code{NULL} for unsuccessful data).
-#' @param infoRmd Optional, an Rmarkdown help file for infoOutput, e.g. requirements.
+#' @param informd Optional, an Rmarkdown help file for infoOutput, e.g. requirements.
 #' @param appdata Optional, the name (including extension) of one or more files stored in appdata that can be
 #' mock-uploaded. See details.
-#' @param checkappdata Whether checkFun should be applied to appdata, normally FALSE.
+#' @param checkappdata Whether checkFun should also be applied to appdata, normally FALSE.
 #' @return A data.table with a "filename" attribute containing the filename without extension,
 #' or \code{NULL} if the file input was not a table or returned as \code{NULL} from \code{checkFun}.
 #' @export
 dataUpload <- function(input, output, session,
-                       asDT = T, removable = F, checkFun = NULL, infoRmd = NULL, appdata = NULL, checkappdata = F) {
+                       asDT = T, removable = F, checkFun = NULL, informd = NULL, appdata = NULL, checkappdata = F) {
 
   uploaded <- reactiveVal(NULL)
 
   # Optional info link  ------------------------------------------------------- #
-  if(!is.null(infoRmd)) {
+  if(!is.null(informd)) {
     output$info <- renderUI({
       infoOutput(session$ns("reqs"))
     })
-    modal <- callModule(info, "reqs", infoRmd)
+    modal <- callModule(info, "reqs", informd)
   }
 
   # ---------------------------------------------------------------------------- #
@@ -69,7 +69,7 @@ dataUpload <- function(input, output, session,
       checked <- checkFun(data)
       data <- checked$result
       message <- checked$message
-      if(!is.null(message)) showModal(modalDialog(HTML(message), title = "Data upload status", easyClose = F))
+      if(length(message)) showModal(modalDialog(HTML(message), title = "Data upload status", easyClose = F))
     }
     # set new data if successful
     if(!is.null(data)) {

@@ -17,10 +17,8 @@ subgroupV(input, output, session, cdata, hdlist)
 This primarily allows creation of volcano plots for highthroughput datasets based on user-defined group contrasts.
 }
 \seealso{
-Other multiVApp module functions: \code{\link{geneVUI}},
-  \code{\link{geneV}}, \code{\link{multiVUIR}},
-  \code{\link{multiVUI}}, \code{\link{multiV}},
-  \code{\link{selectVUI}}, \code{\link{selectV}},
-  \code{\link{subgroupVUI}}
+Other multiVApp module functions: \code{\link{geneV}},
+  \code{\link{multiV}}, \code{\link{selectVUI}},
+  \code{\link{selectV}}, \code{\link{subgroupVUI}}
 }
 \concept{multiVApp module functions}
