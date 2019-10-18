@@ -45,12 +45,12 @@ multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @export
 multiV <- function(input, output, session,
-                      hdata = NULL,
-                      hcat = NULL,
-                      cdata = NULL,
-                      genes = DIVE::gene_symbols,
-                      prelist = NULL,
-                      slabel = DIVE::gene_symbols_map) {
+                   hdata = NULL,
+                   hcat = NULL,
+                   cdata = NULL,
+                   genes = DIVE::gene_symbols,
+                   prelist = NULL,
+                   slabel = DIVE::gene_symbols_map) {
 
   view <- callModule(multiVCtrl, "ctrl",
                      cdata = cdata, hdlist = hdata,

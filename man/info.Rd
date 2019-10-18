@@ -4,12 +4,12 @@
 \alias{info}
 \title{Server module function for displaying an info modal}
 \usage{
-info(input, output, session, infoRmd)
+info(input, output, session, informd)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
-\item{infoRmd}{Relative path to the Rmarkdown info file, whose contents will be displayed in the modal.}
+\item{informd}{Relative path to the Rmarkdown info file, whose contents will be displayed in the modal.}
 }
 \description{
 Server module function for displaying an info modal

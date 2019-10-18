@@ -51,18 +51,18 @@ refSubsetInput <- function(id, name = id, label = "", subsets) {
 #' @param refkey Optional, a named list containing name/label for creating a key-like column,
 #' where the name is the name of the column. See details for intended purpose.
 #' @param exclude Optional, a list of IDs to exclude.
-#' @param infoRmd Optional, relative path to an info Rmarkdown file that can be pulled up in a modal.
+#' @param informd Optional, relative path to an info Rmarkdown file that can be pulled up in a modal.
 #' @return A reactive subsetted data.table.
 #' @export
 refSubset <- function(input, output, session,
-                      refData, subsetfeat, refkey, exclude = reactive({}), infoRmd = NULL) {
+                      refData, subsetfeat, datakey = NULL, refname = NULL, exclude = reactive({}), informd = NULL) {
 
   # Optional info link  ------------------------------------------------------- #
-  if(!is.null(infoRmd)) {
+  if(!is.null(informd)) {
     output$info <- renderUI({
       infoOutput(session$ns("reqs"))
     })
-    modal <- callModule(info, "reqs", infoRmd = infoRmd)
+    modal <- callModule(info, "reqs", informd = informd)
   }
 
   # ---------------------------------------------------------------------------- #
@@ -71,7 +71,7 @@ refSubset <- function(input, output, session,
     validate(need(input$selectSubset != "", "Please select a type subset"))
     SS <- refData[get(subsetfeat) %in% input$selectSubset]
     if(length(exclude())) SS <- SS[!ID %in% exclude() ]
-    if(!is.null(refkey)) SS[, (names(refkey)) := refkey[[1]] ]
+    if(!is.null(datakey)) SS[, (datakey) := refname ]
     SS
   })
 

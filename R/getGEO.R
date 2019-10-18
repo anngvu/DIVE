@@ -2,12 +2,12 @@
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @export
-getGEOInput <- function(id, infoRmd = system.file("help/GEO_module.Rmd", package = "DIVE")) {
+getGEOInput <- function(id, informd = system.file("help/GEO_module.Rmd", package = "DIVE")) {
   ns <- NS(id)
   tags$div(id = "getGEOInput",
            div(class = "forceInline", textInput(ns("GSE"), label = "Enter a GEO accession, e.g. 'GSE72492'")),
            div(class = "forceInline", br(), actionButton(ns("get"), "", icon = icon("arrow-right"))),
-           includeMarkdown(infoRmd)
+           includeMarkdown(informd)
            )
 }
 

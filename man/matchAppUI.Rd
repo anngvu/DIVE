@@ -4,17 +4,13 @@
 \alias{matchAppUI}
 \title{Shiny app UI for matching application}
 \usage{
-matchAppUI(id, SUBSETS = list(`No diabetes` = list("No diabetes",
-  "Other-No Diabetes"), `Autoantibody positive` = list("Autoab Pos"), `Type
-  1 Diabetes` = list("T1D", "T1D Medalist", "Monogenic Diabetes"), `Other
-  diabetes` = list("T2D", "Gestational diabetes"), Other =
-  list("Transplant", "Cystic fibrosis", "Pregnancy", "Gastric Bypass")),
-  CSS = system.file("www/", "app.css", package = "DIVE"))
+matchAppUI(id, subsets, CSS = system.file("www/", "app.css", package =
+  "DIVE"))
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{SUBSETS}{Optional, a list of the named subset groups. This can be used to allow only certain subsets
+\item{subsets}{Optional, a list of the named subset groups. This can be used to allow only certain subsets
 within the data available for matching.}
 
 \item{CSS}{Optional, location to an alternate CSS stylesheet to change the look and feel of the app.}

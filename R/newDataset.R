@@ -3,7 +3,6 @@
 #' An extension of \code{\link{dataUploadUI}} to include an additional text field.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param label Name of the dataset.
 #' @return A \code{shiny::\link[shiny]{tagList}} containing input UI.
 #' @export
 newDatasetInput <- function(id) {
@@ -13,7 +12,7 @@ newDatasetInput <- function(id) {
       column(1),
       column(4,
              div(id = "dataUpload",
-                 textInput(ns("name"), "", value = "CohortX", width = 200))
+                 textInput(ns("name"), "", value = "", width = 200))
       ),
       column(7,
           dataUploadUI(ns("upload")))
@@ -25,33 +24,36 @@ newDatasetInput <- function(id) {
 #'
 #' This is essentially the \code{\link{dataUpload}} module, but the uploaded data
 #' is modified to include a key-like column before it is returned as the reactive object.
-#' Use \code{\link{dataUpload}} if there is no need for \preformatted{refkey},
+#' Use \code{\link{dataUpload}} if there is no need for a \preformatted{datakey},
 #' which is used to track the dataset in the same manner as in \code{\link{refSubset}}.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param refkey Optional, a named list containing name/label for creating a key-like column.
+#' @param datakey Optional, a named list containing name/label for creating a key-like column.
 #' @inheritParams dataUpload
 #' @return A reactive data.table of the processed upload.
 #' @export
 newDataset <- function(input, output, session,
-                      refkey, checkFun = NULL, infoRmd = NULL, appdata = NULL) {
+                      datakey = NULL, xname = NULL,
+                      checkFun = NULL, informd = NULL, appdata = NULL) {
 
   # ------------------------------------------------------------- #
 
   newData <- reactiveVal(NULL)
 
+  updateTextInput(session, "name", xname) # gives dataset a default name
+
   upload <- callModule(dataUpload, "upload",
                        checkFun = checkFun,
-                       infoRmd = infoRmd,
+                       informd = informd,
                        appdata = appdata)
 
   # ------------------------------------------------------------- #
   observeEvent(upload(), {
     dataset <- upload()
-    if(!is.null(refkey)) {
+    if(!is.null(datakey)) {
       name <- isolate(input$name)
-      name <- if(name != "") name else refkey[[1]]
-      dataset[[names(refkey)]] <- rep(name, nrow(dataset))
+      name <- if(name != "") name else xname
+      dataset[[datakey]] <- rep(name, nrow(dataset)) # adds a key column as specified in datakey
     }
     newData(dataset)
   })

@@ -14,12 +14,12 @@ infoOutput <- function(id, label = "data req's", i = "exclamation-circle", link 
 #' Server module function for displaying an info modal
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param infoRmd Relative path to the Rmarkdown info file, whose contents will be displayed in the modal.
+#' @param informd Relative path to the Rmarkdown info file, whose contents will be displayed in the modal.
 #' @export
-info <- function(input, output, session, infoRmd) {
+info <- function(input, output, session, informd) {
   observeEvent(input$moreInfo, {
     showModal(modalDialog(
-      includeMarkdown(infoRmd),
+      includeMarkdown(informd),
       easyClose = TRUE,
       footer = modalButton("OK")
     ))

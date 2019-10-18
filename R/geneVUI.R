@@ -45,7 +45,7 @@ geneVUI <- function(id) {
 geneV <- function(input, output, session,
                   choices, prelist = NULL) {
 
-  callModule(info, "querytips", infoRmd = system.file("help/query_api.Rmd", package = "DIVE"))
+  callModule(info, "querytips", informd = system.file("help/query_api.Rmd", package = "DIVE"))
 
   selected <- reactiveVal(choices)
   querystatus <- reactiveVal("")

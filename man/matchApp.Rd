@@ -4,48 +4,32 @@
 \alias{matchApp}
 \title{Shiny app server for matching and exploration of two datasets}
 \usage{
-matchApp(input, output, session, REFDATA = npodX, HPCG = hpcg,
-  COLORS = colors <- c(`Autoab Pos` = "orange", `Cystic fibrosis` =
-  "aquamarine4", `Gastric Bypass` = "bisque4", `Gestational diabetes` =
-  "deeppink2", `Monogenic Diabetes` = "red4", `No diabetes` = "royalblue2",
-  `Other-Diabetes` = "indianred4", `Other-No Diabetes` = "steelblue2", T1D
-  = "red", `T1D Medalist` = "maroon", T2D = "purple", Pending = "gray",
-  Pregnancy = "pink", Transplant = "darkseagreen4"), REFKEY = list(Cohort
-  = "nPOD", Cohort = "CohortX"), VARS = list(Clinical = c("BMI",
-  "db.duration", "age.onset", "Cpeptide", "HbA1c", "peak.gluc", "GADA.pos",
-  "IA2A.pos", "mIAA.pos", "ZnT8A.pos", "AutoAb.count"), Demographic =
-  c("age", "sex_Female", "sex_Male", "race_Caucasian",
-  "race_AfricanAmerican", "race_Hispanic.Latino", "race_Asian",
-  "race_AmericanIndian", "race_Multiracial")), GUESS = guessMatch,
-  SUBSETFEAT = "donor.type",
-  INFORMD = system.file("help/cohort_exchange.Rmd", package = "DIVE"),
-  APPDATA = "examplecohort2020.csv")
+matchApp(input, output, session, refdata, HPCG, colors, refkey, vars,
+  guess = DIVE::guessMatch, subsetfeat,
+  informd = system.file("help/cohort_exchange.Rmd", package = "DIVE"),
+  appdata = NULL)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
-\item{REFDATA}{A data matrix, e.g. a correlation matrix, which must have variables as rownames.}
+\item{refdata}{A data matrix, e.g. a correlation matrix, which must have variables as rownames.}
 
 \item{HPCG}{Graph object representing the reference cohort.}
 
-\item{COLORS}{Colors}
+\item{colors}{Colors}
 
-\item{REFKEY}{Passed to refSubsetInput.}
+\item{refkey}{Passed to refSubsetInput.}
 
-\item{VARS}{Optional, variables allowed to be used for matching within REFDATA organized in categories.
-If not given, all variables in REFDATA are used without a category.}
+\item{vars}{Optional, variables allowed to be used for matching within refdata organized in categories.
+If not given, all variables in refdata are used without a category.}
 
-\item{GUESS}{Optional, a function for making initial guesses of matchable variables.}
+\item{guess}{Optional, a function for making initial guesses of matchable variables.}
 
-\item{SUBSETFEAT}{Which variable to be used as the subset variable.}
+\item{subsetfeat}{Which variable to be used as the subset variable.}
 
-\item{INFORMD}{Link to to help file}
+\item{informd}{Link to to help file}
 
-\item{APPDATA}{See ?}
-
-\item{NGRAPH}{A matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.}
-
-\item{NGRAPHDATA}{The non-reactive data used for generating the matrix.}
+\item{appdata}{See ?}
 }
 \description{
 Shiny app server for matching and exploration of two datasets

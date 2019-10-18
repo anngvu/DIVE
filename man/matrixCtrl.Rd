@@ -4,30 +4,31 @@
 \alias{matrixCtrl}
 \title{Shiny module server functions to generate filter UI for interactive matrix}
 \usage{
-matrixCtrl(input, output, session, M, N, cdata, metadata = NULL,
-  varkey = "VarID", newdata = reactive({ }), widgetmod = NULL,
-  widgetopt = NULL)
+matrixCtrl(input, output, session, M = NULL, N = NULL, cdata = NULL,
+  metadata = NULL, vkey = NULL, newdata = reactive({ }),
+  widgetmod = NULL, widgetopt = NULL)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
-\item{M}{A non-reactive data matrix, e.g. a correlation matrix, which must have row names.}
+\item{M}{A data matrix, e.g. a correlation matrix, which must have row names.}
 
-\item{N}{A non-reactive matrix of the same dimensions as M, used as a filter layer, e.g. sample size.}
+\item{N}{A matrix of the same dimensions as M, used as a filter layer, e.g. sample size.}
 
-\item{cdata}{The non-reactive data used for generating the matrix.}
+\item{cdata}{The data used for generating the matrix.}
 
 \item{metadata}{Optional, a data.table with different types of metadata/annotation to be used as filters.
-If \code{NULL}, the only filter option are the row names/index in M.}
+If not given, the only filter option will be the row names/index in M.}
 
-\item{varkey}{The column in metadata that maps to row names in M.}
+\item{vkey}{The column in metadata that maps to row names in M.}
 
 \item{newdata}{Optional, reactive data, e.g. from user upload, that can be merged with M.}
 
-\item{widget}{Optional, associated widget input. See details.}
+\item{widgetmod}{Optional, a widget extension module. See details.}
 }
 \value{
-Reactive state values to be used by the associated plotting module.
+Reactive values in \code{state} object to be used by the associated plotting module.
+Basically, this keeps track of all the matrices as well as selected metadata.
 }
 \description{
 Update/populate matrix filter UI options depending on available data and metadata,

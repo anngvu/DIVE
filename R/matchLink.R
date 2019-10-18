@@ -119,6 +119,7 @@ matchLink <- function(input, output, session,
 #' An attempt will be made to harmonize them to variable names in the reference dataset.
 #' @return List of named list elements, containing only those reference variables that seem to have
 #' a corresponding version in the external variables (list elements).
+#' @export
 guessMatch <- function(extvars) {
   fuzzymap <- list(GADA.pos = "gad", IA2A.pos = "ia2", mIAA.pos = "mIA", ZnT8A.pos = "znt8",
              AutoAb.count = "abcount", age = "age", BMI = "BMI", db.duration = "duration",

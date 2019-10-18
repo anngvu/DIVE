@@ -43,15 +43,14 @@ exploreMoreUI <- function(id, s1Label = "", s1Data, s2Label = "", s2Data, placeh
 #' the plots show which subsets are matched and provides a means of visualizing the match results.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param s1Data The full (non-reactive) "source 1" dataset, considered the reference dataset.
+#' @param s1Data The full "source 1" dataset, considered the reference dataset.
 #' @param s2Data Reactive "source 2" data that will be compared to the first dataset, usually coming from newDatasetInput.
-#' @param results The reactive values return of matchResult.
-#' @param factorx Suffixes used for grep to recognize plot variables as factors.
+#' @param results The reactive values return of \code{matchResult}.
+#' @param factorx Attribute name suffix/pattern to indicate which should be plotted as factors.
 #' @return Histodot plots for comparing composition and matches between s1Data and s2Data.
 #' @export
 exploreMore <- function(input, output, session,
-                       s1Data, s2Data, results,
-                       factorx = "grp$|cat$|score$|bin$|count$|pos$|risk$") {
+                       s1Data, s2Data, datakey, refname, results, factorx) {
 
   # Update select menu to partition attributes that were used for matching from all "Other" non-matching attributes
   observeEvent(results$params, {
@@ -66,11 +65,11 @@ exploreMore <- function(input, output, session,
                   }")
     updateSelectizeInput(session, "s1Attrs", "", choices = refli,
                          selected = character(0), server = T,
-                         options = list(placeholder = "(cohort data attributes)",
+                         options = list(placeholder = "(data attributes)",
                                         render = displayjs))
     updateSelectizeInput(session, "s2Attrs", "", choices = extli,
                          selected = character(0), server = T,
-                         options = list(placeholder = "(cohort data attributes)", render = displayjs))
+                         options = list(placeholder = "(data attributes)", render = displayjs))
   })
 
   # Plotting
@@ -88,7 +87,7 @@ exploreMore <- function(input, output, session,
 
   plotS1 <- function(y) {
     data <- copy(s1Data)
-    data[, Cohort := "nPOD"] # To do: fix this to make more generalizable
+    data[, c(datakey) := refname]
     matches <- as.numeric(results$matchtable$ID)
     data$Matched <- factor(ifelse(data$ID %in% matches, "matched", "un-matched"), levels = c("un-matched", "matched"))
     p <- cohistPlot(data, y = y, factorx = factorx)
@@ -144,7 +143,7 @@ exploreMore <- function(input, output, session,
 
 removeID <- function(x) Filter(function(f) f != "ID", x)
 
-# A custom cohort histodot plot
+# A custom comparison histodot plot
 cohistPlot <- function(data, x = "Cohort", y, fill = "Matched", factorx) {
   if(grepl(factorx, y)) data[[y]] <- factor(data[[y]])
   p <- ggplot(data, aes_string(x = x, y = y, fill = fill)) +

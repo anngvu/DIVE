@@ -23,7 +23,7 @@ It should return a list containing message and result (result should be \code{NU
 \item{appdata}{Optional, the name (including extension) of one or more files stored in appdata that can be
 mock-uploaded. See details.}
 
-\item{checkappdata}{Whether checkFun should be applied to appdata, normally FALSE.}
+\item{checkappdata}{Whether checkFun should also be applied to appdata, normally FALSE.}
 }
 \value{
 A data.table with a "filename" attribute containing the filename without extension,

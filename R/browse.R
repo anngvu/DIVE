@@ -69,15 +69,15 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"),
 #' @param index2 Optional, name of another column for secondary index.
 #' @param dt_var Table data by var/feature.
 #' @param dt_var_ext Extended table to provide lookup details of metadata.
-#' @param inforRmd1 Helpfile for uploading an ID list.
-#' @param inforRmd2 Helpfile for how browsing data works.
+#' @param informd1 Helpfile for uploading an ID list.
+#' @param informd2 Helpfile for how browsing data works.
 #' @export
 browse <- function(input, output, session,
                    dt_id = NULL, index1 = "ID", index2 = NULL,
                    dt_var = NULL, dt_var_index = NULL,
                    dt_var_ext = NULL,
-                   infoRmd1 = system.file("help/ID_list.Rmd", package = "DIVE"),
-                   infoRmd2 = system.file("help/browse_data.Rmd", package = "DIVE")) {
+                   informd1 = system.file("help/ID_list.Rmd", package = "DIVE"),
+                   informd2 = system.file("help/browse_data.Rmd", package = "DIVE")) {
 
   setkeyv(dt_id, index1)
   setindexv(dt_id, index2)
@@ -86,7 +86,7 @@ browse <- function(input, output, session,
   dataview <- reactiveVal(dt_id)
   customIDs <- reactiveVal(NULL)
 
-  uploadedIDs <- callModule(dataUpload, "IDlist", asDT = F, removable = T, infoRmd = infoRmd1)
+  uploadedIDs <- callModule(dataUpload, "IDlist", asDT = F, removable = T, informd = informd1)
 
   # Available filters
   output$selectbyID <- renderUI({
@@ -233,11 +233,11 @@ browse <- function(input, output, session,
   # Tab 2 ------------------------------------------------------------------------------------------------------------------------------------------------#
 
   # Optional info link  ------------------------------------------------------- #
-  if(!is.null(infoRmd2)) {
+  if(!is.null(informd2)) {
     output$info2 <- renderUI({
       infoOutput(session$ns("browse"), label = "Key", i = "question-circle", link = F)
     })
-    modal <- callModule(info, "browse", infoRmd = infoRmd2)
+    modal <- callModule(info, "browse", informd = informd2)
   }
 
 

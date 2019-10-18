@@ -4,7 +4,7 @@
 \alias{getGEOInput}
 \title{Shiny module UI for importing data from GEO}
 \usage{
-getGEOInput(id, infoRmd = system.file("help/GEO_module.Rmd", package =
+getGEOInput(id, informd = system.file("help/GEO_module.Rmd", package =
   "DIVE"))
 }
 \arguments{
