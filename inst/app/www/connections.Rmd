@@ -1,6 +1,0 @@
----
-title: "Connections In Investigations"
-output: html_document
----
-
-What you see is a representation of nPOD investigator network studies being connected by shared donor samples. Each node represents a study, with size proportional to the amount of data generated, and edges proportional to the number of cases. Hovering over a study node will also show its *eigenvector centrality score*, which is described as "a measure of the influence of a node in a network". In this context, the scores point out which studies have been most active in using the nPOD repository and have high potential for additional discovery synergy. 
