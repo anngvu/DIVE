@@ -4,22 +4,25 @@
 \alias{refSubset}
 \title{Shiny server module function for returning a subsetted dataset}
 \usage{
-refSubset(input, output, session, refData, subsetfeat, refkey,
-  exclude = reactive({ }), infoRmd = NULL)
+refSubset(input, output, session, refdata, subsetfeat, subsets = NULL,
+  datakey = NULL, refname = NULL, exclude = reactive({ }),
+  informd = NULL)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
-\item{refData}{The reference data.table.}
+\item{refdata}{The reference data.table.}
 
-\item{subsetfeat}{The name of the column containing subset factors.}
+\item{subsetfeat}{The name of the column containing the subset factors.}
 
-\item{refkey}{Optional, a named list containing name/label for creating a key-like column,
-where the name is the name of the column. See details for intended purpose.}
+\item{subsets}{Optional, a custom selection list for subsets; by default, the list is composed of unique options found in \code{subsetfeat}.}
 
 \item{exclude}{Optional, a list of IDs to exclude.}
 
-\item{infoRmd}{Optional, relative path to an info Rmarkdown file that can be pulled up in a modal.}
+\item{informd}{Optional, relative path to an info Rmarkdown file that can be pulled up in a modal.}
+
+\item{refkey}{Optional, a named list containing name/label for creating a key-like column,
+where the name is the name of the column. See details for intended purpose.}
 }
 \value{
 A reactive subsetted data.table.

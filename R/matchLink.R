@@ -13,7 +13,7 @@ matchLinkUI <- function(id) {
                     HTML("<strong>You are matching on</strong>"),
                     verbatimTextOutput(ns("matchOn")),
                     HTML("<strong>You are matching with</strong>"),
-                    verbatimTextOutput(ns("matchWith")),
+                    verbatimTextOutput(ns("matchN")),
                     actionButton(ns("run"), "Get matches")
              ),
              column(1),
@@ -32,37 +32,51 @@ matchLinkUI <- function(id) {
 
 #' Server module function for interactive drag-and-drop variable harmonization of two datasets
 #'
+#' Given two datasets, a "reference" and a new "comparison" dataset, the module implements an interface
+#' through which a user can create a harmonized dataset with variables in common. If provided, a guess function
+#' attempts to guess which variables are actually the same, e.g. something called
+#' "sex" in one dataset is the same as "gender" in another. The guess function \code{\link{guessFun}}
+#' that comes with the package is a naive implementation and limited to guessing at
+#' variables typical in clinical cohort datasets (e.g. age, sex, BMI, race, hba1c)
+#' and should certainly be swapped out when the module is expected to handle a different variety of data.
+#' The drag-and-drop interface allows the user to harmonize variables manually, e.g. the "gender" label
+#' can be dropped next to the "sex" label to say that these mean the same thing. The outputs of this module
+#' are inputs to \code{\link{matchResult}}:
+#' \code{params$matchOpts} contains all the possible variables that could be used between the two datasets,
+#' \code{params$matchOn} contains variables that are actually chosen for matching, and
+#' \code{params$run} reactively transmits the "finalized" params/triggers the \code{\link{matchResult}} module.
+#'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param refData Reactive subsetted reference data.table.
-#' @param cohortX Reactive data.table dataset, which typically comes from the \code{\link{newCohortInput}} module.
+#' @param setX Reactive data.table dataset, which typically comes from the \code{\link{newCohortInput}} module.
 #' @param vars Optional, a named list of a variable set (or sets) allowed for matching.
 #' If not provided, the first 10 variables in the reference cohort dataset is used.
 #' @param guess Optional, name of the function to call for initial guessing of harmonized variables;
-#' no initial guesses made if argument is provided or function does not exist.
-#' @param infoRmd Optional, relative path to an info Rmarkdown file that will be pulled up in a modal.
+#' no initial guesses made if no argument is provided or function does not exist.
+#' @param informd Optional, relative path to an info Rmarkdown file that will be pulled up in a modal.
 #' Recommend using for providing methods details of the matching algorithm.
-#' @return Reactive list of parameter values.
+#' @return Reactive list of parameter values with \code{run}, \code{matchOpts} and \code{matchOn}. See details.
 #' @export
 matchLink <- function(input, output, session,
-                            refData, cohortX, vars, guess, infoRmd = system.file("help/matching_methods.Rmd", package = "DIVE")) {
+                      refData, setX, vars, guess, informd = system.file("help/matching_methods.Rmd", package = "DIVE")) {
 
-  modal <- callModule(info, "help", infoRmd)
+  modal <- callModule(info, "help", informd)
 
-  params <- reactiveValues(run = NULL, matchOpts = NULL, matchOn = NULL)
+  params <- reactiveValues(matchOpts = NULL, matchOn = NULL, run = NULL)
 
-#-- when CohortX data changes, initialize match options ------------------------------------------------------------#
+#-- when comparison set X changes, re-initialize match options ------------------------------------------------------------#
   observe({
     if(!is.null(vars) & !is.null(guess)) {
-      params$matchOpts <- guess(names(cohortX()))
-    } else if(!is.null(guess)) { # If variables used for matching are not specified, use the first 10
+      params$matchOpts <- guess(names(setX()))
+    } else if(!is.null(guess)) { # if variables used for matching are not specified, use the first 10
       default <- list(Variables = head(names(refData()), 10))
-      params$matchOpts <- guess(names(cohortX()))
+      params$matchOpts <- guess(names(setX()))
     } else {
-      params$matchOpts <- "" # TO DO!
+      params$matchOpts <- "" # TO DO! Check-later
     }
   })
 
-  # The actual drag-n-drop sets -----------------------------------------------------------------------------------#
+  # Drag-n-drop sets -----------------------------------------------------------------------------------#
 
   # Panel for matched/harmonized pairs
   output$varSets <- renderUI({
@@ -76,10 +90,10 @@ matchLink <- function(input, output, session,
 
   # Panel for un-matched/un-harmonized pairs
   output$varBank <- renderUI({
-    extvars <- names(cohortX())
+    extvars <- names(setX())
     used <- params$matchOpts
     unused <- setdiff(extvars, used)
-    unused <- unused[unused != "ID"]
+    unused <- unused[unused != "ID"] # Check-later: "ID" column hard-coded here.
     tags$div(
       h4(icon("unlink"), "Not used"),
       newOrderInput(inputId = session$ns("varBank"), label = NULL, items = unused,
@@ -88,7 +102,7 @@ matchLink <- function(input, output, session,
     )
   })
 
-  #-- Update matchOn reactive value whenever variables move ---------------------------------------------------#
+  #-- Update matchOn reactive value whenever variables are moved by user --------------------------------------------#
   observe({
     cvars <- paste0("var", seq_along(params$matchOpts), "_order")
     names(cvars) <- names(params$matchOpts)
@@ -99,12 +113,12 @@ matchLink <- function(input, output, session,
     params$matchOn
   })
 
-  output$matchWith <- renderPrint({
+  output$matchN <- renderPrint({
     cat(paste("a subset of", nrow(refData())))
   })
 
   #-- Return --------------------------------------------------------------------------------------------------#
-  observeEvent(input$run, {
+  observe({
     if(!is.null(refData())) params$run <- input$run
   })
 
@@ -133,7 +147,7 @@ guessMatch <- function(extvars) {
   return(res)
 }
 
-#' Create draggable order-able set of elements
+#' Create draggable and order-able set of elements
 #'
 #' @param vars The subset of variables in the reference dataset used for matching.
 #' @param matchOpts Match options, i.e. guessed pairs of matching variables for external and reference dataset.
@@ -155,8 +169,9 @@ orderSet <- function(vars, matchOpts, sessionNS) {
   return(UIlist)
 }
 
-# Modified version of orderInput, important changes include item_class not being constrained and can be assigned to a
-# a custom class and a forced break.
+#' Modified version of \code{shinyjqui::\link[shinyjqui]{orderInput}};
+#' important changes include \code{item_class} not being constrained and allowed to be assigned to a
+#' a custom class with a forced break.
 newOrderInput <- function(inputId, label, items,
                        as_source = FALSE, connect = NULL,
                        item_class,

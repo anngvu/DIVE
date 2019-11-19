@@ -4,7 +4,7 @@
 \alias{refSubsetInput}
 \title{Shiny module UI for selecting a subsetted dataset}
 \usage{
-refSubsetInput(id, name = id, label = "", subsets)
+refSubsetInput(id, name = id, label = "", subsets = "")
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}

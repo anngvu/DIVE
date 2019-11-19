@@ -4,16 +4,18 @@
 \alias{newDataset}
 \title{Shiny module server function for handling new dataset input}
 \usage{
-newDataset(input, output, session, refkey, checkFun = NULL,
-  infoRmd = NULL, appdata = NULL)
+newDataset(input, output, session, datakey = NULL, xname = NULL,
+  checkFun = NULL, informd = NULL, appdata = NULL)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
-\item{refkey}{Optional, a named list containing name/label for creating a key-like column.}
+\item{datakey}{Optional, a named list containing name/label for creating a key-like column.}
 
 \item{checkFun}{Optional, a custom check function for an additional layer of checking/modifying uploaded data.
 It should return a list containing message and result (result should be \code{NULL} for unsuccessful data).}
+
+\item{informd}{Optional, an Rmarkdown help file for infoOutput, e.g. requirements.}
 
 \item{appdata}{Optional, the name (including extension) of one or more files stored in appdata that can be
 mock-uploaded. See details.}
@@ -24,6 +26,6 @@ A reactive data.table of the processed upload.
 \description{
 This is essentially the \code{\link{dataUpload}} module, but the uploaded data
 is modified to include a key-like column before it is returned as the reactive object.
-Use \code{\link{dataUpload}} if there is no need for \preformatted{refkey},
+Use \code{\link{dataUpload}} if there is no need for a \preformatted{datakey},
 which is used to track the dataset in the same manner as in \code{\link{refSubset}}.
 }

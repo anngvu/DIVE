@@ -4,7 +4,12 @@
 \alias{matchAppR}
 \title{Launch Shiny app for matching between two datasets}
 \usage{
-matchAppR(ns, subsets, ...)
+matchAppR(ns = NULL, ...)
+}
+\arguments{
+\item{ns}{Optional namespace for app, passed into server module.}
+
+\item{...}{Parameters passed into server module.}
 }
 \description{
 Wrapper to launch app at console

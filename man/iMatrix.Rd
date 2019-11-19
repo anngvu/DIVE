@@ -4,7 +4,10 @@
 \alias{iMatrix}
 \title{Server module server for plotting correlations matrix with drilldown interaction}
 \usage{
-iMatrix(input, output, session, state, factorx = NULL, dcolors = NULL)
+iMatrix(input, output, session, state, factorx = NULL, dcolors = NULL,
+  defpal = c("#E74F00", "#FF894C", "gray", "#404040", "gray", "#4CC2FF",
+  "#0098E7"), abspal = c("#E74F00", "#FFE168", "gray", "#404040", "gray",
+  "#FFE168", "#E74F00"), plotbg = "#404040")
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
@@ -15,6 +18,14 @@ iMatrix(input, output, session, state, factorx = NULL, dcolors = NULL)
 
 \item{dcolors}{Optional, a list of at least one categorical variable to use for scatterplot point colors
 and the manual color mappings for each in the list. If color mappings are not specified, random colors will be used.}
+
+\item{defpal}{Optional, a color palette to be used by \code{colorRampPalette} for mapping matrix value colors.
+The default is a red-blue  palette.}
+
+\item{abspal}{Optional, a symmetrical color palette to be used by \code{colorRampPalette}
+for mapping matrix value colors as if values were absolute (sign-agnostic coloring).}
+
+\item{plotbg}{Optional, color for matrix plot background.}
 }
 \description{
 The matrix responds to inputs, new plotdata, and has a linked drilldown component.

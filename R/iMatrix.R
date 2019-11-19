@@ -19,8 +19,7 @@ iMatrixUI <- function(id) {
                                 div(class = "forceInline", actionLink(ns("abspalette"), "Sign-agnostic", icon = icon("palette")))
                )
            ),
-           div(id = "matrixOutput",
-               shinycssloaders::withSpinner(uiOutput(ns("heatmap")), color = "gray"))
+           div(id = "matrixOutput", shinycssloaders::withSpinner(plotlyOutput(ns("matrix")), color = "gray"))
     ),
     column(4,
            div(id = "drilldownOutput",
@@ -45,41 +44,46 @@ iMatrixUI <- function(id) {
 #'
 #' The module handles interactive display of a matrix linked to a scatterplot
 #' that accesses underlying data for a user-clicked cell. It works with \code{\link{matrixCtrl}},
-#' which returns the reactive matrix as part of a \code{state} object. The general idea is that
+#' which returns the reactive matrix as part of a \code{display} object. The general idea is that
 #' this module only handles visualization of a matrix while the actual matrix generation can be handled by
 #' other modules that feed into it. For the drilldown component that displays underlying data points,
 #' the type of data matters and may require setting aesthetic parameters to maintain consistency across modules.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param state Reactive state object from \code{\link{matrixCtrl}}.
+#' @param display Reactive display object from \code{\link{matrixCtrl}}.
 #' @param factorx Names and/or patterns for variables that should be displayed as factors in scatterplot.
 #' @param dcolors Optional, a list of at least one categorical variable to use for scatterplot point colors
 #' and the manual color mappings for each in the list. If color mappings are not specified, random colors will be used.
+#' @param defpal Optional, a color palette to be used by \code{colorRampPalette} for mapping matrix value colors.
+#' The default is a red-blue  palette.
+#' @param abspal Optional, a symmetrical color palette to be used by \code{colorRampPalette}
+#' for mapping matrix value colors as if values were absolute (sign-agnostic coloring).
+#' @param plotbg Optional, color for matrix plot background.
 #' @export
 iMatrix <- function(input, output, session,
-                    state, factorx = NULL, dcolors = NULL)
+                    display, factorx = NULL, dcolors = NULL,
+                    defpal = c("#E74F00", "#FF894C", "gray", "#404040", "gray", "#4CC2FF", "#0098E7"),
+                    abspal = c("#E74F00", "#FFE168", "gray", "#404040", "gray", "#FFE168", "#E74F00"),
+                    plotbg = "#404040")
   {
 
   #-- Main matrix plot -----------------------------------------------------------------------------------------------------#
 
-  output$heatmap <- renderUI({
-    if(nrow(state$filM)) plotlyOutput(session$ns("matrix")) else htmlOutput(session$ns("empty"))
-  })
-
   output$matrix <- renderPlotly({
-
-     M <- state$filM
-     # bug? plotly doesn't display the plot if height is less than 100px
-     # max height should be ~1000px
-     px <- 1000/ncol(M)
+     req(display$filM)
+     if(!nrow(display$filM)) {
+        empty <- plotly_empty() %>% plotly::config(displayModeBar = F)
+        return(empty)
+      }
+     M <- display$filM
+     px <- 1000/ncol(M) # bug? plotly doesn't display the plot if height is less than 100px; max height should be ~1000px
      height <- nrow(M) * px
      height <- if(height < 400) 400 else ifelse(height > 1000, 1000, height)
-     newdata <- state$newdata
      show <- nrow(M) <= 20 # only show y axis-labels when a reasonable number of rows is being displayed
      colorz <- if(input$abspalette %% 2) {
-       colorRampPalette(c("#E74F00", "#FFE168", "gray", "#404040", "gray", "#FFE168", "#E74F00"))
+       colorRampPalette(abspal)
      } else {
-       colorRampPalette(c("#E74F00", "#FF894C", "gray", "#404040", "gray", "#4CC2FF", "#0098E7"))
+       colorRampPalette(defpal)
      }
      #colorz <- colorRampPalette(c("#FF008C", "gray", "#404040", "gray", "#00FF73")) # not colorblind friendly
 
@@ -88,16 +92,16 @@ iMatrix <- function(input, output, session,
                   height = height, colorbar = list(thickness = 8)) %>%
        layout(xaxis = list(title = "", showgrid = F, showticklabels = input$showclabs %% 2 == 1, ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
               yaxis = list(title = "", showgrid = F, showticklabels = input$showrlabs %% 2 == 1, ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
-              plot_bgcolor = "#404040") %>%
+              plot_bgcolor = plotbg) %>%
        event_register("plotly_click")
 
      # since plot_bgcolor can't be set for individual plots in subplot, layout adjusts depending on whether metadata is passed in
-     if(!is.null(state$rowmeta)) {
+     if(!is.null(display$rowmeta)) {
 
-       rvals <- scales::rescale(as.integer(state$rowmeta))
-       cvals <- scales::rescale(as.integer(state$colmeta))
+       rvals <- scales::rescale(as.integer(display$rowmeta))
+       cvals <- scales::rescale(as.integer(display$colmeta))
 
-       # state$optrowgroup == state$optcolgroup
+       # display$optrowgroup == display$optcolgroup
        if(F) {
          rdomain <- cdomain <- c(min(rvals, cvals, na.rm = T), max(rvals, cvals, na.rm = T)) # consistent colors for when annotations are the same type
          rpal <- cpal <- "Spectral"
@@ -112,23 +116,28 @@ iMatrix <- function(input, output, session,
        colcolors <- scales::col_numeric(cpal, domain = cdomain)(cvals)
        ccolorscale <- data.frame(cvals, colcolors)
 
-       rtext <- matrix(as.character(state$rowmeta))
-       rowmeta <- plot_ly(y = rownames(M), x = 1, z = matrix(as.integer(state$rowmeta)), text = rtext,
+       rtext <- matrix(as.character(display$rowmeta))
+
+       # additional group annotations for rows, shown as a vertical subplot at the right of p
+       rowmeta <- plot_ly(y = rownames(M), x = 1, z = matrix(as.integer(display$rowmeta)), text = rtext,
                           type = "heatmap", showscale = FALSE, name = "Row Group",
                           colorscale = "Portland", hovertemplate = "<b>%{text}</b>") %>%
          layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""),
                 yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""))
 
-       ctext <- matrix(as.character(state$colmeta), nrow = 1)
-       colmeta <- plot_ly(x = colnames(M), y = 1,  z = matrix(as.integer(state$colmeta), nrow = 1),
+       # additional group annotations for columns, shown as a horizontal subplot at the top of p
+       ctext <- matrix(as.character(display$colmeta), nrow = 1)
+       colmeta <- plot_ly(x = colnames(M), y = 1,  z = matrix(as.integer(display$colmeta), nrow = 1),
                           type = "heatmap", showscale = FALSE, name = "Column Group", text = ctext,
                           colorscale = "Portland", hovertemplate = "<b>%{text}</b>")  %>%
          layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""),
                 yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""))
 
+       # the main matrix plot
        main <- subplot(colmeta, plotly_empty(), p, rowmeta,
                        nrows = 2, shareX = T, shareY = T, margin = 0.01,
                        widths = c(0.97, 0.03), heights = c(0.03, 0.97))
+
      } else {
        main <- p
      }
@@ -136,13 +145,9 @@ iMatrix <- function(input, output, session,
      main %>% plotly::config(displayModeBar = F)
   })
 
-  output$empty <- renderUI({
-    "No meaningful results. Try expanding filters."
-  })
-
   #-- Drilldown handling -----------------------------------------------------------------------------------------------------#
-  observeEvent(state$cdata, {
-    updateSelectizeInput(session, "drilldown", choices = removeID(names(state$cdata)), selected = character(0))
+  observeEvent(display$cdata, {
+    updateSelectizeInput(session, "drilldown", choices = removeID(names(display$cdata)), selected = character(0))
   })
 
   observe({
@@ -158,7 +163,7 @@ iMatrix <- function(input, output, session,
     req(!is.null(input$drilldown))
     var1 <- input$drilldown[1]
     var2 <- input$drilldown[2]
-    tmp <- as.data.frame(state$cdata)
+    tmp <- as.data.frame(display$cdata)
     dgroup <- names(dcolors) # default categorical group colors
     colorby <- dgroup
     if(grepl(factorx, var1)) tmp[[var1]] <- factor(tmp[[var1]])

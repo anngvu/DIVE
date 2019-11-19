@@ -4,19 +4,21 @@
 \alias{matchResult}
 \title{Shiny module server for generating match results output}
 \usage{
-matchResult(input, output, session, refSubset, cohortX, params)
+matchResult(input, output, session, refSubset, setX, params, sourcecol)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
-\item{refSubset}{Reactive reference cohort subset data.table.}
+\item{refSubset}{Reactive reference cohort subset data.table, i.e. from \code{refSubset}.}
 
-\item{cohortX}{Reactive cohortX data.table, which typically comes from the newCohortInput module.}
+\item{setX}{Reactive data.table of comparison subset, i.e from \code{newDataset} module.}
 
-\item{params}{Reactive params data, typically from the matchParameters module.}
+\item{params}{Reactive parameters data, i.e. from \code{matchLink} module.}
+
+\item{sourcecol}{Name for the source key column of the joined dataset.}
 }
 \value{
-Reactive values params, intermediate, pair, and matchtable.
+Reactive values containing params, intermediate results, pair, and matchtable. See \code{matchPair}.
 }
 \description{
 Shiny module server for generating match results output

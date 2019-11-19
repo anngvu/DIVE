@@ -2,7 +2,7 @@
 % Please edit documentation in R/cellPack.R
 \name{cellPackUI}
 \alias{cellPackUI}
-\title{Shiny module UI widget for visualization and filtering of hierarchical cell and tissue samples}
+\title{Shiny UI widget module for visualization and filtering by cell and tissue}
 \usage{
 cellPackUI(id, width = "400px", height = "400px")
 }
@@ -10,7 +10,8 @@ cellPackUI(id, width = "400px", height = "400px")
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 }
 \description{
-Based on d3 circlepack.js
+Based on d3 circlepack.js, this represents cells and tissues as circles placed in a
+hierarchy.
 }
 \details{
 Certain selections can trigger the widget "augmented input interface".

@@ -49,7 +49,7 @@ matrixMix <- function(input, output, session,
                         M = M, N = N, cdata = cdata, metadata = metadata, vkey = vkey,
                         newdata = upload, widgetmod = widgetmod, widgetopt = widgetopt)
 
-  matrix <- callModule(iMatrix, "matrix", state = display,
+  callModule(iMatrix, "matrix", display = display,
                        factorx = factorx, dcolors = dcolors)
 
 }

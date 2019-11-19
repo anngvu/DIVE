@@ -9,16 +9,16 @@ nodeMod(nodes, metadata, IDcol = "Source", mfuns, mcols)
 \arguments{
 \item{nodes}{Name of nodes to look up in metadata table.}
 
-\item{metadata}{A data.table.}
+\item{metadata}{A \code{data.table}.}
 
-\item{IDcol}{Column used for matching nodes. Defaults to "Source".}
+\item{IDcol}{Column in metadata table used for matching node names. Defaults to "Source".}
 
 \item{mfuns}{A list of one or more functions that map values in a column to size, color, or another node feature.}
 
-\item{mcols}{A named vector of the corresponding column(s) to use as input into mfuns. Names should correspond to the node feature.}
+\item{mcols}{A named vector of the corresponding column(s) to use as input into \code{mfuns}. Names should correspond to the node feature.}
 }
 \value{
-A data.frame containing aesthetics data for the nodes.
+A \code{data.frame} containing aesthetics data for the nodes.
 }
 \description{
 Change or add node size, color, or other annotation values depending on metadata.

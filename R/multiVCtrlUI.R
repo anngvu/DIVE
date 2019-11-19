@@ -20,7 +20,7 @@
 #' @export
 multiVCtrlUI <- function(id, menu = T, upload = T, GEO = T) {
   ns <- NS(id)
-  tags$div(id = "multiVCtrlUI", style="margin-top:30px; margin-bottom:20px; margin-right:100px",
+  tags$div(class = "multiVCtrlUI", id = ns("multiVCtrlUI"),
            if(menu) div(class = "forceInline", style = "margin-right: 40px;",
                selectizeInput(ns("dataset"), HTML("<strong>Available high-throughput datasets</strong>"),
                               choices = NULL, selected = NULL, multiple = T,
@@ -53,7 +53,7 @@ multiVCtrlUI <- function(id, menu = T, upload = T, GEO = T) {
 #' @param vselect A default selected column in \preformatted{cdata} to display.
 #' @param checkFun A check function used for checking data uploads.
 #' @param infoRmd Optional link to an Rmarkdown document containing details for the data upload module.
-#' @return A list containing the data matrix for the parameter \preformatted{hdata} in the \code{\link{multiV}} module,
+#' @return A \code{view} object which is a list containing the data matrix for the parameter \preformatted{hdata} of the \code{\link{multiV}} module,
 #' as well as parameters for \code{\link{geneV}} and \code{\link{selectV}}.
 #' @export
 multiVCtrl <- function(input, output, session,
@@ -67,15 +67,15 @@ multiVCtrl <- function(input, output, session,
   updateSelectizeInput(session, "dataset", choices = choices, selected = NULL)
 
   observe({
-    if(!length(input$dataset)) {
+    if(!length(input$dataset)) { # when everything has been cleared from the global dataset selection
       dataset <- list(NULL) # set return to NULL
       names(dataset) <-  paste0("i", which(names(view$hdlist) %in% inview))
       inview <<- c()
     } else {
       hdname <- setdiff(input$dataset, inview)
-      if(length(hdname)) {
+      if(length(hdname)) { # a new dataset needs to be added to view
         dataset <- view$hdlist[hdname]
-      } else {  # remove from view
+      } else {  # a dataset needs to be removed from view
         hdname <- setdiff(inview, input$dataset)
         dataset <- list(NULL)
       }
@@ -101,14 +101,14 @@ multiVCtrl <- function(input, output, session,
     data <- udata()
     if(key %in% names(data)) {
       # low-throughput processing: check and modify column names if necessary
-      data <- merge(cdata, data, by = "ID", all = T)
+      data <- merge(cdata, data, by = key, all = T)
       view$cdata <- data
     } else {
       # high-throughput processing
       filename <- attr(data, "filename")
       if(filename %in% names(view$hdlist)) {
         showNotification("Dataset with same file name already exists (overwrites not allowed).
-                         To upload a different version, change file name to reflect that.",
+                         To upload a different version, change file name to reflect the version.",
                          type = "warning", duration = NULL)
       } else {
         hdata <- as.matrix(data, rownames = 1)

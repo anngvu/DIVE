@@ -23,16 +23,27 @@ selectVUI <- function(id) {
 #' @param data A reactive data.table.
 #' @param key A key column that is kept for every selected subset. Defaults to "ID".
 #' @param label Label for variable select input.
+#' @param excludepattern Exclude column names with this pattern in the selection choices.
 #' @param selected Optional, initial selection.
+#' @param countby The matrix representing a high-throughput dataset with sample IDs, which are intersected to generate counts in the select options. See details.
 #' @return The subsetted data table.
 #' @export
 selectV <- function(input, output, session,
-                    data, key = "ID", label = HTML("<strong>Phenotype/Experimental variable(s)</strong>"), selected = reactive({ NULL }) )  {
+                    data = reactive({ NULL }), key = "ID", label = HTML("<strong>Phenotype/Experimental variable(s)</strong>"), excludepattern = "_(SD|SE)$",
+                    selected = reactive({ NULL }), countby = reactive({ NULL }))  {
 
   Vdata <- reactiveVal(NULL)
 
   output$select <- renderUI({
+    # shiny::req(data(), selected())
     choices <- names(data())[names(data()) != key]
+    if(!is.null(excludepattern)) choices <- grep(excludepattern, choices, value = TRUE, invert = T)
+    ids <- rownames(countby()[[1]])
+    if(length(ids)) {
+      counts <- colSums(!is.na(data()[get(key) %in% ids, choices, with = F]))
+      counts <- sort(counts, decreasing = T)
+      choices <- setNames(names(counts), paste0(names(counts), " (", counts, ")"))
+    }
     tags$div(
       div(class = "forceInline",
           selectizeInput(session$ns("var"), label = label,
@@ -44,7 +55,7 @@ selectV <- function(input, output, session,
       )
   })
 
-  observeEvent(data, {
+  observeEvent(data(), {
     Vdata(data()[, c(key, selected()), with = F])
   })
 

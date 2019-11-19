@@ -116,13 +116,26 @@ Match app
   background-color: white;
 }
 
+.multiVUI-ctrl-head {
+  background-color: WhiteSmoke;
+  margin-top: -50px;
+  margin-left: -50px;
+  margin-right: -50px;
+}
+
+.multiVCtrlUI {
+  margin-top: 30px;
+  margin-bottom:20px;
+  margin-right:100px
+}
+
 .subgroups-panel {
+  background-color: WhiteSmoke;
   display: inline-block;
   width: 600px;
   height: 800px;
   border-radius: 4px;
   padding: 10px;
-  background: white;
   margin: 5px;
   /* border: 2px solid gray; */
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);

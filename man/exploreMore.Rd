@@ -4,19 +4,19 @@
 \alias{exploreMore}
 \title{Shiny module server for generating comparative histodot plots of attributes in two datasets}
 \usage{
-exploreMore(input, output, session, s1Data, s2Data, results,
-  factorx = "grp$|cat$|score$|bin$|count$|pos$|risk$")
+exploreMore(input, output, session, s1Data, s2Data, datakey, refname,
+  results, factorx)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
-\item{s1Data}{The full (non-reactive) "source 1" dataset, considered the reference dataset.}
+\item{s1Data}{The full "source 1" dataset, considered the reference dataset.}
 
 \item{s2Data}{Reactive "source 2" data that will be compared to the first dataset, usually coming from newDatasetInput.}
 
-\item{results}{The reactive values return of matchResult.}
+\item{results}{The reactive values return of \code{matchResult}.}
 
-\item{factorx}{Suffixes used for grep to recognize plot variables as factors.}
+\item{factorx}{Attribute name suffix/pattern to indicate which should be plotted as factors.}
 }
 \value{
 Histodot plots for comparing composition and matches between s1Data and s2Data.

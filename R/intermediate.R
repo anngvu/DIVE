@@ -1,15 +1,3 @@
-#' Shiny module UI for additional intermediate input
-#'
-#' Adds some UI to provide input for additional data processing
-#'
-#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @return A \code{shiny::\link[shiny]{tagList}} containing input UI.
-#' @export
-intermediateInput <- function(id) {
-  ns <- NS(id)
-}
-
-
 #' Shiny server module for intermediate data processing
 #'
 #' This module implements an additional customizable layer for intermediate data processing
@@ -21,13 +9,12 @@ intermediateInput <- function(id) {
 #' @return Return value of Fun as reactive object.
 #' @export
 intermediate <- function(input, output, session,
-                      data, Fun) {
+                      data, Fun = NULL) {
 
-  out <- reactive({
-    Fun(data())
+  reactive({
+    if(is.function(Fun)) Fun(data()) else return(NULL)
   })
 
-  return(out)
 }
 
 

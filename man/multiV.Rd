@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiVUI.R
 \name{multiV}
 \alias{multiV}
-\title{Shiny app server for multi-views}
+\title{Shiny app server module for multi-views}
 \usage{
 multiV(input, output, session, hdata = NULL, hcat = NULL,
   cdata = NULL, genes = DIVE::gene_symbols, prelist = NULL,

@@ -4,21 +4,19 @@
 \alias{networkGraph}
 \title{Make custom network graph representing relationships between studies or data}
 \usage{
-networkGraph(adjm, nodemods = NULL)
+networkGraph(adjm, edgemods = NULL, nodemods = NULL)
 }
 \arguments{
 \item{adjm}{Adjacency matrix encoding relationships between source nodes.}
 
-\item{nodemods}{Optional, a data.frame with 'node' column containing node names matching names in adjacency matrix,
-and 'size' and/or 'color' column(s) specifying aesthetics.}
-
 \item{edgemods}{An optional function of adjusting weight values in the adjacency matrix.
-For aesthetic reasons, weights are scaled by sqrt. Set to NULL if this is unnecessary.}
+For aesthetic reasons, weights are scaled by sqrt. Set to \code{NULL} if this is unnecessary.}
 
-\item{asVis}{Whether to keep as \code{\link[igraph]} or convert to interactive \code{\link[visNetwork]} object for the web (default).}
+\item{nodemods}{Optional, a \code{data.frame} with 'node' column containing node names matching names in adjacency matrix,
+and 'size' and/or 'color' column(s) specifying aesthetics.}
 }
 \value{
-Either an \code{\link[igraph]} or \code{\link[visNetwork]} object representing desired relationship network.
+An \code{\link[igraph]} with aesthetics.
 }
 \description{
 This is a wrapper around several \code{\link[igraph]} methods to build a custom network graph
@@ -28,8 +26,8 @@ is the number of shared samples between each study, but the function is made gen
 with the idea that other relationships (e.g. correlation) can be represented as well.
 Edges and weights are set by passing in any appropriate adjacency matrix.
 After the graph is constructed, node sizes and colors are modified if a
-\code{data.frame} containing columns with values for those aesthetics has also been passed in.
+\code{data.frame} containing columns with values for those aesthetics is also passed in.
 While node size is typically used to indicate the amount of data the study generated,
-color can be used for any other annotation. Finally, the resulting object is by default
+color can be used for other annotations. Finally, the resulting object is by default
 converted into an interactive \code{\link[visNetwork]} object so it can be part of the Shiny application.
 }

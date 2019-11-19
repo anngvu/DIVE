@@ -23,10 +23,10 @@ HPCGraphOutput  <- function(id) {
 #' @param hpcg Data object produced by \code{\link{newHPCG}}.
 #' @export
 HPCGraph <- function(input, output, session,
-                        hpcg, colors) {
+                     hpcg, colors, plotbgcolor = NULL) {
 
   output$graph <- renderPlotly({
-    HPCG <- plotlyHPCG(hpcg, colors)
+    HPCG <- plotlyHPCG(hpcg, colors, plotbgcolor)
     HPCG %>% plotly::config(displayModeBar = F)
   })
 

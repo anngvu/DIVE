@@ -2,7 +2,7 @@
 % Please edit documentation in R/matchLink.R
 \name{orderSet}
 \alias{orderSet}
-\title{Create draggable order-able set of elements}
+\title{Create draggable and order-able set of elements}
 \usage{
 orderSet(vars, matchOpts, sessionNS)
 }
@@ -15,5 +15,5 @@ orderSet(vars, matchOpts, sessionNS)
 A \code{shiny::\link[shiny]{tagList}} of variables that can be dragged and dropped.
 }
 \description{
-Create draggable order-able set of elements
+Create draggable and order-able set of elements
 }

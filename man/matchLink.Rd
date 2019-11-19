@@ -4,28 +4,40 @@
 \alias{matchLink}
 \title{Server module function for interactive drag-and-drop variable harmonization of two datasets}
 \usage{
-matchLink(input, output, session, refData, cohortX, vars, guess,
-  infoRmd = system.file("help/matching_methods.Rmd", package = "DIVE"))
+matchLink(input, output, session, refData, setX, vars, guess,
+  informd = system.file("help/matching_methods.Rmd", package = "DIVE"))
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
 \item{refData}{Reactive subsetted reference data.table.}
 
-\item{cohortX}{Reactive data.table dataset, which typically comes from the \code{\link{newCohortInput}} module.}
+\item{setX}{Reactive data.table dataset, which typically comes from the \code{\link{newCohortInput}} module.}
 
 \item{vars}{Optional, a named list of a variable set (or sets) allowed for matching.
 If not provided, the first 10 variables in the reference cohort dataset is used.}
 
 \item{guess}{Optional, name of the function to call for initial guessing of harmonized variables;
-no initial guesses made if argument is provided or function does not exist.}
+no initial guesses made if no argument is provided or function does not exist.}
 
-\item{infoRmd}{Optional, relative path to an info Rmarkdown file that will be pulled up in a modal.
+\item{informd}{Optional, relative path to an info Rmarkdown file that will be pulled up in a modal.
 Recommend using for providing methods details of the matching algorithm.}
 }
 \value{
-Reactive list of parameter values.
+Reactive list of parameter values with \code{run}, \code{matchOpts} and \code{matchOn}. See details.
 }
 \description{
-Server module function for interactive drag-and-drop variable harmonization of two datasets
+Given two datasets, a "reference" and a new "comparison" dataset, the module implements an interface
+through which a user can create a harmonized dataset with variables in common. If provided, a guess function
+attempts to guess which variables are actually the same, e.g. something called
+"sex" in one dataset is the same as "gender" in another. The guess function \code{\link{guessFun}}
+that comes with the package is a naive implementation and limited to guessing at
+variables typical in clinical cohort datasets (e.g. age, sex, BMI, race, hba1c)
+and should certainly be swapped out when the module is expected to handle a different variety of data.
+The drag-and-drop interface allows the user to harmonize variables manually, e.g. the "gender" label
+can be dropped next to the "sex" label to say that these mean the same thing. The outputs of this module
+are inputs to \code{\link{matchResult}}:
+\code{params$matchOpts} contains all the possible variables that could be used between the two datasets,
+\code{params$matchOn} contains variables that are actually chosen for matching, and
+\code{params$run} reactively transmits the "finalized" params/triggers the \code{\link{matchResult}} module.
 }

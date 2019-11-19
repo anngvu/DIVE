@@ -2,21 +2,25 @@
 % Please edit documentation in R/updateNetwork.R
 \name{vBinColor}
 \alias{vBinColor}
-\title{Map to color based on binary data. Since this takes a logical vector, ncolorscale controls
-the color mapping to colorT and colorF; use a value of 3 to assign colorT for a proportion = 0.5.}
+\title{Map a binary vector to a color. For example, the vector \preformatted{c(T, F, F)}
+could be assigned the color white if any value is true (true is dominant),
+or black if any value is false (black is dominant),
+or one could use the proportion of true/false to get some gray color.}
 \usage{
-vBinColor(x, colorT = "#2196f3", colorF = "gray20", ncolorscale = 10)
+vBinColor(x, domlogic = T, shades = c("black", "white"))
 }
 \arguments{
 \item{x}{A logical vector.}
 
-\item{colorT}{Color for TRUE.}
+\item{domlogic}{Dominant logical. Defauls to true.}
 
-\item{colorF}{Color for FALSE.}
-
-\item{ncolorscale}{Number of colors to use.}
+\item{shades}{A vector of colors with at least two colors, where the last color is mapped to the dominant logical.
+Defaults to "black" and "white". If more than two colors are given, the proportion of the dominant logical in x is used
+to assign the closest shade.}
 }
 \description{
-Map to color based on binary data. Since this takes a logical vector, ncolorscale controls
-the color mapping to colorT and colorF; use a value of 3 to assign colorT for a proportion = 0.5.
+Map a binary vector to a color. For example, the vector \preformatted{c(T, F, F)}
+could be assigned the color white if any value is true (true is dominant),
+or black if any value is false (black is dominant),
+or one could use the proportion of true/false to get some gray color.
 }

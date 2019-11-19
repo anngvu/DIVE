@@ -12,7 +12,7 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"),
   fluidPage(theme = shinythemes::shinytheme(theme),
             if(!is.null(CSS)) includeCSS(CSS),
             tabsetPanel(id = ns("tabs"),
-                        tabPanel("ID x Data Map",
+                        tabPanel("Metadata Map",
                                  fluidRow(style = "margin-top: 20px; margin-left: 20px;", height = 100,
                                           div(class = "forceInline", style = "background-color: WhiteSmoke;",
                                               div(class = "forceInline", style = "margin-left: 20px;",
@@ -46,10 +46,16 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"),
                                  fluidRow(
                                    shinycssloaders::withSpinner(plotlyOutput(ns("cases"), height = 750), color = "gray")
                             )),
-                        tabPanel("Data Dictionary",
+                        tabPanel("Metadata Dictionary",
                                  br(),
                                  div(class = "forceInline", uiOutput(ns("info2"))),
                                  DT::DTOutput(ns("table"))
+                        ),
+                        tabPanel("SPARQL Query",
+                                 br(),
+                                 "The SPARQL Query portal allows advanced searching and filtering with metadata.",
+                                 br(),
+                                 textOutput(ns("SPARQLsrvstat"))
                         )
             )
   )
@@ -106,11 +112,12 @@ browse <- function(input, output, session,
 
   output$annotation <- renderUI({
     selectInput(session$ns("class"), HTML("<strong>Data annotation</strong>"),
-                choices = names(dt_var), width = 200)
+                choices = names(dt_var)[names(dt_var) != dt_var_index], width = 200)
   })
 
   output$expandUI <- renderUI({
-      selectInput(session$ns("expandon"), HTML("<i class='fas fa-expand'></i>&nbsp;&nbsp;<strong>Expand on</strong>"),
+      req(input$class)
+      selectInput(session$ns("expandon"), HTML("<strong>Expand on</strong>"),
                   choices = c("", unique(id_data_map()$Data)), selected = "")
 
   })
@@ -158,21 +165,27 @@ browse <- function(input, output, session,
 
   #
   id_data_map <- reactive({
+    req(dataview(), visIDs(), input$class)
     IDs <- visIDs()
-
     # Show only variables that were measured for at least one of the selected IDs
-    id_data_map <- dataview()[IDs, dataview()[IDs, sapply(.SD, function(x) !all(is.na(x))), with = F] ]
-
-    # Basically a binary display for availability
-    for(col in removeID(names(id_data_map))) id_data_map[[col]] <- as.integer(!is.na(id_data_map[[col]]))
-    id_data_map <- melt(id_data_map, id.var = "ID", variable.name = "VarID", value.name = "Available")
-
-    # Join on variable name allows display of ID vs. selected metadata
-    id_data_map <- merge(id_data_map, dt_var[, c(dt_var_index, input$class), with = F], by.x = "VarID", by.y = dt_var_index)
-    setnames(id_data_map, input$class, "Data")
+    id_data_map <- dataview()[IDs, dataview()[IDs, sapply(.SD, function(x) !all(x == 0)), with = F] ]
+    # convert the dt_id table into a binary version
+    # TO DO: if dt_id is very large, this could slow things down considerably,
+    # so this needs to be calculated only once at beginning instead of within reactive
+    for(col in names(id_data_map)[names(id_data_map) != index1]) id_data_map[[col]] <- as.integer(!is.na(id_data_map[[col]]))
+    if(nrow(id_data_map) == 0) { # if selected IDs have no measurements of interest
+      return(NULL)
+    } else {
+      id_data_map <- melt(id_data_map, id.var = "ID", variable.name = "VarID", value.name = "Available")
+      # Join on variable name allows display of ID vs. selected metadata
+      id_data_map <- merge(id_data_map, dt_var[, c(dt_var_index, input$class), with = F], by.x = "VarID", by.y = dt_var_index)
+      setnames(id_data_map, input$class, "Data")
+      id_data_map
+    }
   })
 
   output$cases <- renderPlotly({
+    req(id_data_map())
     withclass <- unique(id_data_map()[, .(ID, Data, Available)])
     p <- plot_ly(withclass, x = ~Data, y = ~ID, name = "Available", type = "scatter", mode = "markers", source = "main",
                  marker = list(size = ~Available *6, color = "#404040", opacity = 1, line = list(color = "#404040")),
@@ -180,7 +193,6 @@ browse <- function(input, output, session,
       layout(xaxis = list(type = "category", title = "Data", showline = FALSE, showgrid = FALSE),
              yaxis = list(type = "category", title = "Case", showline = FALSE, dtick = 1, tickfont = list(size = 9), showgrid = FALSE)) %>%
       event_register("plotly_click")
-
 
     sumID <- withclass[, sum(Available), by = "ID"]
     marginID <- plot_ly(
@@ -212,7 +224,7 @@ browse <- function(input, output, session,
   output$abspanel <- renderUI({
     req(input$expandon)
     if(input$expandon != "") {
-      div(class = "subgroups-panel", style = "background-color: WhiteSmoke;",
+      div(class = "subgroups-panel",
         div(align = "right", actionButton(session$ns("closepanel"), "", icon = icon("times"))),
         plotlyOutput(session$ns("expandplot"), height = 750, width = 500))
     }
@@ -224,7 +236,8 @@ browse <- function(input, output, session,
     plot_ly(xvars, x = ~VarID, y = ~ID, type = "scatter", mode = "markers",
             marker = list(size = ~Available *6, color = "#404040", opacity = 1, line = list(color = "#404040")),
             showlegend = FALSE) %>%
-      layout(xaxis = list(type = "category", title = "Data", showline = FALSE, showgrid = FALSE),
+      # to do: long x-axis labels seems to make plot die
+      layout(xaxis = list(type = "category", title = "Data", showline = FALSE, showgrid = FALSE, showticklabels = F),
              yaxis = list(type = "category", title = "ID", showline = FALSE, dtick = 1, tickfont = list(size = 9), showgrid = FALSE),
              plot_bgcolor = "transparent", paper_bgcolor = "transparent") %>%
       plotly::config(displayModeBar = F)
@@ -250,6 +263,18 @@ browse <- function(input, output, session,
     dt_var_ext
 
   }, escape = FALSE, rownames = F, filter = "none", options = list(dom = 'ftp', pageLength = 10), style = "bootstrap")
+
+  # Tab 3 ------------------------------------------------------------------------------------------------------------------------------#
+
+  # to do: code to communicate with SPARQL server
+  SPARQLsrv <- reactive({
+    NULL
+  })
+
+  output$SPARQLsrvstat <- renderPrint({
+    status <- if(is.null(SPARQLsrv())) "down" else "available"
+    paste("Server status:", status)
+  })
 
 }
 

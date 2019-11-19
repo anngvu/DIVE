@@ -2,7 +2,7 @@
 % Please edit documentation in R/cellPack.R
 \name{cellPack}
 \alias{cellPack}
-\title{Server module function for cellPack widget}
+\title{Shiny server module function for cellPack widget}
 \usage{
 cellPack(input, output, session, json, css = system.file("www/",
   "cellpack.css", package = "DIVE"))
@@ -10,13 +10,13 @@ cellPack(input, output, session, json, css = system.file("www/",
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
-\item{json}{Relative path to the JSON data for widget.}
+\item{json}{Either a JSON object or relative path to the JSON data file for widget.}
 
 \item{css}{Optional, relative path to a CSS file.}
 }
 \value{
-reactive object for element that was clicked
+Reactive object for element that was clicked
 }
 \description{
-Server module function for cellPack widget
+Shiny server module function for cellPack widget
 }

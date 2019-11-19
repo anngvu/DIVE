@@ -4,30 +4,30 @@
 \alias{matchApp}
 \title{Shiny app server for matching and exploration of two datasets}
 \usage{
-matchApp(input, output, session, refdata, HPCG, colors, refkey, vars,
-  guess = DIVE::guessMatch, subsetfeat,
+matchApp(input, output, session, refdata, HPCG, colors, datakey, xname,
+  refname, vars, guess = DIVE::guessMatch, subsets, subsetfeat,
   informd = system.file("help/cohort_exchange.Rmd", package = "DIVE"),
-  appdata = NULL)
+  factorx, appdata = NULL)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
-\item{refdata}{A data matrix, e.g. a correlation matrix, which must have variables as rownames.}
+\item{refdata}{The reference dataset.}
 
-\item{HPCG}{Graph object representing the reference cohort.}
+\item{HPCG}{Optional graph object representing the reference dataset.}
 
 \item{colors}{Colors}
 
-\item{refkey}{Passed to refSubsetInput.}
+\item{datakey}{Passed to \code{refSubsetInput}, \code{newDataset}, \code{matchResult}.}
 
-\item{vars}{Optional, variables allowed to be used for matching within refdata organized in categories.
-If not given, all variables in refdata are used without a category.}
+\item{vars}{Optional, variables allowed to be used for matching within \code{refdata}, organized in categories
+displayed as separate lists (mainly for user-friendliness). If not given, all variables can be used and will be displayed in one list.}
 
 \item{guess}{Optional, a function for making initial guesses of matchable variables.}
 
 \item{subsetfeat}{Which variable to be used as the subset variable.}
 
-\item{informd}{Link to to help file}
+\item{informd}{Link to a help file that can be called with the info module.}
 
 \item{appdata}{See ?}
 }

@@ -4,16 +4,15 @@
 \alias{matchAppUI}
 \title{Shiny app UI for matching application}
 \usage{
-matchAppUI(id, subsets, CSS = system.file("www/", "app.css", package =
-  "DIVE"))
+matchAppUI(id, CSS = system.file("www/", "app.css", package = "DIVE"))
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
+\item{CSS}{Optional, location to an alternate CSS stylesheet to change the look and feel of the app.}
+
 \item{subsets}{Optional, a list of the named subset groups. This can be used to allow only certain subsets
 within the data available for matching.}
-
-\item{CSS}{Optional, location to an alternate CSS stylesheet to change the look and feel of the app.}
 }
 \description{
 Shiny app UI for matching application

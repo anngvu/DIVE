@@ -2,19 +2,19 @@
 % Please edit documentation in R/updateNetwork.R
 \name{vSize}
 \alias{vSize}
-\title{To get size, a numeric column can be summed by each node, which is then usually log-scaled.
-Note: For simplicity, NA is substituted by 1. Because sizes are log-scaled and only meant to proportionally representative,
-this doesn't matter too much.}
+\title{To get size, a numeric column is summed by each node, which is then usually log-scaled.
+Note: For simplicity, NA is substituted by 1. Because sizes are log-scaled
+and only meant to be proportionally representative, this doesn't matter too much.}
 \usage{
 vSize(x, logscale = T)
 }
 \arguments{
 \item{x}{A numeric vector.}
 
-\item{scale}{Whether to log-scale node sizes for aesthetic reasons.}
+\item{logscale}{Whether to log-scale.}
 }
 \description{
-To get size, a numeric column can be summed by each node, which is then usually log-scaled.
-Note: For simplicity, NA is substituted by 1. Because sizes are log-scaled and only meant to proportionally representative,
-this doesn't matter too much.
+To get size, a numeric column is summed by each node, which is then usually log-scaled.
+Note: For simplicity, NA is substituted by 1. Because sizes are log-scaled
+and only meant to be proportionally representative, this doesn't matter too much.
 }

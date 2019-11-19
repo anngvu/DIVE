@@ -11,7 +11,7 @@
 #' within the data available for matching.
 #' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
 #' @export
-matchAppUI <- function(id, subsets, CSS = system.file("www/", "app.css", package = "DIVE")) {
+matchAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
 
   ns <- NS(id)
   fluidPage(theme = shinythemes::shinytheme("paper"),
@@ -20,14 +20,14 @@ matchAppUI <- function(id, subsets, CSS = system.file("www/", "app.css", package
     fluidRow(style="margin-top:30px; margin-bottom:50px; margin-right:100px",
              column(6, style="border-right: 1px solid lightgray;",
                     newDatasetInput(ns("CohortX"))),
-             column(6, refSubsetInput(ns("nPOD"), "nPOD", label = HTML("<strong>Select type of matches to get</strong>"),
-                                      subsets = subsets))
+             column(6, refSubsetInput(ns("ref"), name = "nPOD",
+                                      label = HTML("<strong>Select type of matches to get</strong>")))
              ),
     fluidRow(style="margin-top:50px; margin-bottom:50px; margin-right:100px",
              column(1),
              column(10,
                     tabsetPanel(id = ns("tabs"),
-                                tabPanel("Reference cohort graph", HPCGraphOutput(ns("nPODg")))))
+                                tabPanel("Reference graph", HPCGraphOutput(ns("hpcg")))))
     )
   )
 }
@@ -40,15 +40,15 @@ matchAppUI <- function(id, subsets, CSS = system.file("www/", "app.css", package
 #' logic to power the interactive capabilities of the matching application.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param refdata A data matrix, e.g. a correlation matrix, which must have variables as rownames.
-#' @param HPCG Graph object representing the reference cohort.
+#' @param refdata The reference dataset.
+#' @param HPCG Optional graph object representing the reference dataset.
 #' @param colors Colors
-#' @param datakey Passed to refSubsetInput.
-#' @param vars Optional, variables allowed to be used for matching within refdata organized in categories.
-#' If not given, all variables in refdata are used without a category.
+#' @param datakey Passed to \code{refSubsetInput}, \code{newDataset}, \code{matchResult}.
+#' @param vars Optional, variables allowed to be used for matching within \code{refdata}, organized in categories
+#' displayed as separate lists (mainly for user-friendliness). If not given, all variables can be used and will be displayed in one list.
 #' @param guess Optional, a function for making initial guesses of matchable variables.
 #' @param subsetfeat Which variable to be used as the subset variable.
-#' @param informd Link to to help file
+#' @param informd Link to a help file that can be called with the info module.
 #' @param appdata See ?
 #' @export
 matchApp <- function(input, output, session,
@@ -57,6 +57,7 @@ matchApp <- function(input, output, session,
                      datakey, xname, refname,
                      vars,
                      guess = DIVE::guessMatch,
+                     subsets,
                      subsetfeat,
                      informd = system.file("help/cohort_exchange.Rmd", package = "DIVE"),
                      factorx,
@@ -73,27 +74,30 @@ matchApp <- function(input, output, session,
                           informd = informd,
                           appdata = appdata)
 
+  # Optional cross-checking
   crossCheck <- callModule(intermediate, "internal",
                         data = newCohort,
                         Fun = xCheckID)
 
   reference <- callModule(refSubset, "ref",
-                     refData = refdata,
+                     refdata = refdata,
                      subsetfeat = subsetfeat,
+                     subsets = subsets,
                      datakey = datakey,
                      refname = refname,
                      exclude = crossCheck)
 
   parameters <- callModule(matchLink, "params",
                            refData = reference,
-                           cohortX = newCohort,
+                           setX = newCohort,
                            vars = vars,
                            guess = guess)
 
   results <-  callModule(matchResult, "results",
                          refSubset = reference,
-                         cohortX = newCohort,
-                         params = parameters)
+                         setX = newCohort,
+                         params = parameters,
+                         sourcecol = datakey)
 
   explore <- callModule(exploreMore, "explore",
                         s1Data = refdata,
@@ -144,9 +148,11 @@ matchApp <- function(input, output, session,
 #'
 #' Wrapper to launch app at console
 #'
+#' @param ns Optional namespace for app, passed into server module.
+#' @param ... Parameters passed into server module.
 #' @export
-matchAppR <- function(ns, subsets, ...) {
-  ui <- matchAppUI(ns, subsets)
+matchAppR <- function(ns = NULL, ...) {
+  ui <- matchAppUI(ns)
   server <- function(input, output, session) { callModule(matchApp, ns, ...) }
   shinyApp(ui = ui, server = server)
 }

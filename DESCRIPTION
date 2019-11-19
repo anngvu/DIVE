@@ -9,10 +9,10 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Depends:
-    shiny,
+    shiny (>= 1.4.0),
     ggplot2,
     plotly,
-    data.table
+    data.table (>= 1.12.6)
 Imports:
     shinythemes,
     Hmisc,

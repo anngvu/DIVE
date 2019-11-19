@@ -8,22 +8,14 @@
 #' @param subsets A named list of the available subset factors in the data.
 #' @return A \code{shiny::\link[shiny]{tagList}} for UI to subset a dataset.
 #' @export
-refSubsetInput <- function(id, name = id, label = "", subsets) {
+refSubsetInput <- function(id, name = id, label = "", subsets = "") {
   ns <- NS(id)
   tags$div(id = "refSubsetInput",
     fluidRow(
       column(1),
-      column(3,
-             span(class = "large-name", name)
-      ),
-      column(4,
-             div(id = "refData",
-                 selectizeInput(ns("selectSubset"),
-                             label,
-                             choices = subsets, multiple = T, options = list(placeholder = "(one or more types)"))
-             )
-      ),
-      column(4,
+      column(3, span(class = "large-name", name)),
+      column(4, div(id = "refdata", uiOutput(ns("selectSubsetUI")))),
+      column(4, #
              br(),
              uiOutput(ns("info"))
       ))
@@ -46,8 +38,9 @@ refSubsetInput <- function(id, name = id, label = "", subsets) {
 #' with another or for filtering out rows that don't pass some criteria.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param refData The reference data.table.
-#' @param subsetfeat The name of the column containing subset factors.
+#' @param refdata The reference data.table.
+#' @param subsetfeat The name of the column containing the subset factors.
+#' @param subsets Optional, a custom selection list for subsets; by default, the list is composed of unique options found in \code{subsetfeat}.
 #' @param refkey Optional, a named list containing name/label for creating a key-like column,
 #' where the name is the name of the column. See details for intended purpose.
 #' @param exclude Optional, a list of IDs to exclude.
@@ -55,7 +48,8 @@ refSubsetInput <- function(id, name = id, label = "", subsets) {
 #' @return A reactive subsetted data.table.
 #' @export
 refSubset <- function(input, output, session,
-                      refData, subsetfeat, datakey = NULL, refname = NULL, exclude = reactive({}), informd = NULL) {
+                      refdata, subsetfeat, subsets = NULL, datakey = NULL, refname = NULL, exclude = reactive({}),
+                      informd = NULL) {
 
   # Optional info link  ------------------------------------------------------- #
   if(!is.null(informd)) {
@@ -67,10 +61,18 @@ refSubset <- function(input, output, session,
 
   # ---------------------------------------------------------------------------- #
 
+  output$selectSubsetUI <- renderUI({
+    choices <- if(length(subsets)) subsets else unique(refdata[[subsetfeat]])
+    selectizeInput(session$ns("selectSubset"), label = "",
+                     choices = subsets, selected = NULL,
+                     multiple = T,
+                     options = list(placeholder = "(one or more types)"))
+  })
+
   subsetDT <- reactive({
-    validate(need(input$selectSubset != "", "Please select a type subset"))
-    SS <- refData[get(subsetfeat) %in% input$selectSubset]
-    if(length(exclude())) SS <- SS[!ID %in% exclude() ]
+    validate(need(length(input$selectSubset), "Please select a type subset"))
+    SS <- refdata[get(subsetfeat) %in% input$selectSubset]
+    if(length(exclude())) SS <- SS[!ID %in% exclude() ] # Check-later: ID is hard-coded
     if(!is.null(datakey)) SS[, (datakey) := refname ]
     SS
   })

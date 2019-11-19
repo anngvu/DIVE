@@ -15,7 +15,7 @@ multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
             if(!is.null(CSS)) includeCSS(CSS),
             shinyWidgets::chooseSliderSkin("Flat"),
 
-            fluidRow(style = "background: WhiteSmoke; margin-top: -50px; margin-left: -50px; margin-right: -50px;",
+            fluidRow(class = "multiVUI-ctrl-head", id = ns("multiVUI-ctrl-head"),
               tags$div(style = "margin-top: 50px; margin-left: 50px;",
               column(1, br(), h4("DATA SOURCES")),
               column(7, multiVCtrlUI(ns("ctrl"))),
@@ -35,7 +35,7 @@ multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
   )
 }
 
-#' Shiny app server for multi-views
+#' Shiny app server module for multi-views
 #'
 #' Assembles the logic of various module components, i.e. \code{\link{multiV}}, \code{\link{geneV}},
 #' into a working one-page application
@@ -59,7 +59,8 @@ multiV <- function(input, output, session,
   # controls clinical/phenotype/experimental variable selection
   vselect <- callModule(selectV, "cdata",
                         data = reactive(view$cdata),
-                        selected = reactive(view$vselect))
+                        selected = reactive(view$vselect),
+                        countby = reactive(view$hddata))
 
   # controls gene selection for all xVUI components in multiVUI
   gselect <- callModule(geneV, "gene",

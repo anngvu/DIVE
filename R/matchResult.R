@@ -16,26 +16,27 @@ matchResultOutput <- function(id) {
 #' Shiny module server for generating match results output
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param refSubset Reactive reference cohort subset data.table.
-#' @param cohortX Reactive cohortX data.table, which typically comes from the newCohortInput module.
-#' @param params Reactive params data, typically from the matchParameters module.
-#' @return Reactive values params, intermediate, pair, and matchtable.
+#' @param refSubset Reactive reference cohort subset data.table, i.e. from \code{refSubset}.
+#' @param setX Reactive data.table of comparison subset, i.e from \code{newDataset} module.
+#' @param params Reactive parameters data, i.e. from \code{matchLink} module.
+#' @param sourcecol Name for the source key column of the joined dataset.
+#' @return Reactive values containing params, intermediate results, pair, and matchtable. See \code{matchPair}.
 #' @export
 matchResult <- function(input, output, session,
-                        refSubset, cohortX, params) {
+                        refSubset, setX, params, sourcecol) {
 
   results <- reactiveValues(params = NULL, intermediate = NULL, pair = NULL, matchtable = NULL)
 
-  observeEvent(cohortX(), {
+  observeEvent(setX(), {
     results$params <- results$intermediate <- results$pair <- results$matchtable <- NULL
   })
 
   observeEvent(params$run, {
     # Create fused dataset with required structure
-    intermediate <- dataFusion(d1 = refSubset(), d2 = cohortX(), fuseon = params$matchOn,
-                        sourcecol = "Cohort")
-    # Do match
-    matchpairs <- matchPair(data = intermediate, groupcol = "Cohort", params$matchOn)
+    intermediate <- dataFusion(d1 = refSubset(), d2 = setX(),
+                               fuseon = params$matchOn, sourcecol = sourcecol)
+    # Then do match
+    matchpairs <- matchPair(data = intermediate, groupcol = sourcecol, params$matchOn)
     # Update result reactive vals
     results$params <- params$matchOn
     results$intermediate <- intermediate

@@ -1,4 +1,4 @@
-#' A UI box element for summary values in dashboard-like presentation 
+#' A UI box element for summary values in dashboard-like presentation
 #'
 #' This is similar to the UI element in shinydashboard.
 #'
@@ -32,16 +32,16 @@ infoBox <- function(title, value, subtitle = NULL, icon = shiny::icon("info"), w
                 font-size: 24px;"
   box <- div(style = boxStyle,
                     span(style = iconStyle, icon),
-                    div(style = contentStyle, 
-                        span(style = titleStyle, title), 
-                        span(style = valueStyle, value), 
+                    div(style = contentStyle,
+                        span(style = titleStyle, title),
+                        span(style = valueStyle, value),
                         if (!is.null(subtitle)) p(subtitle)
                       )
                     )
   div(class = if (!is.null(width)) paste0("col-sm-", width), box)
 }
 
-#' A UI box element for summary values in dashboard-like presentation 
+#' A UI box element for summary values in dashboard-like presentation
 #'
 #' This is similar to the UI element in shinydashboard.
 #'
@@ -64,9 +64,9 @@ valueBox <- function(value, subtitle, icon = NULL, textcolor = "black", bgcolor 
   subtitleCSS <- "
     font-weight: bold;
     font-size: 48px;"
-  boxContent <- div(style = paste0(boxCSS, paste("color:", textcolor), ";", paste("background-color:", bgcolor)), 
-                    div(style = "padding: 10px;", div(style = subtitleCSS, value), p(subtitle)), if (!is.null(icon)) div(style = iconCSS, icon))
+  p.subtitleCSS <- "font-size: 20px;"
+  boxContent <- div(style = paste0(boxCSS, paste("color:", textcolor), ";", paste("background-color:", bgcolor)),
+                    div(style = "padding: 10px;", div(style = subtitleCSS, value), p(subtitle, style = p.subtitleCSS), if(!is.null(icon)) div(style = iconCSS, icon)))
   if (!is.null(href)) boxContent <- a(href = href, boxContent)
   div(class = if (!is.null(width)) paste0("col-sm-", width), boxContent)
 }
-  

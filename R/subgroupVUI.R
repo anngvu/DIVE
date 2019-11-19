@@ -44,7 +44,7 @@ subgroupV <- function(input, output, session,
   })
 
   output$select1 <- renderUI({
-    selectInput(session$ns("groupby1"), "(B) group by", choices = names(cdata))
+    selectInput(session$ns("groupby1"), "(A) group by", choices = names(cdata))
   })
 
   output$select2 <- renderUI({
