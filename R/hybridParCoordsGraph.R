@@ -81,11 +81,13 @@ hybridNodes <- function(data, vcat, yNAnode) {
 #'
 #' @param hpcg Data from \code{\link{hybridParCoordsGraph}}.
 #' @param colors Color mappings.
-#' @param plotbgcolor Optional plot background color; transparent if not given,
+#' @param plotbgcolor Optional plot background color; transparent if not given.
+#' @param txtcolor Optional label text color.
 #' @export
-plotlyHPCG <- function(hpcg, colors, plotbgcolor = NULL) {
-  line <- list(type = "line", line = list(color = "black"), xref = "x", yref = "y")
-  ax <- list(title = "", zeroline = FALSE, showline = FALSE, showgrid = FALSE)
+plotlyHPCG <- function(hpcg, colors, plotbgcolor = NULL, txtcolor = "black", linecolor = "black") {
+  font <- list(color = txtcolor)
+  line <- list(type = "line", line = list(color = linecolor), xref = "x", yref = "y")
+  ax <- list(title = "", zeroline = FALSE, showline = FALSE, showgrid = FALSE, tickfont = font)
   lines <- list()
   # set the x-axis label and y-axis limits
   for(v in hpcg$vnum) {
@@ -99,7 +101,8 @@ plotlyHPCG <- function(hpcg, colors, plotbgcolor = NULL) {
     add_lines(color = ~color, alpha = 0.3) %>%
     layout(xaxis = ax, yaxis = c(ax, showticklabels = F), shapes = lines,
            plot_bgcolor = if(is.null(plotbgcolor)) "rgba(0,0,0,0)" else plotbgcolor,
-           paper_bgcolor = if(is.null(plotbgcolor)) "rgba(0,0,0,0)" else plotbgcolor)
+           paper_bgcolor = if(is.null(plotbgcolor)) "rgba(0,0,0,0)" else plotbgcolor,
+           legend = list(font = font))
   # Add nodes for categorical axes
   HPCG <- HPCG %>% add_trace(data = hpcg$nodes$NAnodes, type = "scatter", mode = "markers",
                              name = "Not applicable/Not available",

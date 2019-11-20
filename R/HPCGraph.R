@@ -23,10 +23,10 @@ HPCGraphOutput  <- function(id) {
 #' @param hpcg Data object produced by \code{\link{newHPCG}}.
 #' @export
 HPCGraph <- function(input, output, session,
-                     hpcg, colors, plotbgcolor = NULL) {
+                     hpcg, colors, plotbgcolor = NULL, txtcolor = "black", linecolor = "black") {
 
   output$graph <- renderPlotly({
-    HPCG <- plotlyHPCG(hpcg, colors, plotbgcolor)
+    HPCG <- plotlyHPCG(hpcg, colors, plotbgcolor, txtcolor, linecolor)
     HPCG %>% plotly::config(displayModeBar = F)
   })
 
@@ -52,7 +52,7 @@ HPCGraph <- function(input, output, session,
              yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
              paper_bgcolor= "transparent", plot_bgcolor = "transparent",
              autosize = F, margin = list(t = 150, b = 20, r = 100, l = 70),
-             font = list(size = 10))
+             font = list(size = 10, color = txtcolor))
     p
   })
 }
