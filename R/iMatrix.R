@@ -106,41 +106,25 @@ iMatrix <- function(input, output, session,
      }
   })
 
+  # additional group annotations for rows, shown as a vertical subplot at the right of p
   observeEvent(display$rowmeta, {
       if(length(display$rowmeta)) {
         M <- display$filM
         rtext <- matrix(as.character(display$rowmeta))
-        # additional group annotations for rows, shown as a vertical subplot at the right of p
-          pmeta$row <- plot_ly(y = rownames(M), x = "Group", z = matrix(as.integer(display$rowmeta)), text = rtext,
+        pmeta$row <- plot_ly(y = rownames(M), x = "Group", z = matrix(as.integer(display$rowmeta)), text = rtext,
                            type = "heatmap", showscale = FALSE, name = "Row Group",
                            colorscale = "Portland", hovertemplate = "<b>%{text}</b>") %>%
           layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""),
                  yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""))
-      } else {
+        } else {
         pmeta$row <- plotly_empty()
-      }
+        }
   })
 
+  # additional group annotations for cols, shown as a horizontal subplot at the top of p
   observeEvent(display$colmeta, {
     if(length(display$colmeta)) {
       M <- display$filM
-      # rvals <- scales::rescale(as.integer(display$rowmeta))
-      # cvals <- scales::rescale(as.integer(display$colmeta))
-      # # display$optrowgroup == display$optcolgroup
-      # if(F) {
-      #   rdomain <- cdomain <- c(min(rvals, cvals, na.rm = T), max(rvals, cvals, na.rm = T)) # consistent colors for when annotations are the same type
-      #   rpal <- cpal <- "Spectral"
-      # } else {
-      #   rdomain <- cdomain <- NULL
-      #   cpal <- "Spectral"
-      #   rpal <- "Set3"
-      # }
-      # rowcolors <- scales::col_numeric(rpal, domain = rdomain)(rvals)
-      # rcolorscale <- data.frame(rvals, rowcolors)
-      #
-      # colcolors <- scales::col_numeric(cpal, domain = cdomain)(cvals)
-      # ccolorscale <- data.frame(cvals, colcolors)
-
       ctext <- matrix(as.character(display$colmeta), nrow = 1)
       pmeta$col <- plot_ly(x = colnames(M), y = "Group",  z = matrix(as.integer(display$colmeta), nrow = 1),
                          type = "heatmap", showscale = FALSE, name = "Column Group", text = ctext,
@@ -153,49 +137,6 @@ iMatrix <- function(input, output, session,
 
   })
 
-  # rowmeta <- reactive({
-  #
-  #   if(length(display$rowmeta)) {
-  #     M <- display$filM
-  #     rvals <- scales::rescale(as.integer(display$rowmeta))
-  #     cvals <- scales::rescale(as.integer(display$colmeta))
-  #     # display$optrowgroup == display$optcolgroup
-  #     if(F) {
-  #       rdomain <- cdomain <- c(min(rvals, cvals, na.rm = T), max(rvals, cvals, na.rm = T)) # consistent colors for when annotations are the same type
-  #       rpal <- cpal <- "Spectral"
-  #     } else {
-  #       rdomain <- cdomain <- NULL
-  #       cpal <- "Spectral"
-  #       rpal <- "Set3"
-  #     }
-  #     rowcolors <- scales::col_numeric(rpal, domain = rdomain)(rvals)
-  #     rcolorscale <- data.frame(rvals, rowcolors)
-  #
-  #     colcolors <- scales::col_numeric(cpal, domain = cdomain)(cvals)
-  #     ccolorscale <- data.frame(cvals, colcolors)
-  #
-  #     rtext <- matrix(as.character(display$rowmeta))
-  #
-  #     # additional group annotations for rows, shown as a vertical subplot at the right of p
-  #       plot_ly(y = rownames(M), x = 1, z = matrix(as.integer(display$rowmeta)), text = rtext,
-  #                        type = "heatmap", showscale = FALSE, name = "Row Group",
-  #                        colorscale = "Portland", hovertemplate = "<b>%{text}</b>") %>%
-  #       layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""),
-  #              yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""))
-  #   } else {
-  #     plotly_empty()
-  #   }
-  #   #
-  #   #   # additional group annotations for columns, shown as a horizontal subplot at the top of p
-  #   #
-  #   #   ctext <- matrix(as.character(display$colmeta), nrow = 1)
-  #   #   colmeta <- plot_ly(x = colnames(M), y = 1,  z = matrix(as.integer(display$colmeta), nrow = 1),
-  #   #                      type = "heatmap", showscale = FALSE, name = "Column Group", text = ctext,
-  #   #                      colorscale = "Portland", hovertemplate = "<b>%{text}</b>")  %>%
-  #   #     layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""),
-  #   #            yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""))
-  #
-  # })
 
   #-- Drilldown handling -----------------------------------------------------------------------------------------------------#
   observeEvent(display$cdata, {

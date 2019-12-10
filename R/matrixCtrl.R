@@ -211,13 +211,14 @@ matrixCtrl <- function(input, output, session,
   observe({
     if(!is.null(metadata)) {
       rowmeta <- metadata[[input$optrowgroup]][metadata[[vkey]] %in% rownames(mstate$filM)]
-      rowmeta <- factor(rowmeta, levels = unique(metadata[[input$optrowgroup]]))
+      rlevels <- sample(unique(metadata[[input$optrowgroup]])) # this is to make sure group annotation colors are mixed when displayed
+      rowmeta <- factor(rowmeta, levels = rlevels)
       mstate$rowmeta <- rowmeta
 
       optcolgroup <- if(is.null(input$optcolgroup)) input$optrowgroup else input$optcolgroup
       colmeta <- metadata[[optcolgroup]][metadata[[vkey]] %in% colnames(mstate$filM)]
       # when optcolgroup and optrowgroup are the same, harmonize levels used
-      levels <- if(optcolgroup == input$optrowgroup) unique(metadata[[input$optrowgroup]]) else unique(metadata[[optcolgroup]])
+      levels <- if(optcolgroup == input$optrowgroup) rlevels else unique(metadata[[optcolgroup]])
       colmeta <- factor(colmeta, levels = levels)
       mstate$colmeta <- colmeta
     }
