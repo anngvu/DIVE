@@ -34,6 +34,12 @@ selectV <- function(input, output, session,
 
   Vdata <- reactiveVal(NULL)
 
+  # parse a URL request for a specific dataset
+  # observe({
+  #   query <- parseQueryString(session$clientData$url_search)
+  #   if(!is.null(query[["dataset"]])) updateSelectInput(session, "dataset", selected = query[["dataset"]])
+  # })
+
   output$select <- renderUI({
     # shiny::req(data(), selected())
     choices <- names(data())[names(data()) != key]

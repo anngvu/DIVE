@@ -67,83 +67,135 @@ iMatrix <- function(input, output, session,
                     plotbg = "#404040")
   {
 
+  pmeta <- reactiveValues(row = plotly_empty(), col = plotly_empty())
+
   #-- Main matrix plot -----------------------------------------------------------------------------------------------------#
 
   output$matrix <- renderPlotly({
-     req(display$filM)
-     if(!nrow(display$filM)) {
-        empty <- plotly_empty() %>% plotly::config(displayModeBar = F)
-        return(empty)
-      }
-     M <- display$filM
-     px <- 1000/ncol(M) # bug? plotly doesn't display the plot if height is less than 100px; max height should be ~1000px
-     height <- nrow(M) * px
-     height <- if(height < 400) 400 else ifelse(height > 1000, 1000, height)
-     show <- nrow(M) <= 20 # only show y axis-labels when a reasonable number of rows is being displayed
-     colorz <- if(input$abspalette %% 2) {
-       colorRampPalette(abspal)
+     if(is.null(display$filM) || !nrow(display$filM)) {
+        # empty <- plotly_empty() %>% plotly::config(displayModeBar = F)
+        # return(empty)
      } else {
-       colorRampPalette(defpal)
-     }
-     #colorz <- colorRampPalette(c("#FF008C", "gray", "#404040", "gray", "#00FF73")) # not colorblind friendly
-
-     p <- plot_ly(x = colnames(M), y = rownames(M), z = M, type = "heatmap", colors = colorz(101), name = "Exploratory\nMap",
-                  hovertemplate = "row: <b>%{y}</b><br>col: <b>%{x}</b><br>correlation: <b>%{z}</b>", # xgap = 1, ygap = 1,
-                  height = height, colorbar = list(thickness = 8)) %>%
-       layout(xaxis = list(title = "", showgrid = F, showticklabels = input$showclabs %% 2 == 1, ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
-              yaxis = list(title = "", showgrid = F, showticklabels = input$showrlabs %% 2 == 1, ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
-              plot_bgcolor = plotbg) %>%
-       event_register("plotly_click")
-
-     # since plot_bgcolor can't be set for individual plots in subplot, layout adjusts depending on whether metadata is passed in
-     if(!is.null(display$rowmeta)) {
-
-       rvals <- scales::rescale(as.integer(display$rowmeta))
-       cvals <- scales::rescale(as.integer(display$colmeta))
-
-       # display$optrowgroup == display$optcolgroup
-       if(F) {
-         rdomain <- cdomain <- c(min(rvals, cvals, na.rm = T), max(rvals, cvals, na.rm = T)) # consistent colors for when annotations are the same type
-         rpal <- cpal <- "Spectral"
+       M <- display$filM
+       px <- 1000/ncol(M) # bug? plotly doesn't display the plot if height is less than 100px; max height should be ~1000px
+       height <- nrow(M) * px
+       height <- if(height < 400) 400 else ifelse(height > 1000, 1000, height)
+       show <- nrow(M) <= 20 # only show y axis-labels when a reasonable number of rows is being displayed
+       colorz <- if(input$abspalette %% 2) {
+         colorRampPalette(abspal)
        } else {
-         rdomain <- cdomain <- NULL
-         cpal <- "Spectral"
-         rpal <- "Set3"
+         colorRampPalette(defpal)
        }
-       rowcolors <- scales::col_numeric(rpal, domain = rdomain)(rvals)
-       rcolorscale <- data.frame(rvals, rowcolors)
+       #colorz <- colorRampPalette(c("#FF008C", "gray", "#404040", "gray", "#00FF73")) # not colorblind friendly
 
-       colcolors <- scales::col_numeric(cpal, domain = cdomain)(cvals)
-       ccolorscale <- data.frame(cvals, colcolors)
+       p <- plot_ly(x = colnames(M), y = rownames(M), z = M, type = "heatmap", colors = colorz(101), name = "Exploratory\nMap",
+                    hovertemplate = "row: <b>%{y}</b><br>col: <b>%{x}</b><br>correlation: <b>%{z}</b>", # xgap = 1, ygap = 1,
+                    height = height,
+                    colorbar = list(thickness = 8)) %>%
+         layout(xaxis = list(title = "", showgrid = F, showticklabels = input$showclabs %% 2 == 1, ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
+                yaxis = list(title = "", showgrid = F, showticklabels = input$showrlabs %% 2 == 1, ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T),
+                plot_bgcolor = plotbg) %>%
+         event_register("plotly_click")
 
-       rtext <- matrix(as.character(display$rowmeta))
-
-       # additional group annotations for rows, shown as a vertical subplot at the right of p
-       rowmeta <- plot_ly(y = rownames(M), x = 1, z = matrix(as.integer(display$rowmeta)), text = rtext,
-                          type = "heatmap", showscale = FALSE, name = "Row Group",
-                          colorscale = "Portland", hovertemplate = "<b>%{text}</b>") %>%
-         layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""),
-                yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""))
-
-       # additional group annotations for columns, shown as a horizontal subplot at the top of p
-       ctext <- matrix(as.character(display$colmeta), nrow = 1)
-       colmeta <- plot_ly(x = colnames(M), y = 1,  z = matrix(as.integer(display$colmeta), nrow = 1),
-                          type = "heatmap", showscale = FALSE, name = "Column Group", text = ctext,
-                          colorscale = "Portland", hovertemplate = "<b>%{text}</b>")  %>%
-         layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""),
-                yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""))
-
-       # the main matrix plot
-       main <- subplot(colmeta, plotly_empty(), p, rowmeta,
-                       nrows = 2, shareX = T, shareY = T, margin = 0.01,
-                       widths = c(0.97, 0.03), heights = c(0.03, 0.97))
-
-     } else {
-       main <- p
+       # since plot_bgcolor can't be set for individual plots in subplot, layout adjusts depending on whether metadata is passed in
+       main <- subplot(pmeta$col, plotly_empty(), p, pmeta$row,
+                      nrows = 2, shareX = T, shareY = T, margin = 0.01,
+                      widths = c(0.97, 0.03), heights = c(0.03, 0.97))
+       main$x$source <- "main"
+       main %>% plotly::config(displayModeBar = F)
      }
-     main$x$source <- "main"
-     main %>% plotly::config(displayModeBar = F)
   })
+
+  observeEvent(display$rowmeta, {
+      if(length(display$rowmeta)) {
+        M <- display$filM
+        rtext <- matrix(as.character(display$rowmeta))
+        # additional group annotations for rows, shown as a vertical subplot at the right of p
+          pmeta$row <- plot_ly(y = rownames(M), x = "Group", z = matrix(as.integer(display$rowmeta)), text = rtext,
+                           type = "heatmap", showscale = FALSE, name = "Row Group",
+                           colorscale = "Portland", hovertemplate = "<b>%{text}</b>") %>%
+          layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""),
+                 yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""))
+      } else {
+        pmeta$row <- plotly_empty()
+      }
+  })
+
+  observeEvent(display$colmeta, {
+    if(length(display$colmeta)) {
+      M <- display$filM
+      # rvals <- scales::rescale(as.integer(display$rowmeta))
+      # cvals <- scales::rescale(as.integer(display$colmeta))
+      # # display$optrowgroup == display$optcolgroup
+      # if(F) {
+      #   rdomain <- cdomain <- c(min(rvals, cvals, na.rm = T), max(rvals, cvals, na.rm = T)) # consistent colors for when annotations are the same type
+      #   rpal <- cpal <- "Spectral"
+      # } else {
+      #   rdomain <- cdomain <- NULL
+      #   cpal <- "Spectral"
+      #   rpal <- "Set3"
+      # }
+      # rowcolors <- scales::col_numeric(rpal, domain = rdomain)(rvals)
+      # rcolorscale <- data.frame(rvals, rowcolors)
+      #
+      # colcolors <- scales::col_numeric(cpal, domain = cdomain)(cvals)
+      # ccolorscale <- data.frame(cvals, colcolors)
+
+      ctext <- matrix(as.character(display$colmeta), nrow = 1)
+      pmeta$col <- plot_ly(x = colnames(M), y = "Group",  z = matrix(as.integer(display$colmeta), nrow = 1),
+                         type = "heatmap", showscale = FALSE, name = "Column Group", text = ctext,
+                         colorscale = "Portland", hovertemplate = "<b>%{text}</b>")  %>%
+        layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""),
+               yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""))
+    } else {
+      pmeta$col <- plotly_empty()
+    }
+
+  })
+
+  # rowmeta <- reactive({
+  #
+  #   if(length(display$rowmeta)) {
+  #     M <- display$filM
+  #     rvals <- scales::rescale(as.integer(display$rowmeta))
+  #     cvals <- scales::rescale(as.integer(display$colmeta))
+  #     # display$optrowgroup == display$optcolgroup
+  #     if(F) {
+  #       rdomain <- cdomain <- c(min(rvals, cvals, na.rm = T), max(rvals, cvals, na.rm = T)) # consistent colors for when annotations are the same type
+  #       rpal <- cpal <- "Spectral"
+  #     } else {
+  #       rdomain <- cdomain <- NULL
+  #       cpal <- "Spectral"
+  #       rpal <- "Set3"
+  #     }
+  #     rowcolors <- scales::col_numeric(rpal, domain = rdomain)(rvals)
+  #     rcolorscale <- data.frame(rvals, rowcolors)
+  #
+  #     colcolors <- scales::col_numeric(cpal, domain = cdomain)(cvals)
+  #     ccolorscale <- data.frame(cvals, colcolors)
+  #
+  #     rtext <- matrix(as.character(display$rowmeta))
+  #
+  #     # additional group annotations for rows, shown as a vertical subplot at the right of p
+  #       plot_ly(y = rownames(M), x = 1, z = matrix(as.integer(display$rowmeta)), text = rtext,
+  #                        type = "heatmap", showscale = FALSE, name = "Row Group",
+  #                        colorscale = "Portland", hovertemplate = "<b>%{text}</b>") %>%
+  #       layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""),
+  #              yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""))
+  #   } else {
+  #     plotly_empty()
+  #   }
+  #   #
+  #   #   # additional group annotations for columns, shown as a horizontal subplot at the top of p
+  #   #
+  #   #   ctext <- matrix(as.character(display$colmeta), nrow = 1)
+  #   #   colmeta <- plot_ly(x = colnames(M), y = 1,  z = matrix(as.integer(display$colmeta), nrow = 1),
+  #   #                      type = "heatmap", showscale = FALSE, name = "Column Group", text = ctext,
+  #   #                      colorscale = "Portland", hovertemplate = "<b>%{text}</b>")  %>%
+  #   #     layout(xaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""),
+  #   #            yaxis = list(title = "", showgrid = F, showticklabels = F, ticks = ""))
+  #
+  # })
 
   #-- Drilldown handling -----------------------------------------------------------------------------------------------------#
   observeEvent(display$cdata, {
@@ -159,56 +211,56 @@ iMatrix <- function(input, output, session,
     }
   })
 
-  output$scatter <- renderPlotly({
-    req(!is.null(input$drilldown))
-    var1 <- input$drilldown[1]
-    var2 <- input$drilldown[2]
-    tmp <- as.data.frame(display$cdata)
-    dgroup <- names(dcolors) # default categorical group colors
-    colorby <- dgroup
-    if(grepl(factorx, var1)) tmp[[var1]] <- factor(tmp[[var1]])
-
-    if(!is.na(var2)) { #-> do scatter plot 2-variable view -------------------------------------#
-      tmp <- tmp[complete.cases(tmp[, c(var1, var2)]), ]
-      if(grepl(factorx, var2)) tmp[[var2]] <- factor(tmp[[var2]])
-      p <- ggplot(tmp, aes_string(x = var1, y = var2)) +
-        labs(title = paste("n =", nrow(tmp))) +
-        theme_bw()
-      if(all(grepl(factorx, c(var1, var2)))) {
-        p <- p + geom_count() # deals with overplotting when both variables are categorical
-      } else {
-        p <- p + geom_point(aes_string(color = colorby), size = 2, alpha = 0.7)
-      }
-      if(colorby == dgroup) { # default is to color points by dgroup
-        p <- p + scale_colour_manual(values = dcolors[[1]])
-      } else { # continuous color scale for interval variable
-        p <- p + scale_colour_distiller(palette = "YlOrRd", na.value = "black")
-      }
-      if(input$plotsmooth) p <- p + stat_smooth(method = "lm")
-      if(input$switchXY) p <- p + coord_flip()
-      p <- ggplotly(p)
-      p %>% plotly::config(displayModeBar = F)
-
-    } else { #-> do boxplot 1-variable view ----------------------------------------------------#
-      tmp <- tmp[!is.na(tmp[[var1]]), ]
-      tmp[[dgroup]] <- factor(tmp[[dgroup]])
-      p <- ggplot(tmp, aes_string(x = dgroup, y = var1)) +
-        geom_boxplot(outlier.color = NA) +
-        scale_colour_manual(values = dcolors[[1]]) +
-        labs(title = paste("n =", nrow(tmp))) +
-        theme_bw()
-      if(is.factor(tmp[[var1]])) {
-        p <- p + geom_count(aes_string(color = dgroup))
-      } else {
-        p <- p + geom_point(aes_string(color = dgroup), size = 2, alpha = 0.5,
-                            position = position_jitter(width = 0.05, height = 0.05))
-      }
-      p <- ggplotly(p)
-      p$x$data[[1]]$marker$opacity <- 0 # manual specify since plotly doesn't translate this for boxplot
-      p <- hide_legend(p)
-      if(length(levels(tmp[[dgroup]])) > 4) p <- p %>% layout(xaxis = list(tickangle = 45))
-      p %>% plotly::config(displayModeBar = F)
-    }
-  })
+  # output$scatter <- renderPlotly({
+  #   req(!is.null(input$drilldown))
+  #   var1 <- input$drilldown[1]
+  #   var2 <- input$drilldown[2]
+  #   tmp <- as.data.frame(display$cdata)
+  #   dgroup <- names(dcolors) # default categorical group colors
+  #   colorby <- dgroup
+  #   if(grepl(factorx, var1)) tmp[[var1]] <- factor(tmp[[var1]])
+  #
+  #   if(!is.na(var2)) { #-> do scatter plot 2-variable view -------------------------------------#
+  #     tmp <- tmp[complete.cases(tmp[, c(var1, var2)]), ]
+  #     if(grepl(factorx, var2)) tmp[[var2]] <- factor(tmp[[var2]])
+  #     p <- ggplot(tmp, aes_string(x = var1, y = var2)) +
+  #       labs(title = paste("n =", nrow(tmp))) +
+  #       theme_bw()
+  #     if(all(grepl(factorx, c(var1, var2)))) {
+  #       p <- p + geom_count() # deals with overplotting when both variables are categorical
+  #     } else {
+  #       p <- p + geom_point(aes_string(color = colorby), size = 2, alpha = 0.7)
+  #     }
+  #     if(colorby == dgroup) { # default is to color points by dgroup
+  #       p <- p + scale_colour_manual(values = dcolors[[1]])
+  #     } else { # continuous color scale for interval variable
+  #       p <- p + scale_colour_distiller(palette = "YlOrRd", na.value = "black")
+  #     }
+  #     if(input$plotsmooth) p <- p + stat_smooth(method = "lm")
+  #     if(input$switchXY) p <- p + coord_flip()
+  #     p <- ggplotly(p)
+  #     p %>% plotly::config(displayModeBar = F)
+  #
+  #   } else { #-> do boxplot 1-variable view ----------------------------------------------------#
+  #     tmp <- tmp[!is.na(tmp[[var1]]), ]
+  #     tmp[[dgroup]] <- factor(tmp[[dgroup]])
+  #     p <- ggplot(tmp, aes_string(x = dgroup, y = var1)) +
+  #       geom_boxplot(outlier.color = NA) +
+  #       scale_colour_manual(values = dcolors[[1]]) +
+  #       labs(title = paste("n =", nrow(tmp))) +
+  #       theme_bw()
+  #     if(is.factor(tmp[[var1]])) {
+  #       p <- p + geom_count(aes_string(color = dgroup))
+  #     } else {
+  #       p <- p + geom_point(aes_string(color = dgroup), size = 2, alpha = 0.5,
+  #                           position = position_jitter(width = 0.05, height = 0.05))
+  #     }
+  #     p <- ggplotly(p)
+  #     p$x$data[[1]]$marker$opacity <- 0 # manual specify since plotly doesn't translate this for boxplot
+  #     p <- hide_legend(p)
+  #     if(length(levels(tmp[[dgroup]])) > 4) p <- p %>% layout(xaxis = list(tickangle = 45))
+  #     p %>% plotly::config(displayModeBar = F)
+  #   }
+  # })
 
 }

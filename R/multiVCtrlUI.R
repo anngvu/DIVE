@@ -66,6 +66,12 @@ multiVCtrl <- function(input, output, session,
 
   updateSelectizeInput(session, "dataset", choices = choices, selected = NULL)
 
+  # parse a URL request for a specific dataset
+  observe({
+    query <- parseQueryString(session$clientData$url_search)
+    if(!is.null(query[["dataset"]])) updateSelectInput(session, "dataset", selected = query[["dataset"]])
+  })
+
   observe({
     if(!length(input$dataset)) { # when everything has been cleared from the global dataset selection
       dataset <- list(NULL) # set return to NULL
