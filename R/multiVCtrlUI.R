@@ -37,21 +37,28 @@ multiVCtrlUI <- function(id, menu = T, upload = T, GEO = T) {
 #' \code{multiVCtrl} is the control hub that provides the data and parameters for \code{\link{multiVUI}},
 #' \code{\link{geneV}} and \code{\link{selectV}}.
 #'
-#' The server logic handles sourcing of datasets for three different methods:
+#' The server logic handles sourcing of high-throughput datasets with three different methods:
 #' \enumerate{
 #'   \item Selecting datasets that are pre-processed and stored in memory.
 #'   \item User-uploaded data.
 #'   \item A beta (and least-supported) method of retrieving datasets from GEO.
 #' }
+#' The module also handles upload of low-throughput data. The module is instantiated with whatever is
+#' passed into the parameter \code{cdata}. The module uses a mutable version of \code{cdata} that
+#' can change based on user uploads. The data in \code{cdata} is supposed to be a phenotype or clinical
+#' feature that one usually tries to correlate with expression data and can be numeric or categorical.
+#' By default, any column that is character as well as what matches \code{factorx} in \code{cdata}
+#' will be converted to factors.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param cdata Data.table of low-throughput data.
+#' @param cdata Data.table of "low-throughput" phenotype or clinical data.
 #' @param hdlist A list containing high dimensional datasets; must have names to be used as choices in the selection menu.
 #' @param choices Names referencing datasets in hdlist, to be used in selection menu.
 #' When the datasets should be displayed as grouped, the choices can be passed in accordingly for \code{\link[shiny]{selectizeInput}}.
 #' @param key Name of column that contains IDs in \preformatted{cdata} that link to samples in \preformatted{hdlist} datasets. Defaults to "ID".
 #' @param vselect A default selected column in \preformatted{cdata} to display.
-#' @param checkFun A check function used for checking data uploads.
+#' @param checkFun Optional, a check function used for checking data uploads.
+#' @param factorx If not NULL, the given name pattern will be used for recognizing and converting columns in cdata to factor. See details.
 #' @param infoRmd Optional link to an Rmarkdown document containing details for the data upload module.
 #' @return A \code{view} object which is a list containing the data matrix for the parameter \preformatted{hdata} of the \code{\link{multiV}} module,
 #' as well as parameters for \code{\link{geneV}} and \code{\link{selectV}}.
@@ -59,7 +66,9 @@ multiVCtrlUI <- function(id, menu = T, upload = T, GEO = T) {
 multiVCtrl <- function(input, output, session,
                       cdata, hdlist, choices = names(hdlist),
                       key = "ID", vselect = "donor.type",
-                      checkFun = NULL, infoRmd = system.file("help/ht_upload.Rmd", package = "DIVE")) {
+                      checkFun = NULL,
+                      factorx = NULL,
+                      infoRmd = system.file("help/ht_upload.Rmd", package = "DIVE")) {
 
   inview <- c()
   view <- reactiveValues(cdata = cdata, hdlist = hdlist, hddata = NULL, vselect = vselect)
@@ -108,7 +117,9 @@ multiVCtrl <- function(input, output, session,
     if(key %in% names(data)) {
       # low-throughput processing: check and modify column names if necessary
       data <- merge(cdata, data, by = key, all = T)
+      if(!is.null(factorx)) for(i in grep(factorx, names(data))) data[[i]] <- factor(data[[i]])
       view$cdata <- data
+      removeModal()
     } else {
       # high-throughput processing
       filename <- attr(data, "filename")
@@ -162,6 +173,7 @@ multiVCtrl <- function(input, output, session,
   return(view)
 }
 
+# TO-DO
 # Check fun, returns notification message
 xpMatrixCheck <- function() {
   # check that IDs are nPOD IDs

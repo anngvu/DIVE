@@ -61,6 +61,8 @@ xV <- function(input, output, session,
   })
 
   #-- Custom select --------------------------------------------------------------------------------------------------#
+
+  # This is the "local" select available for each dataset
   observeEvent(input$addcustom, {
     if(input$addcustom %% 2) {
       insertUI(selector = paste0("#", session$ns("custom")), immediate = T,
@@ -84,8 +86,8 @@ xV <- function(input, output, session,
   #-- Plots ----------------------------------------------------------------------------------------------------------#
 
   # Global vs. local selection control
-  # local select takes precedence over global select; when local select option is displayed, global subsetting is ignored
-  # to restore plot listening to global selection, local select must be removed
+  # Local select takes precedence over global select; when local select option is displayed, global subsetting is ignored.
+  # To restore plot listening to global selection, local select must be removed.
   observe({
     if(is.null(localselect())) { if(!length(selected())) localhdata(hdata) else localhdata(hdata[, colnames(hdata) %in% selected(), drop = F]) }
   })
@@ -134,6 +136,8 @@ xV <- function(input, output, session,
             plot_bgcolor = "#F5F5F5")
   })
 
+  # cdata() should be a table already subsetted by selected variables (columns);
+  # cplotdata is a further subset by samples (rows) that are present in the high-throughput dataset
   cplotdata <- reactive({
     if(is.null(cdata())) return(NULL)
     if(!is.null(hplotdata())) {
@@ -149,17 +153,20 @@ xV <- function(input, output, session,
     plotdata <- cplotdata()
     y <- as.character(plotdata[[key]])
     notID <- names(plotdata) != key
-    vcat <- sapply(plotdata, function(v) class(v) == "character" | class(v) == "factor")
+    vcat <- sapply(plotdata, function(v) class(v) == "character" || class(v) == "factor")
+
+    # Generate a list of plotly plots for categorical variables
     cplotcat <- lapply(names(plotdata)[vcat & notID],
                            function(v) {
-                             # Note: there's a plotly issue that will spew many warnings
+                             # Note: there's a plotly issue that will spew many warnings for the below
                              plot_ly(x = 1, y = y, name = v, type = "bar", orientation = "h", showlegend = F,
-                                     color = factor(plotdata[[v]]), text = plotdata[[v]],
+                                     color = plotdata[[v]], text = plotdata[[v]],
                                      hoverinfo = "text") %>%
                                layout(xaxis = list(title = v, zeroline = FALSE, showline = FALSE,
                                                    showticklabels = FALSE, showgrid = FALSE),
                                       yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
                          })
+    # Generate a list of plotly plots for numeric variables
     cplotnum <- lapply(names(plotdata)[!vcat & notID],
                            function(v) {
                              x <- plotdata[[v]]

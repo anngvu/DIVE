@@ -48,13 +48,16 @@ multiV <- function(input, output, session,
                    hdata = NULL,
                    hcat = NULL,
                    cdata = NULL,
+                   factorx = NULL,
                    genes = DIVE::gene_symbols,
                    prelist = NULL,
                    slabel = DIVE::gene_symbols_map) {
 
   view <- callModule(multiVCtrl, "ctrl",
-                     cdata = cdata, hdlist = hdata,
-                     choices = hcat)
+                     cdata = cdata,
+                     hdlist = hdata,
+                     choices = hcat,
+                     factorx = factorx)
 
   # controls clinical/phenotype/experimental variable selection
   vselect <- callModule(selectV, "cdata",
