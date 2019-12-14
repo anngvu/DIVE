@@ -45,18 +45,33 @@ xV <- function(input, output, session,
 
   localselect <- reactiveVal(NULL)
   localhdata <- reactiveVal(hdata)
+  localcdata <- reactiveVal(NULL)
+  clusterplot <- reactiveVal(NULL)
   hivarprct <- reactiveVal(10)
 
   #-- Clustering -----------------------------------------------------------------------------------------------------#
   observeEvent(input$cluster, {
     withProgress(value = 0.2, message = "creating distance matrix...",
       expr = {
-              gene_clust <- dist(t(hdata))
+              # gene_clust <- dist(t(hdata)) # cluster by columns
+              # setProgress(value = 0.7, message = "clustering...")
+              # gene_clust <- hclust(gene_clust)
+              # setProgress(value = 0.9, message = "reordering columns...")
+              # hdata <- hdata[, gene_clust$order]
+              # localhdata(hdata)
+              sample_clust <- dist(hdata) # clust by samples
               setProgress(value = 0.7, message = "clustering...")
-              gene_clust <- hclust(gene_clust)
-              setProgress(value = 0.9, message = "reordering columns...")
-              hdata <- hdata[, gene_clust$order]
-              localhdata(hdata)
+              sample_clust <- fastcluster::hclust(sample_clust)
+              setProgress(value = 0.9, message = "reordering rows (cases)...")
+              localhdata(hdata[sample_clust$labels[sample_clust$order], ])
+
+              # add new dendroplot
+              dendro <- plotly::plot_dendro(as.dendrogram(sample_clust), width = 2200)
+              dendro <- dendro %>% layout(xaxis = list(autorange = "reversed", showgrid = FALSE), yaxis = list(showgrid = FALSE),
+                                          paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF")
+              # the only way to hide labels and legend for now:
+              dendro$x$attrs <- lapply(dendro$x$attrs, function(x) { x$showlegend <- F ; x$text <- ""; x })
+              clusterplot(dendro)
               })
   })
 
@@ -109,13 +124,19 @@ xV <- function(input, output, session,
     }
   })
 
-  # Plot subsetting by phenotype variables
+  # Plot subsetting and sample-ordering by phenotype variables
+  observeEvent(cdata(), {
+      # manually order rows by order given in new cdata()
+      # cdata() is itself ordered by a "sort by" column
+      ckey <- cdata()[as.character(get(key)) %in% rownames(localhdata()), as.character(get(key))] # IDs ordered in cdata()
+      plotdata <- localhdata()[ckey, , drop = F]
+      localhdata(plotdata)
+      clusterplot(NULL)
+  })
+
+
   hplotdata <- reactive({
     plotdata <- localhdata()
-    if(!is.null(cdata())) { # manually order rows by order given in cdata()
-      ckey <- cdata()[as.character(get(key)) %in% rownames(hdata), as.character(get(key))]
-      plotdata <- plotdata[ckey, , drop = F]
-    }
     # subset to highest variance
     selected <- subHiVar(plotdata, percent = hivarprct())
     plotdata[, colnames(plotdata) %in% selected, drop = F] # for some reason plotdata[, selected, drop = F] gives subscript out of bounds
@@ -130,9 +151,9 @@ xV <- function(input, output, session,
     plot_ly(z = hplotdata(), x = xlabs, y = ylabs, name = "Expression\nMatrix",
             type = "heatmap", height = 25 * nrow(hdata), colors = colorscale,
             hovertemplate = "transcript/protein: <b>%{x}</b><br>sampleID: <b>%{y}</b><br>expression value: <b>%{z}</b>",
-            colorbar = list(title = "relative\nexpression", thickness = 10, x = -0.09)) %>%
-      layout(xaxis = list(type = "category", showgrid = FALSE, ticks = "", showticklabels = showticklabs),
-            yaxis = list(type = "category", ticks = ""),
+                        colorbar = list(title = "relative\nexpression", thickness = 10, x = -0.09)) %>%
+                  layout(xaxis = list(type = "category", showgrid = FALSE, ticks = "", showticklabels = showticklabs),
+                        yaxis = list(type = "category", ticks = ""),
             plot_bgcolor = "#F5F5F5")
   })
 
@@ -140,12 +161,8 @@ xV <- function(input, output, session,
   # cplotdata is a further subset by samples (rows) that are present in the high-throughput dataset
   cplotdata <- reactive({
     if(is.null(cdata())) return(NULL)
-    if(!is.null(hplotdata())) {
-      plotdata <- cdata()[as.character(get(key)) %in% rownames(hplotdata()), ]
-    } else {
-      plotdata <- cdata()
-    }
-    plotdata
+    # cdata()[as.character(get(key)) %in% rownames(localhdata()), ]
+    cdata()[match(rownames(localhdata()), as.character(get(key))), ]
   })
 
   cplot <- reactive({
@@ -190,12 +207,21 @@ xV <- function(input, output, session,
 
   output$heatmap <- renderPlotly({
     if(is.null(cplot())) {
-      hplot() %>% plotly::config(displayModeBar = F)
+      if(is.null(clusterplot())) hplot() %>% plotly::config(displayModeBar = F) else subplot(clusterplot(), hplot(), shareX = T, widths = c(0.1, 0.9)) %>%
+        plotly::config(displayModeBar = F)
     } else if(is.null(hplot())) {
       cplot() %>% plotly::config(displayModeBar = F)
     } else {
-      subplot(hplot(), cplot(), titleX = T, shareY = T, widths = c(0.7, 0.3)) %>%
-        plotly::config(displayModeBar = F)
+      if(is.null(clusterplot())) {
+         subplot(hplot(), cplot(), titleX = T, shareY = T, widths = c(0.7, 0.3)) %>%
+          plotly::config(displayModeBar = F)
+      } else {
+        # probably the most common display configuration:
+        subplot(subplot(clusterplot(), hplot(), shareX = T, widths = c(0.1, 0.9)),
+                cplot(), titleX = T, shareY = T, widths = c(0.7, 0.3)) %>%
+          plotly::config(displayModeBar = F)
+      }
+
     }
   })
 

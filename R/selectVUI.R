@@ -66,30 +66,30 @@ selectV <- function(input, output, session,
                          width = "450px", options = list(maxItems = maxitems))
           ),
       div(class = "forceInline",
-          selectInput(session$ns("sortby"), "Sort by", choices = selected(), selected = selected(), width = "300px"))
+          selectInput(session$ns("sortby"), "Sort by", choices = "", selected = "", width = "300px"))
       )
   })
 
   observeEvent(data(), {
-    Vdata(data()[, c(key, selected()), with = F])
+    if(!is.null(selected())) Vdata(data()[, c(key, selected()), with = F])
   })
 
   observeEvent(input$var, {
-    if(is.null(input$var)) {
+    if(!length(input$var)) {
       Vdata(NULL)
     } else {
-      sortby <- if(input$sortby %in% input$var) input$sortby else last(input$var)
-      updateSelectizeInput(session, "sortby", choices = input$var, selected = sortby)
+      updateSelectInput(session, "sortby", choices = c("", input$var), selected = "")
       data <- data()[, c(key, input$var), with = F]
-      setorderv(data, cols = sortby, na.last = T)
       Vdata(data)
     }
   }, ignoreNULL = F)
 
   observeEvent(input$sortby, {
-    data <- copy(Vdata())
-    setorderv(data, cols = input$sortby, na.last = T)
-    Vdata(data)
+    if(input$sortby != "") {
+      data <- copy(Vdata())
+      setorderv(data, cols = input$sortby, na.last = T)
+      Vdata(data)
+    }
   })
 
   return(Vdata)

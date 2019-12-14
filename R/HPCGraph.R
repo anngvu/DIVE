@@ -12,7 +12,7 @@ HPCGraphOutput  <- function(id) {
   tags$div(id = "cohortGraph", style = "height:500px;",
     fluidRow(
     column(2, style="margin-right:-40px; padding-top:30px;", plotlyOutput(ns("pie"))),
-    column(9, shinycssloaders::withSpinner(color = "gray", plotlyOutput(ns("graph")))),
+    column(9, plotlyOutput(ns("graph"))),
     column(1)
   ))
 }

@@ -56,7 +56,6 @@ multiVCtrlUI <- function(id, menu = T, upload = T, GEO = T) {
 #' @param choices Names referencing datasets in hdlist, to be used in selection menu.
 #' When the datasets should be displayed as grouped, the choices can be passed in accordingly for \code{\link[shiny]{selectizeInput}}.
 #' @param key Name of column that contains IDs in \preformatted{cdata} that link to samples in \preformatted{hdlist} datasets. Defaults to "ID".
-#' @param vselect A default selected column in \preformatted{cdata} to display.
 #' @param checkFun Optional, a check function used for checking data uploads.
 #' @param factorx If not NULL, the given name pattern will be used for recognizing and converting columns in cdata to factor. See details.
 #' @param infoRmd Optional link to an Rmarkdown document containing details for the data upload module.
@@ -65,13 +64,13 @@ multiVCtrlUI <- function(id, menu = T, upload = T, GEO = T) {
 #' @export
 multiVCtrl <- function(input, output, session,
                       cdata, hdlist, choices = names(hdlist),
-                      key = "ID", vselect = "donor.type",
+                      key = "ID",
                       checkFun = NULL,
                       factorx = NULL,
                       infoRmd = system.file("help/ht_upload.Rmd", package = "DIVE")) {
 
   inview <- c()
-  view <- reactiveValues(cdata = cdata, hdlist = hdlist, hddata = NULL, vselect = vselect)
+  view <- reactiveValues(cdata = cdata, hdlist = hdlist, hddata = NULL, vselect = NULL)
 
   updateSelectizeInput(session, "dataset", choices = choices, selected = NULL)
 
@@ -134,7 +133,6 @@ multiVCtrl <- function(input, output, session,
         view$hdlist <- c(view$hdlist, hdata)
         choices$Uploaded <<- c(choices$Uploaded, list(filename))
         updateSelectizeInput(session, "dataset", choices = choices, selected = c(input$dataset, filename))
-        # view$vselect <- NULL # to do: more sophisticated to infer most appropriate vselect as default
         removeModal()
       }
     }
