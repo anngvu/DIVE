@@ -67,11 +67,11 @@ multiVCtrl <- function(input, output, session,
                       key = "ID",
                       checkFun = NULL,
                       factorx = NULL,
-                      vselect = NULL,
+                      preselect = NULL,
                       infoRmd = system.file("help/ht_upload.Rmd", package = "DIVE")) {
 
   inview <- c()
-  view <- reactiveValues(cdata = cdata, hdlist = hdlist, hddata = NULL, vselect = vselect)
+  view <- reactiveValues(cdata = cdata, hdlist = hdlist, hddata = NULL, vselect = preselect)
 
   updateSelectizeInput(session, "dataset", choices = choices, selected = NULL)
 

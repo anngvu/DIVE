@@ -52,19 +52,19 @@ multiV <- function(input, output, session,
                    genes = DIVE::gene_symbols,
                    prelist = NULL,
                    slabel = DIVE::gene_symbols_map,
-                   select = NULL) {
+                   preselect = NULL) {
 
   view <- callModule(multiVCtrl, "ctrl",
                      cdata = cdata,
                      hdlist = hdata,
                      choices = hcat,
                      factorx = factorx,
-                     vselect = select)
+                     preselect = preselect)
 
   # controls clinical/phenotype/experimental variable selection
   vselect <- callModule(selectV, "cdata",
                         data = reactive(view$cdata),
-                        selected = reactive(select),
+                        selected = reactive(preselect),
                         countby = reactive(view$hddata))
 
   # controls gene selection for all xVUI components in multiVUI

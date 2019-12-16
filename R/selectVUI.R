@@ -44,7 +44,8 @@ selectV <- function(input, output, session,
                     data = reactive({ NULL }), key = "ID",
                     label = HTML("<strong>Phenotype/Experimental variable(s)</strong>"),
                     excludepattern = "_(SD|SE)$",
-                    selected = reactive({ NULL }), countby = reactive({ NULL }),
+                    selected = reactive({ NULL }),
+                    countby = reactive({ NULL }),
                     maxitems = 3)  {
 
   Vdata <- reactiveVal(NULL)
@@ -62,7 +63,7 @@ selectV <- function(input, output, session,
     tags$div(
       div(class = "forceInline",
           selectizeInput(session$ns("var"), label = label,
-                         choices = choices, selected = selected(),
+                         choices = choices, selected = "donor.type", # TO-DO: clear hardcoding!
                          width = "450px", options = list(maxItems = maxitems))
           ),
       div(class = "forceInline",

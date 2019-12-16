@@ -157,10 +157,11 @@ xV <- function(input, output, session,
   })
 
   hplot <- reactive({
+    if(is.null(hplotdata())) return(NULL)
     xlabs <- if(!is.null(slabel)) slabel[colnames(hplotdata())] else colnames(hplotdata())
     ylabs <- rownames(hplotdata())
     showticklabs <- if(ncol(hplotdata()) <= 50) TRUE else FALSE # only show labels when readable
-    # infer color scale for type of data
+    # infer color scale for type of data; min = 0 -> counts
     if(min(hplotdata()) == 0) colorscale <- "Greys" else colorscale <- "RdBu"
     plot_ly(z = hplotdata(), x = xlabs, y = ylabs, name = "Expression\nMatrix",
             type = "heatmap", height = 25 * nrow(hdata), colors = colorscale,
@@ -189,12 +190,16 @@ xV <- function(input, output, session,
     # Generate a list of plotly plots for categorical variables
     cplotcat <- lapply(names(plotdata)[vcat & notID],
                            function(v) {
-                             # Note: there's a plotly issue that will spew many warnings for the below
-                             plot_ly(x = 1, y = y, name = v, type = "bar", orientation = "h", showlegend = F,
-                                     color = plotdata[[v]], text = paste(y, "|", plotdata[[v]]),
-                                     hoverinfo = "text") %>%
-                               layout(xaxis = list(title = v, zeroline = FALSE, showline = FALSE,
-                                                   showticklabels = FALSE, showgrid = FALSE),
+                             z <- matrix(as.integer(plotdata[[v]]))
+                             text <- matrix(paste(y, "|", "value =", as.character(plotdata[[v]])))
+                             plot_ly(x = v, y = y, type = "heatmap", z = z, name = v,
+                                     showscale = FALSE,
+                                     text = text,
+                                     hovertemplate = "%{text}", # ygap = 1,
+                                     colorscale = "Portland") %>%
+                             layout(xaxis = list(title = v, zeroline = FALSE, showline = FALSE,
+                                                   showticklabels = FALSE, showgrid = FALSE,
+                                                   type = "category"),
                                       yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
                          })
     # Generate a list of plotly plots for numeric variables
