@@ -16,7 +16,8 @@ xVUI <- function(id) {
         conditionalPanel(condition = "input.show%2==1", ns = ns, class = "forceInline",
           div(class = "forceInline", id = ns("custom")),
           div(class = "forceInline", actionLink(ns("addcustom"), "LOCAL FILTER", icon = icon("plus"))),
-          div(class = "forceInline", actionLink(ns("cluster"), "CLUSTER", icon = icon("sitemap"))),
+          div(class = "forceInline", actionLink(ns("rowcluster"), "ROW CLUSTER", icon = icon("sitemap"))),
+          div(class = "forceInline", actionLink(ns("colcluster"), "COL CLUSTER", icon = icon("sitemap"))),
           div(class = "forceInline", "Show most variable"),
           div(style = "display: inline-block; margin-top: -5px;",
               numericInput(ns("hivarprct"), label = NULL, value = 10, min = 1, max = 100, step = 5, width = 50)),
@@ -50,7 +51,7 @@ xV <- function(input, output, session,
   hivarprct <- reactiveVal(10)
 
   #-- Clustering -----------------------------------------------------------------------------------------------------#
-  observeEvent(input$cluster, {
+  observeEvent(input$rowcluster, {
     withProgress(value = 0.2, message = "creating distance matrix...",
       expr = {
               # gene_clust <- dist(t(hdata)) # cluster by columns
@@ -73,6 +74,19 @@ xV <- function(input, output, session,
               dendro$x$attrs <- lapply(dendro$x$attrs, function(x) { x$showlegend <- F ; x$text <- ""; x })
               clusterplot(dendro)
               })
+  })
+
+  observeEvent(input$colcluster, {
+    withProgress(value = 0.2, message = "creating distance matrix...",
+                 expr = {
+                   gene_clust <- dist(t(hdata)) # cluster by columns
+                   setProgress(value = 0.7, message = "clustering...")
+                   gene_clust <- hclust(gene_clust)
+                   setProgress(value = 0.9, message = "reordering columns...")
+                   hdata <- hdata[, gene_clust$order]
+                   localhdata(hdata)
+                 }
+    )
   })
 
   #-- Custom select --------------------------------------------------------------------------------------------------#
@@ -177,7 +191,7 @@ xV <- function(input, output, session,
                            function(v) {
                              # Note: there's a plotly issue that will spew many warnings for the below
                              plot_ly(x = 1, y = y, name = v, type = "bar", orientation = "h", showlegend = F,
-                                     color = plotdata[[v]], text = plotdata[[v]],
+                                     color = plotdata[[v]], text = paste(y, "|", plotdata[[v]]),
                                      hoverinfo = "text") %>%
                                layout(xaxis = list(title = v, zeroline = FALSE, showline = FALSE,
                                                    showticklabels = FALSE, showgrid = FALSE),
@@ -187,10 +201,11 @@ xV <- function(input, output, session,
     cplotnum <- lapply(names(plotdata)[!vcat & notID],
                            function(v) {
                              x <- plotdata[[v]]
-                             hoverx <- sapply(x, function(p) if(is.na(p)) "NA" else as.character(p))
+                             hoverx <- paste(y, "|", sapply(x, function(p) if(is.na(p)) "NA" else as.character(p)))
                              NAtext <- ifelse(is.na(x), "  NA", "")
                              x[is.na(x)] <- 0
-                             plot_ly(x = x, y = y, customdata = hoverx, name = v, type = "bar", orientation = "h", showlegend = F,
+                             plot_ly(x = x, y = y, customdata = hoverx, name = v, type = "bar",
+                                     orientation = "h", showlegend = F,
                                      text = hoverx, hoverinfo = "text") %>%
                                add_text(text = NAtext, textposition = "right", textfont = list(color = toRGB("red"))) %>%
                                layout(xaxis = list(title = v, showgrid = FALSE),
@@ -207,13 +222,17 @@ xV <- function(input, output, session,
 
   output$heatmap <- renderPlotly({
     if(is.null(cplot())) {
-      if(is.null(clusterplot())) hplot() %>% plotly::config(displayModeBar = F) else subplot(clusterplot(), hplot(), shareX = T, widths = c(0.1, 0.9)) %>%
+      if(is.null(clusterplot())) {
+        hplot() %>% plotly::config(displayModeBar = F)
+      } else {
+        subplot(clusterplot(), hplot(), shareX = T, widths = c(0.1, 0.9)) %>%
         plotly::config(displayModeBar = F)
+      }
     } else if(is.null(hplot())) {
       cplot() %>% plotly::config(displayModeBar = F)
     } else {
       if(is.null(clusterplot())) {
-         subplot(hplot(), cplot(), titleX = T, shareY = T, widths = c(0.7, 0.3)) %>%
+         subplot(hplot(), cplot(), titleX = T, shareX = F, shareY = T, widths = c(0.7, 0.3)) %>%
           plotly::config(displayModeBar = F)
       } else {
         # probably the most common display configuration:

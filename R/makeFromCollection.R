@@ -19,12 +19,12 @@
 #' @param index Optional, a function to help with namespacing. If not given, defaults to using file name. See details.
 #' @return A "master" data.table
 #' @export
-makeFromCollection <- function(cdir = getwd(), filepattern = "*.txt", exclude = "!", numdata = T, index = NULL) {
+makeFromCollection <- function(cdir = getwd(), filepattern = "*.txt|.csv|.tsv", exclude = "!", numdata = T, index = indexDefault) {
   files <- list.files(cdir, pattern = filepattern)
-  cdata <- lapply(paste0(cdir, files), function(x) fread(x))
+  cdata <- lapply(paste0(cdir, "/", files), function(x) fread(x))
   iref <- if(!is.null(index) & is.function(index)) index(files) else files
   # problem if not unique
-  stopifnot(is.unique(iref))
+  # stopifnot(anyDuplicated(iref))
   for(i in seq_along(cdata)) setnames(cdata[[i]], c("ID", paste0(iref[i], "_", names(cdata[[i]])[-1])))
   cdata <- rbindlist(cdata, use.names = T, fill = T)
   cdata <- cdata[, lapply(.SD, Agg), by = ID]
@@ -40,29 +40,14 @@ makeFromCollection <- function(cdir = getwd(), filepattern = "*.txt", exclude = 
 #' @inheritParams makeFromCollection
 #' @param other Optional, a list of of paths to other data files not in the main collection but
 #' that should be part of the master data object. NULL if no other data to be incorporated.
-#' @param outdir Where to put \code{cdata}. Defaults to App/Data.
 #' @export
-makeCdata <- function(cdir = "./Collection/Main/", filepattern,
-                      other = list("./Collection/Other/coredata_ref.txt"),
-                      outdir = "./App/Data/") {
+makeCdata <- function(cdir = "./Collection/Main/", filepattern = "*.txt|.csv|.tsv",
+                      other = NULL) {
   cdata <- makeFromCollection(cdir, filepattern, exclude)
   if(length(other)) cdata <- Reduce(mergeMore, other, cdata)
-  save(cdata, file = paste0(outdir, "cdata.Rdata"))
+  cdata
 }
 
-
-#' Merge a main data table with other misc data
-#'
-#' Use \code{mergeMore} to merge some other data with the master dataset.
-#'
-#' @param data A data.table
-#' @param inputpath Path to another dataset to merge with data.
-#' @return A data.table
-mergeMore <- function(data, inputpath) {
-  moredata <- fread(inputpath)
-  data <- merge(data, moredata, by = "ID", all = T)
-  return(data)
-}
 
 #' Check metadata for \preformatted{cdata}
 #'
@@ -81,14 +66,6 @@ updateMethod <- function() {
   metadata <- fread("Metadata.tsv")
   methods <- fread("Methods.tsv")
   metadata <- merge(metadata, methods[, .(MethodID, OBITerm)], by = "MethodID")
-}
-
-# create a mapping of cases to variable for easy lookup
-cases2Variable <- function() {
-  c2v <- split(!apply(cdata[, -1], 1, is.na), 1:nrow(cdata))
-  c2v <- lapply(c2v, function(x) names(cdata)[-1][x])
-  names(c2v) <- cdata$ID
-  save(c2v, file = "c2v.rda")
 }
 
 # For combining rows, e.g.
