@@ -8,6 +8,7 @@ Description: Utilities to integrate and visually explore a collection of partial
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+biocViews:
 Depends:
     shiny (>= 1.4.0),
     ggplot2,
@@ -25,5 +26,9 @@ Imports:
     r2d3,
     jsonlite,
     optmatch,
-    DT
+    DT,
+    GEOquery,
+    recount,
+    mygene,
+    limma
 RoxygenNote: 6.1.1

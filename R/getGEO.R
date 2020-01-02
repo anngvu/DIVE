@@ -31,6 +31,7 @@ getGEOMod <- function(input, output, session) {
   GPL <- reactiveVal(NULL)
   GEOdata <- reactiveValues(accession = NULL, eset = NULL, pData = NULL, call = NULL)
 
+  # Step 2 is selecting characteristics to import from pData
   Step2 <- function() {
     showModal(modalDialog(title = "Step 2",
                           selectizeInput(session$ns("characteristics"),
@@ -44,15 +45,16 @@ getGEOMod <- function(input, output, session) {
     ))
   }
 
+  # Step 3 is selecting which annotation field to use for searching/filtering of expression matrix columns
   Step3 <- function() {
     showModal(modalDialog(title = "Step 3",
                           selectizeInput(session$ns("annofield"),
-                                         HTML("<strong>Choose annotation field to use for lookup and filtering?</strong>"),
+                                         HTML("<strong>Choose annotation field to use for lookup and filtering</strong>"),
                                          choices = names(GPL()), width = "100%"),
                           helpText("Choosing the column containing Entrez gene ID (NOT symbol) is recommended,
-                                   but if it is not available, choose the annotation most useful for you."),
+                                   but if it is not available, choose the annotation type most useful for you."),
                           actionButton(session$ns("annotate"), "OK"),
-                          br(), br(), h5("Annotation table (preview)"),
+                          br(), br(), h5("Annotation table"),
                           tableOutput(session$ns("gplTable")),
                           footer = modalButton("Cancel")
     ))
@@ -78,6 +80,7 @@ getGEOMod <- function(input, output, session) {
         setProgress(value = 0.5, message = "sourcing sequencing data...")
         sra <- regmatches(meta$relation, regexpr("(https://www.ncbi.nlm.nih.gov/sra?term=)?SRP[0-9]+", meta$relation))
         recounted <- getRecount(sra)
+
         if(!is.null(recounted)) {
           xdata <- recounted$xdata
           characteristics(recounted$pdata)
@@ -103,6 +106,7 @@ getGEOMod <- function(input, output, session) {
     Step3()
   })
 
+  # Rendered objects for Step 3
   output$pChars <- renderTable({
     head(characteristics())
   }, spacing = "xs")
@@ -111,9 +115,16 @@ getGEOMod <- function(input, output, session) {
     head(GPL())
   }, spacing = "xs")
 
+
+  # When user proceeds with annotations
   observeEvent(input$annotate, {
     if(length(input$characteristics)) GEOdata$pData <- characteristics()[, input$characteristics, drop = F]
-    rownames(GEOdata$eset) <- as.character(GPL()[, input$annofield])
+    # Need to map probe IDs (rownames) to Entrez Gene IDs or selected annotation
+    probes <- rownames(GEOdata$eset)
+    # A column named "ID" *should* exist in the gpl table, but need to check and do alternative
+    # annotation operation if otherwise
+    annrows <- gpl[[input$annofield]][match(probes, gpl$ID)]
+    rownames(GEOdata$eset) <- annrows
     GEOdata$call <- input$annotate
   })
 
@@ -121,6 +132,7 @@ getGEOMod <- function(input, output, session) {
 
 }
 
+# Helper functions -----------------------------------------------------------------------------------------------#
 checkGEO <- function(xdata, meta,
                      supported = c("Expression profiling by array",
                        "Expression profiling by high throughput sequencing",

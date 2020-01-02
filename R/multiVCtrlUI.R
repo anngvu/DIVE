@@ -28,8 +28,8 @@ multiVCtrlUI <- function(id, menu = T, upload = T, GEO = T) {
            if(upload) div(class = "forceInline", style = "margin-right: 40px;", br(),
                           actionButton(ns("upload"), "Upload my data")),
            if(GEO) div(class = "forceInline", style = "margin-right: 40px;", br(),
-                       actionButton(ns("getGEO"), "Source from GEO (beta)"))
-          )
+                       actionButton(ns("getGEO"), HTML("Source from GEO <sup>beta</sup>")))
+  )
 }
 
 #' Shiny module server for controlling multi-column view
