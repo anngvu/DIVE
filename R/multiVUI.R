@@ -64,7 +64,7 @@ multiV <- function(input, output, session,
   # controls clinical/phenotype/experimental variable selection
   vselect <- callModule(selectV, "cdata",
                         data = reactive(view$cdata),
-                        selected = reactive(preselect),
+                        selected = reactive(view$vselect),
                         countby = reactive(view$hddata))
 
   # controls gene selection for all xVUI components in multiVUI
@@ -94,6 +94,7 @@ multiV <- function(input, output, session,
                  cdata = vselect,
                  selected = gselect,
                  slabel = slabel)
+      # showNotification(paste("New track loaded with expression matrix", paste(dim(trackdata), collapse = "x")))
     } else {
       removeUI(selector = paste0("#", trackID))
     }

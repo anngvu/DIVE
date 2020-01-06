@@ -41,8 +41,8 @@ xVUI <- function(id) {
 #' @param slabel Optional, a vector that can map column names of hdata to plot labels.
 #' @export
 xV <- function(input, output, session,
-                   hdata, cdata = reactive({ NULL }), key = "ID",
-                   selected = reactive({ NULL }), slabel = NULL) {
+               hdata, cdata = reactive({ NULL }), key = "ID",
+               selected = reactive({ NULL }), slabel = NULL) {
 
   localselect <- reactiveVal(NULL)
   localhdata <- reactiveVal(hdata)
@@ -153,7 +153,7 @@ xV <- function(input, output, session,
     plotdata <- localhdata()
     # subset to highest variance
     selected <- subHiVar(plotdata, percent = hivarprct())
-    plotdata[, colnames(plotdata) %in% selected, drop = F] # for some reason plotdata[, selected, drop = F] gives subscript out of bounds
+    plotdata[, selected, drop = F] # plotdata[, selected, drop = F] gives subscript out of bounds
   })
 
   hplot <- reactive({
@@ -252,11 +252,12 @@ xV <- function(input, output, session,
 }
 
 # Subset a matrix by the most variable n features (columns)
-subHiVar <- function(data, n, percent) {
+# Need to either give n number of features or percent of data to calculate n
+subHiVar <- function(data, n = NULL, percent) {
   n <- round(ncol(data) * (percent/100))
   n <- ifelse(n < 1, 1, n)
   vars <- apply(data, 2, var)
-  selected <- names(sort(vars, decreasing = T))[1:n]
+  selected <- order(vars, decreasing = T)[1:n]
   return(selected)
 }
 

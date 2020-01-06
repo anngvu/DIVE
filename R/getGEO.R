@@ -37,7 +37,7 @@ getGEOMod <- function(input, output, session) {
                           selectizeInput(session$ns("characteristics"),
                                          HTML("<strong>Which characteristics do you want to import as relevant clinical/phenotype/experimental data?</strong>"),
                                          choices = names(characteristics()), selected = names(characteristics()), multiple = T, width = "100%"),
-                          helpText("(clear all selections to import none)"),
+                          helpText("(can only be imported as factors; clear all selections to import none)"),
                           actionButton(session$ns("importC"), "OK"),
                           br(), br(), h5("Characteristics (preview)"),
                           tableOutput(session$ns("pChars")),
@@ -123,7 +123,8 @@ getGEOMod <- function(input, output, session) {
     probes <- rownames(GEOdata$eset)
     # A column named "ID" *should* exist in the gpl table, but need to check and do alternative
     # annotation operation if otherwise
-    annrows <- gpl[[input$annofield]][match(probes, gpl$ID)]
+    IDcol <- "ID"
+    annrows <- GPL()[[input$annofield]][match(probes, GPL()[[IDcol]])]
     rownames(GEOdata$eset) <- annrows
     GEOdata$call <- input$annotate
   })

@@ -123,6 +123,8 @@ multiVCtrl <- function(input, output, session,
     } else {
       # high-throughput processing
       filename <- attr(data, "filename")
+      # If the filename is the same as something currently in the selection,
+      # the uploaded data will replace the current object, which we currently disallow
       if(filename %in% names(view$hdlist)) {
         showNotification("Dataset with same file name already exists (overwrites not allowed).
                          To upload a different version, change file name to reflect the version.",
@@ -150,21 +152,30 @@ multiVCtrl <- function(input, output, session,
 
   GEOdata <- callModule(getGEOMod, "GEO")
 
+  # When GEO data is pulled successfully, GEOdata$call changes from NULL to 1
   observeEvent(GEOdata$call, {
     hdata <- t(GEOdata$eset)
+    # showModal(
+    #   modalDialog(title = "Status",
+    #               )
+    # )
     hdata <- setNames(list(hdata), GEOdata$accession)
     view$hdlist <- c(view$hdlist, hdata)
     choices$GEO <- c(choices$GEO, list(GEOdata$accession))
-    updateSelectizeInput(session, "dataset", choices = choices, selected = GEOdata$accession)
     if(!is.null(GEOdata$pData)) {
       pData <- GEOdata$pData
+      # add key column to pData so we can merge; the samples can be totally
+      # unrelated and there might not be anything to merge upon;
+      # tell user results of ID and annotation checks
+      for(col in names(pData)) pData[[col]] <- factor(pData[[col]])
       pData[[key]] <- rownames(pData)
-      data <- merge(cdata, pData, by = "ID", all = T)
+      data <- merge(cdata, pData, by = key, all = T)
       view$cdata <- data
       view$vselect <- names(pData)[1]
     } else {
       view$vselect <- NULL
     }
+    updateSelectizeInput(session, "dataset", choices = choices, selected = GEOdata$accession)
     removeModal()
   })
 

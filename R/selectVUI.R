@@ -63,7 +63,7 @@ selectV <- function(input, output, session,
     tags$div(
       div(class = "forceInline",
           selectizeInput(session$ns("var"), label = label,
-                         choices = choices, selected = "donor.type", # TO-DO: clear hardcoding!
+                         choices = choices, selected = selected(),
                          width = "450px", options = list(maxItems = maxitems))
           ),
       div(class = "forceInline",
