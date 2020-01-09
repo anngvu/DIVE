@@ -1,4 +1,4 @@
-#' Shiny module UI containing filter inputs for interactive matrix
+    #' Shiny module UI containing filter inputs for interactive matrix
 #'
 #' Interactive controls for a matrix (usually correlation) plot.
 #'
