@@ -14,7 +14,7 @@ matchLinkUI <- function(id) {
                     verbatimTextOutput(ns("matchOn")),
                     HTML("<strong>You are matching with</strong>"),
                     verbatimTextOutput(ns("matchN")),
-                    actionButton(ns("run"), "Get matches")
+                    uiOutput(ns("btnRun"))
              ),
              column(1),
              column(8,
@@ -32,22 +32,22 @@ matchLinkUI <- function(id) {
 
 #' Server module function for interactive drag-and-drop variable harmonization of two datasets
 #'
-#' Given two datasets, a "reference" and a new "comparison" dataset, the module implements an interface
-#' through which a user can create a harmonized dataset with variables in common. If provided, a guess function
-#' attempts to guess which variables are actually the same, e.g. something called
-#' "sex" in one dataset is the same as "gender" in another. The guess function \code{\link{guessFun}}
-#' that comes with the package is a naive implementation and limited to guessing at
-#' variables typical in clinical cohort datasets (e.g. age, sex, BMI, race, hba1c)
+#' Given two datasets, a "reference" and a "comparison" dataset, the module implements an interface
+#' that allows users to interactively harmonize variables to be used for matching;
+#' the output is used as inputs to the module \code{\link{matchResult}}:
+#' \code{params$matchOpts} contains all the possible variables that could be used between the two datasets,
+#' \code{params$matchOn} contains variables that are chosen for matching, and
+#' \code{params$run} reactively transmits the "finalized" params/triggers the \code{\link{matchResult}} module.
+#' If provided, a guess function attempts to guess which variables are actually the same,
+#' e.g. something called "sex" in one dataset is the same as "gender" in another.
+#' The guess function \code{\link{guessFun}} that comes with the package is a naive implementation
+#' limited to guessing at variables in cohorts used in the diabetes research domain (e.g. age, sex, BMI, race, hba1c)
 #' and should certainly be swapped out when the module is expected to handle a different variety of data.
 #' The drag-and-drop interface allows the user to harmonize variables manually, e.g. the "gender" label
-#' can be dropped next to the "sex" label to say that these mean the same thing. The outputs of this module
-#' are inputs to \code{\link{matchResult}}:
-#' \code{params$matchOpts} contains all the possible variables that could be used between the two datasets,
-#' \code{params$matchOn} contains variables that are actually chosen for matching, and
-#' \code{params$run} reactively transmits the "finalized" params/triggers the \code{\link{matchResult}} module.
+#' can be dropped next to the "sex" label to say that these mean the same thing.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param refData Reactive subsetted reference data.table.
+#' @param refdata Reactive subsetted reference data.table.
 #' @param setX Reactive data.table dataset, which typically comes from the \code{\link{newCohortInput}} module.
 #' @param vars Optional, a named list of a variable set (or sets) allowed for matching.
 #' If not provided, the first 10 variables in the reference cohort dataset is used.
@@ -58,7 +58,8 @@ matchLinkUI <- function(id) {
 #' @return Reactive list of parameter values with \code{run}, \code{matchOpts} and \code{matchOn}. See details.
 #' @export
 matchLink <- function(input, output, session,
-                      refData, setX, vars, guess, informd = system.file("help/matching_methods.Rmd", package = "DIVE")) {
+                      refdata, setX, vars, guess,
+                      informd = system.file("help/matching_methods.Rmd", package = "DIVE")) {
 
   modal <- callModule(info, "help", informd)
 
@@ -69,7 +70,7 @@ matchLink <- function(input, output, session,
     if(!is.null(vars) & !is.null(guess)) {
       params$matchOpts <- guess(names(setX()))
     } else if(!is.null(guess)) { # if variables used for matching are not specified, use the first 10
-      default <- list(Variables = head(names(refData()), 10))
+      default <- list(Variables = head(names(refdata()), 10))
       params$matchOpts <- guess(names(setX()))
     } else {
       params$matchOpts <- "" # TO DO! Check-later
@@ -113,13 +114,22 @@ matchLink <- function(input, output, session,
     params$matchOn
   })
 
+  output$btnRun <- renderPrint({
+    if(nrow(refdata()) > 0) actionButton(session$ns("run"), "Get matches")
+  })
+
   output$matchN <- renderPrint({
-    cat(paste("a subset of", nrow(refData())))
+    if(nrow(refdata()) > 0) {
+      cat(paste("a subset of", nrow(refdata())))
+    } else {
+      cat("You haven't selected the reference subset(s) to pair with your cohort. You won't be able to run the match until this is specified.")
+    }
   })
 
   #-- Return --------------------------------------------------------------------------------------------------#
   observe({
-    if(!is.null(refData())) params$run <- input$run
+    # Require that there is actually refdata
+    if(nrow(refdata())) params$run <- input$run
   })
 
   return(params)

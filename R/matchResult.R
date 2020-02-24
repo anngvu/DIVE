@@ -1,15 +1,20 @@
 #' Shiny module UI output for match results
 #'
+#' Shiny module UI output for match results
+#'
+#' Creates UI for match result output, including a table preview of the result and download interface.
+#' Note that an intermediate result table is available to download only when application is run in dev mode.
+#'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @return Results UI consisting of a table and data download buttons.
+#' @return Results UI consisting of a table and data download interface.
 #' @export
 matchResultOutput <- function(id) {
   ns <- NS(id)
   tags$div(id = "matchResultOutput",
-    tableOutput(ns("table")),
-    br(),
-    downloadButton(ns("save"), "Download main match result table"),
-    downloadButton(ns("save_intermediate"), "Download match result intermediates")
+           tableOutput(ns("table")),
+           br(),
+           downloadButton(ns("save"), "Save result table"),
+           if(dev_mode()) downloadButton(ns("save_intermediate"), "Save result intermediates") else NULL
   )
 }
 
@@ -36,12 +41,18 @@ matchResult <- function(input, output, session,
     intermediate <- dataFusion(d1 = refSubset(), d2 = setX(),
                                fuseon = params$matchOn, sourcecol = sourcecol)
     # Then do match
-    matchpairs <- matchPair(data = intermediate, groupcol = sourcecol, params$matchOn)
-    # Update result reactive vals
-    results$params <- params$matchOn
-    results$intermediate <- intermediate
-    results$pair <- matchpairs$pair
-    results$matchtable <- matchpairs$matchtable
+    matchpairs <- withProgress(try(matchPair(data = intermediate, groupcol = sourcecol, params$matchOn)),
+                               value = 0.5, message = "Running...")
+    if(inherits(matchpairs, "try-error")) {
+      showModal(modalDialog("Unfortunately, something went wrong. Please review your data or submit a bug report.",
+                            title = "Match result status", easyClose = T))
+    } else {
+      # Update result reactive vals
+      results$params <- params$matchOn
+      results$intermediate <- intermediate
+      results$pair <- matchpairs$pair
+      results$matchtable <- matchpairs$matchtable
+    }
   })
 
   output$table <- renderTable({
@@ -58,6 +69,7 @@ matchResult <- function(input, output, session,
     }
   )
 
+  # The intermediate table is the fused dataset in long format
   output$save_intermediate <- downloadHandler(
     filename = function() {
       "match_intermediate.csv"

@@ -7,7 +7,7 @@ checkCohortData <- function(cohdata, message = NULL, result = NULL) {
   notID <- removeID(names(cohdata))
   isNumeric <- sapply(cohdata[, notID, with = F], function(x) class(x) %in% c("numeric", "integer"))
   if(!all(isNumeric)) message <- paste(message,
-                                       paste("<strong>These columns must be numeric/factor-encoded data:</strong><br>",
+                                       paste("<strong>These columns must be numeric (encode categorical data):</strong><br>",
                                              paste(notID[!isNumeric], collapse = "<br>")))
   if(is.null(message)) result <- cohdata
   return(list(message = message, result = result))

@@ -28,7 +28,7 @@ Imports:
     optmatch,
     DT,
     GEOquery,
-    recount,
+    recount,                    
     mygene,
     limma
 RoxygenNote: 6.1.1

@@ -12,7 +12,7 @@ newDatasetInput <- function(id) {
       column(1),
       column(4,
              div(id = "dataUpload",
-                 textInput(ns("name"), "", value = "", width = 200))
+                 textInput(ns("name"), "(custom)", value = "", width = 200))
       ),
       column(7,
           dataUploadUI(ns("upload")))
@@ -23,9 +23,9 @@ newDatasetInput <- function(id) {
 #' Shiny module server function for handling new dataset input
 #'
 #' This is essentially the \code{\link{dataUpload}} module, but the uploaded data
-#' is modified to include a key-like column before it is returned as the reactive object.
+#' is modified to include a key-like column before it is returned as a reactive object.
 #' Use \code{\link{dataUpload}} if there is no need for a \preformatted{datakey},
-#' which is used to track the dataset in the same manner as in \code{\link{refSubset}}.
+#' which is used to track the dataset as in \code{\link{refSubset}}.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param datakey Optional, a named list containing name/label for creating a key-like column.
@@ -40,7 +40,7 @@ newDataset <- function(input, output, session,
 
   newData <- reactiveVal(NULL)
 
-  updateTextInput(session, "name", xname) # gives dataset a default name
+  updateTextInput(session, "name", value = xname) # gives dataset a default name
 
   upload <- callModule(dataUpload, "upload",
                        checkFun = checkFun,

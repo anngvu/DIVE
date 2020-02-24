@@ -4,12 +4,12 @@
 #'
 #' The application UI can be viewed as a default template of how to put together several module components,
 #' including \code{\link{newDataSetInput}}, \code{\link{refSubsetInput}}, \code{\link{cohortGraphOutput}},
-#' to overall enable interactive exploration and matching of two different (cohort) datasets.
+#' to overall enable interactive exploration and matching of two different datasets. Note that though the datasets
+#' are typically conceived as datasets of matchable patient cohorts, this could be other types of matchable data
+#' such as geographic sampling sites, etc.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param subsets Optional, a list of the named subset groups. This can be used to allow only certain subsets
-#' within the data available for matching.
-#' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
+#' @param CSS Optional, location to an alternate CSS stylesheet to set look and feel of the module.
 #' @export
 matchAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
 
@@ -36,17 +36,22 @@ matchAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"
 #'
 #' Shiny app server for matching and exploration of two datasets
 #'
-#' This server function puts together a number of modular server module components with the correct
-#' logic to power the interactive capabilities of the matching application.
+#' This server function puts together a number of modular components to
+#' implement the whole interaction of the matching application. Though originally composed for
+#' matching patient cohorts, this matching application can be used with data in a different domain.
+#' Thus, if one were not matching cohorts, one can create a modified version that omits the
+#' cohort graph or replaces it with a custom-written module/visualization more applicable to the new domain.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param refdata The reference dataset.
 #' @param HPCG Optional graph object representing the reference dataset.
-#' @param colors Colors
-#' @param datakey Passed to \code{refSubsetInput}, \code{newDataset}, \code{matchResult}.
-#' @param vars Optional, variables allowed to be used for matching within \code{refdata}, organized in categories
-#' displayed as separate lists (mainly for user-friendliness). If not given, all variables can be used and will be displayed in one list.
-#' @param guess Optional, a function for making initial guesses of matchable variables.
+#' @param colors Colors for HPCG graph.
+#' @param datakey Shared paramater passed to \code{refSubset}, \code{newDataset}, \code{matchResult}.
+#' @param xname Parameter for \code{refSubset}.
+#' @param vars Optional, variables allowed to be used for matching within \code{refdata}, which will be organized and
+#' displayed in separate lists. This allows domain-specific controls of how variables are displayed and used.
+#' If not given, all variables can be used and will be displayed in a single list.
+#' @param guess Optional, a domain-specific function for making initial guesses of matchable variables.
 #' @param subsetfeat Which variable to be used as the subset variable.
 #' @param informd Link to a help file that can be called with the info module.
 #' @param appdata See ?
@@ -88,7 +93,7 @@ matchApp <- function(input, output, session,
                      exclude = crossCheck)
 
   parameters <- callModule(matchLink, "params",
-                           refData = reference,
+                           refdata = reference,
                            setX = newCohort,
                            vars = vars,
                            guess = guess)
