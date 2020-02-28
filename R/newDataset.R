@@ -7,7 +7,7 @@
 #' @export
 newDatasetInput <- function(id) {
   ns <- NS(id)
-  tags$div(id = "newDatasetInput",
+  tags$div(id = ns("newDatasetInput"),
     fluidRow(
       column(1),
       column(4,

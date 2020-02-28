@@ -9,7 +9,7 @@
 #' @export
 HPCGraphOutput  <- function(id) {
   ns <- NS(id)
-  tags$div(id = "cohortGraph", style = "height:500px;",
+  tags$div(class = "HPCGraph", style = "width: 100%; height:500px;",
     fluidRow(
     column(2, style="margin-right:-40px; padding-top:30px;", plotlyOutput(ns("pie"))),
     column(9, plotlyOutput(ns("graph"))),

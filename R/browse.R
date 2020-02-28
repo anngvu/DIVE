@@ -75,8 +75,8 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"),
 #' @param index2 Optional, name of another column for secondary index.
 #' @param dt_var Table data by var/feature.
 #' @param dt_var_ext Extended table to provide lookup details of metadata.
-#' @param informd1 Helpfile for uploading an ID list.
-#' @param informd2 Helpfile for how browsing data works.
+#' @param informd1 Help content for uploading an ID list.
+#' @param informd2 Help content for how browsing data works.
 #' @export
 browse <- function(input, output, session,
                    dt_id = NULL, index1 = "ID", index2 = NULL,

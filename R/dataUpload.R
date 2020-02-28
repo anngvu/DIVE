@@ -25,26 +25,31 @@ dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>", 
 #'
 #' At its most basic, the module checks for and returns a data table from \code{fileInput}
 #' (if the uploaded file is not data in table format, the return will be \code{NULL}).
-#' However, a check function can be named to perform additional "light" data checking or modification operations
-#' and thus customize the module somewhat for different situations. Some example check functions
-#' simply look for specific column names or types. For more intense data processing that might involve
-#' multiple functions and/or side effects, one should really make a specialized module and pass the data into that.
+#'
+#' A check function can be optionally integrated into this module to perform additional
+#' "light" data checking or modification operations and make the the module somewhat adaptable for different uses.
+#' Some example check functions simply check for specific column names or data types.
+#' For more intense data processing that might involve multiple functions and/or side effects as part of a pipeline,
+#' one should really make a specialized module and pass the data into that intermediate module.
+#'
 #' File uploads can have "reset" behavior by specifying the optional \code{removable} parameter,
-#' where a remove button will be rendered after upload.
-#' The module also optionally incorporates \code{\link{infoOutput}} functionality.
-#' Finally, it is possible to perform a mock upload of a saved dataset, e.g. for demonstration purposes.
-#' Saved datasets are expected to be .csv files that reside in a relative "Data/" directory.
-#' For instance, if the name is "SampleCohort", the dataset will be "uploaded" from "Data/SampleCohort.csv".
+#' where a remove button will appear after upload, allowing data to be "cleared", in which case the module returns \code{NULL}).
+#'
+#' The module also optionally incorporates \code{\link{infoOutput}} functionality to provide specifications for data.
+#'
+#' Finally, it is possible to perform a mock upload of a saved dataset, e.g. for demonstration purposes, that is triggered externally.
+#' The dataset is expected to be a .csv/.tsv file in a relative directory within the app directory.
+#' For instance, the dataset path can be "appdata/Demo.csv".
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param asDT Logical flag to indicate whether data returned should be a data.table. If FALSE, \code{readLines} is used on file.
 #' @param removable Logical flag to indicate whether data upload will have "removable" feature. Defaults to FALSE. See details.
 #' @param checkFun Optional, a custom check function for an additional layer of checking/modifying uploaded data.
-#' It should return a list containing message and result (result should be \code{NULL} for unsuccessful data).
-#' @param informd Optional, an Rmarkdown help file for infoOutput, e.g. requirements.
+#' It should return a list containing message and result (result should be \code{NULL} when data fails checks).
+#' @param informd Optional, an Rmarkdown help file for infoOutput, e.g. requirements info.
 #' @param appdata Optional, the name (including extension) of one or more files stored in appdata that can be
 #' mock-uploaded. See details.
-#' @param checkappdata Whether checkFun should also be applied to appdata, normally FALSE.
+#' @param checkappdata Whether checkFun should be applied to appdata, normally FALSE.
 #' @return A data.table with a "filename" attribute containing the filename without extension,
 #' or \code{NULL} if the file input was not a table or returned as \code{NULL} from \code{checkFun}.
 #' @export
@@ -100,10 +105,10 @@ dataUpload <- function(input, output, session,
     newUploadUI()
   })
 
-  # input$appdata comes from javascript
+  # input$appdata comes from external javascript call
   observeEvent(input$appdata, {
     if(input$appdata %in% appdata) {
-      data <- data.table::fread(paste0("appdata/", appdata))
+      data <- data.table::fread(appdata)
       if(checkappdata && is.function(checkFun)) {
         checked <- checkFun(data)
         data <- checked$result
