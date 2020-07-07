@@ -4,15 +4,22 @@
 \alias{matchAppUI}
 \title{Shiny app UI for matching application}
 \usage{
-matchAppUI(id, CSS = system.file("www/", "app.css", package = "DIVE"))
+matchAppUI(
+  id,
+  CSS = system.file("www/", "app.css", package = "DIVE"),
+  refname = NULL,
+  customUI = NULL,
+  customtab = ""
+)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{CSS}{Optional, location to an alternate CSS stylesheet to change the look and feel of the app.}
+\item{CSS}{Optional, location to an alternate CSS stylesheet to set look and feel of the module.}
 
-\item{subsets}{Optional, a list of the named subset groups. This can be used to allow only certain subsets
-within the data available for matching.}
+\item{customUI}{Optional, ui module function to display custom components.}
+
+\item{customtab}{If customUI is given, should also give a name for the tab hosting custom ui components.}
 }
 \description{
 Shiny app UI for matching application
@@ -20,5 +27,7 @@ Shiny app UI for matching application
 \details{
 The application UI can be viewed as a default template of how to put together several module components,
 including \code{\link{newDataSetInput}}, \code{\link{refSubsetInput}}, \code{\link{cohortGraphOutput}},
-to overall enable interactive exploration and matching of two different (cohort) datasets.
+to overall enable interactive exploration and matching of two different datasets. Note that though the datasets
+are typically conceived as datasets of matchable patient cohorts, this could be other types of matchable data
+such as geographic sampling sites, etc.
 }

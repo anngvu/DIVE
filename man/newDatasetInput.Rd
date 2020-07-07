@@ -4,14 +4,25 @@
 \alias{newDatasetInput}
 \title{Shiny module UI for a dataset input}
 \usage{
-newDatasetInput(id)
+newDatasetInput(id, label = "(name)")
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
+\item{label}{Optional, a label for the name text input field.}
 }
 \value{
 A \code{shiny::\link[shiny]{tagList}} containing input UI.
 }
 \description{
-An extension of \code{\link{dataUploadUI}} to include an additional text field.
+An extension of \code{\link{dataUploadUI}}
+}
+\details{
+When a user uploads a dataset, that dataset may need to be referenced either by
+the upload number, the original file name, or even a field in the dataset file.
+A reference is especially relevant if there are multiple datasets to be joined.
+The most preferable way to make a reference can be to attach a meaningful label/key
+to a dataset to be used by the application. This module simply bundles a text field
+with the \code{\link{dataUploadUI}} module so the user can give their uploaded data
+that meaningful label/key.
 }

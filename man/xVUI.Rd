@@ -10,10 +10,10 @@ xVUI(id)
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 }
 \description{
-UI based on the idea of a "visual spreadsheet" or "line up" view. The associated
-server function \code{\link{multiV}} provides more details of the implementation.
+The UI is based on the idea of a "visual spreadsheet" or "line up" view. See associated
+server function \code{\link{multiV}} for details of the implementation.
 }
 \details{
-The original use case presumes the high dimensional data to be genomics data, e.g.
-gene or protein expression that can be represented with heatmap matrices.
+The original use case presumes the high dimensional data to be expression data, e.g.
+gene or protein expression matrices.
 }

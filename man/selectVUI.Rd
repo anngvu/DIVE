@@ -13,8 +13,9 @@ selectVUI(id)
 A basic UI for choosing columns in a dataset.
 }
 \seealso{
-Other multiVApp module functions: \code{\link{geneV}},
-  \code{\link{multiV}}, \code{\link{selectV}},
-  \code{\link{subgroupVUI}}, \code{\link{subgroupV}}
+Other multiVApp module functions: 
+\code{\link{geneV}()},
+\code{\link{subgroupVUI}()},
+\code{\link{subgroupV}()}
 }
 \concept{multiVApp module functions}

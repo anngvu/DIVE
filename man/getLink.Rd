@@ -4,22 +4,27 @@
 \alias{getLink}
 \title{Shiny module server for retrieving internal data with action buttons/links}
 \usage{
-getLink(input, output, session, link = T, sources, readfun = readLines,
-  ...)
+getLink(input, output, session, sources, readfun = readLines, ...)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
 \item{sources}{A vector of source paths matching the order of labels given in \code{\link{getLinkInput}}.}
 
-\item{readfun}{A function to handle reading source files. Defaults to \code{\link[base]{readLines}}.}
+\item{readfun}{A function to handle reading the source files. Defaults to \code{\link[base]{readLines}}.}
 
 \item{...}{Additional arguments for \preformatted{readfun}.}
 }
 \value{
-Data object.
+A data object.
 }
 \description{
-Inserts action buttons/links that that can be used to 
+Inserts action buttons/links that that can be used to
 get data from a specified source.
+}
+\details{
+This is a simple component for the primary use of loading example data,
+defaulting to reading a locally-stored text file.
+If the data needs to be materialized another way, e.g. if the data is \code{.rda} or a web file,
+that can be handled with using the appropriate \code{readfun}.
 }

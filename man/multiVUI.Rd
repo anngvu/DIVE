@@ -16,7 +16,10 @@ Assembles the UI of various module components, i.e. \code{\link{xVUI}}, \code{\l
 into a working one-page application
 }
 \seealso{
-Other multiVUI module functions: \code{\link{geneVUI}},
-  \code{\link{multiVUIR}}
+Other multiVUI module functions: 
+\code{\link{geneVUI}()},
+\code{\link{multiVUIR}()},
+\code{\link{multiV}()},
+\code{\link{selectV}()}
 }
 \concept{multiVUI module functions}

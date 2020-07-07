@@ -34,7 +34,7 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"),
                                           ),
                                           div(class = "forceInline",
                                               dataUploadUI(ns("IDlist"), label = "Or upload a list of IDs",
-                                                           buttonlabel = "Upload", width = 200)
+                                                           buttonLabel = "Upload", width = 200)
                                           ),
                                           div(class = "forceInline", style = "margin-left: 10px;",
                                              uiOutput(ns("selectbygroup"))

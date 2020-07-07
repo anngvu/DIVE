@@ -9,14 +9,19 @@ matrixMixUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
   ns <- NS(id)
   fluidPage(theme = shinythemes::shinytheme("paper"),
             if(!is.null(CSS)) includeCSS(CSS),
-            # Control and data input module
+            # Filter controls and data input
             fluidRow(style="margin-top:30px; margin-bottom:20px;",
                      column(8, matrixCtrlUI(ns("ctrl"))),
                      column(3, dataUploadUI(ns("upload"))),
                      column(1) # to do: enable bookmarking?
             ),
-            # Display module
-            fluidRow(iMatrixUI(ns("matrix")))
+            # Matrix and network tabs
+            fluidRow(
+              tabsetPanel(id = ns("tabs"),
+                          tabPanel("Matrix", iMatrixUI(ns("matrix"))),
+                          tabPanel("Network")
+              )
+            )
   )
 }
 
@@ -29,10 +34,17 @@ matrixMixUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
 #' @param N A matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.
 #' @param cdata The non-reactive data used for generating the matrix.
 #' @param metadata A data.table with "Variable" as a key column and any number of columns (metadata) to be used as filters.
+#' @param vkey
+#' @param checkFun
+#' @param factorx
+#' @param dcolors
+#' @param informd
+#' @param appdata
 #' @export
 matrixMix <- function(input, output, session,
                       M, N, cdata,
                       metadata, vkey,
+                      checkFun = DIVE::checkDataUpload,
                       widgetmod = NULL, widgetopt = NULL,
                       factorx, dcolors,
                       informd = system.file("help/interactive_matrix.Rmd", package = "DIVE"),
@@ -40,17 +52,24 @@ matrixMix <- function(input, output, session,
 
   upload <- callModule(dataUpload, "upload",
                        removable = T,
-                       checkFun = checkForID,
+                       checkFun = checkFun,
                        informd = informd,
                        appdata = appdata,
                        checkappdata = T)
 
-  display <- callModule(matrixCtrl, "ctrl",
-                        M = M, N = N, cdata = cdata, metadata = metadata, vkey = vkey,
-                        newdata = upload, widgetmod = widgetmod, widgetopt = widgetopt)
+  mdata <- callModule(matrixCtrl, "ctrl",
+                        M = M, N = N,
+                        cdata = cdata,
+                        metadata = metadata,
+                        vkey = vkey,
+                        newdata = upload,
+                        widgetmod = widgetmod, widgetopt = widgetopt)
 
-  callModule(iMatrix, "matrix", display = display,
+  mat <- callModule(iMatrix, "matrix", mdata = mdata,
                        factorx = factorx, dcolors = dcolors)
+
+
+
 
 }
 

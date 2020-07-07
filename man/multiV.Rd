@@ -4,20 +4,49 @@
 \alias{multiV}
 \title{Shiny app server module for multi-views}
 \usage{
-multiV(input, output, session, hdata = NULL, hcat = NULL,
-  cdata = NULL, genes = DIVE::gene_symbols, prelist = NULL,
-  slabel = DIVE::gene_symbols_map)
+multiV(
+  input,
+  output,
+  session,
+  hdata = NULL,
+  hcat = NULL,
+  cdata = NULL,
+  factorx = NULL,
+  genes = DIVE::gene_symbols,
+  prelist = NULL,
+  slabel = DIVE::gene_symbols_map,
+  preselect = NULL
+)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 }
 \description{
-Assembles the logic of various module components, i.e. \code{\link{multiV}}, \code{\link{geneV}},
-into a working one-page application
+This assembles the logic of various module components into a working one-page application.
+First, the module calls \code{\link{multiVCtrl}},
+which returns a named list object which either contains data or NULL.
+A section is either dynamically added for data or removed for NULL,
+using the name of the object, which is something like "i1" and corresponds to the
+index of the stored global datasets. Thus, a section with id containing "-i1" corresponds to
+a representation of the first dataset. Each section is rendered by \code{\link{xV}}.
+}
+\details{
+While \code{\link{multiVCtrl}} is a global control that calls one or more sections into
+existence on the page, there are two other types of global controls that affect
+the sections present. These are the \code{\link{geneV}} and \code{\link{selectV}} controls,
+which function as global filters for attributes that should be present in all or most of the data
+(for expression matrix data, this means gene/protein and attributes corresponding to samples).
+Thus, each \code{\link{xV}} section component listens to
+\code{\link{geneV}} and \code{\link{selectV}} outputs.
+
+However, each section also has its own local options that control display of only that section,
+as seen in \code{\link{xVUI}}.
 }
 \seealso{
-Other multiVApp module functions: \code{\link{geneV}},
-  \code{\link{selectVUI}}, \code{\link{selectV}},
-  \code{\link{subgroupVUI}}, \code{\link{subgroupV}}
+Other multiVUI module functions: 
+\code{\link{geneVUI}()},
+\code{\link{multiVUIR}()},
+\code{\link{multiVUI}()},
+\code{\link{selectV}()}
 }
-\concept{multiVApp module functions}
+\concept{multiVUI module functions}

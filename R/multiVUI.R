@@ -37,10 +37,26 @@ multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
 
 #' Shiny app server module for multi-views
 #'
-#' Assembles the logic of various module components, i.e. \code{\link{multiV}}, \code{\link{geneV}},
-#' into a working one-page application
+#' This assembles the logic of various module components into a working one-page application.
+#' First, the module calls \code{\link{multiVCtrl}},
+#' which returns a named list object which either contains data or NULL.
+#' A section is either dynamically added for data or removed for NULL,
+#' using the name of the object, which is something like "i1" and corresponds to the
+#' index of the stored global datasets. Thus, a section with id containing "-i1" corresponds to
+#' a representation of the first dataset. Each section is rendered by \code{\link{xV}}.
 #'
-#' @family multiVApp module functions
+#' While \code{\link{multiVCtrl}} is a global control that calls one or more sections into
+#' existence on the page, there are two other types of global controls that affect
+#' the sections present. These are the \code{\link{geneV}} and \code{\link{selectV}} controls,
+#' which function as global filters for attributes that should be present in all or most of the data
+#' (for expression matrix data, this means gene/protein and attributes corresponding to samples).
+#' Thus, each \code{\link{xV}} section component listens to
+#' \code{\link{geneV}} and \code{\link{selectV}} outputs.
+#'
+#' However, each section also has its own local options that control display of only that section,
+#' as seen in \code{\link{xVUI}}.
+#'
+#' @family multiVUI module functions
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @export
@@ -61,17 +77,35 @@ multiV <- function(input, output, session,
                      factorx = factorx,
                      preselect = preselect)
 
-  # controls clinical/phenotype/experimental variable selection
+  # controls clinical/phenotype/other variable selection for all xVUI components
   vselect <- callModule(selectV, "cdata",
                         data = reactive(view$cdata),
                         selected = reactive(view$vselect),
-                        countby = reactive(view$hddata))
+                        countby = reactive(view$hdata))
 
-  # controls gene selection for all xVUI components in multiVUI
+  # controls gene selection for all xVUI components
   gselect <- callModule(geneV, "gene",
                         choices = genes,
                         prelist = prelist)
 
+  # each dataset gets its own section with its own xVUI local module options
+  observeEvent(view$hdata, {
+    trackID <- session$ns(names(view$hdata))
+    trackdata <- view$hdata[[1]]
+    if(!is.null(trackdata)) {
+      insertUI(selector = "#displaytrack", immediate = T,
+               ui = tags$div(id = trackID, xVUI(id = trackID)))
+      callModule(xV, id = names(view$hdata),
+                 hdata = trackdata,
+                 cdata = vselect,
+                 selected = gselect,
+                 slabel = slabel)
+    } else {
+      removeUI(selector = paste0("#", trackID))
+    }
+  })
+
+  # data tools
   observeEvent(input$newSubgroupVUI, {
     N <- input$newSubgroupVUI
     insertUI(paste0("#views"),
@@ -81,24 +115,6 @@ multiV <- function(input, output, session,
                hdlist = view$hdlist)
   })
 
-  # each dataset gets its own track (row), served by its own xVUI module
-  observeEvent(view$hddata, {
-    trackID <- session$ns(names(view$hddata))
-    trackdata <- view$hddata[[1]]
-    if(!is.null(trackdata)) {
-      insertUI(selector = "#displaytrack", immediate = T,
-               ui = tags$div(id = trackID,
-                             xVUI(id = trackID)))
-      callModule(xV, id = names(view$hddata),
-                 hdata = trackdata,
-                 cdata = vselect,
-                 selected = gselect,
-                 slabel = slabel)
-      # showNotification(paste("New track loaded with expression matrix", paste(dim(trackdata), collapse = "x")))
-    } else {
-      removeUI(selector = paste0("#", trackID))
-    }
-  })
 
 }
 

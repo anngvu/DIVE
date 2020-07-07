@@ -21,7 +21,6 @@ Imports:
     visNetwork,
     reshape2,
     shinycssloaders,
-    shinyjqui,
     shinyWidgets,
     r2d3,
     jsonlite,
@@ -31,4 +30,4 @@ Imports:
     recount,                    
     mygene,
     limma
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0

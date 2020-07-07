@@ -37,26 +37,26 @@ matchResult <- function(input, output, session,
   })
 
   observeEvent(params$run, {
-    # Create fused dataset with required structure
-    intermediate <- dataFusion(d1 = refSubset(), d2 = setX(),
-                               fuseon = params$matchOn, sourcecol = sourcecol)
-    # Then do match
-    matchpairs <- withProgress(try(matchPair(data = intermediate, groupcol = sourcecol, params$matchOn)),
-                               value = 0.5, message = "Running...")
-    if(inherits(matchpairs, "try-error")) {
-      showModal(modalDialog("Unfortunately, something went wrong. Please review your data or submit a bug report.",
-                            title = "Match result status", easyClose = T))
-    } else {
-      # Update result reactive vals
-      results$params <- params$matchOn
-      results$intermediate <- intermediate
-      results$pair <- matchpairs$pair
-      results$matchtable <- matchpairs$matchtable
-    }
+
+    withProgress({
+      tryCatch({
+        # Create fused dataset with required structure, then do match
+        intermediate <- dataFusion(d1 = refSubset(), d2 = setX(),
+                                   fuseon = params$matchOn, sourcecol = sourcecol)
+        matchpairs <- matchPair(data = intermediate, groupcol = sourcecol, params$matchOn)
+        # Update result reactive vals
+        results$params <- params$matchOn
+        results$intermediate <- intermediate
+        results$pair <- matchpairs$pair
+        results$matchtable <- matchpairs$matchtable
+      },
+        error = function(e) meh()
+      )
+    }, value = 0.5, message = "Running...")
   })
 
   output$table <- renderTable({
-    if(is.null(results$matchtable)) return()
+    req(results$matchtable)
     results$matchtable
   }, striped = T)
 
@@ -84,13 +84,15 @@ matchResult <- function(input, output, session,
 
 #-- Helper functions -----------------------------------------------------------------------------------#
 
-#' Fusing two datasets based on harmonized variable names.
+#' Fusing two datasets based on harmonized variable names
 #'
-#' Details
+#' Given two datasets and information on which columns are the same, the two datasets
+#' are concatenated, with any NAs removed and keeping only the specified columns in the result.
 #'
 #' @param d1 A data.frame of the first dataset.
 #' @param d2 A data.frame of the second dataset.
-#' @param fuseon A named vector of the harmonized features, where the names are the features in d1 and elements are features in d2.
+#' @param fuseon A named vector of the harmonized features,
+#' where the names are the features in d1 and elements are features in d2.
 #' @param sourcecol The key column used to identify the row sources after the two datasets are fused.
 #' @return A data.table of the fused data.
 #' @export
@@ -102,7 +104,7 @@ dataFusion <- function(d1, d2, fuseon, sourcecol) {
   # remove NAs
   fused <- fused[ fused[, !Reduce(`|`, lapply(.SD, function(x) is.na(x))), .SDcols = names(fuseon)] ]
   fused <- fused[, c("ID", sourcecol, names(fuseon)), with = F]
-  # sourecol must be factored for use in matching functions
+  # sourecol must be factored for use in matching function
   fused[[sourcecol]] <- factor(fused[[sourcecol]], levels = c(unique(d1[[sourcecol]]), unique(d2[[sourcecol]])))
   fused
 }

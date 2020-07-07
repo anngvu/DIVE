@@ -4,37 +4,59 @@
 \alias{matchApp}
 \title{Shiny app server for matching and exploration of two datasets}
 \usage{
-matchApp(input, output, session, refdata, HPCG, colors, datakey, xname,
-  refname, vars, guess = DIVE::guessMatch, subsets, subsetfeat,
+matchApp(
+  input,
+  output,
+  session,
+  refdata,
+  custom = NULL,
+  datakey,
+  xname,
+  refname,
+  vars,
+  guess = NULL,
+  subsets,
+  subsetfeat,
   informd = system.file("help/cohort_exchange.Rmd", package = "DIVE"),
-  factorx, appdata = NULL)
+  factorx,
+  appdata = NULL
+)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
 \item{refdata}{The reference dataset.}
 
-\item{HPCG}{Optional graph object representing the reference dataset.}
+\item{custom}{Optional self-contained module that doesn't interact with others,
+e.g. for extra summary plots. Needs to be passed in as name of the server module function.}
 
-\item{colors}{Colors}
+\item{datakey}{Shared paramater passed to \code{refSubset}, \code{newDataset}, \code{matchResult}.}
 
-\item{datakey}{Passed to \code{refSubsetInput}, \code{newDataset}, \code{matchResult}.}
+\item{xname}{Character label of what to the external dataset, e.g. "CohortX" or "New Site" or "Comparison Dataset".}
 
-\item{vars}{Optional, variables allowed to be used for matching within \code{refdata}, organized in categories
-displayed as separate lists (mainly for user-friendliness). If not given, all variables can be used and will be displayed in one list.}
+\item{refname}{Character label of what to call the reference dataset.}
 
-\item{guess}{Optional, a function for making initial guesses of matchable variables.}
+\item{vars}{Variables allowed to be used for matching within \code{refdata}, which will be organized and
+displayed as the given named lists.}
+
+\item{guess}{Optional, a custom function for making initial guesses of matchable variables.}
+
+\item{subsets}{The subsets.}
 
 \item{subsetfeat}{Which variable to be used as the subset variable.}
 
 \item{informd}{Link to a help file that can be called with the info module.}
 
-\item{appdata}{See ?}
+\item{factorx}{A naming pattern for factoring variables displayed.}
+
+\item{appdata}{Optional, a path to example application data (for demonstration purposes).}
 }
 \description{
 Shiny app server for matching and exploration of two datasets
 }
 \details{
-This server function puts together a number of modular server module components with the correct
-logic to power the interactive capabilities of the matching application.
+This server function puts together a number of modular components to
+implement the whole interaction of the matching application. Though originally composed for
+matching patient cohorts, this matching application can be used with data in different domains.
+The composition of this module allows inserting a custom-written module.
 }

@@ -4,8 +4,16 @@
 \alias{xV}
 \title{Shiny module server for presenting high dimensional data with other features in multi-column view}
 \usage{
-xV(input, output, session, hdata, cdata = reactive({     NULL }),
-  key = "ID", selected = reactive({     NULL }), slabel = NULL)
+xV(
+  input,
+  output,
+  session,
+  hdata,
+  cdata = reactive({     NULL }),
+  key = "ID",
+  selected = reactive({     NULL }),
+  slabel = NULL
+)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
@@ -14,7 +22,7 @@ xV(input, output, session, hdata, cdata = reactive({     NULL }),
 
 \item{cdata}{Optional, a data.frame or data.table that can be joined to high-dimensional data. See details.}
 
-\item{key}{Name of key column, defaulting to "ID".}
+\item{key}{Name of key column, should be and currently defaults to "ID".}
 
 \item{selected}{A vector used to subset the columns of hdata.}
 

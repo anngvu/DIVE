@@ -10,7 +10,10 @@ multiVUIR(ns, ...)
 Shiny app launcher for multi-view module
 }
 \seealso{
-Other multiVUI module functions: \code{\link{geneVUI}},
-  \code{\link{multiVUI}}
+Other multiVUI module functions: 
+\code{\link{geneVUI}()},
+\code{\link{multiVUI}()},
+\code{\link{multiV}()},
+\code{\link{selectV}()}
 }
 \concept{multiVUI module functions}

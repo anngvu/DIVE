@@ -4,8 +4,7 @@
 \alias{exploreMoreUI}
 \title{Shiny module UI for attribute-by-attribute comparison of two datasets}
 \usage{
-exploreMoreUI(id, s1Label = "", s1Data, s2Label = "", s2Data,
-  placeholder = "")
+exploreMoreUI(id, s1Label = "", s1Data, s2Label = "", s2Data, placeholder = "")
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}

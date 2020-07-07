@@ -10,8 +10,12 @@ matchResultOutput(id)
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 }
 \value{
-Results UI consisting of a table and data download buttons.
+Results UI consisting of a table and data download interface.
 }
 \description{
 Shiny module UI output for match results
+}
+\details{
+Creates UI for match result output, including a table preview of the result and download interface.
+Note that an intermediate result table is available to download only when application is run in dev mode.
 }

@@ -4,16 +4,12 @@
 \alias{refSubsetInput}
 \title{Shiny module UI for selecting a subsetted dataset}
 \usage{
-refSubsetInput(id, name = id, label = "", subsets = "")
+refSubsetInput(id, refname = NULL)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{name}{Optional, name for the main dataset.}
-
-\item{label}{Optional, select input label.}
-
-\item{subsets}{A named list of the available subset factors in the data.}
+\item{refname}{Optional, a label for the reference dataset or even HTML link to logo, etc.}
 }
 \value{
 A \code{shiny::\link[shiny]{tagList}} for UI to subset a dataset.

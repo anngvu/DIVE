@@ -4,8 +4,13 @@
 \alias{makeFromCollection}
 \title{Create master data table from a collection of datasets}
 \usage{
-makeFromCollection(cdir = getwd(), filepattern = "*.txt",
-  exclude = "!", numdata = T, index = NULL)
+makeFromCollection(
+  cdir = getwd(),
+  filepattern = "*.txt|.csv|.tsv",
+  exclude = "!",
+  numdata = T,
+  index = indexDefault
+)
 }
 \arguments{
 \item{cdir}{Directory path (relative to working directory) to the collection of dataset files.}

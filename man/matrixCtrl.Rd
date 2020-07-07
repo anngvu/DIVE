@@ -4,47 +4,64 @@
 \alias{matrixCtrl}
 \title{Shiny module server functions to generate filter UI for interactive matrix}
 \usage{
-matrixCtrl(input, output, session, M = NULL, N = NULL, cdata = NULL,
-  metadata = NULL, vkey = NULL, newdata = reactive({ }),
-  widgetmod = NULL, widgetopt = NULL)
+matrixCtrl(
+  input,
+  output,
+  session,
+  M = NULL,
+  N = NULL,
+  cdata = NULL,
+  metadata = NULL,
+  vkey = NULL,
+  newdata = reactive({ }),
+  widgetmod = NULL,
+  widgetopt = NULL
+)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
 \item{M}{A data matrix, e.g. a correlation matrix, which must have row names.}
 
-\item{N}{A matrix of the same dimensions as M, used as a filter layer, e.g. sample size.}
+\item{N}{A matrix of the same dimensions as M to be used as a filter layer, e.g. sample size or p-values.}
 
-\item{cdata}{The data used for generating the matrix.}
+\item{cdata}{The data used for generating the matrix,
+necessary for allowing user-uploaded data for mutable M.}
 
 \item{metadata}{Optional, a data.table with different types of metadata/annotation to be used as filters.
-If not given, the only filter option will be the row names/index in M.}
+If not given, the only filter option will be the row names in M. Column names will be the names of the filter group.}
 
-\item{vkey}{The column in metadata that maps to row names in M.}
+\item{vkey}{The column in metadata that maps to row/col names in M, i.e. the key column.}
 
-\item{newdata}{Optional, reactive data, e.g. from user upload, that can be merged with M.}
+\item{newdata}{Optional, reactive data such as a user upload passed in by
+the \code{\link{dataUpload}} module or from some other component,
+that is suitable for merging with \preformatted{cdata} to calculate a new M.}
 
-\item{widgetmod}{Optional, a widget extension module. See details.}
+\item{widgetmod}{IGNORE. Optional, a widget extension module. See details.}
 }
 \value{
-Reactive values in \code{state} object to be used by the associated plotting module.
-Basically, this keeps track of all the matrices as well as selected metadata.
+Reactive values in \code{mstate} object that keeps track of visible matrices
+and selected metadata and is used by the associated plotting module.
 }
 \description{
-Update/populate matrix filter UI options depending on available data and metadata,
-as well as handling of user inputs to pass on to appropriate plot objects.
+Update matrix data and metadata for the appropriate plotting module.
 }
 \details{
 What is available as filters relies on the underlying metadata.
-See \code{\link{metadata}} for an example data object that can be passed into the parameter
-\preformatted{metadata}. The base UI implements these filters as drop-down selections,
-but the UI can also expand/integrate with an optional "add-on" or "augmenting" widget
-to provide an alternate, perhaps more intuitive route of filter input.
+The metadata should be a table that can be passed into the parameter
+\preformatted{metadata}, with a key column referencing the matrix index
+and additional columns for each type of metadata attribute.
+The base UI implements interactive filters as drop-down selections.
+The server function returns the data with user-applied filters,
+i.e. the main input to be visualized with \code{\link{iMatrix}}.
+}
+\section{To-do}{
+
+The UI can also expand/integrate with an optional "add-on" widget
+to provide an alternate, perhaps more intuitive interface for filtering.
 For example, compared to a drop-down selection of geographical locations,
 a map widget would provide a better selection interface. Not all types of metadata
 can be integrated with a widget, and the module provides capability for only one widget.
 The server function needs to return when the widget should be called (displayed).
-
-The module returns an object representing the original data with user-applied filters,
-i.e. the main input to be visualized with \code{\link{interactiveMatrix}}.
 }
+

@@ -4,10 +4,12 @@
 \alias{matrixCtrlUI}
 \title{Shiny module UI containing filter inputs for interactive matrix}
 \usage{
-matrixCtrlUI(id)
+matrixCtrlUI(id, minN = 5)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
+\item{minN}{Minimum number for numeric input filter.}
 }
 \description{
 Interactive controls for a matrix (usually correlation) plot.

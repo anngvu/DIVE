@@ -42,14 +42,16 @@ getAncestry <- function(e, cl, rel_type) {
   return(e_ancestry)
 }
 
+
+#' Reduce Class
+#'
 #' An entity is reduced to a specific (ancestor) class for coloring,
 #' usually based on the topmost ancestor of either the "part_of" or "is_a" relationship.
+#'
 #' For instance, an ancestor A is assigned color "red", entities descended from A will be assigned some color of red hue.
 #' Which ancestors and the hue color associated with each must all be manually specified.
-#'
 #' The order of values (ancestors) in classes matters; when an entity inherits from two or more classes
 #' but only one label can be used, the ancestor class that takes precedence should be listed first.
-#'
 #' When values in e_classes may be inaccurate due to errors in the ontology, or for special cases,
 #' one can specifically assign classes using the corrections parameter.
 #'
@@ -66,6 +68,8 @@ reduceClass <- function(e_classes, index_classes, other = "other", corrections =
   return(reduced)
 }
 
+#' Color By Class
+#'
 #' @param dt A data.table with entities for which a color column will be added.
 #' @param e_ancestry A list of ancestor classes by entity.
 #' @param indexed A list of the same length as e_ancestry, treated as factors and used for splitting e_ancestry into defined classes.

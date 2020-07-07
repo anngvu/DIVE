@@ -4,9 +4,11 @@
 \alias{makeCdata}
 \title{Make data object for Shiny app}
 \usage{
-makeCdata(cdir = "./Collection/Main/", filepattern,
-  other = list("./Collection/Other/coredata_ref.txt"),
-  outdir = "./App/Data/")
+makeCdata(
+  cdir = "./Collection/Main/",
+  filepattern = "*.txt|.csv|.tsv",
+  other = NULL
+)
 }
 \arguments{
 \item{cdir}{Directory path (relative to working directory) to the collection of dataset files.}
@@ -15,8 +17,6 @@ makeCdata(cdir = "./Collection/Main/", filepattern,
 
 \item{other}{Optional, a list of of paths to other data files not in the main collection but
 that should be part of the master data object. NULL if no other data to be incorporated.}
-
-\item{outdir}{Where to put \code{cdata}. Defaults to App/Data.}
 }
 \description{
 A wrapper to create the \code{cdata} object

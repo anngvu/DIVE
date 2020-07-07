@@ -4,8 +4,15 @@
 \alias{valueBox}
 \title{A UI box element for summary values in dashboard-like presentation}
 \usage{
-valueBox(value, subtitle, icon = NULL, textcolor = "black",
-  bgcolor = "white", width = 4, href = NULL)
+valueBox(
+  value,
+  subtitle,
+  icon = NULL,
+  textcolor = "black",
+  bgcolor = "white",
+  width = 4,
+  href = NULL
+)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}

@@ -1,41 +1,40 @@
 # DIVE: Data Integration & Visual Exploration
 
-DIVE is an R/Shiny application that provides a proof-of-concept framework for curating, integrating and visualizing heterogenous biological data that has been generated from the same collection of samples, such as a specialized biorepository that distributes cells or tissues to many independent investigators. Though this framework is meant to be re-purposeable as much as possible for different collections and use cases, we demonstrate the idea on data that has been painstakingly curated from the Network for Pancreatic Organ Donors (nPOD). Our motivating data comprises of research results from nPOD samples published over the last decade. This data provides a different value proposition to researchers who are not interested in the "methods" part of the package (i.e. re-using the framework); for them, we hope the package can be viewed as a way to conveniently explore and re-use data from nPOD. 
+DIVE is an R/Shiny application that provides a proof-of-concept framework for integrating and visualizing data that have been generated on the same collection of individuals or sites. In the context of biomedical research, one can think of independent studies that use biosamples from individuals within the same cohort. In the context of ecological research, one can think of heterogeneous measurements that were gathered at various times and/or by different groups on the same geographical sites. Though the components of this software are modular and generic enough to be re-purposeable for different collections and use cases, we optimize for the first context and demonstrate the idea with data from the Network for Pancreatic Organ Donors (nPOD) cohort. Our motivating data comprise of painstakingly curated published research on the nPOD donor samples published over the last decade. The instance of DIVE configured with nPOD data is branded nPOD DataView, accessible here (nPOD DataView requires DIVE to be installed, and then simply calls DIVE with the custom configurations and data objects). nPOD DataView is intended for diabetes researchers who want a "friendly" data portal. Other researchers/developers may be more interested in reusing or modifying the software components of DIVE to share their own data; feel free to contact me <avu@coh.org> if this is you and you want to ask about adapting DIVE.
 
-This is still a work in progress and more details will be available as the application is finishing up on development and testing. Investigators who'd like to contribute data or help us with testing can submit a note at the issues page (https://github.com/avucoh/DIVE/issues) or email <avu@coh.org>.
+This is still a work in progress and more details will be available as the application is finishing up on development and testing. Investigators who'd like to contribute data or help us with testing can submit a note at the issues page (https://github.com/avucoh/DIVE/issues).
 
-The current version of can be installed via `devtools::install_github("avucoh/DIVE")`
+The current version can be installed via `devtools::install_github("avucoh/DIVE")`
+
+## Recent Updates
+
+
 
 ## Modules
 
-DIVE is composed of five stand-alone modules, each with different purposes and methods for interfacing with the data, described below. The first three modules are more "major" modules, while the last two modules are more "minor" modules. Though the modules can be run independently, when put together they can serve as a well-rounded web data portal. 
+DIVE is composed of four stand-alone modules, each with different purposes and methods for interfacing with data, described below. The modules can be run independently or put together as part of the same web application. 
 
-### Cohort matching (Match App)
+### Match Module (CohortXchange)
 
-- Intended users: Both nPOD and non-nPOD investigators
-- Description: Many experimental studies draw samples from multiple sources, and matching along certain features might be desired for more valid statistical results. The nPOD cohort of organ donors includes mostly T1D, T2D, non-diabetes, and a minority of other donor types. This module allows matching and comparison of an external cohort (or internally with an nPOD subset) to nPOD based on clinical data like disease, age, auto-antibody positivity, and more. Investigators can contact nPOD to request tissue samples of matches.  
+- Intended users: nPOD investigators and non-nPOD diabetes researchers
+- Description: Experimental studies can draw samples from multiple cohorts, and matching along certain features might be desired for more valid statistical results. The nPOD cohort of organ donors includes mostly T1D, T2D, non-diabetes, and a minority of other donor types. This module allows matching and comparison of nPOD donors to an external cohort (or internally for a subset of nPOD donors) using clinical and demographic variables like disease status, age, sex. Investigators can then contact nPOD to check for availability of matching tissue samples.  
 - To start just this module at the console: `matchAppRun()`
 
-### Exploration of data from small-scale experiments (interactiveMatrix App)
+### Matrix Module
 
-- Intended users: Primarily for nPOD investigators 
-- Description: All data from small-scale experiment that we have cleaned and curated is placed into The Matrix, which supports simple interactive data comparisons through correlation analysis, drilldowns, and uploading data. It is meant to be the easiest and fastest way for an nPOD investigator to get started at looking at how their data might relate to others and generate new hypotheses.
+- Intended users: More interesting for nPOD investigators who have already generated data or are planning to generate nPOD data 
+- Description: All data from small-scale experiment that we have curated and standardized is placed into The Matrix, which supports interactive data comparisons through correlation analysis, drilldowns, and custom data uploads. This is the easiest and fastest way for an nPOD investigator to get started at looking at how data might relate across different studies and to generate new hypotheses.
 - To start just this module at the console: `interactiveMatrixAppRun()`
 
-### Exploration and learning from high-throughput phenotype data (multiVUI App)
+### MultiVUI Module
 
-- Intended users: Both nPOD and non-nPOD investigators
-- Description: Going beyond the limitations of the interactiveMatrix module, this module extends data interaction to high-throughput data and better combines data of different sources/dimensions through an alternate layout and additional capabilities.
+- Intended users: nPOD investigators and non-nPOD diabetes researchers
+- Description: Going beyond the limitations of the Matrix Module, this module extends data interaction to high-throughput data and better combines data of different sources/dimensions through an alternate layout and additional capabilities.
 - To start just this module at the console: `multiVAppRun()`
 
-### Browse and download (Browser App)
+### Browser Module
 
 - Intended users: Both nPOD and non-nPOD investigators 
-- Description: This module is for exploring and understanding the data through the metadata, giving interested researcher a better idea "what is out there" in terms of the data we have curated. Aside from the code that powers the application, much work has been put in to convert data into readable formats and annotate it with metadata to allow better searching and discovery. From this portal, researchers can download all or a select set of data.
+- Description: This module is for exploring and understanding the data through the metadata, giving interested researcher a better idea of "what is out there" with a traditional summary view, metadata dictionary, and basic filter options.
 - To start just this module at the console: `browseR()`
 
-### Curate (Curater App)
-
-- Intended users: Data curators and other data submitters (investigators)
-- Description: So far this will simply be an interface for inputting metadata. Adding capabilities for tracking and generating statistics is being considered.
-- To start just this module at the console: `curateR()`

@@ -2,10 +2,16 @@
 % Please edit documentation in R/checks.R
 \name{xCheckID}
 \alias{xCheckID}
-\title{Returns a list of IDs found in reference list}
+\title{xCheckID
+Also used for match module
+Returns a list of IDs found in reference list
+#' Tells user that internal matches have been found}
 \usage{
 xCheckID(data, ref = cdata$ID)
 }
 \description{
+xCheckID
+Also used for match module
 Returns a list of IDs found in reference list
+#' Tells user that internal matches have been found
 }

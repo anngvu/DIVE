@@ -2,13 +2,9 @@
 % Please edit documentation in R/cellPackR.R
 \name{reduceClass}
 \alias{reduceClass}
-\title{An entity is reduced to a specific (ancestor) class for coloring,
-usually based on the topmost ancestor of either the "part_of" or "is_a" relationship.
-For instance, an ancestor A is assigned color "red", entities descended from A will be assigned some color of red hue.
-Which ancestors and the hue color associated with each must all be manually specified.}
+\title{Reduce Class}
 \usage{
-reduceClass(e_classes, index_classes, other = "other",
-  corrections = NULL)
+reduceClass(e_classes, index_classes, other = "other", corrections = NULL)
 }
 \arguments{
 \item{e_classes}{List of ancestor class by entity.}
@@ -20,10 +16,14 @@ reduceClass(e_classes, index_classes, other = "other",
 \item{classes}{A vector containing ancestor classes to look for and to for li.}
 }
 \description{
-The order of values (ancestors) in classes matters; when an entity inherits from two or more classes
-but only one label can be used, the ancestor class that takes precedence should be listed first.
+An entity is reduced to a specific (ancestor) class for coloring,
+usually based on the topmost ancestor of either the "part_of" or "is_a" relationship.
 }
 \details{
+For instance, an ancestor A is assigned color "red", entities descended from A will be assigned some color of red hue.
+Which ancestors and the hue color associated with each must all be manually specified.
+The order of values (ancestors) in classes matters; when an entity inherits from two or more classes
+but only one label can be used, the ancestor class that takes precedence should be listed first.
 When values in e_classes may be inaccurate due to errors in the ontology, or for special cases,
 one can specifically assign classes using the corrections parameter.
 }

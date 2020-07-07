@@ -2,7 +2,7 @@
 % Please edit documentation in R/iMatrix.R
 \name{iMatrixUI}
 \alias{iMatrixUI}
-\title{Shiny module UI of matrix plot with drilldown components}
+\title{Shiny module UI for interactive matrix plot with drilldown components}
 \usage{
 iMatrixUI(id)
 }
@@ -10,5 +10,5 @@ iMatrixUI(id)
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 }
 \description{
-Creates app UI for a heatmap matrix responding to inputs, new plot data, that is linked to a drilldown scatterplot component.
+Creates app UI for a heatmap matrix responding to reactive data that is linked to a drilldown scatterplot component.
 }

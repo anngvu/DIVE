@@ -4,8 +4,7 @@
 \alias{infoBox}
 \title{A UI box element for summary values in dashboard-like presentation}
 \usage{
-infoBox(title, value, subtitle = NULL, icon = shiny::icon("info"),
-  width = 4)
+infoBox(title, value, subtitle = NULL, icon = shiny::icon("info"), width = 4)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}

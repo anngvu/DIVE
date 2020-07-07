@@ -4,11 +4,19 @@
 \alias{browse}
 \title{Shiny module server functions for browsing metadata}
 \usage{
-browse(input, output, session, dt_id = NULL, index1 = "ID",
-  index2 = NULL, dt_var = NULL, dt_var_index = NULL,
-  dt_var_ext = NULL, informd1 = system.file("help/ID_list.Rmd", package
-  = "DIVE"), informd2 = system.file("help/browse_data.Rmd", package =
-  "DIVE"))
+browse(
+  input,
+  output,
+  session,
+  dt_id = NULL,
+  index1 = "ID",
+  index2 = NULL,
+  dt_var = NULL,
+  dt_var_index = NULL,
+  dt_var_ext = NULL,
+  informd1 = system.file("help/ID_list.Rmd", package = "DIVE"),
+  informd2 = system.file("help/browse_data.Rmd", package = "DIVE")
+)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
@@ -23,9 +31,9 @@ browse(input, output, session, dt_id = NULL, index1 = "ID",
 
 \item{dt_var_ext}{Extended table to provide lookup details of metadata.}
 
-\item{informd1}{Helpfile for uploading an ID list.}
+\item{informd1}{Help content for uploading an ID list.}
 
-\item{informd2}{Helpfile for how browsing data works.}
+\item{informd2}{Help content for how browsing data works.}
 }
 \description{
 Handles general browsing, filtering, subsetting of metadata table. The module requires two tables:

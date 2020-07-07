@@ -1,13 +1,14 @@
-    #' Shiny module UI containing filter inputs for interactive matrix
+#' Shiny module UI containing filter inputs for interactive matrix
 #'
 #' Interactive controls for a matrix (usually correlation) plot.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param minN Minimum number for numeric input filter.
 #' @export
-matrixCtrlUI <- function(id) {
+matrixCtrlUI <- function(id, minN = 5) {
   ns <- NS(id)
   tags$div(id = "matrixCtrlUI",
-           div(class = "forceInline", numericInput(ns("minN"), HTML("mininum <i>N</i>"), min = 2, max = NA, step = 1, val = 2, width = "70px")),
+           div(class = "forceInline", numericInput(ns("minN"), HTML("mininum <i>N</i>"), min = minN, max = NA, step = 1, val = 2, width = "70px")),
            div(class = "forceInline",
              div(class = "forceInline", selectInput(ns("optrowgroup"), "Select rows by", choices = "", width = "120px")),
              div(class = "forceInline", selectizeInput(ns("optrow"), "Rows", choices = "", multiple = T, width = "360px"))
@@ -19,43 +20,49 @@ matrixCtrlUI <- function(id) {
 
 #' Shiny module server functions to generate filter UI for interactive matrix
 #'
-#' Update/populate matrix filter UI options depending on available data and metadata,
-#' as well as handling of user inputs to pass on to appropriate plot objects.
+#' Update matrix data and metadata for the appropriate plotting module.
 #'
 #' What is available as filters relies on the underlying metadata.
-#' See \code{\link{metadata}} for an example data object that can be passed into the parameter
-#' \preformatted{metadata}. The base UI implements these filters as drop-down selections,
-#' but the UI can also expand/integrate with an optional "add-on" or "augmenting" widget
-#' to provide an alternate, perhaps more intuitive route of filter input.
+#' The metadata should be a table that can be passed into the parameter
+#' \preformatted{metadata}, with a key column referencing the matrix index
+#' and additional columns for each type of metadata attribute.
+#' The base UI implements interactive filters as drop-down selections.
+#' The server function returns the data with user-applied filters,
+#' i.e. the main input to be visualized with \code{\link{iMatrix}}.
+#'
+#' @section To-do:
+#' The UI can also expand/integrate with an optional "add-on" widget
+#' to provide an alternate, perhaps more intuitive interface for filtering.
 #' For example, compared to a drop-down selection of geographical locations,
 #' a map widget would provide a better selection interface. Not all types of metadata
 #' can be integrated with a widget, and the module provides capability for only one widget.
 #' The server function needs to return when the widget should be called (displayed).
 #'
-#' The module returns an object representing the original data with user-applied filters,
-#' i.e. the main input to be visualized with \code{\link{interactiveMatrix}}.
-#'
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param M A data matrix, e.g. a correlation matrix, which must have row names.
-#' @param N A matrix of the same dimensions as M, used as a filter layer, e.g. sample size.
-#' @param cdata The data used for generating the matrix.
+#' @param N A matrix of the same dimensions as M to be used as a filter layer, e.g. sample size or p-values.
+#' @param cdata The data used for generating the matrix,
+#' necessary for allowing user-uploaded data for mutable M.
 #' @param metadata Optional, a data.table with different types of metadata/annotation to be used as filters.
-#' If not given, the only filter option will be the row names/index in M.
-#' @param vkey The column in metadata that maps to row/col names in M.
-#' @param newdata Optional, reactive data, e.g. from user upload, that can be merged with M.
-#' @param widgetmod Optional, a widget extension module. See details.
-#' @return Reactive values in \code{mstate} object to be used by the associated plotting module,
-#' which keeps track of visible matrices and selected metadata.
+#' If not given, the only filter option will be the row names in M. Column names will be the names of the filter group.
+#' @param vkey The column in metadata that maps to row/col names in M, i.e. the key column.
+#' @param newdata Optional, reactive data such as a user upload passed in by
+#' the \code{\link{dataUpload}} module or from some other component,
+#' that is suitable for merging with \preformatted{cdata} to calculate a new M.
+#' @param widgetmod IGNORE. Optional, a widget extension module. See details.
+#' @return Reactive values in \code{mstate} object that keeps track of visible matrices
+#' and selected metadata and is used by the associated plotting module.
 #' @export
 matrixCtrl <- function(input, output, session,
-                       M = NULL, N = NULL, cdata = NULL, metadata = NULL, vkey = NULL, newdata = reactive({ }),
+                       M = NULL, N = NULL, cdata = NULL, metadata = NULL, vkey = NULL,
+                       newdata = reactive({ }),
                        widgetmod = NULL, widgetopt = NULL
                      ) {
 
-  # If for some reason the metadata contains records for features that are actually not in M or are missing M,
+  # If for some reason the metadata contains records for features that are actually not in M,
   # make sure that is reflected in the metadata selection options.
-  # Then columns are in metadata are mapped to optrowgroups, with the vkey used as the default group
+  # Columns in metadata are mapped to optrowgroups, with vkey used as the default group
   if(!is.null(metadata)) {
     metadata <- metadata[get(vkey) %in% rownames(M), ]
     updateSelectInput(session, "optrowgroup", choices = names(metadata), selected = vkey)
@@ -63,10 +70,10 @@ matrixCtrl <- function(input, output, session,
     updateSelectInput(session, "optrowgroup", choices = vkey, selected = vkey)
   }
 
-  default <- list(M = M, N = N, cdata = cdata, newdata = NULL, rowmeta = NULL, colmeta = NULL, filM = M)
   mstate <- reactiveValues(M = M, N = N, cdata = cdata, newdata = NULL, rowmeta = NULL, colmeta = NULL, filM = M)
   request <- reactiveValues(optrowgroup = NULL, optrow = NULL)
 
+  # handles initiating a view with URL parameter string
   observe({
     query <- parseQueryString(session$clientData$url_search)
     for(nm in names(query)) {
@@ -75,17 +82,13 @@ matrixCtrl <- function(input, output, session,
         request$optrow <- query[[nm]]
       }
     }
-  })
+  }, priority = 100)
 
   observeEvent(request$optrowgroup, {
     updateSelectInput(session, "optrowgroup", selected = request$optrowgroup)
   })
 
   #-- Functions --------------------------------------------------------------------------------------------------------#
-  # reset all to default mstate
-  reset <- function() {
-    for(nm in names(default)) mstate[[nm]] <- default[[nm]]
-  }
 
   # clears filters
   clear <- function() {
@@ -96,7 +99,7 @@ matrixCtrl <- function(input, output, session,
 
   # Return a filtered matrix (filM)
   filterUpdate <- function(M, N, minN, optrows, optcols = colnames(M)) {
-    M[N < minN] <- NA # gray out entries in M that does not meet min N
+    M[N < minN] <- NA # gray out entries in M that does not meet minN
     whichoptrows <- which(rownames(M) %in% optrows)
     whichoptcols <- which(colnames(M) %in% optcols)
     m <- M[whichoptrows, whichoptcols, drop = F]
@@ -106,9 +109,9 @@ matrixCtrl <- function(input, output, session,
     return(m)
   }
 
-  # -------------------------------------------------------------------------------------------------------------------------#
+  # ----------------------------------------------------------------------------------------------------------------------#
 
-  # Reset to none selected
+  # Set row options to none selected
   observeEvent(input$clear, {
     clear()
   })
@@ -116,10 +119,10 @@ matrixCtrl <- function(input, output, session,
   #-- Row filter ---------------------------------------------------------------------------------------------------------#
 
   # optrow holds metadata choices for the optrowgroup that is selected
-  # important note: when optrowgroup is the same column used as vkey,
+  # important note: when optrowgroup is the vkey,
   # it might seem strange to return options from the rownames of the current matrix
-  # instead of the actual column in metadata table, but this is to handle two cases:
-  # 1) when metadata is not given
+  # instead of the actual column in the metadata table, but this is to handle two cases:
+  # 1) when metadata is not given at all
   # 2) when matrix contains uploaded new data without metadata
   optrow <- reactive({
     if(input$optrowgroup == vkey) rownames(mstate$M) else unique(metadata[[input$optrowgroup]])
@@ -155,7 +158,11 @@ matrixCtrl <- function(input, output, session,
   #-- Column filter ---------------------------------------------------------------------------------------------------------#
 
   observeEvent(input$optcolgroup, {
-    choices <- if(input$optcolgroup == vkey) colnames(mstate$filM) else unique(metadata[[input$optcolgroup]][metadata[[vkey]] %in% colnames(mstate$filM)])
+    choices <- if(input$optcolgroup == vkey) {
+        colnames(mstate$filM)
+      } else {
+        unique(metadata[[input$optcolgroup]][metadata[[vkey]] %in% colnames(mstate$filM)])
+      }
     updateSelectizeInput(session, "optcol", choices = choices)
   })
 
@@ -211,7 +218,7 @@ matrixCtrl <- function(input, output, session,
   observe({
     if(!is.null(metadata)) {
       rowmeta <- metadata[[input$optrowgroup]][metadata[[vkey]] %in% rownames(mstate$filM)]
-      rlevels <- sample(unique(metadata[[input$optrowgroup]])) # this is to make sure group annotation colors are mixed when displayed
+      rlevels <- sample(unique(metadata[[input$optrowgroup]])) # to make sure group annotation colors are different
       rowmeta <- factor(rowmeta, levels = rlevels)
       mstate$rowmeta <- rowmeta
 
@@ -229,7 +236,11 @@ matrixCtrl <- function(input, output, session,
   # Update M, cdata, and options given newdata, and reset to default when newdata is removed
   observeEvent(newdata(), {
     if(is.null(newdata())) {
-      reset()
+      clear()
+      mstate$cdata <- cdata
+      mstate$filM <- mstate$M <- M
+      mstate$N <- N
+      mstate$newdata <- NULL
     } else {
       newDT <- newdata()
       names(newDT) <- make.names(names(newDT))
@@ -239,8 +250,7 @@ matrixCtrl <- function(input, output, session,
       mstate$filM <- mstate$M <- updated$M
       mstate$N <- updated$N
       mstate$newdata <- names(newDT) # only the names of new variables need be stored, not full table
-      # select new data for view
-      updateSelectInput(session, "optrowgroup", selected = vkey)
+      updateSelectInput(session, "optrowgroup", selected = vkey) # select new data for view
     }
   }, ignoreInit = T, ignoreNULL = F)
 

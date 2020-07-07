@@ -4,8 +4,13 @@
 \alias{cellPack}
 \title{Shiny server module function for cellPack widget}
 \usage{
-cellPack(input, output, session, json, css = system.file("www/",
-  "cellpack.css", package = "DIVE"))
+cellPack(
+  input,
+  output,
+  session,
+  json,
+  css = system.file("www/", "cellpack.css", package = "DIVE")
+)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}

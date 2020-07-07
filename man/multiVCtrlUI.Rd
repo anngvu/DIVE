@@ -4,7 +4,7 @@
 \alias{multiVCtrlUI}
 \title{Shiny module UI for controlling multi-column view}
 \usage{
-multiVCtrlUI(id, menu = T, upload = T, GEO = T)
+multiVCtrlUI(id, menu = TRUE, upload = TRUE, GEO = TRUE)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
@@ -23,9 +23,9 @@ Multiple high dimensional datasets can be displayed by calling separate instance
 with the contents typically laid out in separate a row containers. This "controller" UI establishes three different ways to
 select and source the datasets:
 \enumerate{
-  \item A selection menu that contains datasets that are pre-processed and stored in memory.
-  \item An upload method for users to upload their own datasets.
-  \item A beta (and least-supported) method for retrieving datasets from GEO.
+  \item Selecting from available pre-processed datasets.
+  \item User-uploaded data.
+  \item A beta (least-supported) method of retrieving datasets from GEO.
 }
 For convenience and customization, it is possible make unavailable any of the three sourcing methods,
 e.g. hide the GEO method by not displaying the UI.

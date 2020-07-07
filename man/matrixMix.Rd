@@ -4,10 +4,23 @@
 \alias{matrixMix}
 \title{Shiny app server for exploration of relationships in annotated data with an interactive matrix}
 \usage{
-matrixMix(input, output, session, M, N, cdata, metadata, vkey,
-  widgetmod = NULL, widgetopt = NULL, factorx, dcolors,
+matrixMix(
+  input,
+  output,
+  session,
+  M,
+  N,
+  cdata,
+  metadata,
+  vkey,
+  checkFun = DIVE::checkDataUpload,
+  widgetmod = NULL,
+  widgetopt = NULL,
+  factorx,
+  dcolors,
   informd = system.file("help/interactive_matrix.Rmd", package = "DIVE"),
-  appdata = NULL)
+  appdata = NULL
+)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}

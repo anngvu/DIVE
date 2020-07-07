@@ -4,12 +4,13 @@
 \alias{dataUploadUI}
 \title{Shiny module UI for data table upload module}
 \usage{
-dataUploadUI(id, label = "<strong>Upload data to compare</strong>",
-  buttonlabel = "Data", placeholder = "  no file selected",
-  width = 300)
+dataUploadUI(id, ...)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
+\item{...}{Named list of params passed to \code{shiny::\link[shiny]{fileInput}}.
+Note that \preformatted{multiple = FALSE} (the default) must be kept.}
 }
 \value{
 UI components.

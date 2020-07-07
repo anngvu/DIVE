@@ -4,19 +4,17 @@
 \alias{checkForID}
 \title{Check and make character ID column}
 \usage{
-checkForID(data, idcol = "ID",
-  fail = "<strong>There is no ID column.</strong><br>", aschar = T)
+checkForID(data, message = NULL, idcol = "ID", aschar = T)
 }
 \arguments{
 \item{data}{A table.}
 
 \item{idcol}{Name of ID column, defaulting to "ID".}
 
-\item{fail}{Optional, message to return if ID check fails.}
-
 \item{aschar}{Convert ID column to character.}
 }
 \description{
-Checks for some sort of ID column, which can optionally be converted to character. Returns a message for failures.
-This is meant to work with dataset input modules.
+Checks for some sort of ID column, which is by default converted to character.
+Returns a message for failures.
+This is meant to work with dataset upload modules.
 }

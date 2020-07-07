@@ -4,9 +4,18 @@
 \alias{refSubset}
 \title{Shiny server module function for returning a subsetted dataset}
 \usage{
-refSubset(input, output, session, refdata, subsetfeat, subsets = NULL,
-  datakey = NULL, refname = NULL, exclude = reactive({ }),
-  informd = NULL)
+refSubset(
+  input,
+  output,
+  session,
+  refdata,
+  subsetfeat,
+  subsets = NULL,
+  datakey = NULL,
+  refname = NULL,
+  exclude = reactive({ }),
+  informd = NULL
+)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}

@@ -4,21 +4,27 @@
 \alias{matchLink}
 \title{Server module function for interactive drag-and-drop variable harmonization of two datasets}
 \usage{
-matchLink(input, output, session, refData, setX, vars, guess,
-  informd = system.file("help/matching_methods.Rmd", package = "DIVE"))
+matchLink(
+  input,
+  output,
+  session,
+  refdata,
+  setX,
+  vars,
+  guess = NULL,
+  informd = system.file("help/matching_methods.Rmd", package = "DIVE")
+)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 
-\item{refData}{Reactive subsetted reference data.table.}
+\item{refdata}{Reactive subsetted reference data.table.}
 
 \item{setX}{Reactive data.table dataset, which typically comes from the \code{\link{newCohortInput}} module.}
 
-\item{vars}{Optional, a named list of a variable set (or sets) allowed for matching.
-If not provided, the first 10 variables in the reference cohort dataset is used.}
+\item{vars}{A named list of a variable set (or sets) in the data that is allowed for matching. See details.}
 
-\item{guess}{Optional, name of the function to call for initial guessing of harmonized variables;
-no initial guesses made if no argument is provided or function does not exist.}
+\item{guess}{Optional, name of the function to call for initial guessing of harmonized variables. See details.}
 
 \item{informd}{Optional, relative path to an info Rmarkdown file that will be pulled up in a modal.
 Recommend using for providing methods details of the matching algorithm.}
@@ -27,17 +33,30 @@ Recommend using for providing methods details of the matching algorithm.}
 Reactive list of parameter values with \code{run}, \code{matchOpts} and \code{matchOn}. See details.
 }
 \description{
-Given two datasets, a "reference" and a new "comparison" dataset, the module implements an interface
-through which a user can create a harmonized dataset with variables in common. If provided, a guess function
-attempts to guess which variables are actually the same, e.g. something called
-"sex" in one dataset is the same as "gender" in another. The guess function \code{\link{guessFun}}
-that comes with the package is a naive implementation and limited to guessing at
-variables typical in clinical cohort datasets (e.g. age, sex, BMI, race, hba1c)
-and should certainly be swapped out when the module is expected to handle a different variety of data.
-The drag-and-drop interface allows the user to harmonize variables manually, e.g. the "gender" label
-can be dropped next to the "sex" label to say that these mean the same thing. The outputs of this module
-are inputs to \code{\link{matchResult}}:
+Given two datasets, a "reference" and a "comparison" dataset, the module implements an interface
+that allows users to interactively harmonize variables to be used for matching;
+the output is used as inputs to the module \code{\link{matchResult}}:
 \code{params$matchOpts} contains all the possible variables that could be used between the two datasets,
 \code{params$matchOn} contains variables that are actually chosen for matching, and
 \code{params$run} reactively transmits the "finalized" params/triggers the \code{\link{matchResult}} module.
+The drag-and-drop interface allows the user to harmonize variables manually, e.g. the "gender" label
+can be dropped next to the "sex" label to say that these mean the same thing. Which variables
+the user can interact with is determined by the vars parameter.
 }
+\section{Variables List}{
+
+This should be a list such as \preformatted{list(Variables = c("age", "sex", "BMI", "biomarkerLevel"))} or
+\preformatted{list(Demographic = c("age", "sex"), Clinical = c("BMI", "biomarkerLevel"))}.
+This format allows visually grouping the variables in the display only and has no effect on matching.
+}
+
+\section{Guess Function}{
+
+A guess function can be provided to attempt guessing which variables are actually the same between the datasets,
+which will run before the user does manual harmonization of variables. The guess function is specific
+to the dataset and the domain. For example, it knows that "sex" is a matchable variable in the reference dataset
+and can try to look for variables called "sex" or "gender" in the incoming dataset so that the user doesn't
+have to specify this manually. It should also be consistent with what is specified as matchable variables,
+so that its return (a list) should contain a list item for all vars.
+}
+

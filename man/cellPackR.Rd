@@ -4,10 +4,18 @@
 \alias{cellPackR}
 \title{Create a custom cell pack widget based on d3 circlepack.js}
 \usage{
-cellPackR(tab, entity = "CellTissue", context = "CellTissueContext",
-  nested = "|", cl = system.file("ontology/cl_2018-11.obo", package =
-  "DIVE"), rel_type = "is_a", ancestor_classes, class_colors,
-  corrections = NULL, contextcolors)
+cellPackR(
+  tab,
+  entity = "CellTissue",
+  context = "CellTissueContext",
+  nested = "|",
+  cl = system.file("ontology/cl_2018-11.obo", package = "DIVE"),
+  rel_type = "is_a",
+  ancestor_classes,
+  class_colors,
+  corrections = NULL,
+  contextcolors
+)
 }
 \arguments{
 \item{tab}{Table with data for widget.}

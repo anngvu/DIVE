@@ -4,8 +4,17 @@
 \alias{exploreMore}
 \title{Shiny module server for generating comparative histodot plots of attributes in two datasets}
 \usage{
-exploreMore(input, output, session, s1Data, s2Data, datakey, refname,
-  results, factorx)
+exploreMore(
+  input,
+  output,
+  session,
+  s1Data,
+  s2Data,
+  datakey,
+  refname,
+  results,
+  factorx
+)
 }
 \arguments{
 \item{input, output, session}{Standard \code{shiny} boilerplate.}

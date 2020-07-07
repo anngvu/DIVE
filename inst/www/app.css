@@ -1,3 +1,5 @@
+/* General -------------------------------------------------------------------------*/
+
 body {
   /* Disables pull-to-refresh and overscroll glow effect. */
   overflow-x: hidden;
@@ -17,14 +19,25 @@ body {
   padding: 30px;
 }
 
-#matrixOutput {
-
+.firm-feedback {
+  font-weight: bold;
 }
 
-#drilldownOutput {
-  margin-top: 20px;
-  margin-right: 20px;
+
+/* Theming Overrides ----------------------------------------------------------------*/
+
+.progress-bar {
+  background-color: MediumSpringGreen;
+  color: transparent;
 }
+
+.dropdown-menu {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+
+/* Custom Components ----------------------------------------------------------------*/
 
 #cellpackpanel {
   border: 1px solid lightgray;
@@ -37,14 +50,22 @@ body {
 	box-shadow: 0 2px 1px lightgray;
 }
 
-.progress-bar {
-  background-color: MediumSpringGreen;
-  color: transparent;
+/* Matrix Module --------------------------------------------------------------------*/
+
+#drilldownOutput {
+  margin-top: 20px;
+  margin-right: 20px;
 }
 
-/*
-Match app
-*/
+/* Match Module ---------------------------------------------------------------------*/
+
+
+#matchVarBank, #matchVarLinked {
+  width: 400px;
+  margin-left: 30px;
+  padding: 30px;
+  border: darkgray dashed 1px;
+}
 
 .covariate {
   color: black;
@@ -71,7 +92,7 @@ Match app
   color: white;
 }
 
-.unused {
+.un-used {
   background: gainsboro;
 }
 
@@ -81,7 +102,7 @@ Match app
   margin-bottom: 5px;
 }
 
-.large-name, #match-CohortX-name {
+.large-name {
   color: #444444;
   font-size: 34px;
 }
@@ -115,6 +136,8 @@ Match app
 .custom-highlight {
   background-color: white;
 }
+
+/* MutiVUI Module -----------------------------------------------------------------------*/
 
 .multiVUI-ctrl-head {
   background-color: WhiteSmoke;

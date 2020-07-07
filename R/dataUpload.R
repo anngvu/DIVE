@@ -6,25 +6,48 @@
 #' or instructions.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param ... Named list of params passed to \code{shiny::\link[shiny]{fileInput}}.
+#' Note that \preformatted{multiple = FALSE} (the default) must be kept.
 #' @return UI components.
 #' @export
-dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>", buttonlabel = "Data", placeholder = "  no file selected", width = 300) {
+dataUploadUI <- function(id, ...) {
   ns <- NS(id)
-  dataUploadConf <<- list(label = label, buttonlabel = buttonlabel, placeholder = placeholder, width = width)
-  tags$div(id = ns("dataUploadUI"),
-      tags$div(class = "forceInline", style="margin-top:-5px;", tags$div(id = ns("main"),
-              tags$div(id = ns("upload"), class = "forceInline",
-                       fileInput(ns("upload"), HTML(label), multiple = FALSE,
-                                 accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"),
-                                 buttonLabel = buttonlabel, placeholder = placeholder, width = width)))),
+  dep <- list(
+    htmltools::htmlDependency(
+      name       = "jqueryui",
+      version    = "1.12.1",
+      package    = "shiny",
+      src        = "www/shared/jqueryui",
+      script     = "jquery-ui.min.js",
+      stylesheet = "jquery-ui.css"
+    ),
+    htmltools::htmlDependency(
+      name       = "dive-app-js",
+      version    = "0.1.0",
+      package    = "DIVE",
+      src        = "www",
+      script     = "app.js"
+    )
+  )
+  tagList(dep, tags$div(id = ns("dataUploadUI"),
+      tags$div(class = "forceInline", style="margin-top:-5px;",
+               tags$div(id = ns("main"),
+                        tags$div(class = "forceInline",
+                                 if(length(list(...))) fileInput(ns("upload"), ...) else
+                                 fileInput(ns("upload"), HTML("<strong>Upload data to compare</strong>"),
+                                           accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"),
+                                           buttonLabel = "Data", placeholder = "  no file selected", width = 275))
+                        )
+              ),
       tags$div(class = "forceInline", br(), uiOutput(ns("info")))
     )
+  )
 }
 
 #' Shiny server function for data table upload module
 #'
 #' At its most basic, the module checks for and returns a data table from \code{fileInput}
-#' (if the uploaded file is not data in table format, the return will be \code{NULL}).
+#' (if the uploaded file is not data in table format, the return will be \preformatted{NULL}).
 #'
 #' A check function can be optionally integrated into this module to perform additional
 #' "light" data checking or modification operations and make the the module somewhat adaptable for different uses.
@@ -54,7 +77,8 @@ dataUploadUI <- function(id, label = "<strong>Upload data to compare</strong>", 
 #' or \code{NULL} if the file input was not a table or returned as \code{NULL} from \code{checkFun}.
 #' @export
 dataUpload <- function(input, output, session,
-                       asDT = T, removable = F, checkFun = NULL, informd = NULL, appdata = NULL, checkappdata = F) {
+                       asDT = TRUE, removable = FALSE, checkFun = NULL, informd = NULL,
+                       appdata = NULL, checkappdata = F) {
 
   uploaded <- reactiveVal(NULL)
 
@@ -74,7 +98,7 @@ dataUpload <- function(input, output, session,
       checked <- checkFun(data)
       data <- checked$result
       message <- checked$message
-      if(length(message)) showModal(modalDialog(HTML(message), title = "Data upload status", easyClose = F))
+      if(!is.null(message)) showModal(modalDialog(HTML(message), title = "Data upload status", easyClose = F))
     }
     # set new data if successful
     if(!is.null(data)) {
@@ -89,20 +113,10 @@ dataUpload <- function(input, output, session,
     }
   })
 
-  newUploadUI <- function(label = dataUploadConf$label, buttonlabel = dataUploadConf$buttonlabel,
-                          placeholder = dataUploadConf$placeholder, width = dataUploadConf$width) {
-    insertUI(paste0("#", session$ns("main")), "beforeEnd",
-             tags$div(id = session$ns("upload"), class = "forceInline",
-                      fileInput(session$ns("upload"), HTML(label), multiple = FALSE,
-                                accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"),
-                                buttonLabel = buttonlabel, placeholder = placeholder, width = width)))
-  }
-
   observeEvent(input$remove, {
     uploaded(NULL)
-    removeUI(paste0("#", session$ns("upload")))
     removeUI(paste0("#", session$ns("remove-btn")))
-    newUploadUI()
+    session$sendCustomMessage("resetFileInput", message = session$ns("upload"))
   })
 
   # input$appdata comes from external javascript call

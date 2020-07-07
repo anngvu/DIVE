@@ -9,14 +9,18 @@ getLinkInput(id, labels, link = T)
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{labels}{One or more labels.}
+\item{labels}{One or more character labels.}
 
-\item{link}{Logical flag to indicate whether element is action link or button. Defaults to link.}
+\item{link}{Logical flag to indicate whether element is an action link or button. Defaults to link.}
 }
 \value{
-A div were UI is inserted.
+A div where UI is inserted.
 }
 \description{
-Puts any number of action buttons/links on page that can be used to 
+Puts any number of action buttons/links on page that can be used to
 get data from a specified source.
+}
+\details{
+This is a simple component for the primary use of loading example data,
+i.e. Link1, Link2 and Link3 can load ExampleData1, ExampleData2, ExampleData3.
 }

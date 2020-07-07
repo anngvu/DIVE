@@ -3,21 +3,17 @@
 #' Shiny module UI to subset a dataset through a selection menu.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param name Optional, name for the main dataset.
-#' @param label Optional, select input label.
-#' @param subsets A named list of the available subset factors in the data.
+#' @param refname Optional, a label for the reference dataset or even HTML link to logo, etc.
 #' @return A \code{shiny::\link[shiny]{tagList}} for UI to subset a dataset.
 #' @export
-refSubsetInput <- function(id, name = id, label = "", subsets = "") {
+refSubsetInput <- function(id, refname = NULL) {
   ns <- NS(id)
   tags$div(id = "refSubsetInput",
     fluidRow(
       column(1),
-      column(3, span(class = "large-name", name)),
+      column(3, span(class = "large-name", refname)),
       column(4, div(id = "refdata", uiOutput(ns("selectSubsetUI")))),
-      column(4, #
-             br(),
-             uiOutput(ns("info"))
+      column(4, br(), uiOutput(ns("info"))
       ))
   )
 }
@@ -72,7 +68,7 @@ refSubset <- function(input, output, session,
   subsetDT <- reactive({
     validate(need(length(input$selectSubset), "Please select a type subset"))
     SS <- refdata[get(subsetfeat) %in% input$selectSubset]
-    if(length(exclude())) SS <- SS[!ID %in% exclude() ] # Check-later: ID is hard-coded
+    if(length(exclude())) SS <- SS[!ID %in% exclude() ] # ID is hard-coded
     if(!is.null(datakey)) SS[, (datakey) := refname ]
     SS
   })

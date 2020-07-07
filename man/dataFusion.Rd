@@ -2,7 +2,7 @@
 % Please edit documentation in R/matchResult.R
 \name{dataFusion}
 \alias{dataFusion}
-\title{Fusing two datasets based on harmonized variable names.}
+\title{Fusing two datasets based on harmonized variable names}
 \usage{
 dataFusion(d1, d2, fuseon, sourcecol)
 }
@@ -11,7 +11,8 @@ dataFusion(d1, d2, fuseon, sourcecol)
 
 \item{d2}{A data.frame of the second dataset.}
 
-\item{fuseon}{A named vector of the harmonized features, where the names are the features in d1 and elements are features in d2.}
+\item{fuseon}{A named vector of the harmonized features,
+where the names are the features in d1 and elements are features in d2.}
 
 \item{sourcecol}{The key column used to identify the row sources after the two datasets are fused.}
 }
@@ -19,5 +20,6 @@ dataFusion(d1, d2, fuseon, sourcecol)
 A data.table of the fused data.
 }
 \description{
-Details
+Given two datasets and information on which columns are the same, the two datasets
+are concatenated, with any NAs removed and keeping only the specified columns in the result.
 }
