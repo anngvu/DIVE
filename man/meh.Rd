@@ -4,7 +4,7 @@
 \alias{meh}
 \title{Modal Error Handling}
 \usage{
-meh(msg = NULL)
+meh(msg = NULL, error = NULL)
 }
 \description{
 Brings up a generic modal for application errors

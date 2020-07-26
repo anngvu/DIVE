@@ -53,7 +53,7 @@ matchLinkUI <- function(id) {
 #' have to specify this manually. It should also be consistent with what is specified as matchable variables,
 #' so that its return (a list) should contain a list item for all vars.
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param refdata Reactive subsetted reference data.table.
 #' @param setX Reactive data.table dataset, which typically comes from the \code{\link{newCohortInput}} module.
 #' @param vars A named list of a variable set (or sets) in the data that is allowed for matching. See details.
@@ -62,95 +62,98 @@ matchLinkUI <- function(id) {
 #' Recommend using for providing methods details of the matching algorithm.
 #' @return Reactive list of parameter values with \code{run}, \code{matchOpts} and \code{matchOn}. See details.
 #' @export
-matchLink <- function(input, output, session,
-                      refdata, setX,
-                      vars, guess = NULL,
-                      informd = system.file("help/matching_methods.Rmd", package = "DIVE")) {
+matchLinkServer <- function(id,
+                            refdata, setX,
+                            vars, guess = NULL,
+                            informd = system.file("help/matching_methods.Rmd", package = "DIVE")) {
 
-  modal <- callModule(info, "help", informd)
+  moduleServer(id, function(input, output, session) {
 
-  params <- reactiveValues(matchOpts = NULL, matchOn = NULL, run = NULL)
+    modal <- infoServer("help", informd)
 
-#-- when uploaded data X changes, re-initialize match options ------------------------------------------------------------#
-  observe({
-    if(!is.null(guess)) {
-       matchOpts <- guess(names(setX()))
-       inVars <- unlist(vars) %in% names(matchOpts)
-       if(!all(inVars)) {
-         for(v in unlist(vars)[!inVars]) matchOpts[v] <- list(NULL)
-         warning("In matching module, does guess function need to be updated for specified matchable variables?")
-       }
-       params$matchOpts <- matchOpts
-    } else {
-       matchOpts <- list()
-       for(v in unlist(vars)) matchOpts[v] <- list(NULL)
-       params$matchOpts <- matchOpts
-    }
+    params <- reactiveValues(matchOpts = NULL, matchOn = NULL, run = NULL)
+
+  #-- when uploaded data X changes, re-initialize match options ------------------------------------------------------------#
+    observe({
+      if(!is.null(guess)) {
+         matchOpts <- guess(names(setX()))
+         inVars <- unlist(vars) %in% names(matchOpts)
+         if(!all(inVars)) {
+           for(v in unlist(vars)[!inVars]) matchOpts[v] <- list(NULL)
+           warning("In matching module, does guess function need to be updated for specified matchable variables?")
+         }
+         params$matchOpts <- matchOpts
+      } else {
+         matchOpts <- list()
+         for(v in unlist(vars)) matchOpts[v] <- list(NULL)
+         params$matchOpts <- matchOpts
+      }
+    })
+
+    # Drag-n-drop sets -----------------------------------------------------------------------------------#
+
+    # Panel for matched/harmonized pairs
+    # Either a single set or multiple sets of draggable/order-able labels
+    output$varSets <- renderUI({
+      varSets <- tagList()
+      for(i in seq_along(vars)) {
+        varSets[[i]] <- tags$div(h4(icon("link"), names(vars)[i]),
+                                 consortSet(vars[[i]], params$matchOpts, session$ns))
+      }
+      varSets
+    })
+
+    # Panel for un-matched/un-harmonized pairs
+    output$varBank <- renderUI({
+      extvars <- names(setX())
+      used <- unlist(params$matchOpts)
+      unused <- setdiff(extvars, used)
+      unused <- unused[!unused %in% c("ID", "Cohort")] # Needs consideration -- some hard-coding here
+      varbank <- tags$div(
+        h4(icon("unlink"), "Not used"),
+        consortUI(inputId = session$ns("varbank-consort"), label = NULL, items = unused,
+                  item_class = "un-used covariate", width = 200)
+      )
+      varbank
+    })
+
+    #-- Update matchOn reactive values whenever variables are moved by user --------------------------------------------#
+    observe({
+      cvars <- paste0("var", seq_along(params$matchOpts))
+      names(cvars) <- names(params$matchOpts)
+      params$matchOn <- unlist(lapply(cvars, function(v) input[[v]]))
+    })
+
+    output$matchOn <- renderPrint({
+      if(length(params$matchOn)) {
+        pars <- paste(names(params$matchOn), "~", params$matchOn)
+        div(span(class = "firm-feedback", "You are matching on"), tags$ul(lapply(pars, tags$li)), br())
+      } else {
+        div(span(class = "firm-feedback", "You need to specify at least one match variable."), br())
+      }
+    })
+
+    output$matchN <- renderPrint({
+      if(nrow(refdata()) > 0) {
+        div(span(class = "firm-feedback", "You are matching using"), br(), paste("a subset of n =", nrow(refdata())), br(), br())
+      } else {
+        div(span(class = "firm-feedback", "You haven't selected the reference set to use.
+                 You won't be able to run the match until this is specified."))
+      }
+    })
+
+    output$btnRun <- renderPrint({
+      if((nrow(refdata()) > 0) && length(params$matchOn)) actionButton(session$ns("run"), "Get matches")
+    })
+
+    #-- Return --------------------------------------------------------------------------------------------------#
+    observe({
+      # Require that there is actually refdata
+      if(nrow(refdata())) params$run <- input$run
+    })
+
+    return(params)
   })
-
-  # Drag-n-drop sets -----------------------------------------------------------------------------------#
-
-  # Panel for matched/harmonized pairs
-  # Either a single set or multiple sets of draggable/order-able labels
-  output$varSets <- renderUI({
-    varSets <- tagList()
-    for(i in seq_along(vars)) {
-      varSets[[i]] <- tags$div(h4(icon("link"), names(vars)[i]),
-                               consortSet(vars[[i]], params$matchOpts, session$ns))
-    }
-    varSets
-  })
-
-  # Panel for un-matched/un-harmonized pairs
-  output$varBank <- renderUI({
-    extvars <- names(setX())
-    used <- unlist(params$matchOpts)
-    unused <- setdiff(extvars, used)
-    unused <- unused[!unused %in% c("ID", "Cohort")] # Needs consideration -- some hard-coding here
-    varbank <- tags$div(
-      h4(icon("unlink"), "Not used"),
-      consortUI(inputId = session$ns("varbank-consort"), label = NULL, items = unused,
-                item_class = "un-used covariate", width = 200)
-    )
-    varbank
-  })
-
-  #-- Update matchOn reactive values whenever variables are moved by user --------------------------------------------#
-  observe({
-    cvars <- paste0("var", seq_along(params$matchOpts))
-    names(cvars) <- names(params$matchOpts)
-    params$matchOn <- unlist(lapply(cvars, function(v) input[[v]]))
-  })
-
-  output$matchOn <- renderPrint({
-    if(length(params$matchOn)) {
-      pars <- paste(names(params$matchOn), "~", params$matchOn)
-      div(span(class = "firm-feedback", "You are matching on"), tags$ul(lapply(pars, tags$li)), br())
-    } else {
-      div(span(class = "firm-feedback", "You need to specify at least one match variable."), br())
-    }
-  })
-
-  output$matchN <- renderPrint({
-    if(nrow(refdata()) > 0) {
-      div(span(class = "firm-feedback", "You are matching using"), br(), paste("a subset of n =", nrow(refdata())), br(), br())
-    } else {
-      div(span(class = "firm-feedback", "You haven't selected the reference set to use.
-               You won't be able to run the match until this is specified."))
-    }
-  })
-
-  output$btnRun <- renderPrint({
-    if((nrow(refdata()) > 0) && length(params$matchOn)) actionButton(session$ns("run"), "Get matches")
-  })
-
-  #-- Return --------------------------------------------------------------------------------------------------#
-  observe({
-    # Require that there is actually refdata
-    if(nrow(refdata())) params$run <- input$run
-  })
-
-  return(params)
 }
 
 #-- Helpers ----------------------------------------------------------------------------------------------#

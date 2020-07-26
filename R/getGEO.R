@@ -25,111 +25,114 @@ getGEOInput <- function(id, informd = system.file("help/GEO_module.Rmd", package
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @return GEOdata as reactive values object. See details.
 #' @export
-getGEOMod <- function(input, output, session) {
+getGEOServer <- function(id) {
 
-  characteristics <- reactiveVal(NULL)
-  GPL <- reactiveVal(NULL)
-  GEOdata <- reactiveValues(accession = NULL, eset = NULL, pData = NULL, call = NULL)
+  moduleServer(id, function(input, output, session) {
 
-  # Step 2 is selecting characteristics to import from pData
-  Step2 <- function() {
-    showModal(modalDialog(title = "Step 2",
-                          selectizeInput(session$ns("characteristics"),
-                                         HTML("<strong>Which characteristics do you want to import as relevant clinical/phenotype/experimental data?</strong>"),
-                                         choices = names(characteristics()), selected = names(characteristics()), multiple = T, width = "100%"),
-                          helpText("(can only be imported as factors; clear all selections to import none)"),
-                          actionButton(session$ns("importC"), "OK"),
-                          br(), br(), h5("Characteristics (preview)"),
-                          tableOutput(session$ns("pChars")),
-                          footer = modalButton("Cancel")
-    ))
-  }
+    characteristics <- reactiveVal(NULL)
+    GPL <- reactiveVal(NULL)
+    GEOdata <- reactiveValues(accession = NULL, eset = NULL, pData = NULL, call = NULL)
 
-  # Step 3 is selecting which annotation field to use for searching/filtering of expression matrix columns
-  Step3 <- function() {
-    showModal(modalDialog(title = "Step 3",
-                          selectizeInput(session$ns("annofield"),
-                                         HTML("<strong>Choose annotation field to use for lookup and filtering</strong>"),
-                                         choices = names(GPL()), width = "100%"),
-                          helpText("Choosing the column containing Entrez gene ID (NOT symbol) is recommended,
-                                   but if it is not available, choose the annotation type most useful for you."),
-                          actionButton(session$ns("annotate"), "OK"),
-                          br(), br(), h5("Annotation table"),
-                          tableOutput(session$ns("gplTable")),
-                          footer = modalButton("Cancel")
-    ))
-  }
+    # Step 2 is selecting characteristics to import from pData
+    Step2 <- function() {
+      showModal(modalDialog(title = "Step 2",
+                            selectizeInput(session$ns("characteristics"),
+                                           HTML("<strong>Which characteristics do you want to import as relevant clinical/phenotype/experimental data?</strong>"),
+                                           choices = names(characteristics()), selected = names(characteristics()), multiple = T, width = "100%"),
+                            helpText("(can only be imported as factors; clear all selections to import none)"),
+                            actionButton(session$ns("importC"), "OK"),
+                            br(), br(), h5("Characteristics (preview)"),
+                            tableOutput(session$ns("pChars")),
+                            footer = modalButton("Cancel")
+      ))
+    }
+
+    # Step 3 is selecting which annotation field to use for searching/filtering of expression matrix columns
+    Step3 <- function() {
+      showModal(modalDialog(title = "Step 3",
+                            selectizeInput(session$ns("annofield"),
+                                           HTML("<strong>Choose annotation field to use for lookup and filtering</strong>"),
+                                           choices = names(GPL()), width = "100%"),
+                            helpText("Choosing the column containing Entrez gene ID (NOT symbol) is recommended,
+                                     but if it is not available, choose the annotation type most useful for you."),
+                            actionButton(session$ns("annotate"), "OK"),
+                            br(), br(), h5("Annotation table"),
+                            tableOutput(session$ns("gplTable")),
+                            footer = modalButton("Cancel")
+      ))
+    }
 
 
-  # Pull GEO with given GSE
-  observeEvent(input$get, {
-  withProgress(value = 0.2, message = "downloading...", expr = {
-    gse <- try(GEOquery::getGEO(trimws(input$GSE)))
-    if(class(gse) == "try-error") {
-      showNotification("Something went wrong. Try again later or let us know which accession failed.",
-                       duration = NULL, type = "error")
-    } else {
-      setProgress(value = 0.3, message = "checking data...")
-      eset <- gse[[1]]
-      meta <- Biobase::otherInfo(Biobase::experimentData(eset))
-      xdata <- Biobase::exprs(eset)
-      pdata <- Biobase::pData(eset)
-      characteristics(pdata[, grep(":", names(pdata))])
+    # Pull GEO with given GSE
+    observeEvent(input$get, {
+    withProgress(value = 0.2, message = "downloading...", expr = {
+      gse <- try(GEOquery::getGEO(trimws(input$GSE)))
+      if(class(gse) == "try-error") {
+        showNotification("Something went wrong. Try again later or let us know which accession failed.",
+                         duration = NULL, type = "error")
+      } else {
+        setProgress(value = 0.3, message = "checking data...")
+        eset <- gse[[1]]
+        meta <- Biobase::otherInfo(Biobase::experimentData(eset))
+        xdata <- Biobase::exprs(eset)
+        pdata <- Biobase::pData(eset)
+        characteristics(pdata[, grep(":", names(pdata))])
 
-      if(!nrow(xdata) && grepl("sequencing", meta$type)) {
-        setProgress(value = 0.5, message = "sourcing sequencing data...")
-        sra <- regmatches(meta$relation, regexpr("(https://www.ncbi.nlm.nih.gov/sra?term=)?SRP[0-9]+", meta$relation))
-        recounted <- getRecount(sra)
+        if(!nrow(xdata) && grepl("sequencing", meta$type)) {
+          setProgress(value = 0.5, message = "sourcing sequencing data...")
+          sra <- regmatches(meta$relation, regexpr("(https://www.ncbi.nlm.nih.gov/sra?term=)?SRP[0-9]+", meta$relation))
+          recounted <- getRecount(sra)
 
-        if(!is.null(recounted)) {
-          xdata <- recounted$xdata
-          characteristics(recounted$pdata)
+          if(!is.null(recounted)) {
+            xdata <- recounted$xdata
+            characteristics(recounted$pdata)
+          }
+        }
+
+        if(nrow(xdata)) {
+          setProgress(value = 0.8, message = "processing data...")
+          GEOdata$accession <- trimws(input$GSE)
+          GEOdata$eset <- xdata
+          gpl <- GEOquery::Table(GEOquery::getGEO(Biobase::annotation(eset)))
+          if(!length(gpl)) gpl <- data.frame(gene_id = rownames(xdata)) # when no annotation, use rownames of xdata
+          GPL(gpl)
+          Step2()
+        } else {
+          showNotification("Processed data not available.", duration = NULL, type = "error")
         }
       }
+    })
+    })
 
-      if(nrow(xdata)) {
-        setProgress(value = 0.8, message = "processing data...")
-        GEOdata$accession <- trimws(input$GSE)
-        GEOdata$eset <- xdata
-        gpl <- GEOquery::Table(GEOquery::getGEO(Biobase::annotation(eset)))
-        if(!length(gpl)) gpl <- data.frame(gene_id = rownames(xdata)) # when no annotation, use rownames of xdata
-        GPL(gpl)
-        Step2()
-      } else {
-        showNotification("Processed data not available.", duration = NULL, type = "error")
-      }
-    }
+    observeEvent(input$importC, {
+      Step3()
+    })
+
+    # Rendered objects for Step 3
+    output$pChars <- renderTable({
+      head(characteristics())
+    }, spacing = "xs")
+
+    output$gplTable <- renderTable({
+      head(GPL())
+    }, spacing = "xs")
+
+
+    # When user proceeds with annotations
+    observeEvent(input$annotate, {
+      if(length(input$characteristics)) GEOdata$pData <- characteristics()[, input$characteristics, drop = F]
+      # Need to map probe IDs (rownames) to Entrez Gene IDs or selected annotation
+      probes <- rownames(GEOdata$eset)
+      # A column named "ID" *should* exist in the gpl table, but need to check and do alternative
+      # annotation operation if otherwise
+      IDcol <- "ID"
+      annrows <- GPL()[[input$annofield]][match(probes, GPL()[[IDcol]])]
+      rownames(GEOdata$eset) <- annrows
+      GEOdata$call <- input$annotate
+    })
+
+    return(GEOdata)
   })
-  })
-
-  observeEvent(input$importC, {
-    Step3()
-  })
-
-  # Rendered objects for Step 3
-  output$pChars <- renderTable({
-    head(characteristics())
-  }, spacing = "xs")
-
-  output$gplTable <- renderTable({
-    head(GPL())
-  }, spacing = "xs")
-
-
-  # When user proceeds with annotations
-  observeEvent(input$annotate, {
-    if(length(input$characteristics)) GEOdata$pData <- characteristics()[, input$characteristics, drop = F]
-    # Need to map probe IDs (rownames) to Entrez Gene IDs or selected annotation
-    probes <- rownames(GEOdata$eset)
-    # A column named "ID" *should* exist in the gpl table, but need to check and do alternative
-    # annotation operation if otherwise
-    IDcol <- "ID"
-    annrows <- GPL()[[input$annofield]][match(probes, GPL()[[IDcol]])]
-    rownames(GEOdata$eset) <- annrows
-    GEOdata$call <- input$annotate
-  })
-
-  return(GEOdata)
 
 }
 

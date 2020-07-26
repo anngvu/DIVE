@@ -1,4 +1,4 @@
-#' Shiny server module for intermediate data processing
+#' Intermediate data processing
 #'
 #' This module implements an additional customizable layer for intermediate data processing
 #' by passing data into a function and returning results as a reactive object.

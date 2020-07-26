@@ -49,92 +49,95 @@ exploreMoreUI <- function(id, s1Label = "", s1Data, s2Label = "", s2Data, placeh
 #' @param factorx Attribute name suffix/pattern to indicate which should be plotted as factors.
 #' @return Histodot plots for comparing composition and matches between s1Data and s2Data.
 #' @export
-exploreMore <- function(input, output, session,
-                       s1Data, s2Data, datakey, refname, results, factorx) {
+exploreMoreServer <- function(id,
+                              s1Data, s2Data, datakey, refname, results, factorx) {
 
-  # Update select menu to partition attributes that were used for matching from all "Other" non-matching attributes
-  observeEvent(results$params, {
-    refli <- list(Matched = names(results$params), Other = removeID(setdiff(names(s1Data), names(results$params))))
-    extli <- list(Matched = unname(results$params), Other = removeID(setdiff(names(s2Data()), results$params)))
-    displayjs <- I("{
-                    option: function(item, escape) {
-                    return item.optgroup == 'Matched'?
-                    '<div class=\"used covariate\">' + escape(item.value) + '</div><br>'
-                    : '<div class=\"unused covariate\">' + escape(item.value) + '</div><br>'
-                    }
-                  }")
-    updateSelectizeInput(session, "s1Attrs", "", choices = refli,
-                         selected = character(0), server = T,
-                         options = list(placeholder = "(data attributes)",
-                                        render = displayjs))
-    updateSelectizeInput(session, "s2Attrs", "", choices = extli,
-                         selected = character(0), server = T,
-                         options = list(placeholder = "(data attributes)", render = displayjs))
-  })
+  moduleServer(id, function(input, output, session) {
 
-  # Plotting
-  s1Plot <- reactiveValues(data = NULL, p = NULL)
-  s2Plot <- reactiveValues(data = NULL, p = NULL)
+    # Update select menu to partition attributes that were used for matching from all "Other" non-matching attributes
+    observeEvent(results$params, {
+      refli <- list(Matched = names(results$params), Other = removeID(setdiff(names(s1Data), names(results$params))))
+      extli <- list(Matched = unname(results$params), Other = removeID(setdiff(names(s2Data()), results$params)))
+      displayjs <- I("{
+                      option: function(item, escape) {
+                      return item.optgroup == 'Matched'?
+                      '<div class=\"used covariate\">' + escape(item.value) + '</div><br>'
+                      : '<div class=\"unused covariate\">' + escape(item.value) + '</div><br>'
+                      }
+                    }")
+      updateSelectizeInput(session, "s1Attrs", "", choices = refli,
+                           selected = character(0), server = T,
+                           options = list(placeholder = "(data attributes)",
+                                          render = displayjs))
+      updateSelectizeInput(session, "s2Attrs", "", choices = extli,
+                           selected = character(0), server = T,
+                           options = list(placeholder = "(data attributes)", render = displayjs))
+    })
 
-  plotMatched <- function(y) {
-    data <- as.data.frame(results$intermediate)
-    data$Matched <- factor(ifelse(is.na(results$pair), "un-matched", "matched"), levels = c("un-matched", "matched"))
-    p <- cohistPlot(data, y = y, factorx = factorx)
-    s1Plot$data <- data
-    s1Plot$p <- p
-    s2Plot$data <- s2Plot$p <- NULL
-  }
+    # Plotting
+    s1Plot <- reactiveValues(data = NULL, p = NULL)
+    s2Plot <- reactiveValues(data = NULL, p = NULL)
 
-  plotS1 <- function(y) {
-    data <- copy(s1Data)
-    data[, c(datakey) := refname]
-    matches <- as.numeric(results$matchtable$ID)
-    data$Matched <- factor(ifelse(data$ID %in% matches, "matched", "un-matched"), levels = c("un-matched", "matched"))
-    p <- cohistPlot(data, y = y, factorx = factorx)
-    s1Plot$data <- data
-    s1Plot$p <- p
-  }
-
-  plotS2 <- function(y) {
-    data <- as.data.frame(s2Data())
-    matches <- results$matchtable$match.ID
-    data$Matched <- factor(ifelse(data$ID %in% matches, "matched", "un-matched"), levels = c("un-matched", "matched"))
-    p <- cohistPlot(data, y = y, factorx = factorx)
-    s2Plot$data <- data
-    s2Plot$p <- p
-  }
-
-  observeEvent(input$s1Attrs, {
-    # Plot on same scale automatically for matched attributes
-    if(input$s1Attrs %in% names(results$params)) {
-      updateSelectInput(session, "s2Attrs", selected = results$params[names(results$params) == input$s1Attrs])
-      plotMatched(input$s1Attrs)
-    } else {
-      if(input$s1Attrs == "") return()
-      plotS1(input$s1Attrs)
-      if(input$s2Attrs != "") plotS2(input$s2Attrs)
+    plotMatched <- function(y) {
+      data <- as.data.frame(results$intermediate)
+      data$Matched <- factor(ifelse(is.na(results$pair), "un-matched", "matched"), levels = c("un-matched", "matched"))
+      p <- cohistPlot(data, y = y, factorx = factorx)
+      s1Plot$data <- data
+      s1Plot$p <- p
+      s2Plot$data <- s2Plot$p <- NULL
     }
-  })
 
-  observeEvent(input$s2Attrs, {
-    if(input$s2Attrs %in% results$params) {
-      y <- names(results$params)[input$s2Attrs == results$params]
-      updateSelectInput(session, "s1Attrs", selected = y)
-    } else {
-      if(input$s2Attrs == "") return()
-      plotS2(input$s2Attrs)
-      if(input$s1Attrs != "") plotS1(input$s1Attrs)
+    plotS1 <- function(y) {
+      data <- copy(s1Data)
+      data[, c(datakey) := refname]
+      matches <- as.numeric(results$matchtable$ID)
+      data$Matched <- factor(ifelse(data$ID %in% matches, "matched", "un-matched"), levels = c("un-matched", "matched"))
+      p <- cohistPlot(data, y = y, factorx = factorx)
+      s1Plot$data <- data
+      s1Plot$p <- p
     }
-  })
 
-  output$plot <- renderPlot({
-    if(length(s1Plot$p) & length(s2Plot$p)) {
-      gridExtra::grid.arrange(grobs = list(s2Plot$p, s1Plot$p), ncols = 2, nrow = 1)
-    } else if (length(s2Plot$p)) {
-      s2Plot$p
-    } else {
-      s1Plot$p
+    plotS2 <- function(y) {
+      data <- as.data.frame(s2Data())
+      matches <- results$matchtable$match.ID
+      data$Matched <- factor(ifelse(data$ID %in% matches, "matched", "un-matched"), levels = c("un-matched", "matched"))
+      p <- cohistPlot(data, y = y, factorx = factorx)
+      s2Plot$data <- data
+      s2Plot$p <- p
     }
+
+    observeEvent(input$s1Attrs, {
+      # Plot on same scale automatically for matched attributes
+      if(input$s1Attrs %in% names(results$params)) {
+        updateSelectInput(session, "s2Attrs", selected = results$params[names(results$params) == input$s1Attrs])
+        plotMatched(input$s1Attrs)
+      } else {
+        if(input$s1Attrs == "") return()
+        plotS1(input$s1Attrs)
+        if(input$s2Attrs != "") plotS2(input$s2Attrs)
+      }
+    })
+
+    observeEvent(input$s2Attrs, {
+      if(input$s2Attrs %in% results$params) {
+        y <- names(results$params)[input$s2Attrs == results$params]
+        updateSelectInput(session, "s1Attrs", selected = y)
+      } else {
+        if(input$s2Attrs == "") return()
+        plotS2(input$s2Attrs)
+        if(input$s1Attrs != "") plotS1(input$s1Attrs)
+      }
+    })
+
+    output$plot <- renderPlot({
+      if(length(s1Plot$p) & length(s2Plot$p)) {
+        gridExtra::grid.arrange(grobs = list(s2Plot$p, s1Plot$p), ncols = 2, nrow = 1)
+      } else if (length(s2Plot$p)) {
+        s2Plot$p
+      } else {
+        s1Plot$p
+      }
+    })
   })
 
 }

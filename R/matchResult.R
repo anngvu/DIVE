@@ -20,66 +20,70 @@ matchResultOutput <- function(id) {
 
 #' Shiny module server for generating match results output
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param refSubset Reactive reference cohort subset data.table, i.e. from \code{refSubset}.
 #' @param setX Reactive data.table of comparison subset, i.e from \code{newDataset} module.
 #' @param params Reactive parameters data, i.e. from \code{matchLink} module.
 #' @param sourcecol Name for the source key column of the joined dataset.
 #' @return Reactive values containing params, intermediate results, pair, and matchtable. See \code{matchPair}.
 #' @export
-matchResult <- function(input, output, session,
-                        refSubset, setX, params, sourcecol) {
+matchResultServer <- function(id,
+                              refSubset, setX, params, sourcecol) {
 
-  results <- reactiveValues(params = NULL, intermediate = NULL, pair = NULL, matchtable = NULL)
+  moduleServer(id, function(input, output, session) {
 
-  observeEvent(setX(), {
-    results$params <- results$intermediate <- results$pair <- results$matchtable <- NULL
-  })
+    results <- reactiveValues(params = NULL, intermediate = NULL, pair = NULL, matchtable = NULL)
 
-  observeEvent(params$run, {
+    observeEvent(setX(), {
+      results$params <- results$intermediate <- results$pair <- results$matchtable <- NULL
+    })
 
-    withProgress({
-      tryCatch({
-        # Create fused dataset with required structure, then do match
-        intermediate <- dataFusion(d1 = refSubset(), d2 = setX(),
-                                   fuseon = params$matchOn, sourcecol = sourcecol)
-        matchpairs <- matchPair(data = intermediate, groupcol = sourcecol, params$matchOn)
-        # Update result reactive vals
-        results$params <- params$matchOn
-        results$intermediate <- intermediate
-        results$pair <- matchpairs$pair
-        results$matchtable <- matchpairs$matchtable
+    observeEvent(params$run, {
+
+      withProgress({
+        tryCatch({
+          # Create fused dataset with required structure, then do match
+          intermediate <- dataFusion(d1 = refSubset(), d2 = setX(),
+                                     fuseon = params$matchOn, sourcecol = sourcecol)
+          matchpairs <- matchPair(data = intermediate, groupcol = sourcecol, params$matchOn)
+          # Update result reactive vals
+          results$params <- params$matchOn
+          results$intermediate <- intermediate
+          results$pair <- matchpairs$pair
+          results$matchtable <- matchpairs$matchtable
+        },
+          error = function(e) meh()
+        )
+      }, value = 0.5, message = "Running...")
+    })
+
+    output$table <- renderTable({
+      req(results$matchtable)
+      results$matchtable
+    }, striped = T)
+
+    output$save <- downloadHandler(
+      filename = function() {
+        "match_result.csv"
       },
-        error = function(e) meh()
-      )
-    }, value = 0.5, message = "Running...")
+      content = function(file) {
+        write.csv(results$matchtable, file, row.names = F)
+      }
+    )
+
+    # The intermediate table is the fused dataset in long format
+    output$save_intermediate <- downloadHandler(
+      filename = function() {
+        "match_intermediate.csv"
+      },
+      content = function(file) {
+        write.csv(results$intermediate, file, row.names = F)
+      }
+    )
+
+    return(results)
   })
 
-  output$table <- renderTable({
-    req(results$matchtable)
-    results$matchtable
-  }, striped = T)
-
-  output$save <- downloadHandler(
-    filename = function() {
-      "match_result.csv"
-    },
-    content = function(file) {
-      write.csv(results$matchtable, file, row.names = F)
-    }
-  )
-
-  # The intermediate table is the fused dataset in long format
-  output$save_intermediate <- downloadHandler(
-    filename = function() {
-      "match_intermediate.csv"
-    },
-    content = function(file) {
-      write.csv(results$intermediate, file, row.names = F)
-    }
-  )
-
-  return(results)
 }
 
 #-- Helper functions -----------------------------------------------------------------------------------#

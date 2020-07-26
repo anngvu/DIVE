@@ -11,6 +11,12 @@ body {
   margin-right: 10px;
 }
 
+.ui-inline {
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 10px;
+}
+
 .card {
   position: fixed;
   z-index: 999;

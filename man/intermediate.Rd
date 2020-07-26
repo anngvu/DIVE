@@ -2,7 +2,7 @@
 % Please edit documentation in R/intermediate.R
 \name{intermediate}
 \alias{intermediate}
-\title{Shiny server module for intermediate data processing}
+\title{Intermediate data processing}
 \usage{
 intermediate(input, output, session, data, Fun = NULL)
 }

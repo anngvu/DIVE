@@ -42,31 +42,33 @@ newDatasetInput <- function(id, label = "(name)") {
 #' @inheritParams dataUpload
 #' @return A reactive data.table of the processed upload.
 #' @export
-newDataset <- function(input, output, session,
-                      datakey = NULL, xname = NULL,
-                      checkFun = NULL, informd = NULL, appdata = NULL) {
+newDatasetServer <- function(id,
+                             datakey = NULL, xname = NULL,
+                             checkFun = NULL, informd = NULL, appdata = NULL) {
 
-  # ------------------------------------------------------------- #
+  moduleServer(id, function(input, output, session) {
 
-  newData <- reactiveVal(NULL)
+    newData <- reactiveVal(NULL)
 
-  updateTextInput(session, "name", value = xname) # gives dataset a default name
+    updateTextInput(session, "name", value = xname) # gives dataset a default name
 
-  upload <- callModule(dataUpload, "upload",
-                       checkFun = checkFun,
-                       informd = informd,
-                       appdata = appdata)
+    upload <- dataUploadServer("upload",
+                               checkFun = checkFun,
+                               informd = informd,
+                               appdata = appdata)
 
-  # ------------------------------------------------------------- #
-  observeEvent(upload(), {
-    dataset <- upload()
-    if(!is.null(datakey)) {
-      name <- isolate(input$name)
-      name <- if(name != "") name else xname
-      dataset[[datakey]] <- rep(name, nrow(dataset)) # adds a key column as specified in datakey
-    }
-    newData(dataset)
+    # ------------------------------------------------------------- #
+    observeEvent(upload(), {
+      dataset <- upload()
+      if(!is.null(datakey)) {
+        name <- isolate(input$name)
+        name <- if(name != "") name else xname
+        dataset[[datakey]] <- rep(name, nrow(dataset)) # adds a key column as specified in datakey
+      }
+      newData(dataset)
+    })
+
+    return(newData)
   })
 
-  return(newData)
 }

@@ -35,29 +35,31 @@ getLinkInput <- function(id, labels, link = T) {
 #' @param readfun A function to handle reading the source files. Defaults to \code{\link[base]{readLines}}.
 #' @param ... Additional arguments for \preformatted{readfun}.
 #' @return A data object.
-getLink <- function(input, output, session,
-                    sources, readfun = readLines, ...) {
+getLinkServer <- function(id,
+                          sources, readfun = readLines, ...) {
 
-  linkdata <- reactiveVal(NULL)
-  state <- rep(0, length(sources))
+  moduleServer(id, function(input, output, session) {
+    linkdata <- reactiveVal(NULL)
+    state <- rep(0, length(sources))
 
-  readfun <- match.fun(readfun)
+    readfun <- match.fun(readfun)
 
-  whichget <- reactive({
-    current <- unlist(lapply(seq_along(sources), function(i) input[[paste0("get", i)]]))
-    changed <- which(state != current)
-    if(!length(changed)) {
-      return(NULL)
-    } else {
-      state <<- current
-      return(changed)
-    }
+    whichget <- reactive({
+      current <- unlist(lapply(seq_along(sources), function(i) input[[paste0("get", i)]]))
+      changed <- which(state != current)
+      if(!length(changed)) {
+        return(NULL)
+      } else {
+        state <<- current
+        return(changed)
+      }
+    })
+
+    observeEvent(whichget(), {
+      data <- readfun(sources[[whichget()]], ...)
+      linkdata(data)
+    })
+
+    return(linkdata)
   })
-
-  observeEvent(whichget(), {
-    data <- readfun(sources[[whichget()]], ...)
-    linkdata(data)
-  })
-
-  return(linkdata)
 }

@@ -43,35 +43,40 @@ refSubsetInput <- function(id, refname = NULL) {
 #' @param informd Optional, relative path to an info Rmarkdown file that can be pulled up in a modal.
 #' @return A reactive subsetted data.table.
 #' @export
-refSubset <- function(input, output, session,
-                      refdata, subsetfeat, subsets = NULL, datakey = NULL, refname = NULL, exclude = reactive({}),
-                      informd = NULL) {
+refSubsetServer <- function(id,
+                            refdata, subsetfeat, subsets = NULL,
+                            datakey = NULL, refname = NULL, exclude = reactive({}),
+                            informd = NULL) {
 
-  # Optional info link  ------------------------------------------------------- #
-  if(!is.null(informd)) {
-    output$info <- renderUI({
-      infoOutput(session$ns("reqs"))
+  moduleServer(id, function(input, output, session) {
+
+    # Optional info link  ------------------------------------------------------- #
+    if(!is.null(informd)) {
+      output$info <- renderUI({
+        infoOutput(session$ns("reqs"))
+      })
+      modal <- infoServer("reqs", informd = informd)
+    }
+
+    # ---------------------------------------------------------------------------- #
+
+    output$selectSubsetUI <- renderUI({
+      choices <- if(length(subsets)) subsets else unique(refdata[[subsetfeat]])
+      selectizeInput(session$ns("selectSubset"), label = "",
+                       choices = subsets, selected = NULL,
+                       multiple = T,
+                       options = list(placeholder = "(one or more types)"))
     })
-    modal <- callModule(info, "reqs", informd = informd)
-  }
 
-  # ---------------------------------------------------------------------------- #
+    subsetDT <- reactive({
+      validate(need(length(input$selectSubset), "Please select a type subset"))
+      SS <- refdata[get(subsetfeat) %in% input$selectSubset]
+      if(length(exclude())) SS <- SS[!ID %in% exclude() ] # ID is hard-coded
+      if(!is.null(datakey)) SS[, (datakey) := refname ]
+      SS
+    })
 
-  output$selectSubsetUI <- renderUI({
-    choices <- if(length(subsets)) subsets else unique(refdata[[subsetfeat]])
-    selectizeInput(session$ns("selectSubset"), label = "",
-                     choices = subsets, selected = NULL,
-                     multiple = T,
-                     options = list(placeholder = "(one or more types)"))
+    return(subsetDT)
   })
 
-  subsetDT <- reactive({
-    validate(need(length(input$selectSubset), "Please select a type subset"))
-    SS <- refdata[get(subsetfeat) %in% input$selectSubset]
-    if(length(exclude())) SS <- SS[!ID %in% exclude() ] # ID is hard-coded
-    if(!is.null(datakey)) SS[, (datakey) := refname ]
-    SS
-  })
-
-  return(subsetDT)
 }

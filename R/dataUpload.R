@@ -76,60 +76,62 @@ dataUploadUI <- function(id, ...) {
 #' @return A data.table with a "filename" attribute containing the filename without extension,
 #' or \code{NULL} if the file input was not a table or returned as \code{NULL} from \code{checkFun}.
 #' @export
-dataUpload <- function(input, output, session,
-                       asDT = TRUE, removable = FALSE, checkFun = NULL, informd = NULL,
-                       appdata = NULL, checkappdata = F) {
+dataUploadServer <- function(id,
+                             asDT = TRUE, removable = FALSE, checkFun = NULL, informd = NULL,
+                             appdata = NULL, checkappdata = F) {
+  moduleServer(id, function(input, output, session) {
 
-  uploaded <- reactiveVal(NULL)
+    uploaded <- reactiveVal(NULL)
 
-  # Optional info link  ------------------------------------------------------- #
-  if(!is.null(informd)) {
-    output$info <- renderUI({
-      infoOutput(session$ns("reqs"))
-    })
-    modal <- callModule(info, "reqs", informd)
-  }
-
-  # ---------------------------------------------------------------------------- #
-  observeEvent(input$upload, {
-    data <- if(asDT) fread(input$upload$datapath) else readLines(input$upload$datapath)
-    # perform check if checkFun is specified
-    if(is.function(checkFun)) {
-      checked <- checkFun(data)
-      data <- checked$result
-      message <- checked$message
-      if(!is.null(message)) showModal(modalDialog(HTML(message), title = "Data upload status", easyClose = F))
+    # Optional info link  ------------------------------------------------------- #
+    if(!is.null(informd)) {
+      output$info <- renderUI({
+        infoOutput(session$ns("reqs"))
+      })
+      modal <- infoServer("reqs", informd)
     }
-    # set new data if successful
-    if(!is.null(data)) {
-      attr(data, "filename") <- gsub(".txt$|.csv$", "", input$upload$name)
-      uploaded(data)
-      # add remove button if removable
-      if(removable) {
-        insertUI(paste0("#", session$ns("main")), "beforeEnd",
-               tags$div(id = session$ns("remove-btn"), class = "forceInline",
-               br(), actionButton(session$ns("remove"), "", icon = icon("trash"))))
-      }
-    }
-  })
 
-  observeEvent(input$remove, {
-    uploaded(NULL)
-    removeUI(paste0("#", session$ns("remove-btn")))
-    session$sendCustomMessage("resetFileInput", message = session$ns("upload"))
-  })
-
-  # input$appdata comes from external javascript call
-  observeEvent(input$appdata, {
-    if(input$appdata %in% appdata) {
-      data <- data.table::fread(appdata)
-      if(checkappdata && is.function(checkFun)) {
+    # ---------------------------------------------------------------------------- #
+    observeEvent(input$upload, {
+      data <- if(asDT) fread(input$upload$datapath) else readLines(input$upload$datapath)
+      # perform check if checkFun is specified
+      if(is.function(checkFun)) {
         checked <- checkFun(data)
         data <- checked$result
+        message <- checked$message
+        if(!is.null(message)) showModal(modalDialog(HTML(message), title = "Data upload status", easyClose = F))
       }
-      uploaded(data)
-    }
-  })
+      # set new data if successful
+      if(!is.null(data)) {
+        attr(data, "filename") <- gsub(".txt$|.csv$", "", input$upload$name)
+        uploaded(data)
+        # add remove button if removable
+        if(removable) {
+          insertUI(paste0("#", session$ns("main")), "beforeEnd",
+                 tags$div(id = session$ns("remove-btn"), class = "forceInline",
+                 br(), actionButton(session$ns("remove"), "", icon = icon("trash"))))
+        }
+      }
+    })
 
-  return(uploaded)
+    observeEvent(input$remove, {
+      uploaded(NULL)
+      removeUI(paste0("#", session$ns("remove-btn")))
+      session$sendCustomMessage("resetFileInput", message = session$ns("upload"))
+    })
+
+    # input$appdata comes from external javascript call
+    observeEvent(input$appdata, {
+      if(input$appdata %in% appdata) {
+        data <- data.table::fread(appdata)
+        if(checkappdata && is.function(checkFun)) {
+          checked <- checkFun(data)
+          data <- checked$result
+        }
+        uploaded(data)
+      }
+    })
+
+    return(uploaded)
+  })
 }

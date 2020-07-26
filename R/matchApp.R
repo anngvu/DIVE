@@ -61,98 +61,99 @@ matchAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"
 #' @param factorx A naming pattern for factoring variables displayed.
 #' @param appdata Optional, a path to example application data (for demonstration purposes).
 #' @export
-matchApp <- function(input, output, session,
-                     refdata,
-                     custom = NULL,
-                     datakey, xname, refname,
-                     vars, guess = NULL,
-                     subsets, subsetfeat,
-                     informd = system.file("help/cohort_exchange.Rmd", package = "DIVE"),
-                     factorx,
-                     appdata = NULL) {
+matchAppServer <- function(id,
+                           refdata,
+                           custom = NULL,
+                           datakey, xname, refname,
+                           vars, guess = NULL,
+                           subsets, subsetfeat,
+                           informd = system.file("help/cohort_exchange.Rmd", package = "DIVE"),
+                           factorx,
+                           appdata = NULL) {
 
-  if(!is.null(custom)) callModule(custom, "custom")
+  moduleServer(id, function(input, output, session) {
 
+    if(!is.null(custom)) callModule(custom, "custom")
 
-  newCohort <- callModule(newDataset, "CohortX",
-                          datakey = datakey,
-                          xname = xname,
-                          checkFun = checkCohortData,
-                          informd = informd,
-                          appdata = appdata)
+    newCohort <- newDatasetServer("CohortX",
+                                  datakey = datakey,
+                                  xname = xname,
+                                  checkFun = checkCohortData,
+                                  informd = informd,
+                                  appdata = appdata)
 
-  # Optional cross-checking
-  crossCheck <- callModule(intermediate, "internal",
-                           data = newCohort,
-                           Fun = xCheckID)
+    # Optional cross-checking
+    crossCheck <- callModule(intermediate, "internal",
+                             data = newCohort,
+                             Fun = xCheckID)
 
-  reference <- callModule(refSubset, "ref",
-                          refdata = refdata,
-                          subsetfeat = subsetfeat,
-                          subsets = subsets,
-                          datakey = datakey,
-                          refname = refname,
-                          exclude = crossCheck)
+    reference <- refSubsetServer("ref",
+                                 refdata = refdata,
+                                 subsetfeat = subsetfeat,
+                                 subsets = subsets,
+                                 datakey = datakey,
+                                 refname = refname,
+                                 exclude = crossCheck)
 
-  parameters <- callModule(matchLink, "params",
-                           refdata = reference,
-                           setX = newCohort,
-                           vars = vars,
-                           guess = guess)
+    parameters <- matchLinkServer("params",
+                                  refdata = reference,
+                                  setX = newCohort,
+                                  vars = vars,
+                                  guess = guess)
 
-  results <-  callModule(matchResult, "results",
-                         refSubset = reference,
-                         setX = newCohort,
-                         params = parameters,
-                         sourcecol = datakey)
+    results <-  matchResultServer("results",
+                                  refSubset = reference,
+                                  setX = newCohort,
+                                  params = parameters,
+                                  sourcecol = datakey)
 
-  explore <- callModule(exploreMore, "explore",
-                        s1Data = refdata,
-                        s2Data = newCohort,
-                        datakey = datakey,
-                        refname = refname,
-                        factorx = factorx,
-                        results = results)
+    explore <- exploreMoreServer("explore",
+                                 s1Data = refdata,
+                                 s2Data = newCohort,
+                                 datakey = datakey,
+                                 refname = refname,
+                                 factorx = factorx,
+                                 results = results)
 
-  #-- Show output tabs ------------------------------------------------------------------------------------------#
+    #-- Show output tabs ------------------------------------------------------------------------------------------#
 
-  # Need to keep track of first upload since previous implementation of removing and adding new tabs
-  # results in puzzling behavior where one must click twice on run to get results.
-  # (as opposed to logic of adding tab if it's the first interaction and showing/hiding for all subsequent)
-  userfirst <- reactiveValues(upload = TRUE, result = TRUE)
+    # Need to keep track of first upload since previous implementation of removing and adding new tabs
+    # results in puzzling behavior where one must click twice on run to get results.
+    # (as opposed to logic of adding tab if it's the first interaction and showing/hiding for all subsequent)
+    userfirst <- reactiveValues(upload = TRUE, result = TRUE)
 
-  observeEvent(newCohort(), {
-    if(userfirst$upload) {
-      appendTab("tabs", select = T,
-                tabPanel("Match parameters", div(style="padding-top:25px", matchLinkUI(session$ns("params")))))
-      userfirst$upload <- FALSE
-    } else {
-      showTab("tabs", "Match parameters", select = T)
-      hideTab("tabs", "Match results")
-      removeTab("tabs", "Explore")
-    }
-    appendTab("tabs",
-              tabPanel("Explore",
-                       div(style="padding-top:25px",
-                           exploreMoreUI(session$ns("explore"),
-                                         s1Label = refname, s1Data = refdata,
-                                         s2Label = xname, s2Data = newCohort,
-                                         placeholder = "(select from attributes)"))))
-  })
-
-  observeEvent(results$matchtable, {
-    if(userfirst$result) {
-      insertTab("tabs", select = T, target = "Match parameters", position = "after",
-                tabPanel("Match results",
+    observeEvent(newCohort(), {
+      if(userfirst$upload) {
+        appendTab("tabs", select = T,
+                  tabPanel("Match parameters", div(style="padding-top:25px", matchLinkUI(session$ns("params")))))
+        userfirst$upload <- FALSE
+      } else {
+        showTab("tabs", "Match parameters", select = T)
+        hideTab("tabs", "Match results")
+        removeTab("tabs", "Explore")
+      }
+      appendTab("tabs",
+                tabPanel("Explore",
                          div(style="padding-top:25px",
-                             matchResultOutput(session$ns("results")))))
-      userfirst$result <- FALSE
-    } else {
-      showTab("tabs", "Match results", select = T)
-    }
+                             exploreMoreUI(session$ns("explore"),
+                                           s1Label = refname, s1Data = refdata,
+                                           s2Label = xname, s2Data = newCohort,
+                                           placeholder = "(select from attributes)"))))
+    })
 
+    observeEvent(results$matchtable, {
+      if(userfirst$result) {
+        insertTab("tabs", select = T, target = "Match parameters", position = "after",
+                  tabPanel("Match results",
+                           div(style="padding-top:25px",
+                               matchResultOutput(session$ns("results")))))
+        userfirst$result <- FALSE
+      } else {
+        showTab("tabs", "Match results", select = T)
+      }
+
+    })
   })
-
 }
 
 #' Launch Shiny app for matching between two datasets
@@ -164,6 +165,6 @@ matchApp <- function(input, output, session,
 #' @export
 matchAppR <- function(ns = NULL, ...) {
   ui <- matchAppUI(ns)
-  server <- function(input, output, session) { callModule(matchApp, ns, ...) }
+  server <- matchAppServer(ns, ...)
   shinyApp(ui = ui, server = server)
 }
