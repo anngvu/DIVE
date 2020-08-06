@@ -4,14 +4,14 @@
 \alias{geneVServer}
 \title{Shiny module server for filtering high dimensional genomics data}
 \usage{
-geneVServer(id, choices, prelist = NULL)
+geneVServer(id, choices)
 }
 \arguments{
 \item{choices}{Choices for selectInput.}
 
-\item{prelist}{Optional, a named list of source files that store pre-compiled sets for convenient access.}
-
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
+
+\item{prelist}{Optional, a named list of source files that store pre-compiled sets for convenient access.}
 }
 \value{
 A vector that can be used to subset a high dimensional matrix,

@@ -25,6 +25,13 @@ body {
   padding: 30px;
 }
 
+.card2 {
+  position: fixed;
+  background-color: white;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  padding: 30px;
+}
+
 .firm-feedback {
   font-weight: bold;
 }
@@ -135,9 +142,6 @@ body {
   vertical-align: middle;
 }
 
-#explore-matchedAttrs {
-  background-color: lemonchiffon;
-}
 
 .custom-highlight {
   background-color: white;
@@ -154,8 +158,20 @@ body {
 
 .multiVCtrlUI {
   margin-top: 30px;
-  margin-bottom:20px;
-  margin-right:100px
+  margin-bottom: 20px;
+  margin-right: 100px;
+}
+
+.xV-container {
+  margin-bottom: 30px;
+}
+
+.xVUI {
+
+}
+
+.xVUI-ctrl {
+  margin-bottom: 10px;
 }
 
 .subgroups-panel {

@@ -14,10 +14,10 @@ subgroupVUI <- function(id) {
   tags$div(id = ns("viewport"), class = "subgroups-panel",
            div(align = "right", actionButton(ns("remove"), "", icon = icon("times"))),
            uiOutput(ns("selecthd")),
-           div(class = "forceInline", style = "height: 100px", uiOutput(ns("select1"))),
-           div(class = "forceInline", style = "height: 100px", uiOutput(ns("by1"))),
-           div(class = "forceInline", style = "height: 100px", uiOutput(ns("select2"))),
-           div(class = "forceInline", style = "height: 100px", uiOutput(ns("by2"))),
+           div(class = "ui-inline", style = "height: 100px", uiOutput(ns("select1"))),
+           div(class = "ui-inline", style = "height: 100px", uiOutput(ns("by1"))),
+           div(class = "ui-inline", style = "height: 100px", uiOutput(ns("select2"))),
+           div(class = "ui-inline", style = "height: 100px", uiOutput(ns("by2"))),
            div(style = "padding-bottom: 20px;", actionButton(ns("go"), "View")),
            shinycssloaders::withSpinner(color = "gray", size = 0.5, plotlyOutput(ns("plot")))
   )

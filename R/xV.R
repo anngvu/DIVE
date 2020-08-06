@@ -10,53 +10,52 @@
 #' @export
 xVUI <- function(id) {
   ns <- NS(id)
-  tags$div(style = "margin-bottom:30px;",
-           div(style = "margin-bottom: 10px;",
-               div(class = "forceInline", actionButton(ns("show"), label = NULL, icon = icon("cog"))),
-               conditionalPanel(condition = "input.show%2==1", ns = ns, class = "forceInline",
-                div(class = "forceInline", id = ns("local")),
-                div(class = "forceInline", actionLink(ns("addlocal"), "LOCAL FILTER", icon = icon("plus"))),
-                div(class = "forceInline", actionLink(ns("rowcluster"), "ROW CLUSTER", icon = icon("sitemap"))),
-                # TO DO: further testing of col clustering
-                # div(class = "forceInline", actionLink(ns("colcluster"), "COL CLUSTER", icon = icon("sitemap"))),
-                div(class = "forceInline", "show most variable"),
+  tags$div(class = "xVUI",
+           div(class = "xVUI-ctrl",
+               div(class = "ui-inline", actionButton(ns("show"), label = NULL, icon = icon("cog"))),
+               conditionalPanel(condition = "input.show%2==0", ns = ns, class = "ui-inline",
+                 div(class = "ui-inline", id = ns("local")),
+                 div(class = "ui-inline", actionLink(ns("addlocal"), "LOCAL FILTER", icon = icon("plus")),
+                     title = "Initalize local filter for this dataset **that takes precedence over the global filter**"),
+                div(class = "ui-inline", actionLink(ns("rowcluster"), "ROW CLUSTER", icon = icon("sitemap", class = "fa-rotate-270")),
+                    title = "Cluster samples by **features currently in view**"),
+                div(class = "ui-inline", "show most variable:"),
                 div(style = "display: inline-block; margin-top: -5px;",
                     numericInput(ns("hivarprct"), label = NULL, value = 100, min = 1, max = 100, step = 5, width = 50)),
                 div(style = "display: inline-block;", icon("percent"))
               )
           ),
-          div(shinycssloaders::withSpinner(plotlyOutput(ns("heatmap"), height = "100%"), color = "gray"))
+          fluidRow(
+            column(9, shinycssloaders::withSpinner(plotlyOutput(ns("heatmap")))),
+            column(3, plotlyOutput(ns("cplotly")))
+          )
   )
 }
 
 #' Shiny module server for presenting high dimensional data with other features in multi-column view
 #'
 #' This module attempts to integratively visualize one or more
-#' high-dimensional gene/protein/methylation datasets with other phenotype or clinical features.
+#' high-dimensional gene/protein/methylation datasets with phenotype or clinical features.
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param hdata A numeric matrix representing high dimensional data.
-#' @param cdata Optional, a data.frame or data.table that can be joined to high-dimensional data. See details.
-#' @param key Name of key column, should be and currently defaults to "ID".
-#' @param selected A vector used to subset the columns of hdata.
-#' @param slabel Optional, a vector that can map column names of hdata to plot labels.
-#' @param width Custom width, defaults to 1600, only used when dendro subplots are involved.
+#' @param hdata A numeric matrix with row and column names for heatmap.
+#' @param cdata Optional, a data.table that can be joined to hdata. See details.
+#' @param key Name of key column for cdata, currently defaults to "ID".
+#' @param selected A reactive vector used to subset the "features" (cols) of hdata.
 #' @export
 xVServer <- function(id,
-                     hdata, cdata = reactive({ NULL }), key = "ID",
-                     selected = reactive({ NULL }), slabel = NULL,
-                     width = reactive(1600)) {
+                     hdata, cdata = reactive(NULL), key = "ID",
+                     selected = reactive(NULL), height = 500) {
 
   moduleServer(id, function(input, output, session) {
 
-    localhdata <- reactiveVal(NULL)
-    clusterplot <- reactiveVal(NULL)
-    hivarprct <- reactiveVal(100)
+    localhdata <- reactiveVal(NULL) # modified by obs_globalselect and obs_localselect
+    withcluster <- FALSE
 
     #-- Local controls --------------------------------------------------------------------------------------------#
 
     # Local select is dynamically rendered on user request and takes precedence over global select
-    # To restore plot listening to global selection, local select must be removed
+    # To restore plot listening to global selection, the local select input must be removed from UI
     observeEvent(input$addlocal, {
       if(input$addlocal %% 2) {
         insertUI(selector = paste0("#", session$ns("local")), immediate = T,
@@ -94,9 +93,8 @@ xVServer <- function(id,
     }, suspended = TRUE) # start in suspended state
 
 
-    # Subsetting by highest-variance features and constraining user input
-    # Shiny's numeric input doesn't handle non-sensible input well by default
-    observe({
+    # Subsetting by highest-variance features w/ much checking bc numericInput doesn't handle non-sensible inputs well
+    observeEvent(input$hivarprct, {
       if(!length(input$hivarprct) || !is.numeric(input$hivarprct)) {
         updateNumericInput(session, "hivarprct", value = 100)
       } else if(input$hivarprct < 1) {
@@ -104,179 +102,194 @@ xVServer <- function(id,
       } else if(input$hivarprct > 100) {
         updateNumericInput(session, "hivarprct", value = 100)
       } else {
-        hivarprct(input$hivarprct)
+        selected <- subsetHiVar(hdata, percent = isolate(input$hivarprct))
+        localhdata(hdata[, selected, drop = F])
       }
-    })
+    }, ignoreInit = TRUE)
 
     #-- Plots ---------------------------------------------------------------------------------------------------------#
 
+    #-- Expression matrix heatmap ---------------------------------------------------------------------------#
 
-    #-- Expression matrix ---------------------------------------------------------------------------#
-
-
-    hplot <- reactive({
-      if(is.null(localhdata())) return(NULL)
-      plotdata <- localhdata()
-      selected <- subHiVar(plotdata, percent = hivarprct())  # plot highest variance
-      plotdata <- plotdata[, selected, drop = F] # plotdata[, selected, drop = F] gives subscript out of bounds
-      xlabs <- if(!is.null(slabel)) slabel[colnames(plotdata)] else colnames(plotdata)
-      ylabs <- rownames(plotdata)
-      showticklabs <- if(ncol(plotdata) <= 50) TRUE else FALSE # only show labels when readable
-
-      # infer color scale for type of data; min = 0 -> RNA-seq counts; everything else should be log-FC
-      if(min(plotdata) == 0) colorscale <- "Greys" else colorscale <- "RdBu"
-      plot_ly(z = plotdata, x = xlabs, y = ylabs, name = "Expression\nMatrix",
-              type = "heatmap", height = 25 * nrow(hdata), colors = colorscale,
-              hovertemplate = "transcript/protein: <b>%{x}</b><br>sampleID: <b>%{y}</b><br>expression: <b>%{z}</b>",
-              colorbar = list(title = "relative\nexpression", thickness = 10, x = -0.09)) %>%
-        layout(xaxis = list(type = "category", showgrid = FALSE, ticks = "", showticklabels = showticklabs),
-               yaxis = list(type = "category", ticks = ""),
-               plot_bgcolor = "#F5F5F5")
+    # Initialize heatmap with empty left-hand subplot for dendrogram / most subsequent mods use plotlyProxy
+    output$heatmap <- renderPlotly({
+      axis_ <- list(showgrid = FALSE, zeroline = FALSE, ticks = "")
+      d <- plot_ly(type = "scatter", mode = "markers", x = NULL, y = 1:nrow(hdata)) %>%
+        layout(xaxis = c(axis_, showticklabels = FALSE), yaxis = axis_)
+      subplot(d, expHeatmap(hdata, height), shareY = TRUE, widths = c(0, 1)) %>%
+        plotly::config(displayModeBar = F)
     })
 
-    #-- Cluster/dendro plot ---------------------------------------------------------------------------#
+
+    # Add row cluster dendro subplot trace in left margin -- cluster dendogram is removed if cdata() changes
     observeEvent(input$rowcluster, {
-      withProgress(value = 0.2, message = "creating distance matrix...",
-                   expr = {
-                     tryCatch({
-                       sample_clust <- dist(hdata) # cluster by samples
-                       setProgress(value = 0.7, message = "clustering...")
-                       sample_clust <- fastcluster::hclust(sample_clust)
-                       setProgress(value = 0.9, message = "reordering rows...")
-                       localhdata(hdata[sample_clust$labels[sample_clust$order], ])
-                       # add new dendroplot
-                       dendro <- plotly::plot_dendro(as.dendrogram(sample_clust), width = width()-40)
-                       dendro <- dendro %>% layout(xaxis = list(autorange = "reversed", showgrid = FALSE),
-                                                   yaxis = list(showgrid = FALSE),
-                                                   paper_bgcolor = "#FFFFFF", plot_bgcolor = "#FFFFFF",
-                                                   margin = list(b = 0, t = 0, r = 25, l = 10))
-                       # hide labels and legend for cleaner display but add hover:
-                       dendro$x$attrs <- lapply(dendro$x$attrs,  function(x) {
-                         x$showlegend <- F
-                         if(!is.null(x$name) && x$name == "labels") {
-                           x$name <- "sample"
-                           x$color <- sub("black", "transparent", x$color)
-                         }
-                         x$hoverinfo <- x$text
-                         x
-                       })
-                       clusterplot(dendro)
-                     }, error = function(e) meh(error = e))
-                   })
-    })
+      z <- localhdata()
+      tryCatch({
+        rowclusts <- rowCluster(z)
+        z <- z[rowclusts$order, ]
+        withcluster <<- TRUE
+        localhdata(z) # obs_localhdata will then take care of updating heatmap trace 1L
+        lines <- lineShapes(rowclusts)
+        labels <- rowclusts$labels[rowclusts$order]
+        plotlyProxy("heatmap", session) %>%
+          plotlyProxyInvoke("update",
+                            list(type = "scatter", mode = "markers+text",
+                                 x = list(rep(0, length(labels))), y = list(1:length(labels)),
+                                 text = list(labels), textposition="middle right", hoverinfo = "text",
+                                 cliponaxis = FALSE),
+                            list(xaxis.domain = c(0, 0.1), xaxis2.domain = c(0.13, 1),
+                                 shapes = lines, xaxis.autorange = "reversed"),
+                            0L)
+      }, error = function(e) meh(error = e))
 
-    observeEvent(input$colcluster, {
-      withProgress(value = 0.2, message = "creating distance matrix...",
-                   expr = {
-                     tryCatch({
-                       gene_clust <- dist(t(hdata))
-                       setProgress(value = 0.7, message = "clustering...")
-                       gene_clust <- fastcluster::hclust(gene_clust)
-                       setProgress(value = 0.9, message = "reordering columns...")
-                       hdata <- hdata[, gene_clust$order]
-                       localhdata(hdata)
-                     }, error = function(e) meh())
-                   })
-    })
+    }, ignoreInit = TRUE)
+
+
+    # Update heatmap whenever matrix changes
+    obs_localhdata <- observeEvent(localhdata(), {
+      z <- localhdata()
+      ylabs <- rownames(z)
+      yind <- 1:nrow(z)
+      showticks <- !withcluster # if cluster dendogram also being displayed,  don't need labels
+      plotlyProxy("heatmap", session) %>%
+        plotlyProxyInvoke("update",
+                          list(z = list(z), x = list(colnames(z)), y = list(yind), height = height),
+                          list(yaxis.showticklabels = showticks, yaxis.tickvals = yind, yaxis.ticktext = ylabs),
+                          1L)
+    }, ignoreInit = TRUE)
 
 
     #-- Clinical/phenotype variables --------------------------------------------------------------------#
 
-    # Plot subsetting and sample-ordering by phenotype variables
+    # Sample-order by pheno var in cdata "sort by" column
     observeEvent(cdata(), {
-      # manually order rows by order given in cdata(); cdata() is itself ordered by a "sort by" column
-      ckey <- cdata()[as.character(get(key)) %in% rownames(localhdata()), as.character(get(key))]
-      plotdata <- localhdata()[ckey, , drop = F]
-      localhdata(plotdata)
-      clusterplot(NULL) # can only use one ordering...
-    }, ignoreInit = T) # let cplot follow order of hplot rather than hplot follow cdata() when first initialized
+      # Use sample IDs in cdata() to order main matrix
+      crows <- cdata()[as.character(get(key)) %in% rownames(localhdata()), unique(as.character(get(key)))]
+      z <- localhdata()[crows, , drop = F]
+      # Main matrix can only be ordered by one source at a time! remove cluster plot when cdata() applies
+      withcluster <<- FALSE
+      plotlyProxy("heatmap", session) %>%
+        plotlyProxyInvoke("update",
+                          list(y = list(1:nrow(z)), text = NULL),
+                          list(xaxis.domain = c(0, 0), xaxis2.domain = c(0, 1), shapes = NULL),
+                          0L)
+      localhdata(z)
+
+    }, ignoreInit = T) # on init, cplot ordered by matrixplot rather than matrixplot ordered by cdata()
 
 
+    # Plot product representing cdata(), which contains one to several plots of each var in subplot
     cplot <- reactive({
-      # cdata() should be a table already subsetted by selected variables (columns)
       if(is.null(cdata())) return(NULL)
-      plotdata <- merge(as.data.table(setNames(list(rownames(localhdata())), key)), cdata(),
-                        by = key, all.x = T, sort = FALSE)
-      plotdata <- plotdata[!duplicated(get(key))]
-      # print(plotdata)
+      dtorder <- as.data.table(setNames(list(rownames(localhdata())), key))
+      plotdata <- merge(dtorder, cdata(), by = key, all.x = T, sort = FALSE)
+      plotdata <- plotdata[!duplicated(get(key))] # in case cdata() isn't well-cleaned
       y <- plotdata[[key]] %>% paste()
       notID <- names(cdata()) != key
       vcat <- sapply(cdata(), function(v) class(v) == "character" || class(v) == "factor")
 
       # Generate a list of plotly plots for categorical variables
       cplotcat <- lapply(names(plotdata)[vcat & notID],
-                         function(v) {
-                           zdomain <- cdata()[[v]] %>% factor() %>% levels()  # keep colors consistent across xVUIs
-                           colorscale <- if(length(zdomain) < 4) "Viridis" else "Portland"
-                           z <- plotdata[[v]] %>% factor(levels = zdomain) %>% as.integer() %>% as.matrix()
-                           text <- matrix(paste(y, "|", "value =", plotdata[[v]]))
-                           plot_ly(x = v, y = y, z = z, name = v, type = "heatmap",
-                                   showscale = FALSE, text = text, hoverinfo = "text",
-                                   colorscale = colorscale, zmin = 1, zmax = length(zdomain)) %>%
-                             layout(xaxis = list(title = v, zeroline = FALSE, showline = FALSE,
-                                    showticklabels = FALSE, showgrid = FALSE, type = "category"),
-                                    yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
-                        })
-
+                         function(v) vcatplotly(v, cdata()[[v]], plotdata[[v]], y, height))
       # Generate a list of plotly plots for numeric variables
-      # Both plotly and ggplot will remove NA data automatically, which isn't great for our purpose.
-      # Instead, we use a dummy "0" value and add annotation layer to indicate where data is missing.
-      cplotnum <- lapply(names(plotdata)[!vcat & notID],
-                         function(v) {
-                           x <- plotdata[[v]]
-                           hoverx <- paste(y, "|", sapply(x, function(i) if(is.na(i)) "NA" else as.character(i)))
-                           NAtext <- ifelse(is.na(x), "  NA", "")
-                           x[is.na(x)] <- 0
-                           plot_ly(x = x, y = y, customdata = hoverx, name = v,
-                                   type = "bar", orientation = "h", showlegend = F,
-                                   text = hoverx, hoverinfo = "text") %>%
-                                   add_text(text = NAtext, textposition = "right", textfont = list(color = toRGB("red"))) %>%
-                                   layout(xaxis = list(title = v, showgrid = FALSE),
-                                        yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
-                      })
+      cplotnum <- lapply(names(plotdata)[!vcat & notID], function(v) vnumplotly(v, plotdata[[v]], y, height))
 
       if(length(cplotcat) && length(cplotnum)) {
-        # Technically, numeric plots need more width allocated to look most effective, but use method below for now
-        # n <- length(cplotcat) + length(cplotnum)
-        # w1 <- round(length(cplotcat)/(length(cplotcat) + length(cplotnum)))
-        # widths <- c(w1, n-w1)
-        subplot(subplot(cplotcat, shareY = T, titleX = T),
-                 subplot(cplotnum, shareY = T, titleX = T),
-                 titleX = T, shareY = T, widths = c(0.3, 0.7))
-      } else {
-         subplot(c(cplotcat, cplotnum), shareY = T, titleX = T)
-      }
-    })
-
-    #-- Combined plots --------------------------------------------------------------------#
-
-    output$heatmap <- renderPlotly({
-      if(is.null(cplot()) && is.null(clusterplot())) {
-          hplot() %>% plotly::config(displayModeBar = F)
-      } else if(is.null(cplot())) {
-          subplot(clusterplot(), hplot(), shareX = T, widths = c(0.1, 0.9)) %>%
+        # To look best numeric plots need more width allocated, use widths below for now
+        subplot(subplot(cplotcat, shareY = T, titleX = T), subplot(cplotnum, shareY = T, titleX = T),
+                titleX = T, shareY = T, widths = c(0.3, 0.7)) %>%
           plotly::config(displayModeBar = F)
-      } else if(is.null(clusterplot())) {
-          subplot(hplot(), cplot(), titleX = T, shareX = F, shareY = T, widths = c(0.7, 0.3)) %>%
-            plotly::config(displayModeBar = F)
-      } else if(is.null(hplot())) { # all plots are removed if hplot() is null so really moot option
-        # cplot() %>% plotly::config(displayModeBar = F)
       } else {
-        # the most complicated configuration:
-        subplot(subplot(clusterplot(), hplot(), shareX = T, widths = c(0.1, 0.9)),
-                cplot(), titleX = T, shareY = F, widths = c(0.7, 0.3)) %>%
-          plotly::config(displayModeBar = F, autosizable = TRUE)
+         subplot(c(cplotcat, cplotnum), shareY = T, titleX = T) %>%
+          layout(margin = list(t = 0.071 * height, b = 0.077 * height)) %>% # https://github.com/plotly/plotly.js/issues/4583
+          plotly::config(displayModeBar = F)
       }
     })
-  })
 
+    output$cplotly <- renderPlotly({
+      cplot()
+    })
+
+  })
 }
 
 #-- Helper functions -----------------------------------------------------------------------------------#
 
+# Expression heatmap of N samples x p features
+expHeatmap <- function(z, height) {
+  xlabs <- colnames(z)
+  ylabs <- rownames(z)
+  yind <- 1:nrow(z) # keep y as integer indices instead of using names for dendogram compatibility
+  # infer color scale for type of data; min = 0 -> RNA-seq counts; everything else should be log-Fc
+  if(min(z) == 0) colorscale <- "Greys" else colorscale <- "RdBu"
+  # only show labels when readable
+  showticklabs <- if(ncol(z) <= 50) TRUE else FALSE
+
+  plot_ly(z = z, x = xlabs, y = yind, name = "Expression\nMatrix",
+          type = "heatmap", colors = colorscale, height = height,
+          # text = matrix(rep(ylabs, each = ncol(z)), ncol = ncol(z), byrow = T),
+          # hovertemplate = "feature: <b>%{x}</b><br>expression: <b>%{z}</b>",
+          colorbar = list(title = "relative\nexpression", thickness = 10, x = -0.09)) %>%
+    layout(xaxis = list(type = "category", showgrid = FALSE, ticks = "", showticklabels = showticklabs),
+           yaxis = list(ticks = "", tickvals = yind, ticktext = ylabs))
+}
+
+
+# For clustering samples
+rowCluster <- function(data) {
+  withProgress(value = 0.2, message = "creating distance matrix...",
+               expr = {
+                 clusts <- dist(data)
+                 setProgress(value = 0.7, message = "clustering...")
+                 clusts <- fastcluster::hclust(clusts)
+                 return(clusts)
+               })
+}
+
+# Get line segments list from a cluster object, which can be passed into plotly shapes
+lineShapes <- function(cluster, horiz = TRUE) {
+  dendata <- dendextend::as.ggdend(as.dendrogram(cluster))
+  segments <- dendata$segments
+  names(segments) <- if(horiz) c("y0", "x0", "y1", "x1") else c("x0", "y0", "x1", "y1")
+  linetype <- list(line = list(color = "gray", width = 2), type = "line", xref = "x", yref = "y")
+  lines <- apply(segments, 1, function(x) c(as.list(x), linetype))
+  return(lines)
+}
+
+# Simple plot of a vector of categorical variables
+# vt is the variable name used in plot title; vu is the un-subsetted vec; vx is the subsetted vec
+vcatplotly <- function(vt, vu, vx, y, height = NULL) {
+  zdomain <- vu %>% factor() %>% levels()  # keep colors consistent across xVUIs
+  z <- vx %>% factor(levels = zdomain) %>% as.integer() %>% as.matrix()
+  colorscale <- if(length(zdomain) < 4) "Viridis" else "Portland"
+  text <- matrix(paste(y, "|", "value =", vx))
+  plot_ly(x = vt, y = y, z = z, name = vt, type = "heatmap", height = height,
+          text = text, hoverinfo = "text", showscale = FALSE,
+          colorscale = colorscale, zmin = 1, zmax = length(zdomain)) %>%
+    layout(xaxis = list(title = vt, zeroline = FALSE, showline = FALSE,
+                        showticklabels = FALSE, showgrid = FALSE, type = "category"),
+           yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
+}
+
+# Both plotly and ggplot will remove NA data automatically, which isn't desired default
+# Instead, use a dummy "0" value and add annotation layer to indicate where data is missing
+vnumplotly <- function(vt, vx, y, height = NULL) {
+  x <- vx
+  hoverx <- paste(y, "|", sapply(x, function(i) if(is.na(i)) "NA" else as.character(i)))
+  NAtext <- ifelse(is.na(x), "  NA", "")
+  x[is.na(x)] <- 0
+  plot_ly(x = x, y = y, customdata = hoverx, name = vt, type = "bar",
+          orientation = "h", showlegend = F, height = height,
+          text = hoverx, hoverinfo = "text") %>%
+    add_text(text = NAtext, textposition = "right", textfont = list(color = toRGB("red"))) %>%
+    layout(xaxis = list(title = vt, showgrid = FALSE),
+           yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
+}
+
+
 # Subset a matrix by the most variable n features (columns)
 # Need to either give n number of features or percent of data to calculate n
-subHiVar <- function(data, n = NULL, percent) {
+subsetHiVar <- function(data, n = NULL, percent) {
   n <- round(ncol(data) * (percent/100))
   n <- ifelse(n < 1, 1, n)
   vars <- apply(data, 2, var)

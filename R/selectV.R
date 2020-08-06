@@ -8,7 +8,7 @@
 #' @export
 selectVUI <- function(id) {
   ns <- NS(id)
-  tags$div(id = "selectVUI",
+  tags$div(class = "selectVUI",
            uiOutput(ns("select"))
            )
 }
@@ -17,15 +17,15 @@ selectVUI <- function(id) {
 #'
 #' Returns the selected columns.
 #'
-#' This is a subcomponent that originally serves under \code{\link{multiVCtrl}}
+#' This is a subcomponent intended to serve under \code{\link{multiVCtrl}}
 #' but should be generic enough to be integrated with other modules.
 #' When data is uploaded through \code{\link{multiVCtrl}}, it can be "high-throughput"
 #' or "low-throughput" type data, the latter typically as phenotype or clinical variables.
 #' This module handles changes in the table of the latter data type.
-#' When the user adds new data columns to the table, the selection changes to include these new options.
+#' When the user adds (uploads) new data columns, the selection updates to include these new options.
 #' When the user selects specific columns from the menu, a column-subsetted table is returned.
 #' The most recent modification involves adding parenthesized counts for each variable option,
-#' i.e. "phenotypeA (15)", calculated on intersections with another table.
+#' e.g. "phenotypeX (15)", calculated by intersections with a vector of IDs.
 #'
 #' @family multiVUI module functions
 #'
@@ -34,8 +34,8 @@ selectVUI <- function(id) {
 #' @param key A key column that is kept for every selected subset. Defaults to "ID".
 #' @param label Label for variable select input.
 #' @param selected Optional, initial selection.
-#' @param countby The matrix representing a high-throughput dataset with sample IDs,
-#' which are intersected to generate counts in the select options. See details.
+#' @param countby A vector of IDs, which are intersected with the key (IDs) in data
+#' to generate counts in the select options. See details.
 #' @param maxitems Maximum number of items that can be selected. Defaults to 3.
 #' @return The subsetted data table.
 #' @export
@@ -62,7 +62,7 @@ selectVServer <- function(id,
         div(class = "forceInline",
             selectizeInput(session$ns("var"), label = label,
                            choices = choices, selected = selected(),
-                           width = "450px", options = list(maxItems = maxitems))
+                           width = "400px", options = list(maxItems = maxitems))
             ),
         div(class = "forceInline",
             selectInput(session$ns("sortby"), "Sort by", choices = "", selected = "", width = "300px"))

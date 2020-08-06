@@ -55,7 +55,7 @@ iMatrixUI <- function(id) {
 iMatrixServer <- function(id,
                           mdata, factorx = NULL, dcolors = NULL,
                           colorscales = list(default = colorscale_heatmap_alt,
-                                             alt = colorscale_heatmap_alt(palette = c("#F3012F", "#404040", "#01F3C5")),
+                                             alt = colorscale_heatmap_alt, # colorscale_heatmap_alt(z, palette = c("#F3012F", "#404040", "#01F3C5")),
                                              zmin = -1, zmax = 1),
                           plotbg = "ghostwhite") {
   moduleServer(id, function(input, output, session) {
@@ -84,15 +84,6 @@ iMatrixServer <- function(id,
           event_register("plotly_click")
       }
     })
-
-    # Generate meta marginal plots
-    metamargin <- function(x, y, z, name, text, colorscale = "Portland") {
-      axis <- list(title = "", showgrid = F, showticklabels = F, ticks = "")
-      plot_ly(type = "heatmap", x = x, y = y, z = z,
-              name = "Column Group", text = text, hovertemplate = "<b>%{text}</b>",
-              showscale = FALSE, colorscale = colorscale) %>%
-        layout(xaxis = axis, yaxis = axis)
-    }
 
     # Additional group annotations for rows, shown as a vertical subplot in right margin of p
     rowmeta <- reactive({
@@ -144,39 +135,6 @@ iMatrixServer <- function(id,
       }
     })
 
-    plot2vars <- function(datasub, var1, var2, colorgroup, flipxy) {
-      p <- ggplot(datasub, aes_string(x = var1, y = var2)) +
-        labs(title = paste("n =", nrow(datasub))) +
-        theme_bw()
-      # different plot when both variables are categorical
-      if(all(factorx(c(var1, var2)))) {
-        p <- p + geom_count()
-      } else {
-        p <- p + geom_point(aes_string(color = colorgroup), size = 2, alpha = 0.7)
-      }
-      if(colorgroup %in% names(dcolors)) p <- p + scale_colour_manual(values = dcolors[[colorgroup]])
-      if(flipxy) p <- p + coord_flip()
-      p <- suppressWarnings(ggplotly(p)) %>% plotly::config(displayModeBar = F)
-      p
-    }
-
-    plot1var <- function(datasub, var1, colorgroup) {
-      p <- ggplot(datasub, aes_string(x = colorgroup, y = var1)) +
-        geom_boxplot(outlier.color = NA) +
-        scale_colour_manual(values = dcolors[[1]]) +
-        labs(title = paste("n =", nrow(datasub))) +
-        theme_bw()
-      if(is.factor(datasub[[var1]])) {
-        p <- p + geom_count(aes_string(color = colorgroup))
-      } else {
-        p <- p + geom_point(aes_string(color = colorgroup), size = 2, alpha = 0.5,
-                            position = position_jitter(width = 0.05, height = 0.05))
-      }
-      p <- suppressWarnings(ggplotly(p)) %>% hide_legend() %>% layout(xaxis = list(tickangle = 45)) %>% plotly::config(displayModeBar = F)
-      p$x$data[[1]]$marker$opacity <- 0 # manual specify since plotly doesn't translate this for boxplot
-      p
-    }
-
     output$scatter <- renderPlotly({
       req(input$drilldown != "")
       var1 <- input$drilldown[1]
@@ -188,14 +146,60 @@ iMatrixServer <- function(id,
         datasub <- datasub[complete.cases(datasub)]
         if(factorx(var1)) datasub[[var1]] <- factor(datasub[[var1]])
         if(factorx(var2)) datasub[[var2]] <- factor(datasub[[var2]])
-        plot2vars(datasub, var1, var2, colorgroup, input$flipxy %% 2)
+        drillplot2(datasub, var1, var2, colorgroup, input$flipxy %% 2)
 
       } else { #-> do boxplot 1-variable view ----------------------------------------------------#
         datasub <- mdata$cdata[!is.na(get(var1)), c(..var1, ..colorgroup)]
-        plot1var(datasub, var1, colorgroup)
+        drillplot1(datasub, var1, colorgroup)
       }
     })
   })
+}
+
+# -- Helpers ---------------------------------------------------------------------------------------------------------#
+
+# Generate meta marginal plots
+metamargin <- function(x, y, z, name, text, colorscale = "Portland") {
+  axis <- list(title = "", showgrid = F, showticklabels = F, ticks = "")
+  plot_ly(type = "heatmap", x = x, y = y, z = z,
+          name = "Column Group", text = text, hovertemplate = "<b>%{text}</b>",
+          showscale = FALSE, colorscale = colorscale) %>%
+    layout(xaxis = axis, yaxis = axis)
+}
+
+# Two-variable scatterplot
+drillplot2 <- function(datasub, var1, var2, colorgroup, flipxy) {
+  p <- ggplot(datasub, aes_string(x = var1, y = var2)) +
+    labs(title = paste("n =", nrow(datasub))) +
+    theme_bw()
+  # different plot when both variables are categorical
+  if(all(factorx(c(var1, var2)))) {
+    p <- p + geom_count()
+  } else {
+    p <- p + geom_point(aes_string(color = colorgroup), size = 2, alpha = 0.7)
+  }
+  if(colorgroup %in% names(dcolors)) p <- p + scale_colour_manual(values = dcolors[[colorgroup]])
+  if(flipxy) p <- p + coord_flip()
+  p <- suppressWarnings(ggplotly(p)) %>% plotly::config(displayModeBar = F)
+  p
+}
+
+# "Single-variable" boxplots with a default factor group
+drillplot1 <- function(datasub, var1, colorgroup) {
+  p <- ggplot(datasub, aes_string(x = colorgroup, y = var1)) +
+    geom_boxplot(outlier.color = NA) +
+    scale_colour_manual(values = dcolors[[1]]) +
+    labs(title = paste("n =", nrow(datasub))) +
+    theme_bw()
+  if(is.factor(datasub[[var1]])) {
+    p <- p + geom_count(aes_string(color = colorgroup))
+  } else {
+    p <- p + geom_point(aes_string(color = colorgroup), size = 2, alpha = 0.5,
+                        position = position_jitter(width = 0.05, height = 0.05))
+  }
+  p <- suppressWarnings(ggplotly(p)) %>% hide_legend() %>% layout(xaxis = list(tickangle = 45)) %>% plotly::config(displayModeBar = F)
+  p$x$data[[1]]$marker$opacity <- 0 # manual specify since plotly doesn't translate this for boxplot
+  p
 }
 
 colorscale_named <- function(z,

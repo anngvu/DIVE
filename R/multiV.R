@@ -14,19 +14,6 @@ multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
   fluidPage(theme = shinythemes::shinytheme("paper"),
             if(!is.null(CSS)) includeCSS(CSS),
             shinyWidgets::chooseSliderSkin("Flat"),
-            # script included below because subplots w/ plot_dendro have to be sized manually, unfortunately
-            tags$script(sprintf("
-            var widthId = '%s';
-            var width = 0;
-            $(document).on('shiny:connected', function(e) {
-            width = window.innerWidth;
-            Shiny.onInputChange(widthId, width);
-            });
-            $(window).resize(function(e) {
-            width = window.innerWidth;
-            Shiny.onInputChange(widthId, width);
-            });", ns("width"))
-            ),
 
             fluidRow(class = "multiVUI-ctrl-head", id = ns("multiVUI-ctrl-head"),
               tags$div(style = "margin-top: 50px; margin-left: 50px;",
@@ -34,16 +21,17 @@ multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
               column(7, multiVCtrlUI(ns("ctrl"))),
               column(1, br(), h4("DATA TOOLS")),
               column(3, br(), br(),
-                     div(class = "forceInline", actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup"))),
-                     div(class = "forceInline", actionButton(ns("ML"), "Learn", icon = icon("cog")))
+                     div(class = "forceInline",
+                         actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup"))),
+                     div(class = "forceInline",
+                         actionButton(ns("ML"), "Learn", icon = icon("cog")))
               )
             )),
             fluidRow(absolutePanel(style = "z-index: 10;", tags$div(id = "views"), draggable = T)),
             fluidRow(style = "padding-top: 50px;",
-              conditionalPanel(condition = paste0("input['", ns("ctrl-dataset"), "']"),
-                               column(8, geneVUI(ns("gene"))),
-                               column(4, selectVUI(ns("cdata")))
-            )),
+                    column(9, geneVUI(ns("gene"))),
+                    column(3, selectVUI(ns("cdata")))
+            ),
             div(id = "displaytrack")
   )
 }
@@ -79,8 +67,6 @@ multiVServer <- function(id,
                          cdata = NULL,
                          factorx = NULL,
                          genes = DIVE::gene_symbols,
-                         prelist = NULL,
-                         slabel = DIVE::gene_symbols_map,
                          preselect = NULL) {
 
   moduleServer(id, function(input, output, session) {
@@ -99,27 +85,26 @@ multiVServer <- function(id,
                             countby = reactive(view$hdata))
 
     # controls gene selection for all xVUI components
-    gselect <- geneVServer("gene",
-                          choices = genes,
-                          prelist = prelist)
+    gselect <- geneVServer("gene", choices = genes)
 
     # each dataset gets its own section with its own xVUI local module options
     obs_view <- observeEvent(view$hdata, {
         trackID <- session$ns(names(view$hdata))
         trackdata <- view$hdata[[1]]
         if(!is.null(trackdata)) {
+          height <- if(nrow(trackdata) <=10) { 400 } else { 25 * nrow(trackdata) } # used across plots, tracks
           insertUI(selector = "#displaytrack", immediate = T,
-                   ui = tags$div(id = trackID, xVUI(id = trackID)))
+                   ui = tags$div(id = trackID, class = "xV-container", style = paste0("min-height: ", height+30, "px ;"),
+                                 xVUI(id = trackID)))
           xVServer(id = names(view$hdata),
                    hdata = trackdata,
                    cdata = vselect,
                    selected = gselect,
-                   slabel = slabel,
-                   width = reactive(input$width))
+                   height = height)
         } else {
           removeUI(selector = paste0("#", trackID))
         }
-    })
+    }, ignoreInit = TRUE)
 
     # data tools
     observeEvent(input$newSubgroupVUI, {

@@ -30,16 +30,16 @@ dataUploadUI <- function(id, ...) {
     )
   )
   tagList(dep, tags$div(id = ns("dataUploadUI"),
-      tags$div(class = "forceInline", style="margin-top:-5px;",
+      tags$div(class = "ui-inline", style="margin-top:-5px;",
                tags$div(id = ns("main"),
-                        tags$div(class = "forceInline",
+                        tags$div(class = "ui-inline",
                                  if(length(list(...))) fileInput(ns("upload"), ...) else
                                  fileInput(ns("upload"), HTML("<strong>Upload data to compare</strong>"),
                                            accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"),
                                            buttonLabel = "Data", placeholder = "  no file selected", width = 275))
                         )
               ),
-      tags$div(class = "forceInline", br(), uiOutput(ns("info")))
+      tags$div(class = "ui-inline", br(), uiOutput(ns("info")))
     )
   )
 }
@@ -108,7 +108,7 @@ dataUploadServer <- function(id,
         # add remove button if removable
         if(removable) {
           insertUI(paste0("#", session$ns("main")), "beforeEnd",
-                 tags$div(id = session$ns("remove-btn"), class = "forceInline",
+                 tags$div(id = session$ns("remove-btn"), class = "ui-inline",
                  br(), actionButton(session$ns("remove"), "", icon = icon("trash"))))
         }
       }

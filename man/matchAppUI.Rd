@@ -8,8 +8,8 @@ matchAppUI(
   id,
   CSS = system.file("www/", "app.css", package = "DIVE"),
   refname = NULL,
-  customUI = NULL,
-  customtab = ""
+  addonUI = NULL,
+  addontab = ""
 )
 }
 \arguments{
@@ -17,9 +17,9 @@ matchAppUI(
 
 \item{CSS}{Optional, location to an alternate CSS stylesheet to set look and feel of the module.}
 
-\item{customUI}{Optional, ui module function to display custom components.}
+\item{addonUI}{Optional, ui module function to display addon components.}
 
-\item{customtab}{If customUI is given, should also give a name for the tab hosting custom ui components.}
+\item{addontab}{If addonUI is given, should also give a name for the tab hosting addon ui components.}
 }
 \description{
 Shiny app UI for matching application

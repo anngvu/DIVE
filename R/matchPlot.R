@@ -10,25 +10,23 @@
 #' @param placeholder Optional, placeholder for attribute selection menus.
 #' @return Menu UI for selecting attributes from s1 and s2 datasets.
 #' @export
-exploreMoreUI <- function(id, s1Label = "", s1Data, s2Label = "", s2Data, placeholder = "") {
+matchPlotUI <- function(id, s1Label = "", s1Data, s2Label = "", s2Data, placeholder = "") {
   ns <- NS(id)
-  displayjs <- I("{
-                   option: function(item, escape) {
-                   return '<div class=\"unused covariate\">' + escape(item.value) + '</div><br>'
-                   }
+  renderjs <- I("{ option: function(item, escape) {
+                   return '<div class=\"unused covariate\">' + escape(item.value) + '</div><br>' }
                 }")
-  tags$div(id = "exploreMoreUI",
+  tags$div(id = "matchPlotUI",
     fluidRow(
       column(6, div(id = "s2Attributes",
                     h4(s2Label),
                     selectizeInput(ns("s2Attrs"), "", choices = c("", removeID(names(s2Data()))), selected = character(0),
-                                   options = list(placeholder = placeholder, render = displayjs))
+                                   options = list(placeholder = placeholder, render = renderjs))
       )),
       column(6, div(id = "s1Attributes",
                     h4(s1Label),
                     selectizeInput(ns("s1Attrs"), "", choices = c("", removeID(names(s1Data))), selected = character(0),
                                    options = list(placeholder = placeholder,
-                                   render = displayjs))
+                                   render = renderjs))
       ))
     ),
     fluidRow(align = "center",
@@ -49,29 +47,28 @@ exploreMoreUI <- function(id, s1Label = "", s1Data, s2Label = "", s2Data, placeh
 #' @param factorx Attribute name suffix/pattern to indicate which should be plotted as factors.
 #' @return Histodot plots for comparing composition and matches between s1Data and s2Data.
 #' @export
-exploreMoreServer <- function(id,
+matchPlotServer <- function(id,
                               s1Data, s2Data, datakey, refname, results, factorx) {
 
   moduleServer(id, function(input, output, session) {
 
-    # Update select menu to partition attributes that were used for matching from all "Other" non-matching attributes
+    renderjs <- I("{ option: function(item, escape) {
+                       return item.optgroup == 'Matched'?
+                       '<div class=\"used covariate\">' + escape(item.value) + '</div><br>'
+                       : '<div class=\"unused covariate\">' + escape(item.value) + '</div><br>' }
+                    }")
+
+    # Update select menu to partition attributes that were used for matching from "Other" non-matching attributes
     observeEvent(results$params, {
       refli <- list(Matched = names(results$params), Other = removeID(setdiff(names(s1Data), names(results$params))))
       extli <- list(Matched = unname(results$params), Other = removeID(setdiff(names(s2Data()), results$params)))
-      displayjs <- I("{
-                      option: function(item, escape) {
-                      return item.optgroup == 'Matched'?
-                      '<div class=\"used covariate\">' + escape(item.value) + '</div><br>'
-                      : '<div class=\"unused covariate\">' + escape(item.value) + '</div><br>'
-                      }
-                    }")
       updateSelectizeInput(session, "s1Attrs", "", choices = refli,
                            selected = character(0), server = T,
                            options = list(placeholder = "(data attributes)",
-                                          render = displayjs))
+                                          render = renderjs))
       updateSelectizeInput(session, "s2Attrs", "", choices = extli,
                            selected = character(0), server = T,
-                           options = list(placeholder = "(data attributes)", render = displayjs))
+                           options = list(placeholder = "(data attributes)", render = renderjs))
     })
 
     # Plotting
@@ -142,7 +139,7 @@ exploreMoreServer <- function(id,
 
 }
 
-# -- Helpers -- -------------------------------------------------------------------------------------------------------#
+# -- Helpers ---------------------------------------------------------------------------------------------------------#
 
 removeID <- function(x) Filter(function(f) f != "ID", x)
 

@@ -7,7 +7,6 @@
 matchAppServer(
   id,
   refdata,
-  custom = NULL,
   datakey,
   xname,
   refname,
@@ -15,35 +14,36 @@ matchAppServer(
   guess = NULL,
   subsets,
   subsetfeat,
-  informd = system.file("help/cohort_exchange.Rmd", package = "DIVE"),
   factorx,
+  informd = system.file("help/cohort_exchange.Rmd", package = "DIVE"),
+  addon = NULL,
   appdata = NULL
 )
 }
 \arguments{
-\item{refdata}{The reference dataset.}
+\item{refdata}{Data.table of reference dataset.}
 
-\item{custom}{Optional self-contained module that doesn't interact with others,
-e.g. for extra summary plots. Needs to be passed in as name of the server module function.}
+\item{datakey}{Shared grouping parameter passed to \code{refSubset}, \code{newDataset}, \code{matchResult}.}
 
-\item{datakey}{Shared paramater passed to \code{refSubset}, \code{newDataset}, \code{matchResult}.}
+\item{xname}{Character label for the external dataset, e.g. "CohortX" or "New Site" or "Comparison Dataset".}
 
-\item{xname}{Character label of what to the external dataset, e.g. "CohortX" or "New Site" or "Comparison Dataset".}
-
-\item{refname}{Character label of what to call the reference dataset.}
+\item{refname}{Character label for the reference dataset.}
 
 \item{vars}{Variables allowed to be used for matching within \code{refdata}, which will be organized and
 displayed as the given named lists.}
 
-\item{guess}{Optional, a custom function for making initial guesses of matchable variables.}
+\item{guess}{Optional, a function for making initial guesses of matchable variables.}
 
 \item{subsets}{The subsets.}
 
 \item{subsetfeat}{Which variable to be used as the subset variable.}
 
-\item{informd}{Link to a help file that can be called with the info module.}
-
 \item{factorx}{A naming pattern for factoring variables displayed.}
+
+\item{informd}{Optional, link to a help file that can be called with the info module.}
+
+\item{addon}{Optional, a self-contained module that doesn't interact with others,
+e.g. for extra summary plots. Needs to be passed in as name of the server module function.}
 
 \item{appdata}{Optional, a path to example application data (for demonstration purposes).}
 
@@ -56,5 +56,5 @@ Shiny app server for matching and exploration of two datasets
 This server function puts together a number of modular components to
 implement the whole interaction of the matching application. Though originally composed for
 matching patient cohorts, this matching application can be used with data in different domains.
-The composition of this module allows inserting a custom-written module.
+The composition of this module allows inserting a addon-written module.
 }

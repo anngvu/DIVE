@@ -9,20 +9,20 @@
 #' @export
 geneVUI <- function(id) {
   ns <- NS(id)
-  tags$div(id = "geneVUI",
-           div(class = "forceInline",
+  tags$div(class = "geneVUI",
+           div(class = "ui-inline",
                selectizeInput(ns("IDs"), HTML("<strong>Genes/gene products of interest</strong>"),
                               choices = NULL, selected = NULL,
                               options = list(maxItems = 50, placeholder = "globally filter across all datasets"))),
-           div(class = "forceInline", br(),
-               actionButton(ns("xlist"), "Quick list", icon = icon("plus"))),
-           div(class = "forceInline",
+           div(class = "ui-inline", br(),
+               actionButton(ns("qlist"), "Quick list", icon = icon("plus"))),
+           div(class = "ui-inline",
                textInput(ns("qtext"), "", placeholder = "search query...")),
-           div(class = "forceInline", br(),
+           div(class = "ui-inline", br(),
                actionButton(ns("query"), "Query")),
-           div(class = "forceInline", br(),
+           div(class = "ui-inline", br(),
                infoOutput(ns("querytips"), label = "tips", i = "question-circle")),
-           div(class = "forceInline", br(),
+           div(class = "ui-inline", br(),
                textOutput(ns("querystatus"))),
            helpText("Note: Expression values may not be available in all assays.")
           )
@@ -43,7 +43,7 @@ geneVUI <- function(id) {
 #' which should be passed in to the parameter \code{selected} in the \code{\link{multiV}} server module.
 #' @export
 geneVServer <- function(id,
-                        choices, prelist = NULL) {
+                        choices) {
 
   moduleServer(id, function(input, output, session) {
 
@@ -55,47 +55,35 @@ geneVServer <- function(id,
     updateSelectizeInput(session, "IDs", "Genes/proteins of interest", choices = choices,
                          selected = character(0), options = list(maxItems = 50), server = T)
 
-    observeEvent(input$xlist, {
-      prelistdiv <- if(!is.null(prelist)) {
-        tags$div(HTML("<strong>Pre-compiled, curated lists</strong><br><li>"),
-                 getLinkInput(session$ns("precompiled"), labels = names(prelist)))
-      } else {
-        NULL
-      }
-
+    observeEvent(input$qlist, {
       showModal(modalDialog(
-        prelistdiv,
         HTML("<br><br><strong>Upload my custom list</strong><br>"),
         helpText("Your list should be a text file with one gene per line."),
-        dataUploadUI("customlist", label = ""),
-        easyClose = TRUE,
-        footer = NULL
+        dataUploadUI("customlist", label = NULL),
+        easyClose = TRUE, footer = NULL
       ))
     })
 
-    prelistgo <- getLinkServer("precompiled", sources = prelist)
 
     observeEvent(input$IDs, {
       if(is.null(input$IDs)) selected(choices) else selected(input$IDs)
     }, ignoreNULL = FALSE)
 
-    observeEvent(prelistgo(), {
-      selected(choices[prelistgo()])
-      removeModal()
-    })
 
     observeEvent(input$query, {
       withProgress(expr =
       {
-        result <- tryCatch({ mygene::query(input$qtext, species = "human") },
-                           error = function(e) { return(NA) })
+        result <- tryCatch({
+          mygene::query(input$qtext, species = "human")
+          }, error = function(e) { return(NA) }
+          )
         if(!is.na(result) && result$total > 0) {
           selected(result$hits$entrezgene)
           querystatus("")
         } else {
           querystatus("No results.")
         }
-      }, value = 0.5, message = "looking up...")
+      }, value = 0.5, message = "querying API...")
     })
 
     output$querystatus <- renderText({

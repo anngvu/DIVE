@@ -7,23 +7,20 @@
 xVServer(
   id,
   hdata,
-  cdata = reactive({     NULL }),
+  cdata = reactive(NULL),
   key = "ID",
-  selected = reactive({     NULL }),
-  slabel = NULL,
+  selected = reactive(NULL),
   width = reactive(1600)
 )
 }
 \arguments{
-\item{hdata}{A numeric matrix representing high dimensional data.}
+\item{hdata}{A numeric matrix for high dimensional data.}
 
-\item{cdata}{Optional, a data.frame or data.table that can be joined to high-dimensional data. See details.}
+\item{cdata}{Optional, a data.table that can be joined to high-dimensional data. See details.}
 
-\item{key}{Name of key column, should be and currently defaults to "ID".}
+\item{key}{Name of key column for cdata, currently defaults to "ID".}
 
-\item{selected}{A vector used to subset the columns of hdata.}
-
-\item{slabel}{Optional, a vector that can map column names of hdata to plot labels.}
+\item{selected}{A reactive vector used to subset the columns of hdata.}
 
 \item{width}{Custom width, defaults to 1600, only used when dendro subplots are involved.}
 
@@ -31,5 +28,5 @@ xVServer(
 }
 \description{
 This module attempts to integratively visualize one or more
-high-dimensional gene/protein/methylation datasets with other phenotype or clinical features.
+high-dimensional gene/protein/methylation datasets with phenotype or clinical features.
 }

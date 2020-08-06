@@ -79,15 +79,16 @@ multiVCtrlServer <- function(id,
 
     updateSelectizeInput(session, "dataset", choices = choices, selected = NULL)
 
-    # parse a URL request for a specific dataset
+    # Parse a URL request for a specific dataset
     observe({
       query <- parseQueryString(session$clientData$url_search)
       if(!is.null(query[["dataset"]])) updateSelectInput(session, "dataset", selected = query[["dataset"]])
     })
 
 
+    # Handle dataset selection or de-selection
     observe({
-      if(!length(input$dataset)) { # when everything has been cleared from the global dataset selection
+      if(!length(input$dataset)) { # everything has been cleared from the global dataset selection
         dataset <- setNames(object = list(NULL), # set return to NULL
                             nm = paste0("i", which(names(view$hdlist) %in% inview)))
         inview <<- c()

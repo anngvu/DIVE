@@ -11,8 +11,6 @@ multiVServer(
   cdata = NULL,
   factorx = NULL,
   genes = DIVE::gene_symbols,
-  prelist = NULL,
-  slabel = DIVE::gene_symbols_map,
   preselect = NULL
 )
 }

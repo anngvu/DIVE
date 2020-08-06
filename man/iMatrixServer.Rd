@@ -9,24 +9,21 @@ iMatrixServer(
   mdata,
   factorx = NULL,
   dcolors = NULL,
-  defpal = c("#E74F00", "#FF894C", "gray", "#404040", "gray", "#4CC2FF", "#0098E7"),
-  abspal = c("#E74F00", "#FFE168", "gray", "#404040", "gray", "#FFE168", "#E74F00"),
-  plotbg = "#404040"
+  colorscales = list(default = colorscale_heatmap_alt, alt =
+    colorscale_heatmap_alt(palette = c("#F3012F", "#404040", "#01F3C5")), zmin = -1, zmax
+    = 1),
+  plotbg = "ghostwhite"
 )
 }
 \arguments{
 \item{mdata}{Reactive matrix data from \code{\link{matrixCtrl}}.}
 
-\item{factorx}{Names and/or patterns for variables that should be displayed as factors in scatterplot.}
+\item{factorx}{A function that returns a boolean for whether a variable should be plotted as factor when given the variable name.}
 
-\item{dcolors}{Optional, a list of at least one categorical variable to use for scatterplot point colors
-and the manual color mappings for each in the list. If color mappings are not specified, random colors will be used.}
+\item{dcolors}{Optional, a list with name matching the variable in the data to use for color grouping and the custom colors.}
 
-\item{defpal}{Optional, a default color palette to be used by \code{colorRampPalette} for mapping matrix value colors.
-The default is a red-blue palette.}
-
-\item{abspal}{Optional, a symmetric color palette to be used by \code{colorRampPalette}
-for color mapping matrix values as absolute (sign-agnostic coloring).}
+\item{colorscales}{Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named coloscale
+or custom colorscale used for heatmap. If not given, two default colorscale functions are used.}
 
 \item{plotbg}{Optional, color for matrix plot background.}
 

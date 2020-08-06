@@ -23,8 +23,8 @@ selectVServer(
 
 \item{selected}{Optional, initial selection.}
 
-\item{countby}{The matrix representing a high-throughput dataset with sample IDs,
-which are intersected to generate counts in the select options. See details.}
+\item{countby}{A vector of IDs, which are intersected with the key (IDs) in data
+to generate counts in the select options. See details.}
 
 \item{maxitems}{Maximum number of items that can be selected. Defaults to 3.}
 
@@ -37,15 +37,15 @@ The subsetted data table.
 Returns the selected columns.
 }
 \details{
-This is a subcomponent that originally serves under \code{\link{multiVCtrl}}
+This is a subcomponent intended to serve under \code{\link{multiVCtrl}}
 but should be generic enough to be integrated with other modules.
 When data is uploaded through \code{\link{multiVCtrl}}, it can be "high-throughput"
 or "low-throughput" type data, the latter typically as phenotype or clinical variables.
 This module handles changes in the table of the latter data type.
-When the user adds new data columns to the table, the selection changes to include these new options.
+When the user adds (uploads) new data columns, the selection updates to include these new options.
 When the user selects specific columns from the menu, a column-subsetted table is returned.
 The most recent modification involves adding parenthesized counts for each variable option,
-i.e. "phenotypeA (15)", calculated on intersections with another table.
+e.g. "phenotypeX (15)", calculated by intersections with a vector of IDs.
 }
 \seealso{
 Other multiVUI module functions: 

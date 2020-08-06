@@ -1,6 +1,6 @@
-#' Shiny app UI for browsing metadata
+#' Shiny app UI for browsing data
 #'
-#' Shiny app UI for browsing metadata
+#' Shiny app UI for browsing data
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
@@ -57,10 +57,10 @@ browseUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"),
 
 #' Shiny module server functions for browsing metadata
 #'
-#' Handles general browsing, filtering, subsetting of metadata table. The module requires two tables:
-#' a table of ID and all measured features, and a table of those measured features and metadata columns.
-#' Generally, users can select specific IDs or a group of IDs and see what features are available.
-#' A join of the two input tables on the feature name allows comparing IDs vs. selected metadata.
+#' Handles general browsing, filtering, subsetting of metadata. The module requires two tables:
+#' a table of sample ID with all measured features, and a table of measured features and metadata.
+#' Generally, users can select specific IDs or a group of IDs and see what features are available
+#' through an underlying join of the two input tables.
 #'
 #'
 #' @param input,output,session Standard \code{shiny} boilerplate.
@@ -259,13 +259,6 @@ browseServer <- function(id,
       dt_var_ext
 
     }, escape = FALSE, rownames = F, filter = "none", options = list(dom = 'ftp', pageLength = 10), style = "bootstrap")
-
-    # Tab 3 ------------------------------------------------------------------------------------------------------------------------------#
-
-    # to do: code to communicate with SPARQL server
-    SPARQLsrv <- reactive({
-      NULL
-    })
 
   })
 }
