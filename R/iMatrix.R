@@ -47,13 +47,15 @@ iMatrixUI <- function(id) {
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param mdata Reactive matrix data from \code{\link{matrixCtrl}}.
 #' @param factorx A function that returns a boolean for whether a variable should be plotted as factor when given the variable name.
-#' @param dcolors Optional, a list with name matching the variable in the data to use for color grouping and the custom colors.
+#' @param dcolors Optional, a list with name matching the variable in the data to use for color grouping and custom colors.
 #' @param colorscales Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named coloscale
 #' or custom colorscale used for heatmap. If not given, two default colorscale functions are used.
 #' @param plotbg Optional, color for matrix plot background.
 #' @export
 iMatrixServer <- function(id,
-                          mdata, factorx = NULL, dcolors = NULL,
+                          mdata,
+                          factorx = NULL,
+                          dcolors = NULL,
                           colorscales = list(default = colorscale_heatmap_alt,
                                              alt = colorscale_heatmap_alt, # colorscale_heatmap_alt(z, palette = c("#F3012F", "#404040", "#01F3C5")),
                                              zmin = -1, zmax = 1),
@@ -69,11 +71,12 @@ iMatrixServer <- function(id,
       } else if(nrow(M) == 0 || ncol(M) == 0) {
         plotly_empty() %>% layout(title = "no result with selected filters")
       } else {
-        px <- 1000/ncol(M) # bug? plot not displayed if height is less than 100px; max height should be ~1000px
+        # bug? plot not displayed if height is less than 100px; max height should be ~1000px
+        px <- 1000/ncol(M)
         height <- nrow(M) * px
         height <- if(height < 400) 400 else if(height > 1000) 1000 else height
         colorz <-  if(input$abspalette %% 2) colorscales$default(M) else colorscales$alt(M)
-        axis <- list(title = "", showgrid = F, showticklabels = nrow(M) <= 30, # show labels when not too crowded
+        axis <- list(title = "", showgrid = F, automargin = TRUE, showticklabels = nrow(M) <= 30, # show labels when not too crowded
                      ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T)
 
         plot_ly(type = "heatmap", x = colnames(M), y = rownames(M), z = M, name = "Exploratory\nMap",
@@ -146,7 +149,7 @@ iMatrixServer <- function(id,
         datasub <- datasub[complete.cases(datasub)]
         if(factorx(var1)) datasub[[var1]] <- factor(datasub[[var1]])
         if(factorx(var2)) datasub[[var2]] <- factor(datasub[[var2]])
-        drillplot2(datasub, var1, var2, colorgroup, input$flipxy %% 2)
+        drillplot2(datasub, var1, var2, dcolors, colorgroup, input$flipxy %% 2, factorx)
 
       } else { #-> do boxplot 1-variable view ----------------------------------------------------#
         datasub <- mdata$cdata[!is.na(get(var1)), c(..var1, ..colorgroup)]
@@ -159,16 +162,16 @@ iMatrixServer <- function(id,
 # -- Helpers ---------------------------------------------------------------------------------------------------------#
 
 # Generate meta marginal plots
-metamargin <- function(x, y, z, name, text, colorscale = "Portland") {
+metamargin <- function(x, y, z, name = "Group", text, colorscale = "Portland") {
   axis <- list(title = "", showgrid = F, showticklabels = F, ticks = "")
   plot_ly(type = "heatmap", x = x, y = y, z = z,
-          name = "Column Group", text = text, hovertemplate = "<b>%{text}</b>",
+          name = name, text = text, hovertemplate = "<b>%{text}</b>",
           showscale = FALSE, colorscale = colorscale) %>%
     layout(xaxis = axis, yaxis = axis)
 }
 
 # Two-variable scatterplot
-drillplot2 <- function(datasub, var1, var2, colorgroup, flipxy) {
+drillplot2 <- function(datasub, var1, var2, dcolors, colorgroup, flipxy, factorx) {
   p <- ggplot(datasub, aes_string(x = var1, y = var2)) +
     labs(title = paste("n =", nrow(datasub))) +
     theme_bw()

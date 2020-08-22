@@ -8,4 +8,5 @@ meh(msg = NULL, error = NULL)
 }
 \description{
 Brings up a generic modal for application errors
+Shows error if dev_mode
 }

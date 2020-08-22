@@ -107,7 +107,8 @@ matrixCtrlServer <- function(id,
     # Return a filtered matrix (filM)
     filterUpdate <- function(M, N, minN, optrows = rownames(M), optcols = colnames(M)) {
       M[N < minN] <- NA # gray out entries in M that does not meet minN
-      m <- M[rownames(M) %in% optrows, colnames(M) %in% optcols, drop = F] # M may not always contain opts in metadata
+      # m <- M[rownames(M) %in% optrows, colnames(M) %in% optcols, drop = F] # M may not always contain opts in metadata
+      m <- M[optrows, optcols, drop = F]
       deadrows <- apply(m, 1, function(x) all(is.na(x))) # hide "dead pixels" (no values > minN)
       deadcols <- apply(m, 2, function(x) all(is.na(x)))
       m <- m[!deadrows, !deadcols, drop = F]
@@ -115,6 +116,7 @@ matrixCtrlServer <- function(id,
     }
 
     # Return row or columns indexes ordered by selected metadata, or just literal row/col names if no metadata
+    # Note that column optgroup can be "" when first initialized
     metArrange <- function(optgroup, optsel) {
       if(optgroup == vkey) return(list(optsel))
       meta <- metadata[get(optgroup) %in% optsel, c(..vkey, ..optgroup)][order(get(optgroup))]
@@ -177,8 +179,14 @@ matrixCtrlServer <- function(id,
 
     # Apply minimum N to current matrix filM
     observeEvent(input$minN, {
-      mstate$filM <- filterUpdate(mstate$M, mstate$N, input$minN,
-                                  optrows = rownames(mstate$filM), optcols = colnames(mstate$filM))
+
+        optrows <- if(!length(input$optrow)) list(rownames(mstate$filM)) else metArrange(input$optrowgroup, input$optrow)
+        optcols <- if(!length(input$optcol)) list(colnames(mstate$filM)) else metArrange(input$optcolgroup, input$optcol)
+        mstate$filM <- filterUpdate(mstate$M, mstate$N, input$minN,
+                                    optrows = optrows[[1]], optcols = optcols[[1]])
+        if(length(optrows) > 1) mstate$rowmeta <- optrows[[2]][optrows[[1]] %in% rownames(mstate$filM)]
+        if(length(optcols) > 1) mstate$colmeta <- optcols[[2]][optcols[[1]] %in% colnames(mstate$filM)]
+
     })
 
     #-- New data handling --------------------------------------------------------------------------------------------#

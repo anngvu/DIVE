@@ -69,7 +69,7 @@ refSubsetServer <- function(id,
     })
 
     subsetDT <- reactive({
-      validate(need(length(input$selectSubset), "Please select a type subset"))
+      shiny::validate(need(length(input$selectSubset), "Please select a type subset"))
       SS <- refdata[get(subsetfeat) %in% input$selectSubset]
       if(length(exclude())) SS <- SS[!ID %in% exclude() ] # ID is hard-coded
       if(!is.null(datakey)) SS[, (datakey) := refname ]

@@ -48,7 +48,7 @@ matchPlotUI <- function(id, s1Label = "", s1Data, s2Label = "", s2Data, placehol
 #' @return Histodot plots for comparing composition and matches between s1Data and s2Data.
 #' @export
 matchPlotServer <- function(id,
-                              s1Data, s2Data, datakey, refname, results, factorx) {
+                            s1Data, s2Data, datakey, refname, results, factorx) {
 
   moduleServer(id, function(input, output, session) {
 

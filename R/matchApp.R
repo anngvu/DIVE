@@ -107,12 +107,12 @@ matchAppServer <- function(id,
                                   sourcecol = datakey)
 
     explore <- matchPlotServer("explore",
-                                 s1Data = refdata,
-                                 s2Data = newCohort,
-                                 datakey = datakey,
-                                 refname = refname,
-                                 factorx = factorx,
-                                 results = results)
+                               s1Data = refdata,
+                               s2Data = newCohort,
+                               datakey = datakey,
+                               refname = refname,
+                               factorx = factorx,
+                               results = results)
 
     #-- Output tabs display logic ------------------------------------------------------------------------------------------#
 

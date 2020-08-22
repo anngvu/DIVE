@@ -9,9 +9,8 @@ iMatrixServer(
   mdata,
   factorx = NULL,
   dcolors = NULL,
-  colorscales = list(default = colorscale_heatmap_alt, alt =
-    colorscale_heatmap_alt(palette = c("#F3012F", "#404040", "#01F3C5")), zmin = -1, zmax
-    = 1),
+  colorscales = list(default = colorscale_heatmap_alt, alt = colorscale_heatmap_alt,
+    zmin = -1, zmax = 1),
   plotbg = "ghostwhite"
 )
 }
@@ -20,7 +19,7 @@ iMatrixServer(
 
 \item{factorx}{A function that returns a boolean for whether a variable should be plotted as factor when given the variable name.}
 
-\item{dcolors}{Optional, a list with name matching the variable in the data to use for color grouping and the custom colors.}
+\item{dcolors}{Optional, a list with name matching the variable in the data to use for color grouping and custom colors.}
 
 \item{colorscales}{Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named coloscale
 or custom colorscale used for heatmap. If not given, two default colorscale functions are used.}

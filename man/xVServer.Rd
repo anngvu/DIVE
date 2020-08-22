@@ -10,19 +10,17 @@ xVServer(
   cdata = reactive(NULL),
   key = "ID",
   selected = reactive(NULL),
-  width = reactive(1600)
+  height = 500
 )
 }
 \arguments{
-\item{hdata}{A numeric matrix for high dimensional data.}
+\item{hdata}{A numeric matrix with row and column names for heatmap.}
 
-\item{cdata}{Optional, a data.table that can be joined to high-dimensional data. See details.}
+\item{cdata}{Optional, a data.table that can be joined to hdata. See details.}
 
 \item{key}{Name of key column for cdata, currently defaults to "ID".}
 
-\item{selected}{A reactive vector used to subset the columns of hdata.}
-
-\item{width}{Custom width, defaults to 1600, only used when dendro subplots are involved.}
+\item{selected}{A reactive vector used to subset the "features" (cols) of hdata.}
 
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 }

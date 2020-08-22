@@ -63,7 +63,8 @@ matrixAppServer <- function(id,
 
     mat <- iMatrixServer("matrix",
                          mdata = mdata,
-                         factorx = factorx, dcolors = dcolors)
+                         factorx = factorx,
+                         dcolors = dcolors)
 
     })
 }
