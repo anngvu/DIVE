@@ -12,8 +12,7 @@ matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
             # Filter controls and data input
             fluidRow(style="margin-top:30px; margin-bottom:20px;",
                      column(8, matrixCtrlUI(ns("ctrl"))),
-                     column(3, dataUploadUI(ns("upload"))),
-                     column(1) # to do: enable bookmarking?
+                     column(4, dataUploadUI(ns("upload")))
             ),
             fluidRow(iMatrixUI(ns("matrix")))
   )
@@ -26,6 +25,7 @@ matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
 #' @param input,output,session Standard \code{shiny} boilerplate.
 #' @param M A data matrix, e.g. a correlation matrix, which must have variables as rownames.
 #' @param N A matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.
+#' @param P A matrix of the same dimensions as M with data for the filterable layer, e.g. p-values.
 #' @param cdata The non-reactive data used for generating the matrix.
 #' @param metadata A data.table with "Variable" as a key column and any number of columns (metadata) to be used as filters.
 #' @param vkey
@@ -36,11 +36,12 @@ matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
 #' @param appdata
 #' @export
 matrixAppServer <- function(id,
-                            M, N, cdata,
+                            M, N, P, cdata,
                             metadata, vkey,
                             checkFun = DIVE::checkDataUpload,
                             widgetmod = NULL, widgetopt = NULL,
                             factorx, dcolors,
+                            colorscales = list(default = list(colorscale_named(pal = "RdBu"), zmin = -1, zmax = 1)),
                             informd = system.file("help/interactive_matrix.Rmd", package = "DIVE"),
                             appdata = NULL) {
 
@@ -54,7 +55,7 @@ matrixAppServer <- function(id,
                                checkappdata = T)
 
     mdata <- matrixCtrlServer("ctrl",
-                              M = M, N = N,
+                              M = M, N = N, P = P,
                               cdata = cdata,
                               metadata = metadata,
                               vkey = vkey,
@@ -64,7 +65,8 @@ matrixAppServer <- function(id,
     mat <- iMatrixServer("matrix",
                          mdata = mdata,
                          factorx = factorx,
-                         dcolors = dcolors)
+                         dcolors = dcolors,
+                         colorscales = colorscales)
 
     })
 }

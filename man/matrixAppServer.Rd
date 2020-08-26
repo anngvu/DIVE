@@ -8,6 +8,7 @@ matrixAppServer(
   id,
   M,
   N,
+  P,
   cdata,
   metadata,
   vkey,
@@ -16,6 +17,8 @@ matrixAppServer(
   widgetopt = NULL,
   factorx,
   dcolors,
+  colorscales = list(default = list(colorscale_named(pal = "RdBu"), zmin = -1, zmax =
+    1)),
   informd = system.file("help/interactive_matrix.Rmd", package = "DIVE"),
   appdata = NULL
 )
@@ -24,6 +27,8 @@ matrixAppServer(
 \item{M}{A data matrix, e.g. a correlation matrix, which must have variables as rownames.}
 
 \item{N}{A matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.}
+
+\item{P}{A matrix of the same dimensions as M with data for the filterable layer, e.g. p-values.}
 
 \item{cdata}{The non-reactive data used for generating the matrix.}
 

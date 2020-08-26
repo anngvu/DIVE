@@ -8,7 +8,8 @@
 matrixCtrlUI <- function(id, minN = 5) {
   ns <- NS(id)
   tags$div(id = "matrixCtrlUI",
-           div(class = "ui-inline", numericInput(ns("minN"), "mininum N", val = 5, min = minN, step = 1, width = "70px")),
+           div(class = "ui-inline", numericInput(ns("minN"), "mininum N", val = 5, min = minN, step = 1, width = "80px")),
+           div(class = "ui-inline", br(), checkboxInput(ns("cutoffP"), "P < 0.05 ", value = FALSE, width = "80px")),
            div(class = "ui-inline",
                div(class = "ui-inline", selectInput(ns("optrowgroup"), "Select rows by", choices = "", width = "120px")),
                div(class = "ui-inline", selectizeInput(ns("optrow"), "Row filter", choices = "", multiple = T, width = "360px"))
@@ -59,14 +60,14 @@ matrixCtrlUI <- function(id, minN = 5) {
 #' and selected metadata and is used by the associated plotting module.
 #' @export
 matrixCtrlServer <- function(id,
-                             M = NULL, N = NULL, cdata = NULL,
-                             metadata = NULL, vkey = NULL,
+                             M = NULL, N = NULL, P = NULL, cutoffP = 0.05,
+                             cdata = NULL, metadata = NULL, vkey = NULL,
                              newdata = reactive({ }),
                              widgetmod = NULL, widgetopt = NULL) {
 
   moduleServer(id, function(input, output, session) {
 
-    mstate <- reactiveValues(M = M, N = N, cdata = cdata, newdata = NULL, rowmeta = NULL, colmeta = NULL, filM = M)
+    mstate <- reactiveValues(M = M, N = N, P = P, cdata = cdata, newdata = NULL, rowmeta = NULL, colmeta = NULL, filM = M)
     request <- reactiveValues(optrowgroup = NULL, optrow = NULL)
 
     #-- Initialize UI --------------------------------------------------------------------------------------------------#
@@ -105,18 +106,23 @@ matrixCtrlServer <- function(id,
     #-- Functions ----------------------------------------------------------------------------------------------------#
 
     # Return a filtered matrix (filM)
-    filterUpdate <- function(M, N, minN, optrows = rownames(M), optcols = colnames(M)) {
-      M[N < minN] <- NA # gray out entries in M that does not meet minN
-      # m <- M[rownames(M) %in% optrows, colnames(M) %in% optcols, drop = F] # M may not always contain opts in metadata
+    filterUpdate <- function(M = mstate$M, N = mstate$N, P = mstate$P,
+                             minN, cutoffP = NULL, optrows = rownames(M), optcols = colnames(M)) {
       m <- M[optrows, optcols, drop = F]
+      n <- N[optrows, optcols, drop = F]
+      m[n < minN] <- NA # gray out entries in M that does not meet minN
       deadrows <- apply(m, 1, function(x) all(is.na(x))) # hide "dead pixels" (no values > minN)
       deadcols <- apply(m, 2, function(x) all(is.na(x)))
       m <- m[!deadrows, !deadcols, drop = F]
+      if(!is.null(P) && !is.null(cutoffP) && all(dim(m) > 0)) {
+        p <- P[rownames(m), colnames(m)]
+        m[p > cutoffP] <- NA
+      }
       return(m)
     }
 
     # Return row or columns indexes ordered by selected metadata, or just literal row/col names if no metadata
-    # Note that column optgroup can be "" when first initialized
+    # *column optgroup can be "" when first initialized
     metArrange <- function(optgroup, optsel) {
       if(optgroup == vkey) return(list(optsel))
       meta <- metadata[get(optgroup) %in% optsel, c(..vkey, ..optgroup)][order(get(optgroup))]
@@ -143,11 +149,12 @@ matrixCtrlServer <- function(id,
     # Updating visible matrix rows according to selected row opt
     observeEvent(input$optrow, {
       if(!length(input$optrow)) {
-        mstate$filM <- mstate$M # same as resetting
+        mstate$filM <- mstate$M # reset
         mstate$rowmeta <- mstate$colmeta <- NULL
+        updateNumericInput(session, "minN", value = 5)
       } else {
         optrows <- metArrange(input$optrowgroup, input$optrow)
-        mstate$filM <- filterUpdate(mstate$M, mstate$N, input$minN, optrows = optrows[[1]])
+        mstate$filM <- filterUpdate(minN = input$minN, cutoffP = if(input$cutoffP) cutoffP, optrows = optrows[[1]])
         if(length(optrows) > 1) mstate$rowmeta <- optrows[[2]][optrows[[1]] %in% rownames(mstate$filM)]
       }
     }, ignoreInit = TRUE, ignoreNULL = F, priority = 10) # matrix update should run before optcol update (see below)
@@ -166,11 +173,13 @@ matrixCtrlServer <- function(id,
     # Updating matrix according to selected col opt
     observeEvent(input$optcol, {
       if(!length(input$optcol)) {
-        mstate$filM <- filterUpdate(mstate$M, mstate$N, input$minN, optrows = rownames(mstate$filM), optcols = colnames(mstate$M))
+        mstate$filM <- filterUpdate(minN = input$minN, cutoffP = if(input$cutoffP) cutoffP,
+                                    optrows = rownames(mstate$filM), optcols = colnames(mstate$M))
         mstate$colmeta <- NULL
       } else {
         optcols <- metArrange(input$optcolgroup, input$optcol)
-        mstate$filM <- filterUpdate(mstate$M, mstate$N, input$minN, optrows = rownames(mstate$filM), optcols = optcols[[1]])
+        mstate$filM <- filterUpdate(minN = input$minN, cutoffP = if(input$cutoffP) cutoffP,
+                                    optrows = rownames(mstate$filM), optcols = optcols[[1]])
         if(length(optcols) > 1) mstate$colmeta <- optcols[[2]][optcols[[1]] %in% colnames(mstate$filM)]
       }
     }, ignoreNULL = F, ignoreInit = TRUE)
@@ -182,12 +191,24 @@ matrixCtrlServer <- function(id,
 
         optrows <- if(!length(input$optrow)) list(rownames(mstate$filM)) else metArrange(input$optrowgroup, input$optrow)
         optcols <- if(!length(input$optcol)) list(colnames(mstate$filM)) else metArrange(input$optcolgroup, input$optcol)
-        mstate$filM <- filterUpdate(mstate$M, mstate$N, input$minN,
+        mstate$filM <- filterUpdate(minN = input$minN, cutoffP = if(input$cutoffP) cutoffP,
                                     optrows = optrows[[1]], optcols = optcols[[1]])
         if(length(optrows) > 1) mstate$rowmeta <- optrows[[2]][optrows[[1]] %in% rownames(mstate$filM)]
         if(length(optcols) > 1) mstate$colmeta <- optcols[[2]][optcols[[1]] %in% colnames(mstate$filM)]
 
     })
+
+    #-- P filter -----------------------------------------------------------------------------------------------------#
+
+    observeEvent(input$cutoffP, {
+      if(input$cutoffP) {
+        mstate$filM <- filterUpdate(minN = input$minN, cutoffP = cutoffP,
+                                    optrows = rownames(mstate$filM), optcols = colnames(mstate$filM))
+      } else {
+        mstate$filM <- filterUpdate(minN = input$minN, cutoffP = NULL,
+                                    optrows = rownames(mstate$filM), optcols = colnames(mstate$filM))
+      }
+    }, ignoreInit = TRUE)
 
     #-- New data handling --------------------------------------------------------------------------------------------#
 

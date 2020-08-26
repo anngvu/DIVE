@@ -6,7 +6,7 @@
 #' @param link Defaults to actionLink, set false for showing actionButton
 #' @return An actionLink or actionButton to call an info module.
 #' @export
-infoOutput <- function(id, label = "data req's", i = "exclamation-circle", link = T) {
+infoOutput <- function(id, label = "req's", i = "exclamation-circle", link = T) {
   ns <- NS(id)
   if(link) actionLink(ns("moreInfo"), label = label, icon = icon(i)) else actionButton(ns("moreInfo"), label = label, icon = icon(i))
 }

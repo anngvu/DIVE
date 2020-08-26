@@ -42,7 +42,7 @@ xCheckID <- function(data, ref = cdata$ID) {
 #' @param idcol Name of ID column, defaulting to "ID".
 #' @param idchar Logical with default TRUE, whether to convert ID column to character.
 #' @param html Logical with default TRUE, whether to format message for HTML display.
-#' @result A list with  \code{result} and  \code{message}.
+#' @return A list with  \code{result} and  \code{message}.
 #' @export
 checkDataUpload <- function(data, result = NULL,
                       idcol = "ID", idchar = TRUE, html = TRUE) {
@@ -73,7 +73,7 @@ checkDataUpload <- function(data, result = NULL,
 #' @param data A table.
 #' @param idcol Name of ID column, defaulting to "ID".
 #' @param aschar Convert ID column to character.
-#' @result A list with elements result with the result data and message with a message to show.
+#' @return A list with elements result with the result data and message with a message to show.
 checkForID <- function(data, message = NULL, idcol = "ID", aschar = T) {
   hasID <- idcol %in% names(data)
   if(!hasID) message <- "<strong>There is no ID column.</strong><br>"

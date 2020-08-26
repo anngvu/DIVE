@@ -9,9 +9,8 @@ iMatrixServer(
   mdata,
   factorx = NULL,
   dcolors = NULL,
-  colorscales = list(default = colorscale_heatmap_alt, alt = colorscale_heatmap_alt,
-    zmin = -1, zmax = 1),
-  plotbg = "ghostwhite"
+  colorscales = list(default = list(colorscale_named(pal = "RdBu"), zmin = -1, zmax =
+    1), absolute = list(colorscale_heatmap_absolute, zmin = -1, zmax = 1))
 )
 }
 \arguments{
@@ -24,9 +23,9 @@ iMatrixServer(
 \item{colorscales}{Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named coloscale
 or custom colorscale used for heatmap. If not given, two default colorscale functions are used.}
 
-\item{plotbg}{Optional, color for matrix plot background.}
-
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
+
+\item{plotbg}{Optional, color for matrix plot background.}
 }
 \description{
 The matrix responds to reactive plot data and has a linked drilldown component.

@@ -64,7 +64,7 @@ dataUploadUI <- function(id, ...) {
 #' The dataset is expected to be a .csv/.tsv file in a relative directory within the app directory.
 #' For instance, the dataset path can be "appdata/Demo.csv".
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param id Namespace ID.
 #' @param asDT Logical flag to indicate whether data returned should be a data.table. If FALSE, \code{readLines} is used on file.
 #' @param removable Logical flag to indicate whether data upload will have "removable" feature. Defaults to FALSE. See details.
 #' @param checkFun Optional, a custom check function for an additional layer of checking/modifying uploaded data.
@@ -93,7 +93,7 @@ dataUploadServer <- function(id,
 
     # ---------------------------------------------------------------------------- #
     observeEvent(input$upload, {
-      data <- if(asDT) fread(input$upload$datapath) else readLines(input$upload$datapath)
+      data <- if(asDT) data.table::fread(input$upload$datapath) else readLines(input$upload$datapath)
       # perform check if checkFun is specified
       if(is.function(checkFun)) {
         checked <- checkFun(data)

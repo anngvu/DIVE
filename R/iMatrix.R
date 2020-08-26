@@ -8,14 +8,8 @@ iMatrixUI <- function(id) {
   ns <- NS(id)
   tags$div(style = "margin-top: 20px;",
     fluidRow(
-    column(8, align = "left",
-           div(style = "margin-left: 20px; margin-bottom: 10px;",
-               div(class = "ui-inline", actionButton(ns("show"), label = NULL, icon = icon("cog"))),
-               conditionalPanel(condition = "input.show%2==1", ns = ns, class = "ui-inline",
-                                div(class = "ui-inline", id = ns("custom")),
-                                div(class = "ui-inline", actionLink(ns("abspalette"), "sign-agnostic", icon = icon("palette")))
-               )
-           ),
+    column(8,
+           div(style = "margin-left: 10px; margin-bottom: 5px;", uiOutput(ns("palettes"))),
            div(id = "matrixOutput", plotlyOutput(ns("main")))
     ),
     column(4,
@@ -56,15 +50,23 @@ iMatrixServer <- function(id,
                           mdata,
                           factorx = NULL,
                           dcolors = NULL,
-                          colorscales = list(default = colorscale_heatmap_alt,
-                                             alt = colorscale_heatmap_alt, # colorscale_heatmap_alt(z, palette = c("#F3012F", "#404040", "#01F3C5")),
-                                             zmin = -1, zmax = 1),
-                          plotbg = "ghostwhite") {
+                          colorscales = list(default = list(colorscale_named(pal = "RdBu"), zmin = -1, zmax = 1), # list(colorscale_heatmap_manual, zmin = -1, zmax = 1),
+                                             absolute = list(colorscale_heatmap_absolute, zmin = -1, zmax = 1))
+                          ) {
   moduleServer(id, function(input, output, session) {
+
+    output$palettes <- renderUI({
+      tags$div(radioButtons(session$ns("colorscale"), label = NULL, choices = names(colorscales), inline = TRUE),
+               title = "Select the color mapping for data")
+    })
+
+
+  showNotification("loading", duration = NULL, closeButton = F, id = "loading-matrix")
 
     #-- Main matrix plot -----------------------------------------------------------------------------------------------------#
 
     matrixheatmap <- reactive({
+      req(input$colorscale)
       M <- mdata$filM
       if(is.null(M)) {
         plotly_empty()
@@ -75,15 +77,15 @@ iMatrixServer <- function(id,
         px <- 1000/ncol(M)
         height <- nrow(M) * px
         height <- if(height < 400) 400 else if(height > 1000) 1000 else height
-        colorz <-  if(input$abspalette %% 2) colorscales$default(M) else colorscales$alt(M)
+        colorz <-  colorscales[[input$colorscale]][[1]](M)
         axis <- list(title = "", showgrid = F, automargin = TRUE, showticklabels = nrow(M) <= 30, # show labels when not too crowded
                      ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T)
 
         plot_ly(type = "heatmap", x = colnames(M), y = rownames(M), z = M, name = "Exploratory\nMap",
-                     colorscale = colorz, zmin = colorscales$zmin, zmax = colorscales$zmax,
+                     colorscale = colorz, zmin = colorscales[[input$colorscale]]$zmin, zmax = colorscales[[input$colorscale]]$zmax,
                      hovertemplate = "row: <b>%{y}</b><br>col: <b>%{x}</b><br>corr: <b>%{z}</b>",
                      height = height, colorbar = list(thickness = 8)) %>%
-          layout(xaxis = axis, yaxis = axis, plot_bgcolor = plotbg) %>%
+          layout(xaxis = axis, yaxis = axis, plot_bgcolor = colorscales[[input$colorscale]]$bgcolor) %>%
           event_register("plotly_click")
       }
     })
@@ -205,21 +207,22 @@ drillplot1 <- function(datasub, var1, colorgroup) {
   p
 }
 
-colorscale_named <- function(z,
-                             brewer = c("RdBu", "BrBG", "PiYG", "PRGn", "PuOr", "RdGy", "RdYlBu", "RdYlGn",
+colorscale_named <- function(pal = c("RdBu", "BrBG", "PiYG", "PRGn", "PuOr", "RdGy", "RdYlBu", "RdYlGn",
                                         "Spectral", "Accent", "Dark2", "Paired",
                                         "Pastel1", "Pastel2", "Set1", "Set2", "Set3",
                                         "Blues", "BuGn", "BuPu", "GnBu", "Greens", "Greys", "Oranges",
                                         "OrRd", "PuBu", "PuBuGn", "PuRd", "Purples", "RdPu", "Reds",
                                         "YlGn", "YlGnBu", "YlOrBr", "YlOrRd")) {
-  return(match.arg(brewer))
+  pal <- match.arg(pal)
+  colorfun <- function(z) pal
+  return(colorfun)
 }
 
 # Colorscale function for color mapping values
 # Palettes:
 # Using a symmetric palette for sign-agnostic coloring focuses only on the magnitude of values
 # c("#F3012F", "#404040", "#01F3C5") red-green
-colorscale_heatmap_alt <- function(z, domain = c(-1, 1), palette = c("#EF3202", "ghostwhite", "#02BFEF")) {
+colorscale_heatmap_manual <- function(z, domain = c(-1, 1), palette = c("#EF3202", "ghostwhite", "#02BFEF")) {
   z <- c(z)
   z <- z[!is.na(z)]
   z <- unique(scales::rescale(z, domain = domain))
@@ -227,5 +230,15 @@ colorscale_heatmap_alt <- function(z, domain = c(-1, 1), palette = c("#EF3202", 
   colors <- scales::col_numeric(palette, domain = NULL)(z)
   colorz <- setNames(data.frame(z[orderz], colors[orderz]), NULL)
   return(colorz)
+}
+
+#' @export
+colorscale_heatmap_custom <- function(palette) {
+  function(z) colorscale_heatmap_manual(z, palette = palette)
+}
+
+
+colorscale_heatmap_absolute <- function(z) {
+  colorscale_heatmap_manual(z, palette = c(hcl.colors(10, "YlOrRd", rev = TRUE), hcl.colors(10, "YlOrRd")))
 }
 

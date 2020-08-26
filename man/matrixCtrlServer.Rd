@@ -8,6 +8,8 @@ matrixCtrlServer(
   id,
   M = NULL,
   N = NULL,
+  P = NULL,
+  cutoffP = 0.05,
   cdata = NULL,
   metadata = NULL,
   vkey = NULL,

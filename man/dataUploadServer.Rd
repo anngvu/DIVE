@@ -15,6 +15,8 @@ dataUploadServer(
 )
 }
 \arguments{
+\item{id}{Namespace ID.}
+
 \item{asDT}{Logical flag to indicate whether data returned should be a data.table. If FALSE, \code{readLines} is used on file.}
 
 \item{removable}{Logical flag to indicate whether data upload will have "removable" feature. Defaults to FALSE. See details.}
@@ -28,8 +30,6 @@ It should return a list containing message and result (result should be \code{NU
 mock-uploaded. See details.}
 
 \item{checkappdata}{Whether checkFun should be applied to appdata, normally FALSE.}
-
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
 }
 \value{
 A data.table with a "filename" attribute containing the filename without extension,
