@@ -11,10 +11,10 @@ matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
             if(!is.null(CSS)) includeCSS(CSS),
             # Filter controls and data input
             fluidRow(style="margin-top:30px; margin-bottom:20px;",
-                     column(8, matrixCtrlUI(ns("ctrl"))),
-                     column(4, dataUploadUI(ns("upload")))
+                     column(9, matrixCtrlUI(ns("ctrl"))),
+                     column(3, dataUploadUI(ns("upload")))
             ),
-            fluidRow(iMatrixUI(ns("matrix")))
+            iMatrixUI(ns("matrix"))
   )
 }
 

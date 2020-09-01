@@ -12,11 +12,11 @@ matrixCtrlUI <- function(id, minN = 5) {
            div(class = "ui-inline", br(), checkboxInput(ns("cutoffP"), "P < 0.05 ", value = FALSE, width = "80px")),
            div(class = "ui-inline",
                div(class = "ui-inline", selectInput(ns("optrowgroup"), "Select rows by", choices = "", width = "120px")),
-               div(class = "ui-inline", selectizeInput(ns("optrow"), "Row filter", choices = "", multiple = T, width = "360px"))
+               div(class = "ui-inline", selectizeInput(ns("optrow"), "Row filter", choices = "", multiple = T, width = "400px"))
            ),
            div(class = "ui-inline", conditionalPanel("input.optrow != ''", ns = ns,
                div(class = "ui-inline", selectInput(ns("optcolgroup"), "Select columns by", choices = "", width = "120px")),
-               div(class = "ui-inline", selectizeInput(ns("optcol"), "Column filter", choices = "", multiple = T, width = "360px"))
+               div(class = "ui-inline", selectizeInput(ns("optcol"), "Column filter", choices = "", multiple = T, width = "400px"))
            )),
            uiOutput(ns("usewidget"))
   )

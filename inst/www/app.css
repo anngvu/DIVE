@@ -36,6 +36,12 @@ body {
   font-weight: bold;
 }
 
+.dive-loader{
+  position: fixed;
+  top: calc(50%);
+  left: calc(50%);
+}
+
 
 /* Theming Overrides ----------------------------------------------------------------*/
 
@@ -65,9 +71,46 @@ body {
 
 /* Matrix Module --------------------------------------------------------------------*/
 
-#drilldownOutput {
-  margin-top: 20px;
-  margin-right: 20px;
+.iMatrixUI {
+  position: relative;
+   margin-top: 20px;
+  -ms-box-orient: horizontal;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -moz-flex;
+  display: -webkit-flex;
+  display: flex;
+}
+
+.matrix-output {
+  flex: 4 0 75vw;
+
+  /* Matrix Module -- display: inline-block; width: 75vw; --*/
+}
+
+.matrix-options {
+  margin-left: 40px;
+}
+
+.drilldown-output {
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  border-top: 5px solid lightgray;
+  padding: 70px 30px 30px 30px;
+  z-index: 10;
+  flex: 0 1 20vw;
+  max-width: 20vw;
+}
+
+.drilldown-output:hover {
+  box-shadow: 0 3px 6px rgba(0,0,0,0.12), 0 3px 6px rgba(0,0,0,0.24);
+  cursor: grab;
+}
+
+.dock {
+  background-color: ghostwhite;
+  display: inline-block;
 }
 
 /* Match Module ---------------------------------------------------------------------*/

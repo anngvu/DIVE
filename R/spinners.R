@@ -1,3 +1,5 @@
+# showNotification(matrixSpinner(), duration = 3, closeButton = F, id = "loading-matrix")
+
 matrixSpinner <- function() {
   HTML('<div class="self-building-square-spinner">
           <div class="square"></div>
@@ -11,5 +13,6 @@ matrixSpinner <- function() {
           <div class="square"></div>
         </div>')
 }
+
 
 

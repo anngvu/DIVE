@@ -6,23 +6,28 @@
 #' @export
 iMatrixUI <- function(id) {
   ns <- NS(id)
-  tags$div(style = "margin-top: 20px;",
-    fluidRow(
-    column(8,
-           div(style = "margin-left: 10px; margin-bottom: 5px;", uiOutput(ns("palettes"))),
-           div(id = "matrixOutput", plotlyOutput(ns("main")))
-    ),
-    column(4,
-           div(id = "drilldownOutput",
-               selectizeInput(ns("drilldown"), "Drill down to data for",
-                              choices = "", selected = "",
-                              options = list(maxItems = 2, placeholder = "select variable(s)"), width = "425px"),
-               conditionalPanel(paste0("input['", ns("drilldown"), "'] != ''"),
-                                div(class = "ui-inline", br(), actionLink(ns("flipxy"), "flip XY", icon = icon("refresh"))),
-                                plotlyOutput(ns("scatter"))
-               )
-           )
-    ))
+
+    tags$div(class = "iMatrixUI",
+    tags$div(class = "drilldown-output", id = ns("drilldown-output"),
+             tags$script(sprintf('$("#%s").draggable({ start: function(event, ui) {
+                                     console.log("moving to:" + event.pageY + " " + event.pageX);
+                                     $(this).css({ position: "absolute", top: event.pageY + "px", left: event.pageX + "px"});
+                                     window.dispatchEvent(new Event("resize"));
+                                    }
+                                   });',
+                                   ns("drilldown-output"), ns("dock"))),
+             selectizeInput(ns("drilldown"), "Drill down to data for", width = "400px",
+                            choices = "", selected = "",
+                            options = list(maxItems = 2, placeholder = "select variable(s)")),
+             conditionalPanel("input.drilldown != ''", ns = ns,
+                              div(class = "ui-inline", br(), actionLink(ns("flipxy"), "flip XY", icon = icon("refresh"))),
+                              plotlyOutput(ns("scatter")))
+            ),
+    tags$div(class = "matrix-output", id = ns("matrix-output"),
+             conditionalPanel("!output.main", ns = ns, class = "dive-loader", id = ns("loader"), matrixSpinner(), "loading..."),
+             div(class = "matrix-options", uiOutput(ns("palettes"))),
+             div(plotlyOutput(ns("main")))
+    )
   )
 }
 
@@ -50,18 +55,16 @@ iMatrixServer <- function(id,
                           mdata,
                           factorx = NULL,
                           dcolors = NULL,
-                          colorscales = list(default = list(colorscale_named(pal = "RdBu"), zmin = -1, zmax = 1), # list(colorscale_heatmap_manual, zmin = -1, zmax = 1),
+                          colorscales = list(default = list(colorscale_named(pal = "RdBu"), zmin = -1, zmax = 1),
                                              absolute = list(colorscale_heatmap_absolute, zmin = -1, zmax = 1))
                           ) {
   moduleServer(id, function(input, output, session) {
+
 
     output$palettes <- renderUI({
       tags$div(radioButtons(session$ns("colorscale"), label = NULL, choices = names(colorscales), inline = TRUE),
                title = "Select the color mapping for data")
     })
-
-
-  showNotification("loading", duration = NULL, closeButton = F, id = "loading-matrix")
 
     #-- Main matrix plot -----------------------------------------------------------------------------------------------------#
 
@@ -73,10 +76,10 @@ iMatrixServer <- function(id,
       } else if(nrow(M) == 0 || ncol(M) == 0) {
         plotly_empty() %>% layout(title = "no result with selected filters")
       } else {
-        # bug? plot not displayed if height is less than 100px; max height should be ~1000px
-        px <- 1000/ncol(M)
+        # bug? plot not displayed if height is less than 100px; minpx = 5
+        px <- 1200/ncol(M)
         height <- nrow(M) * px
-        height <- if(height < 400) 400 else if(height > 1000) 1000 else height
+        height <- if(height < 400) 400 else height
         colorz <-  colorscales[[input$colorscale]][[1]](M)
         axis <- list(title = "", showgrid = F, automargin = TRUE, showticklabels = nrow(M) <= 30, # show labels when not too crowded
                      ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T)
