@@ -6,9 +6,6 @@ This is still a work in progress and more details will be available as the appli
 
 The current version can be installed via `devtools::install_github("avucoh/DIVE")`
 
-## Recent Updates
-
-
 
 ## Modules
 

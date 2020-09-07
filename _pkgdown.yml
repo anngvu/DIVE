@@ -1,0 +1,35 @@
+destination: docs
+template:
+  params:
+    bootswatch: flatly
+reference:
+- title: "matrixApp"
+  desc: "Module functions for creating matrixApp"
+- contents:
+  - starts_with("matrix")
+  - dualDrilldownUI
+  - dualDrilldownServer
+- title: "matchApp"
+  desc: "Module functions for creating matchApp"
+- contents:
+  - starts_with("match")
+- contents:
+- title: "multiVApp"
+  desc: "Module functions for creating multiVApp"
+- contents:
+  - starts_with("multiV")
+  - ends_with("VUI")
+  - ends_with("VServer")
+- title: "dataHelper"
+  desc: "Module functions for creating dataHelperApp"
+- contents:
+- title: "Common-use components"
+  desc: "Utility components that appear as part of other modules"
+- contents:
+  - starts_with("dataUpload")
+  - starts_with("getLink")"
+  - starts_with("info")
+  - starts_with("meh")
+  - starts_with("check")
+
+

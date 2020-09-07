@@ -14,7 +14,11 @@ matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
                      column(9, matrixCtrlUI(ns("ctrl"))),
                      column(3, dataUploadUI(ns("upload")))
             ),
-            iMatrixUI(ns("matrix"))
+            tags$div(style = "display: flex; align-items: flex-start;",
+                     dualDrilldownUI("dd"),
+                     matrixMainUI(ns("matrix")),
+                     matrixAsNetworkUI(ns("graph"), height = "1000px", style = "flex: 4 0 75vw; display: none;")
+            )
   )
 }
 
@@ -22,25 +26,16 @@ matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
 #'
 #' See matrixCtrlUI
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param M A data matrix, e.g. a correlation matrix, which must have variables as rownames.
-#' @param N A matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.
-#' @param P A matrix of the same dimensions as M with data for the filterable layer, e.g. p-values.
-#' @param cdata The non-reactive data used for generating the matrix.
-#' @param metadata A data.table with "Variable" as a key column and any number of columns (metadata) to be used as filters.
-#' @param vkey
-#' @param checkFun
-#' @param factorx
-#' @param dcolors
-#' @param informd
-#' @param appdata
+#' @inheritParams dataUploadServer
+#' @inheritParams matrixCtrlServer
+#' @inheritParams matrixMainServer
+#' @inheritParams matrixAsNetworkServer
+#' @inheritParams dualDrilldownServer
 #' @export
 matrixAppServer <- function(id,
-                            M, N, P, cdata,
-                            metadata, vkey,
-                            checkFun = DIVE::checkDataUpload,
-                            widgetmod = NULL, widgetopt = NULL,
-                            factorx, dcolors,
+                            M, N, P,
+                            cdata, metadata, vkey,
+                            factorx, colorby,
                             colorscales = list(default = list(colorscale_named(pal = "RdBu"), zmin = -1, zmax = 1)),
                             informd = system.file("help/interactive_matrix.Rmd", package = "DIVE"),
                             appdata = NULL) {
@@ -49,7 +44,7 @@ matrixAppServer <- function(id,
 
     upload <- dataUploadServer("upload",
                                removable = T,
-                               checkFun = checkFun,
+                               checkFun = DIVE::checkDataUpload,
                                informd = informd,
                                appdata = appdata,
                                checkappdata = T)
@@ -59,14 +54,24 @@ matrixAppServer <- function(id,
                               cdata = cdata,
                               metadata = metadata,
                               vkey = vkey,
-                              newdata = upload,
-                              widgetmod = widgetmod, widgetopt = widgetopt)
+                              newdata = upload)
 
-    mat <- iMatrixServer("matrix",
-                         mdata = mdata,
-                         factorx = factorx,
-                         dcolors = dcolors,
-                         colorscales = colorscales)
+    src1 <- matrixMainServer("matrix",
+                             mdata = mdata,
+                             colorscales = colorscales)
+
+    src2 <- matrixAsNetworkServer("graph",
+                                  mdata, M,
+                                  background = "#201037",
+                                  .nodes = list(color = list(background = "lemonchiffon", border = "yellow", highlight = "white")),
+                                  .edges = list(color = "yellow"),
+                                  .options = list(highlightNearest = TRUE, nodesIdSelection = list(enabled = TRUE, style = "display:none;")),
+                                  randomSeed = 42)
+
+    dualDrilldownServer("dd",
+                        cdata = mdata$cdata,
+                        colorby = colorby,
+                        src1 = src1, src2 = src2)
 
     })
 }

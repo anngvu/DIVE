@@ -12,11 +12,8 @@ matrixAppServer(
   cdata,
   metadata,
   vkey,
-  checkFun = DIVE::checkDataUpload,
-  widgetmod = NULL,
-  widgetopt = NULL,
   factorx,
-  dcolors,
+  colorby,
   colorscales = list(default = list(colorscale_named(pal = "RdBu"), zmin = -1, zmax =
     1)),
   informd = system.file("help/interactive_matrix.Rmd", package = "DIVE"),
@@ -24,15 +21,38 @@ matrixAppServer(
 )
 }
 \arguments{
-\item{M}{A data matrix, e.g. a correlation matrix, which must have variables as rownames.}
+\item{id}{Namespace ID.}
 
-\item{N}{A matrix of the same dimensions as M with data for the filterable layer, e.g. sample size.}
+\item{M}{A data matrix, e.g. a correlation matrix, which must have row and column names.}
 
-\item{P}{A matrix of the same dimensions as M with data for the filterable layer, e.g. p-values.}
+\item{N}{A matrix of the same dimensions as M to be used as a filter layer, e.g. sample size or p-values.}
 
-\item{cdata}{The non-reactive data used for generating the matrix.}
+\item{cdata}{The data used for generating the matrix,
+necessary for allowing user-uploaded data for mutable M.}
 
-\item{metadata}{A data.table with "Variable" as a key column and any number of columns (metadata) to be used as filters.}
+\item{metadata}{Optional, a data.table with different types of metadata/annotation to be used as filters.
+If not given, the only filter option will be the row names in M. Column names will be the names of the filter group.}
+
+\item{vkey}{The column in metadata that maps to row/col names in M, i.e. the key column such as VarID.
+If metadata is not given, should be something like "Name" because the only selection possible is by row names.}
+
+\item{factorx}{Optional, a function that returns a boolean for whether
+a variable should be plotted as factor when given the variable name.
+Useful when for some reason factor variables are numeric or character instead of already factor-encoded.
+By default, variables are merely checked using base::is.factor, which works when the data is already factor-encoded.}
+
+\item{colorby}{A named list where name matches the (factor) variable in cdata to use for color grouping.
+If there is a named vector, this is passed into scale_color_manual to be used for custom color mapping, e.g.
+`list(MyGroupingVar = c(A = "red", B = "blue"))` (useful for enforcing a consistent/meaningful color scheme),
+or `list(MyGroupingVar = NULL)` if custom color scaling isn't necessary. See also details.}
+
+\item{colorscales}{Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named coloscale
+or custom colorscale used for heatmap. If not given, two default colorscale functions are used.}
+
+\item{informd}{Optional, an Rmarkdown help file for infoOutput, e.g. requirements info.}
+
+\item{appdata}{Optional, the name (including extension) of one or more files stored in appdata that can be
+mock-uploaded. See details.}
 
 \item{input, output, session}{Standard \code{shiny} boilerplate.}
 }

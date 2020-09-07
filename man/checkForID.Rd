@@ -13,6 +13,9 @@ checkForID(data, message = NULL, idcol = "ID", aschar = T)
 
 \item{aschar}{Convert ID column to character.}
 }
+\value{
+A list with elements result with the result data and message with a message to show.
+}
 \description{
 Checks for some sort of ID column, which is by default converted to character.
 Returns a message for failures.

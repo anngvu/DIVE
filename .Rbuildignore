@@ -2,3 +2,6 @@
 ^\.Rproj\.user$
 ^cdata$
 ^data-raw$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

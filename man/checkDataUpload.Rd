@@ -17,6 +17,9 @@ checkDataUpload(data, result = NULL, idcol = "ID", idchar = TRUE, html = TRUE)
 
 \item{html}{Logical with default TRUE, whether to format message for HTML display.}
 }
+\value{
+A list with  \code{result} and  \code{message}.
+}
 \description{
 This is generally meant for dataset upload modules. Checks for (in this order):
 \enumerate{

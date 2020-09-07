@@ -1,37 +1,36 @@
-#' Shiny module UI for interactive matrix plot with drilldown components
+#' Shiny module UI for interactive matrix with drilldown component
 #'
 #' Creates app UI for a heatmap matrix responding to reactive data that is linked to a drilldown scatterplot component.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @export
-iMatrixUI <- function(id) {
+matrixInteractiveUI <- function(id) {
   ns <- NS(id)
-
-    tags$div(class = "iMatrixUI",
-    tags$div(class = "drilldown-output", id = ns("drilldown-output"),
-             tags$script(sprintf('$("#%s").draggable({ start: function(event, ui) {
+  tags$div(class = "matrixInteractiveUI",
+           tags$div(class = "drilldown-output", id = ns("drilldown-output"),
+                    tags$script(sprintf('$("#%s").draggable({ start: function(event, ui) {
                                      console.log("moving to:" + event.pageY + " " + event.pageX);
                                      $(this).css({ position: "absolute", top: event.pageY + "px", left: event.pageX + "px"});
                                      window.dispatchEvent(new Event("resize"));
                                     }
                                    });',
-                                   ns("drilldown-output"), ns("dock"))),
-             selectizeInput(ns("drilldown"), "Drill down to data for", width = "400px",
-                            choices = "", selected = "",
-                            options = list(maxItems = 2, placeholder = "select variable(s)")),
-             conditionalPanel("input.drilldown != ''", ns = ns,
-                              div(class = "ui-inline", br(), actionLink(ns("flipxy"), "flip XY", icon = icon("refresh"))),
-                              plotlyOutput(ns("scatter")))
-            ),
-    tags$div(class = "matrix-output", id = ns("matrix-output"),
-             conditionalPanel("!output.main", ns = ns, class = "dive-loader", id = ns("loader"), matrixSpinner(), "loading..."),
-             div(class = "matrix-options", uiOutput(ns("palettes"))),
-             div(plotlyOutput(ns("main")))
-    )
+                                        ns("drilldown-output"), ns("dock"))),
+                    selectizeInput(ns("drilldown"), "Drill down to data for", width = "400px",
+                                   choices = "", selected = "",
+                                   options = list(maxItems = 2, placeholder = "select variable(s)")),
+                    conditionalPanel("input.drilldown != ''", ns = ns,
+                                     div(class = "ui-inline", br(), actionLink(ns("flipxy"), "flip XY", icon = icon("refresh"))),
+                                     plotlyOutput(ns("scatter")))
+           ),
+           tags$div(class = "matrix-output", id = ns("matrix-output"),
+                    conditionalPanel("!output.main", ns = ns, class = "dive-loader", id = ns("loader"), matrixSpinner(), "loading..."),
+                    div(class = "matrix-options", uiOutput(ns("palettes"))),
+                    div(plotlyOutput(ns("main")))
+           )
   )
 }
 
-#' Server module server for plotting correlations matrix with drilldown interaction
+#' Server module server for matrix with drilldown interaction
 #'
 #' The matrix responds to reactive plot data and has a linked drilldown component.
 #'
@@ -49,9 +48,8 @@ iMatrixUI <- function(id) {
 #' @param dcolors Optional, a list with name matching the variable in the data to use for color grouping and custom colors.
 #' @param colorscales Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named coloscale
 #' or custom colorscale used for heatmap. If not given, two default colorscale functions are used.
-#' @param plotbg Optional, color for matrix plot background.
 #' @export
-iMatrixServer <- function(id,
+matrixInteractiveServer <- function(id,
                           mdata,
                           factorx = NULL,
                           dcolors = NULL,
@@ -123,7 +121,7 @@ iMatrixServer <- function(id,
                         nrows = 2, shareX = T, shareY = T, margin = 0.01,
                         widths = c(0.97, 0.03), heights = c(0.03, 0.97))
       }
-      main$x$source <- "main"
+      main$x$source <- session$ns("main")
       main %>% plotly::config(displayModeBar = F)
     })
 
@@ -135,7 +133,7 @@ iMatrixServer <- function(id,
     })
 
     observe({
-      s <- event_data("plotly_click", source = "main")
+      s <- event_data("plotly_click", source = session$ns("main"))
       if(!is.null(s)) {
         var1 <- s[["x"]]
         var2 <- s[["y"]]

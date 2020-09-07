@@ -11,12 +11,12 @@ matrixCtrlUI <- function(id, minN = 5) {
            div(class = "ui-inline", numericInput(ns("minN"), "mininum N", val = 5, min = minN, step = 1, width = "80px")),
            div(class = "ui-inline", br(), checkboxInput(ns("cutoffP"), "P < 0.05 ", value = FALSE, width = "80px")),
            div(class = "ui-inline",
-               div(class = "ui-inline", selectInput(ns("optrowgroup"), "Select rows by", choices = "", width = "120px")),
-               div(class = "ui-inline", selectizeInput(ns("optrow"), "Row filter", choices = "", multiple = T, width = "400px"))
+               div(class = "ui-inline", selectInput(ns("optrowgroup"), "Filter type", choices = "", width = "120px")),
+               div(class = "ui-inline", selectizeInput(ns("optrow"), "Row (from)", choices = "", multiple = T, width = "400px"))
            ),
            div(class = "ui-inline", conditionalPanel("input.optrow != ''", ns = ns,
-               div(class = "ui-inline", selectInput(ns("optcolgroup"), "Select columns by", choices = "", width = "120px")),
-               div(class = "ui-inline", selectizeInput(ns("optcol"), "Column filter", choices = "", multiple = T, width = "400px"))
+               div(class = "ui-inline", selectInput(ns("optcolgroup"), "Filter type", choices = "", width = "120px")),
+               div(class = "ui-inline", selectizeInput(ns("optcol"), "Column (to)", choices = "", multiple = T, width = "400px"))
            )),
            uiOutput(ns("usewidget"))
   )
@@ -141,7 +141,7 @@ matrixCtrlServer <- function(id,
       optrow <- `if`(input$optrowgroup == vkey, rownames(mstate$M), unique(metadata[[input$optrowgroup]]))
       selected <- if(length(mstate$newdata)) mstate$newdata else request$optrow
       updateSelectizeInput(session, "optrow", choices = optrow, selected = selected,
-                           options = list(placeholder = paste("no", input$optrowgroup, "selected")))
+                           options = list(placeholder = paste("no", input$optrowgroup, "filter applied")))
       request$optrow <- NULL
     }, ignoreInit = TRUE) # because requires initial updateSelectInput to populate optrowgroup
 
@@ -166,7 +166,7 @@ matrixCtrlServer <- function(id,
       optcol <- `if`(input$optcolgroup == vkey, colnames(mstate$filM),
                      unique(metadata[[input$optcolgroup]][metadata[[vkey]] %in% colnames(mstate$filM)]))
       updateSelectizeInput(session, "optcol", choices = optcol,
-                           options = list(placeholder = paste("no", input$optcolgroup, "selected")))
+                           options = list(placeholder = paste("no", input$optcolgroup, "filter applied")))
     })
 
 

@@ -1,7 +1,6 @@
 #' Shiny module UI for filtering high dimensional genomics data
 #'
-#' Currently, this provides options to subset genomics data using a custom list input
-#' or GO and Reactome annotations.
+#' Provides options to subset genomics data (using gene accessions)
 #'
 #' @family multiVUI module functions
 #'
@@ -30,9 +29,7 @@ geneVUI <- function(id) {
 
 #' Shiny module server for filtering high dimensional genomics data
 #'
-#' Currently, this provides options to subset genomics data using custom list input
-#' or GO and Reactome annotations. The output can be passed to multiple "tracks"
-#' in multiVUI for simultaneous filtering.
+#' Provides options to subset genomics data (using gene accessions)
 #'
 #' @family multiVApp module functions
 #'

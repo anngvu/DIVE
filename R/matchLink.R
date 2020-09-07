@@ -1,4 +1,4 @@
-#' Shiny module UI for interactive drag-and-drop variable harmonization of two datasets
+#' Shiny module UI for interactive drag-and-drop variable linkage or harmonization
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @return Interactive drag-and-drop UI elements.
@@ -28,7 +28,7 @@ matchLinkUI <- function(id) {
   ))
 }
 
-#' Server module function for interactive drag-and-drop variable harmonization of two datasets
+#' Shiny server module for interactive drag-and-drop variable linkage or harmonization
 #'
 #' Given two datasets, a "reference" and a "comparison" dataset, the module implements an interface
 #' that allows users to interactively harmonize variables to be used for matching;
@@ -40,12 +40,10 @@ matchLinkUI <- function(id) {
 #' can be dropped next to the "sex" label to say that these mean the same thing. Which variables
 #' the user can interact with is determined by the vars parameter.
 #'
-#' @section Variables List:
-#' This should be a list such as \preformatted{list(Variables = c("age", "sex", "BMI", "biomarkerLevel"))} or
-#' \preformatted{list(Demographic = c("age", "sex"), Clinical = c("BMI", "biomarkerLevel"))}.
-#' This format allows visually grouping the variables in the display only and has no effect on matching.
+#' \code{vars} should be provided as a list such as \code{list(Variables = c("age", "sex", "BMI", "biomarkerLevel"))} or
+#' \code{list(Demographic = c("age", "sex"), Clinical = c("BMI", "biomarkerLevel"))}.
+#' This format allows visually grouping the variables in the display only.
 #'
-#' @section Guess Function:
 #' A guess function can be provided to attempt guessing which variables are actually the same between the datasets,
 #' which will run before the user does manual harmonization of variables. The guess function is specific
 #' to the dataset and the domain. For example, it knows that "sex" is a matchable variable in the reference dataset
@@ -54,11 +52,11 @@ matchLinkUI <- function(id) {
 #' so that its return (a list) should contain a list item for all vars.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param refdata Reactive subsetted reference data.table.
-#' @param setX Reactive data.table dataset, which typically comes from the \code{\link{newCohortInput}} module.
+#' @param refdata Reactive subsetted reference data as \code{data.table}.
+#' @param setX Reactive \code{data.table} dataset, which typically comes from \code{\link{newDatasetServer}}.
 #' @param vars A named list of a variable set (or sets) in the data that is allowed for matching. See details.
 #' @param guess Optional, name of the function to call for initial guessing of harmonized variables. See details.
-#' @param informd Optional, relative path to an info Rmarkdown file that will be pulled up in a modal.
+#' @param informd Optional, relative path to an info Rmarkdown file that will be pulled up in a help modal.
 #' Recommend using for providing methods details of the matching algorithm.
 #' @return Reactive list of parameter values with \code{run}, \code{matchOpts} and \code{matchOn}. See details.
 #' @export

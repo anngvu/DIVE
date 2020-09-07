@@ -16,6 +16,8 @@ consortUI(
 )
 }
 \arguments{
+\item{inputId}{Input ID.}
+
 \item{label}{Element label.}
 
 \item{items}{Optional, character vector of items.}
@@ -23,14 +25,20 @@ consortUI(
 \item{item_class}{Optional, additional class for items in the sortable ui element.}
 
 \item{classes}{Optional, additional classes for the sortable ui element.
-Note: including the "one-to-one" class will create a "monogamous" consort element that will only take one item.}
+Including the "one-to-one" class will create a "monogamous" consort element that will only take one item (see details).}
 
 \item{placeholder}{Placeholder text.}
+
+\item{width}{UI element width.}
 }
 \description{
-Create a CONnected SORT element whose items are sortable and transferable between other elements initiated by this method.
+Create a CONnected SORT ui whose items are sortable and transferable between other elements rendered by this method
 }
 \details{
-This is based on the package function \code{shinyjqui::orderInput}, where the R input builder is simpler
-and the custom Shiny input bindings are implemented differently.
+This is based on the package function \code{shinyjqui::orderInput}, but the HTML input builder is simpler
+and the custom Shiny input bindings are implemented somewhat differently for a more specific purpose.
+In particular, there is an option to specify a "one-to-one" class, which will be recognized to make
+the element have the behavior of only taking one droppable item at a time. Items within the "one-to-one"
+elements are conferred the item class "used", while elements built without the "one-to-one" class confer upon
+their child items the class "un-used", to help visualize new membership after transfers.
 }
