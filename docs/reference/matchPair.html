@@ -40,7 +40,7 @@
 
 
 <meta property="og:title" content="Matching main function — matchPair" />
-<meta property="og:description" content="Calls pairmatch to perform matching using the desired parameters." />
+<meta property="og:description" content="Calls pairmatch to perform matching and formats results" />
 
 
 
@@ -109,7 +109,7 @@
     </div>
 
     <div class="ref-description">
-    <p>Calls <code><a href='https://rdrr.io/pkg/optmatch/man/pairmatch.html'>pairmatch</a></code> to perform matching using the desired parameters.</p>
+    <p>Calls <code><a href='https://rdrr.io/pkg/optmatch/man/pairmatch.html'>pairmatch</a></code> to perform matching and formats results</p>
     </div>
 
     <pre class="usage"><span class='fu'>matchPair</span>(<span class='kw'>data</span>, <span class='kw'>groupcol</span>, <span class='kw'>matchon</span>)</pre>
@@ -133,7 +133,8 @@
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list containing result and a table where each row corresponds to a matched pair.</p>
+    <p>A list containing result and a table where each row corresponds to a matched pair:
+<code><a href='https://rdrr.io/r/base/list.html'>list(pair = pair, matchtable = matchtable)</a></code></p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

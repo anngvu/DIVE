@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shiny module server function for handling new dataset input — newDatasetServer • DIVE</title>
+<title>Shiny module server for new dataset input — newDatasetServer • DIVE</title>
 
 
 <!-- jquery -->
@@ -39,11 +39,8 @@
 
 
 
-<meta property="og:title" content="Shiny module server function for handling new dataset input — newDatasetServer" />
-<meta property="og:description" content="This is essentially the dataUpload module, but the uploaded data
-is modified to include a key-like column before it is returned as a reactive object.
-Use dataUpload if there is no need for a key,
-which is used to track the dataset as in refSubset." />
+<meta property="og:title" content="Shiny module server for new dataset input — newDatasetServer" />
+<meta property="og:description" content="An extension of dataUploadServer" />
 
 
 
@@ -106,23 +103,20 @@ which is used to track the dataset as in refSubset." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Shiny module server function for handling new dataset input</h1>
+    <h1>Shiny module server for new dataset input</h1>
     
     <div class="hidden name"><code>newDatasetServer.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This is essentially the <code>dataUpload</code> module, but the uploaded data
-is modified to include a key-like column before it is returned as a reactive object.
-Use <code>dataUpload</code> if there is no need for a key,
-which is used to track the dataset as in <code>refSubset</code>.</p>
+    <p>An extension of <code><a href='dataUploadServer.html'>dataUploadServer</a></code></p>
     </div>
 
     <pre class="usage"><span class='fu'>newDatasetServer</span>(
   <span class='kw'>id</span>,
   datakey = <span class='kw'>NULL</span>,
   xname = <span class='kw'>NULL</span>,
-  checkFun = <span class='kw'>NULL</span>,
+  checkfun = <span class='kw'>NULL</span>,
   informd = <span class='kw'>NULL</span>,
   appdata = <span class='kw'>NULL</span>
 )</pre>
@@ -130,6 +124,10 @@ which is used to track the dataset as in <code>refSubset</code>.</p>
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>id</th>
+      <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
+    </tr>
     <tr>
       <th>datakey</th>
       <td><p>Optional, a named list containing name/label to be used in creating the key column.</p></td>
@@ -139,14 +137,27 @@ which is used to track the dataset as in <code>refSubset</code>.</p>
       <td><p>Optional, a default name/label to use in the key column.</p></td>
     </tr>
     <tr>
-      <th>input, output, session</th>
-      <td><p>Standard <code>shiny</code> boilerplate.</p></td>
+      <th>informd</th>
+      <td><p>Optional, an Rmarkdown help file for infoOutput, e.g. requirements info.</p></td>
+    </tr>
+    <tr>
+      <th>appdata</th>
+      <td><p>Optional, the name (including extension) of one or more files stored in appdata that can be
+mock-uploaded. See details.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A reactive data.table of the processed upload.</p>
+    <p>A reactive <code>data.table</code> of the processed upload.</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>The UI extends <code><a href='dataUploadUI.html'>dataUploadUI</a></code> components with an additional text field
+so that the user can give their uploaded data a meaningful label/key.
+The server extends <code><a href='dataUploadServer.html'>dataUploadServer</a></code> by modifying the uploaded data
+to include a key-like column before returning it as a reactive object.
+Use <code><a href='dataUploadServer.html'>dataUploadServer</a></code> if there is no need for a key.
+The originally-conceived usage was as the preceding module to <code>refSubsetServer</code>.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

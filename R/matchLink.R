@@ -30,38 +30,41 @@ matchLinkUI <- function(id) {
 
 #' Shiny server module for interactive drag-and-drop variable linkage or harmonization
 #'
-#' Given two datasets, a "reference" and a "comparison" dataset, the module implements an interface
-#' that allows users to interactively harmonize variables to be used for matching;
-#' the output is used as inputs to the module \code{\link{matchResult}}:
-#' \code{params$matchOpts} contains all the possible variables that could be used between the two datasets,
-#' \code{params$matchOn} contains variables that are actually chosen for matching, and
-#' \code{params$run} reactively transmits the "finalized" params/triggers the \code{\link{matchResult}} module.
-#' The drag-and-drop interface allows the user to harmonize variables manually, e.g. the "gender" label
-#' can be dropped next to the "sex" label to say that these mean the same thing. Which variables
-#' the user can interact with is determined by the vars parameter.
+#' Given two datasets, a "reference" and an "external" or "comparison" dataset,
+#' both presumably containing at least some of the same variables,
+#' this module implements a drag-and-drop interface that allows users to
+#' interactively harmonize variables (pair them) as parameters for matching.
 #'
+#' The drops are initialized with the specified \code{vars} in \code{refdata},
+#' and then a "variable bank" is initialized when given \code{inputdata}.
 #' \code{vars} should be provided as a list such as \code{list(Variables = c("age", "sex", "BMI", "biomarkerLevel"))} or
 #' \code{list(Demographic = c("age", "sex"), Clinical = c("BMI", "biomarkerLevel"))}.
-#' This format allows visually grouping the variables in the display only.
 #'
 #' A guess function can be provided to attempt guessing which variables are actually the same between the datasets,
-#' which will run before the user does manual harmonization of variables. The guess function is specific
-#' to the dataset and the domain. For example, it knows that "sex" is a matchable variable in the reference dataset
-#' and can try to look for variables called "sex" or "gender" in the incoming dataset so that the user doesn't
-#' have to specify this manually. It should also be consistent with what is specified as matchable variables,
-#' so that its return (a list) should contain a list item for all vars.
+#' which will run and pre-populate the pairs before the user does manual linkage of variables
+#' The guess function should be specific to the dataset and the domain.
+#' For example, if we can expect demographic-type datasets, the function can look for "sex" or "gender"
+#' in the incoming dataset to be matched with "sex" in the reference data,
+#' so that the user doesn't have to specify this manually.
+#' Its return should contain a list with all matchable variables in \code{refdata} and
+#' the match in \code{inputdata}, or \code{NULL} if no match.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param refdata Reactive subsetted reference data as \code{data.table}.
-#' @param setX Reactive \code{data.table} dataset, which typically comes from \code{\link{newDatasetServer}}.
+#' @param refdata Reactive reference \code{data.table}.
+#' @param inputdata Reactive \code{data.table}, typically provided by \code{\link{newDatasetServer}}.
 #' @param vars A named list of a variable set (or sets) in the data that is allowed for matching. See details.
 #' @param guess Optional, name of the function to call for initial guessing of harmonized variables. See details.
 #' @param informd Optional, relative path to an info Rmarkdown file that will be pulled up in a help modal.
 #' Recommend using for providing methods details of the matching algorithm.
-#' @return Reactive list of parameter values with \code{run}, \code{matchOpts} and \code{matchOn}. See details.
+#' @return The returned reactive list is intended to be used as inputs to \code{\link{matchResultServer}}:
+#' \enumerate{
+#'   \item \code{params$matchOpts} contains all the possible variables that could be used between the two datasets
+#'   \item \code{params$matchOn} contains variables that were actually paired up for matching
+#'   \item \code{params$run} transmits the "finalized" params/triggers \code{\link{matchResultServer}}
+#' }
 #' @export
 matchLinkServer <- function(id,
-                            refdata, setX,
+                            refdata, inputdata,
                             vars, guess = NULL,
                             informd = system.file("help/matching_methods.Rmd", package = "DIVE")) {
 
@@ -74,7 +77,7 @@ matchLinkServer <- function(id,
   #-- when uploaded data X changes, re-initialize match options ------------------------------------------------------------#
     observe({
       if(!is.null(guess)) {
-         matchOpts <- guess(names(setX()))
+         matchOpts <- guess(names(inputdata()))
          inVars <- unlist(vars) %in% names(matchOpts)
          if(!all(inVars)) {
            for(v in unlist(vars)[!inVars]) matchOpts[v] <- list(NULL)
@@ -103,7 +106,7 @@ matchLinkServer <- function(id,
 
     # Panel for un-matched/un-harmonized pairs
     output$varBank <- renderUI({
-      extvars <- names(setX())
+      extvars <- names(inputdata())
       used <- unlist(params$matchOpts)
       unused <- setdiff(extvars, used)
       unused <- unused[!unused %in% c("ID", "Cohort")] # Needs consideration -- some hard-coding here

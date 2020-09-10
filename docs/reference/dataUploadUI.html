@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shiny module UI for data table upload module — dataUploadUI • DIVE</title>
+<title>Shiny module UI for user-uploaded data — dataUploadUI • DIVE</title>
 
 
 <!-- jquery -->
@@ -39,11 +39,10 @@
 
 
 
-<meta property="og:title" content="Shiny module UI for data table upload module — dataUploadUI" />
-<meta property="og:description" content="Generates Shiny UI for a data upload module, which contains the main file input
-and two optional features: a file-remove button and infolink,
-the second of which is intended to be useful for communicating file upload requirements
-or instructions." />
+<meta property="og:title" content="Shiny module UI for user-uploaded data — dataUploadUI" />
+<meta property="og:description" content="Create UI that contains a main shiny::fileInput
+and two optional features: a file-remove button and link to display more info
+(for communicating file upload requirements and/or instructions)." />
 
 
 
@@ -106,16 +105,15 @@ or instructions." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Shiny module UI for data table upload module</h1>
+    <h1>Shiny module UI for user-uploaded data</h1>
     
     <div class="hidden name"><code>dataUploadUI.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Generates Shiny UI for a data upload module, which contains the main file input
-and two optional features: a file-remove button and infolink,
-the second of which is intended to be useful for communicating file upload requirements
-or instructions.</p>
+    <p>Create UI that contains a main <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/fileInput.html'>fileInput</a></code>
+and two optional features: a file-remove button and link to display more info
+(for communicating file upload requirements and/or instructions).</p>
     </div>
 
     <pre class="usage"><span class='fu'>dataUploadUI</span>(<span class='kw'>id</span>, <span class='kw'>...</span>)</pre>
@@ -137,6 +135,10 @@ Note that</p><pre><span class='kw'>multiple</span> <span class='op'>=</span> <sp
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>UI components.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p>Other dataUpload functions: 
+<code><a href='dataUploadServer.html'>dataUploadServer</a>()</code></p></div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

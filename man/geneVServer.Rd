@@ -18,9 +18,7 @@ A vector that can be used to subset a high dimensional matrix,
 which should be passed in to the parameter \code{selected} in the \code{\link{multiV}} server module.
 }
 \description{
-Currently, this provides options to subset genomics data using custom list input
-or GO and Reactome annotations. The output can be passed to multiple "tracks"
-in multiVUI for simultaneous filtering.
+Provides options to subset genomics data (using gene accessions)
 }
 \seealso{
 Other multiVApp module functions: 

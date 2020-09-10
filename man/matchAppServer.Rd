@@ -6,55 +6,55 @@
 \usage{
 matchAppServer(
   id,
+  refname = "Reference Cohort",
   refdata,
-  datakey,
-  xname,
-  refname,
+  subsetv,
+  subsets,
+  customdata = "Cohort",
+  defaultvalue = "CohortX",
   vars,
   guess = NULL,
-  subsets,
-  subsetfeat,
-  factorx,
   informd = system.file("help/cohort_exchange.Rmd", package = "DIVE"),
-  addon = NULL,
   appdata = NULL
 )
 }
 \arguments{
-\item{refdata}{Data.table of reference dataset.}
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{datakey}{Shared grouping parameter passed to \code{refSubset}, \code{newDataset}, \code{matchResult}.}
+\item{refname}{Name of the reference dataset, used for labels. Defaults to "Reference Cohort".}
 
-\item{xname}{Character label for the external dataset, e.g. "CohortX" or "New Site" or "Comparison Dataset".}
+\item{refdata}{Reference dataset that can be matched against in whole or in part, i.e. the match pool.}
 
-\item{refname}{Character label for the reference dataset.}
+\item{subsetv}{Name of the subset-by variable in the data.}
 
-\item{vars}{Variables allowed to be used for matching within \code{refdata}, which will be organized and
-displayed as the given named lists.}
+\item{subsets}{Optional, a list to display groups with higher-level grouping in the selection.
+By default, the selection is composed of unique values in \code{subsetv}.}
 
-\item{guess}{Optional, a function for making initial guesses of matchable variables.}
+\item{customdata}{A name for the appended colum to user-uploaded input data.
+This depends on the type of data expected. "Cohort" is the provided default for cohort-matching application.
+See \code{\link{customDatasetServer}}.}
 
-\item{subsets}{The subsets.}
+\item{defaultvalue}{Default attribute value to append to user-uploaded input data.
+"CohortX" is the provided default for cohort-matching application. See \code{\link{customDatasetServer}}.}
 
-\item{subsetfeat}{Which variable to be used as the subset variable.}
+\item{vars}{A named list of a variable set (or sets) in the data that is allowed for matching. See details.}
 
-\item{factorx}{A naming pattern for factoring variables displayed.}
+\item{guess}{Optional, name of the function to call for initial guessing of harmonized variables. See details.}
 
-\item{informd}{Optional, link to a help file that can be called with the info module.}
+\item{informd}{Relative path to the Rmarkdown file, whose contents will be displayed in the modal.}
 
-\item{addon}{Optional, a self-contained module that doesn't interact with others,
-e.g. for extra summary plots. Needs to be passed in as name of the server module function.}
-
-\item{appdata}{Optional, a path to example application data (for demonstration purposes).}
-
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
+\item{appdata}{Optional, the name (including extension) of one or more files stored in appdata that can be
+mock-uploaded. See details.}
 }
 \description{
 Shiny app server for matching and exploration of two datasets
 }
 \details{
-This server function puts together a number of modular components to
-implement the whole interaction of the matching application. Though originally composed for
-matching patient cohorts, this matching application can be used with data in different domains.
-The composition of this module allows inserting a addon-written module.
+This server function puts together modular components to
+implement the whole interaction of the matching application with several defaults
+to facilitate quick startup.
+Though originally conceived for matching and exploration of patient cohort datasets,
+this could be adapted to matchable data in other domains, such as geographic sampling sites, etc.
+This app module can also be viewed as a starting template to help
+compose a new matching app with a sufficiently different layout or functionality.
 }

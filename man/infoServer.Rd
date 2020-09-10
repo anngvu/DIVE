@@ -2,15 +2,15 @@
 % Please edit documentation in R/info.R
 \name{infoServer}
 \alias{infoServer}
-\title{Server module function for displaying an info modal}
+\title{Server module function to display a modal on click}
 \usage{
 infoServer(id, informd)
 }
 \arguments{
-\item{informd}{Relative path to the Rmarkdown info file, whose contents will be displayed in the modal.}
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
+\item{informd}{Relative path to the Rmarkdown file, whose contents will be displayed in the modal.}
 }
 \description{
-Server module function for displaying an info modal
+Display content from Rmarkdown file when link or button is clicked
 }

@@ -1,3 +1,4 @@
+#' @keywords internal
 matrixSpinner <- function() {
   HTML('<div class="self-building-square-spinner">
           <div class="square"></div>

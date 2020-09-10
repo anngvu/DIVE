@@ -17,6 +17,8 @@ matchAppUI(
 
 \item{CSS}{Optional, location to an alternate CSS stylesheet to set look and feel of the module.}
 
+\item{refname}{Optional, name of the reference dataset.}
+
 \item{addonUI}{Optional, ui module function to display addon components.}
 
 \item{addontab}{If addonUI is given, should also give a name for the tab hosting addon ui components.}
@@ -25,9 +27,10 @@ matchAppUI(
 Shiny app UI for matching application
 }
 \details{
-The application UI can be viewed as a default template of how to put together several module components,
-including \code{\link{newDataSetInput}}, \code{\link{refSubsetInput}}, \code{\link{cohortGraphOutput}},
-to overall enable interactive exploration and matching of two different datasets. Note that though the datasets
-are typically conceived as datasets of matchable patient cohorts, this could be other types of matchable data
-such as geographic sampling sites, etc.
+The application UI puts together multiple module components to enable
+exploration and matching of two different but same-type datasets.
+It places a \code{customDatasetInput} component for a user-uploaded input dataset in the top left
+and a \code{dataSubsetInput} component to allow selection of the match pool in the top right.
+The bottom half is a tab panel with tabs dynamically shown for a matching interface,
+result table and result plots.
 }

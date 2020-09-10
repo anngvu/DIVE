@@ -2,56 +2,61 @@
 % Please edit documentation in R/dataUpload.R
 \name{dataUploadServer}
 \alias{dataUploadServer}
-\title{Shiny server function for data table upload module}
+\title{Shiny server module function for user-uploaded data}
 \usage{
 dataUploadServer(
   id,
   asDT = TRUE,
   removable = FALSE,
   checkFun = NULL,
-  informd = NULL,
   appdata = NULL,
-  checkappdata = F
+  checkappdata = F,
+  informd = NULL
 )
 }
 \arguments{
-\item{id}{Namespace ID.}
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{asDT}{Logical flag to indicate whether data returned should be a data.table. If FALSE, \code{readLines} is used on file.}
+\item{asDT}{Logical flag to indicate whether data returned should be a \code{data.table}. If FALSE, \code{readLines} is used on file.}
 
 \item{removable}{Logical flag to indicate whether data upload will have "removable" feature. Defaults to FALSE. See details.}
 
 \item{checkFun}{Optional, a custom check function for an additional layer of checking/modifying uploaded data.
 It should return a list containing message and result (result should be \code{NULL} when data fails checks).}
 
-\item{informd}{Optional, an Rmarkdown help file for infoOutput, e.g. requirements info.}
-
 \item{appdata}{Optional, the name (including extension) of one or more files stored in appdata that can be
 mock-uploaded. See details.}
 
-\item{checkappdata}{Whether checkFun should be applied to appdata, normally FALSE.}
+\item{checkappdata}{Whether \code{checkFun} should be applied to appdata, normally FALSE.}
+
+\item{informd}{Relative path to the Rmarkdown file, whose contents will be displayed in the modal.}
 }
 \value{
-A data.table with a "filename" attribute containing the filename without extension,
-or \code{NULL} if the file input was not a table or returned as \code{NULL} from \code{checkFun}.
+A \code{data.table} with a "filename" attribute containing the filename without extension,
+or \code{NULL} depending on \code{checkFun}, or \code{NULL} if the file was cleared.
 }
 \description{
-At its most basic, the module checks for and returns a data table from \code{fileInput}
-(if the uploaded file is not data in table format, the return will be \preformatted{NULL}).
+Return reactive user-uploaded or mock data after optional checks and modifications
 }
 \details{
-A check function can be optionally integrated into this module to perform additional
-"light" data checking or modification operations and make the the module somewhat adaptable for different uses.
-Some example check functions simply check for specific column names or data types.
-For more intense data processing that might involve multiple functions and/or side effects as part of a pipeline,
-one should really make a specialized module and pass the data into that intermediate module.
+At its most basic, the module returns data from \code{shiny::\link[shiny]{fileInput}}.
+However, a function can be optionally integrated with the \code{checkFun} option
+to perform additional light data checking or modification operations,
+making the the module more tailored for different uses and data expectations.
+(For more intense processing that might involve multiple steps and/or side effects as part of a pipeline,
+one should really make a specialized module and pass the data into that intermediate module
+instead of using \code{checkFun}.)
 
-File uploads can have "reset" behavior by specifying the optional \code{removable} parameter,
-where a remove button will appear after upload, allowing data to be "cleared", in which case the module returns \code{NULL}).
+File uploads can have \emph{reset} behavior by specifying the \code{removable} parameter,
+where a remove button will appear after upload, allowing data to be cleared,
+after which the module returns \code{NULL}.
 
-The module also optionally incorporates \code{\link{infoOutput}} functionality to provide specifications for data.
-
-Finally, it is possible to perform a mock upload of a saved dataset, e.g. for demonstration purposes, that is triggered externally.
-The dataset is expected to be a .csv/.tsv file in a relative directory within the app directory.
-For instance, the dataset path can be "appdata/Demo.csv".
+Finally, it is possible to perform a mock upload of a saved dataset, triggered externally by another input,
+for demonstration purposes. The dataset is expected to be a .csv/.tsv file in
+a directory within the app directory. For instance, the relative dataset path can be "appdata/Demo.csv".
 }
+\seealso{
+Other dataUpload functions: 
+\code{\link{dataUploadUI}()}
+}
+\concept{dataUpload functions}

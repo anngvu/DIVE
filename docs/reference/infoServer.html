@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Server module function for displaying an info modal — infoServer • DIVE</title>
+<title>Server module function to display a modal on click — infoServer • DIVE</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Server module function for displaying an info modal — infoServer" />
-<meta property="og:description" content="Server module function for displaying an info modal" />
+<meta property="og:title" content="Server module function to display a modal on click — infoServer" />
+<meta property="og:description" content="Display content from Rmarkdown file when link or button is clicked" />
 
 
 
@@ -103,13 +103,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Server module function for displaying an info modal</h1>
+    <h1>Server module function to display a modal on click</h1>
     
     <div class="hidden name"><code>infoServer.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Server module function for displaying an info modal</p>
+    <p>Display content from Rmarkdown file when link or button is clicked</p>
     </div>
 
     <pre class="usage"><span class='fu'>infoServer</span>(<span class='kw'>id</span>, <span class='kw'>informd</span>)</pre>
@@ -118,12 +118,12 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>informd</th>
-      <td><p>Relative path to the Rmarkdown info file, whose contents will be displayed in the modal.</p></td>
+      <th>id</th>
+      <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
     </tr>
     <tr>
-      <th>input, output, session</th>
-      <td><p>Standard <code>shiny</code> boilerplate.</p></td>
+      <th>informd</th>
+      <td><p>Relative path to the Rmarkdown file, whose contents will be displayed in the modal.</p></td>
     </tr>
     </table>
 

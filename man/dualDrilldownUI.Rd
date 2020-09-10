@@ -2,7 +2,7 @@
 % Please edit documentation in R/dualDrilldown.R
 \name{dualDrilldownUI}
 \alias{dualDrilldownUI}
-\title{Shiny module UI for interactive matrix with drilldown component}
+\title{Shiny module UI for data drilldown interaction}
 \usage{
 dualDrilldownUI(id)
 }
@@ -10,5 +10,5 @@ dualDrilldownUI(id)
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 }
 \description{
-Creates app UI for a heatmap matrix responding to reactive data that is linked to a drilldown scatterplot component.
+Creates app UI for a drilldown plot component
 }

@@ -27,7 +27,7 @@ reference:
   desc: "Utility components that appear as part of other modules"
 - contents:
   - starts_with("dataUpload")
-  - starts_with("getLink")"
+  - starts_with("getLink")
   - starts_with("info")
   - starts_with("meh")
   - starts_with("check")

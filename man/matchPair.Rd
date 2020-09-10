@@ -14,8 +14,9 @@ matchPair(data, groupcol, matchon)
 \item{matchon}{Features to match on.}
 }
 \value{
-A list containing result and a table where each row corresponds to a matched pair.
+A list containing result and a table where each row corresponds to a matched pair:
+\code{list(pair = pair, matchtable = matchtable)}
 }
 \description{
-Calls \code{\link[optmatch]{pairmatch}} to perform matching using the desired parameters.
+Calls \code{\link[optmatch]{pairmatch}} to perform matching and formats results
 }

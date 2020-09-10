@@ -1,5 +1,7 @@
 #' Shiny module UI for importing data from GEO
 #'
+#' #' Interactively import GEO data through step-by-step process using a series of modals
+#'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @export
 getGEOInput <- function(id, informd = system.file("help/GEO_module.Rmd", package = "DIVE")) {
@@ -13,16 +15,16 @@ getGEOInput <- function(id, informd = system.file("help/GEO_module.Rmd", package
 
 #' Shiny module server for importing data from GEO
 #'
-#' Handles importing GEO data by guiding user through a number of modals.
+#' Interactively import GEO data through step-by-step process using a series of modals
 #'
-#' Returns a reactive values object containing \preformatted{$accession},
-#' \preformatted{$eset}, \preformatted{$pData} and \preformatted{$call}.
-#' The variable \preformatted{$call} is an internal counter for use with
+#' Returns a reactive values object containing \code{$accession},
+#' \code{$eset}, \code{$pData} and \code{$call}.
+#' The variable \code{$call} is an internal counter for use with
 #' other modules that need to update when new GEO dataset has been processed
 #' completely through the annotation step
 #' (even when it has the same accession number).
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @return GEOdata as reactive values object. See details.
 #' @export
 getGEOServer <- function(id) {

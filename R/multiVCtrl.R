@@ -1,10 +1,10 @@
-#' Shiny module UI for controlling multi-column view
+#' Shiny module UI for controlling multi-column views
 #'
-#' Shiny module UI for controlling multi-column view
+#' Shiny module UI for controlling multi-column views
 #'
-#' Multiple high dimensional datasets can be displayed by calling separate instances of \code{\link{multiVUI}} modules,
-#' with the contents typically laid out in separate a row containers. This "controller" UI establishes three different ways to
-#' select and source the datasets:
+#' Multiple high dimensional datasets can be displayed by calling separate instances of
+#' \code{\link{xVUI}} modules, with the contents typically laid out in row containers.
+#' This controller UI has three different ways to select and source the datasets:
 #' \enumerate{
 #'   \item Selecting from available pre-processed datasets.
 #'   \item User-uploaded data.
@@ -14,9 +14,9 @@
 #' e.g. hide the GEO method by not displaying the UI.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param menu Logical flag, should there be a menu for sourcing stored datasets? See details.
-#' @param upload Logical flag, should users be able to upload data? See details.
-#' @param GEO Logical flag, should users be able to pull data from GEO? (beta) See details.
+#' @param menu Logical flag, whether to allow a menu for loading stored datasets.
+#' @param upload Logical flag, whether to allow data upload.
+#' @param GEO Logical flag, whether to allow pulling data from GEO (beta).
 #' @export
 multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE) {
   ns <- NS(id)
@@ -32,10 +32,10 @@ multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE) {
   )
 }
 
-#' Shiny module server for controlling multi-column view
+#' Shiny module server for controlling multi-column views
 #'
-#' \code{multiVCtrl} is the control hub that provides data and parameters for \code{\link{multiVUI}},
-#' \code{\link{geneV}} and \code{\link{selectV}}.
+#' Control hub that provides data and parameters for \code{\link{xVServer}},
+#' \code{\link{geneVServer}} and \code{\link{selectServer}}
 #'
 #' The server logic handles sourcing of large expression datasets with three different methods:
 #' \enumerate{
@@ -43,14 +43,14 @@ multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE) {
 #'   \item User-uploaded data.
 #'   \item A beta (least-supported) method of retrieving datasets from GEO.
 #' }
-#' The module also handles upload of phenotype/clinical data. The module is instantiated with whatever is
-#' passed into the parameter \code{cdata} and uses a mutable version of \code{cdata} that
-#' appends user uploads. The data in \code{cdata} is supposed to be a phenotype or clinical
+#' The data in \code{cdata} is supposed to be a phenotype or clinical
 #' feature that one usually tries to correlate with expression data and can be numeric or categorical.
+#' The module handles upload of phenotype/clinical data,
+#' using a mutable version of \code{cdata} that appends user uploaded data.
 #' By default, character columns as well as ones matching \code{factorx} in \code{cdata}
 #' will be converted to factors.
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param cdata Data.table of phenotype or clinical data.
 #' @param hdlist A list of matrices representing high dimensional datasets; the names are used for \code{choices}.
 #' @param choices Names referencing datasets in \code{hdlist} to be used in selection menu,
@@ -58,7 +58,7 @@ multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE) {
 #' one can pass in a list formatted accordingly for \code{\link[shiny]{selectizeInput}}.
 #' @param key Name of column that contains IDs in \code{cdata} that link to samples in \code{hdlist} datasets. Defaults to "ID".
 #' @param checkFun Optional, a check function used for checking data uploads.
-#' @param factorx If not NULL, the given name pattern will be used for recognizing and converting columns in cdata to factor. See details.
+#' @param factorx If not \code{NULL}, the given name pattern will be used for recognizing and converting columns in cdata to factor. See details.
 #' @param preselect Optional, pre-selected phenotype or clinical variables from \code{cdata}.
 #' @param infoRmd Optional link to an Rmarkdown document containing description and/or instructions for data upload option.
 #' @return A reactive values list containing the data matrix for the parameter \preformatted{hdata} of the \code{\link{multiV}} module,

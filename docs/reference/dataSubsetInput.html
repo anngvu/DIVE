@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shiny module UI to display a modal on click — infoOutput • DIVE</title>
+<title>Shiny module UI for selecting a subsetted dataset — dataSubsetInput • DIVE</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Shiny module UI to display a modal on click — infoOutput" />
-<meta property="og:description" content="Create a clickable link or button that displays a modal dialog with customizable content" />
+<meta property="og:title" content="Shiny module UI for selecting a subsetted dataset — dataSubsetInput" />
+<meta property="og:description" content="Create a selection input that subsets a dataset" />
 
 
 
@@ -103,16 +103,16 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Shiny module UI to display a modal on click</h1>
+    <h1>Shiny module UI for selecting a subsetted dataset</h1>
     
-    <div class="hidden name"><code>infoOutput.Rd</code></div>
+    <div class="hidden name"><code>dataSubsetInput.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Create a clickable link or button that displays a modal dialog with customizable content</p>
+    <p>Create a selection input that subsets a dataset</p>
     </div>
 
-    <pre class="usage"><span class='fu'>infoOutput</span>(<span class='kw'>id</span>, label = <span class='st'>"req's"</span>, i = <span class='st'>"exclamation-circle"</span>, link = <span class='kw'>T</span>)</pre>
+    <pre class="usage"><span class='fu'>dataSubsetInput</span>(<span class='kw'>id</span>, label = <span class='kw'>NULL</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -123,21 +123,17 @@
     </tr>
     <tr>
       <th>label</th>
-      <td><p>Label, typically for specifying type of info, defaults to "Req's".</p></td>
-    </tr>
-    <tr>
-      <th>i</th>
-      <td><p>Font-awesome icon name to display next to label, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/icon.html'>icon</a></code>.</p></td>
-    </tr>
-    <tr>
-      <th>link</th>
-      <td><p>Whether to use link or button. Defaults to <code>actionLink</code>, set FALSE to use <code>actionButton</code>.</p></td>
+      <td><p>Optional, a label for the dataset.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>An actionLink or actionButton that calls a modal.</p>
+    <p>A <code>shiny::<a href='https://rdrr.io/pkg/htmltools/man/tag.html'>tagList</a></code> for UI to subset a dataset.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p>Other dataSubset functions: 
+<code><a href='dataSubsetServer.html'>dataSubsetServer</a>()</code></p></div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

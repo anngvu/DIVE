@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Server module server for matrix with drilldown interaction — dualDrilldownServer • DIVE</title>
+<title>Server module server for data drilldown interaction — dualDrilldownServer • DIVE</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,7 @@
 
 
 
-<meta property="og:title" content="Server module server for matrix with drilldown interaction — dualDrilldownServer" />
+<meta property="og:title" content="Server module server for data drilldown interaction — dualDrilldownServer" />
 <meta property="og:description" content="Drilldown component with two different modes of disply and linked up to two different inputs" />
 
 
@@ -103,7 +103,7 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Server module server for matrix with drilldown interaction</h1>
+    <h1>Server module server for data drilldown interaction</h1>
     
     <div class="hidden name"><code>dualDrilldownServer.Rd</code></div>
     </div>
@@ -142,29 +142,24 @@ a variable should be plotted as factor when given the variable name.
 Useful when for some reason factor variables are numeric or character instead of already factor-encoded.
 By default, variables are merely checked using base::is.factor, which works when the data is already factor-encoded.</p></td>
     </tr>
-    <tr>
-      <th>input, output, session</th>
-      <td><p>Standard <code>shiny</code> boilerplate.</p></td>
-    </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The drilldown component is, at its simplest, a selectInput through which
-variables can be selected for adaptive visualization as a boxplot or scatterplot
+    <p>The drilldown component is, at its simplest, a <code>selectInput</code> through which
+variables can be selected for adaptive visualization as a boxplot or scatterplot output
 (depending on whether one or two variables are selected, respectively).
-But optional complexity can be added to the component by making it listen to
-two other sources; that is, there can be two independent higher-level
-inputs telling this component what should be selected,
-analogous to the poor drilldown having two different bosses.
+However, optional complexity can be added to the component by making it listen to
+two other sources -- there can be two independent higher-level components
+that can update this component's <code>selectInput</code>,
+analogous to the poor drilldown having two bosses telling it what data they want reported.
 Thus the "dual" describes both how the drilldown renders in two different ways
 as well as being able to be controlled by up to two different sources.
-Another special thing about this component is that data should actually have
-a default factor grouping variable to be passed into the aesthetics.
-If there were no default factor grouping variable, when only one variable is selected
-we would not be able to generate the boxplot view. It should also be possible to specify
-multiple variables able to be used for grouping, which the user can switch between,
-but this isn't implemented yet.</p>
+For this component the data should actually have a default factor grouping variable
+to be passed into the aesthetics. If there were no default factor grouping variable,
+when only one variable is selected we would not be able to generate the boxplot view.
+It should also be possible to specify multiple variables able to be used for grouping
+(which the user can switch between), but this isn't implemented yet.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

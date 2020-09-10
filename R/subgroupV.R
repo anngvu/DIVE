@@ -1,12 +1,10 @@
 #' Shiny app UI for creating comparison plots between subgrouped data
 #'
-#' UI for user to define groups for volcano plots.
+#' UI for user to define groups for volcano plots
 #'
 #' @family multiVApp module functions
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param hdchoices List of high throughput datasets.
-#' @param cchoices Data that can be used to define groups.
 #' @export
 subgroupVUI <- function(id) {
 
@@ -25,13 +23,13 @@ subgroupVUI <- function(id) {
 
 #' Shiny module server for creating comparison plots between subgrouped data
 #'
-#' This primarily allows creation of volcano plots for highthroughput datasets based on user-defined group contrasts.
+#' This primarily allows creation of volcano plots for highthroughput datasets based on user-defined contrast groups
 #'
 #' @family multiVApp module functions
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param cdata A data.table of clinical, phenotype, or other experimental data used to define groups.
-#' @param hdata A list of named high-dimensional (high-throughput datasets)
+#' @param hdlist A list of named high-dimensional (high-throughput datasets)
 #' @export
 subgroupVServer <- function(id,
                             cdata, hdlist) {

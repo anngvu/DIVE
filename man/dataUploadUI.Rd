@@ -2,7 +2,7 @@
 % Please edit documentation in R/dataUpload.R
 \name{dataUploadUI}
 \alias{dataUploadUI}
-\title{Shiny module UI for data table upload module}
+\title{Shiny module UI for user-uploaded data}
 \usage{
 dataUploadUI(id, ...)
 }
@@ -16,8 +16,12 @@ Note that \preformatted{multiple = FALSE} (the default) must be kept.}
 UI components.
 }
 \description{
-Generates Shiny UI for a data upload module, which contains the main file input
-and two optional features: a file-remove button and infolink,
-the second of which is intended to be useful for communicating file upload requirements
-or instructions.
+Create UI that contains a main \code{shiny::\link[shiny]{fileInput}}
+and two optional features: a file-remove button and link to display more info
+(for communicating file upload requirements and/or instructions).
 }
+\seealso{
+Other dataUpload functions: 
+\code{\link{dataUploadServer}()}
+}
+\concept{dataUpload functions}

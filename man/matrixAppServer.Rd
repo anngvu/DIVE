@@ -21,7 +21,7 @@ matrixAppServer(
 )
 }
 \arguments{
-\item{id}{Namespace ID.}
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
 \item{M}{A data matrix, e.g. a correlation matrix, which must have row and column names.}
 
@@ -49,12 +49,10 @@ or `list(MyGroupingVar = NULL)` if custom color scaling isn't necessary. See als
 \item{colorscales}{Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named coloscale
 or custom colorscale used for heatmap. If not given, two default colorscale functions are used.}
 
-\item{informd}{Optional, an Rmarkdown help file for infoOutput, e.g. requirements info.}
+\item{informd}{Relative path to the Rmarkdown file, whose contents will be displayed in the modal.}
 
 \item{appdata}{Optional, the name (including extension) of one or more files stored in appdata that can be
 mock-uploaded. See details.}
-
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
 }
 \description{
 See matrixCtrlUI

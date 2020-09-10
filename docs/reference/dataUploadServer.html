@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shiny server function for data table upload module — dataUploadServer • DIVE</title>
+<title>Shiny server module function for user-uploaded data — dataUploadServer • DIVE</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,8 @@
 
 
 
-<meta property="og:title" content="Shiny server function for data table upload module — dataUploadServer" />
-<meta property="og:description" content="At its most basic, the module checks for and returns a data table from fileInput
-(if the uploaded file is not data in table format, the return will beNULL)." />
+<meta property="og:title" content="Shiny server module function for user-uploaded data — dataUploadServer" />
+<meta property="og:description" content="Return reactive user-uploaded or mock data after optional checks and modifications" />
 
 
 
@@ -104,14 +103,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Shiny server function for data table upload module</h1>
+    <h1>Shiny server module function for user-uploaded data</h1>
     
     <div class="hidden name"><code>dataUploadServer.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>At its most basic, the module checks for and returns a data table from <code>fileInput</code>
-(if the uploaded file is not data in table format, the return will be</p><pre><span class='kw'>NULL</span></pre><p>).</p>
+    <p>Return reactive user-uploaded or mock data after optional checks and modifications</p>
     </div>
 
     <pre class="usage"><span class='fu'>dataUploadServer</span>(
@@ -119,9 +117,9 @@
   asDT = <span class='fl'>TRUE</span>,
   removable = <span class='fl'>FALSE</span>,
   checkFun = <span class='kw'>NULL</span>,
-  informd = <span class='kw'>NULL</span>,
   appdata = <span class='kw'>NULL</span>,
-  checkappdata = <span class='kw'>F</span>
+  checkappdata = <span class='kw'>F</span>,
+  informd = <span class='kw'>NULL</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -129,11 +127,11 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>id</th>
-      <td><p>Namespace ID.</p></td>
+      <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
     </tr>
     <tr>
       <th>asDT</th>
-      <td><p>Logical flag to indicate whether data returned should be a data.table. If FALSE, <code>readLines</code> is used on file.</p></td>
+      <td><p>Logical flag to indicate whether data returned should be a <code>data.table</code>. If FALSE, <code>readLines</code> is used on file.</p></td>
     </tr>
     <tr>
       <th>removable</th>
@@ -145,37 +143,43 @@
 It should return a list containing message and result (result should be <code>NULL</code> when data fails checks).</p></td>
     </tr>
     <tr>
-      <th>informd</th>
-      <td><p>Optional, an Rmarkdown help file for infoOutput, e.g. requirements info.</p></td>
-    </tr>
-    <tr>
       <th>appdata</th>
       <td><p>Optional, the name (including extension) of one or more files stored in appdata that can be
 mock-uploaded. See details.</p></td>
     </tr>
     <tr>
       <th>checkappdata</th>
-      <td><p>Whether checkFun should be applied to appdata, normally FALSE.</p></td>
+      <td><p>Whether <code>checkFun</code> should be applied to appdata, normally FALSE.</p></td>
+    </tr>
+    <tr>
+      <th>informd</th>
+      <td><p>Relative path to the Rmarkdown file, whose contents will be displayed in the modal.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A data.table with a "filename" attribute containing the filename without extension,
-or <code>NULL</code> if the file input was not a table or returned as <code>NULL</code> from <code>checkFun</code>.</p>
+    <p>A <code>data.table</code> with a "filename" attribute containing the filename without extension,
+or <code>NULL</code> depending on <code>checkFun</code>, or <code>NULL</code> if the file was cleared.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>A check function can be optionally integrated into this module to perform additional
-"light" data checking or modification operations and make the the module somewhat adaptable for different uses.
-Some example check functions simply check for specific column names or data types.
-For more intense data processing that might involve multiple functions and/or side effects as part of a pipeline,
-one should really make a specialized module and pass the data into that intermediate module.</p>
-<p>File uploads can have "reset" behavior by specifying the optional <code>removable</code> parameter,
-where a remove button will appear after upload, allowing data to be "cleared", in which case the module returns <code>NULL</code>).</p>
-<p>The module also optionally incorporates <code><a href='infoOutput.html'>infoOutput</a></code> functionality to provide specifications for data.</p>
-<p>Finally, it is possible to perform a mock upload of a saved dataset, e.g. for demonstration purposes, that is triggered externally.
-The dataset is expected to be a .csv/.tsv file in a relative directory within the app directory.
-For instance, the dataset path can be "appdata/Demo.csv".</p>
+    <p>At its most basic, the module returns data from <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/fileInput.html'>fileInput</a></code>.
+However, a function can be optionally integrated with the <code>checkFun</code> option
+to perform additional light data checking or modification operations,
+making the the module more tailored for different uses and data expectations.
+(For more intense processing that might involve multiple steps and/or side effects as part of a pipeline,
+one should really make a specialized module and pass the data into that intermediate module
+instead of using <code>checkFun</code>.)</p>
+<p>File uploads can have <em>reset</em> behavior by specifying the <code>removable</code> parameter,
+where a remove button will appear after upload, allowing data to be cleared,
+after which the module returns <code>NULL</code>.</p>
+<p>Finally, it is possible to perform a mock upload of a saved dataset, triggered externally by another input,
+for demonstration purposes. The dataset is expected to be a .csv/.tsv file in
+a directory within the app directory. For instance, the relative dataset path can be "appdata/Demo.csv".</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p>Other dataUpload functions: 
+<code><a href='dataUploadUI.html'>dataUploadUI</a>()</code></p></div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

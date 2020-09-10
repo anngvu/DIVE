@@ -2,14 +2,16 @@
 #'
 #' Shiny app UI for matching application
 #'
-#' The application UI can be viewed as a default template of how to put together several module components,
-#' including \code{\link{newDataSetInput}}, \code{\link{refSubsetInput}}, \code{\link{cohortGraphOutput}},
-#' to overall enable interactive exploration and matching of two different datasets. Note that though the datasets
-#' are typically conceived as datasets of matchable patient cohorts, this could be other types of matchable data
-#' such as geographic sampling sites, etc.
+#' The application UI puts together multiple module components to enable
+#' exploration and matching of two different but same-type datasets.
+#' It places a \code{customDatasetInput} component for a user-uploaded input dataset in the top left
+#' and a \code{dataSubsetInput} component to allow selection of the match pool in the top right.
+#' The bottom half is a tab panel with tabs dynamically shown for a matching interface,
+#' result table and result plots.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param CSS Optional, location to an alternate CSS stylesheet to set look and feel of the module.
+#' @param refname Optional, name of the reference dataset.
 #' @param addonUI Optional, ui module function to display addon components.
 #' @param addontab If addonUI is given, should also give a name for the tab hosting addon ui components.
 #' @export
@@ -20,10 +22,9 @@ matchAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"
   fluidPage(theme = shinythemes::shinytheme("paper"),
             if(!is.null(CSS)) includeCSS(CSS),
 
-    fluidRow(style="margin-top:30px; margin-bottom:50px; margin-right:100px",
-             column(6, style="border-right: 1px solid lightgray;",
-                    newDatasetInput(ns("CohortX"))),
-             column(6, refSubsetInput(ns("ref"), refname = refname))
+    fluidRow(class = "match-cohorts", style="margin-top:30px; margin-bottom:50px; margin-right:100px",
+             column(6, customDatasetInput(ns("CohortX"))),
+             column(6, dataSubsetInput(ns("ref"), label = refname))
              ),
     fluidRow(style="margin-top:50px; margin-bottom:50px; margin-right:100px",
              column(1),
@@ -33,85 +34,77 @@ matchAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"
                     )
             )
     )
-
 }
 
 #' Shiny app server for matching and exploration of two datasets
 #'
 #' Shiny app server for matching and exploration of two datasets
 #'
-#' This server function puts together a number of modular components to
-#' implement the whole interaction of the matching application. Though originally composed for
-#' matching patient cohorts, this matching application can be used with data in different domains.
-#' The composition of this module allows inserting a addon-written module.
+#' This server function puts together modular components to
+#' implement the whole interaction of the matching application with several defaults
+#' to facilitate quick startup.
+#' Though originally conceived for matching and exploration of patient cohort datasets,
+#' this could be adapted to matchable data in other domains, such as geographic sampling sites, etc.
+#' This app module can also be viewed as a starting template to help
+#' compose a new matching app with a sufficiently different layout or functionality.
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param refdata Data.table of reference dataset.
-#' @param datakey Shared grouping parameter passed to \code{refSubset}, \code{newDataset}, \code{matchResult}.
-#' @param xname Character label for the external dataset, e.g. "CohortX" or "New Site" or "Comparison Dataset".
-#' @param refname Character label for the reference dataset.
-#' @param vars Variables allowed to be used for matching within \code{refdata}, which will be organized and
-#' displayed as the given named lists.
-#' @param guess Optional, a function for making initial guesses of matchable variables.
-#' @param subsets The subsets.
-#' @param subsetfeat Which variable to be used as the subset variable.
-#' @param factorx A naming pattern for factoring variables displayed.
-#' @param informd Optional, link to a help file that can be called with the info module.
-#' @param addon Optional, a self-contained module that doesn't interact with others,
-#' e.g. for extra summary plots. Needs to be passed in as name of the server module function.
-#' @param appdata Optional, a path to example application data (for demonstration purposes).
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param refname Name of the reference dataset, used for labels. Defaults to "Reference Cohort".
+#' @param refdata Reference dataset that can be matched against in whole or in part, i.e. the match pool.
+#' @param customdata A name for the appended colum to user-uploaded input data.
+#' This depends on the type of data expected. "Cohort" is the provided default for cohort-matching application.
+#' See \code{\link{customDatasetServer}}.
+#' @param defaultvalue Default attribute value to append to user-uploaded input data.
+#' "CohortX" is the provided default for cohort-matching application. See \code{\link{customDatasetServer}}.
+#' @inheritParams dataSubsetServer
+#' @inheritParams dataUploadServer
+#' @inheritParams matchLinkServer
+#' @inheritParams matchResultServer
+#' @inheritParams matchPlotServer
 #' @export
 matchAppServer <- function(id,
+                           refname = "Reference Cohort",
                            refdata,
-                           datakey, xname, refname,
+                           subsetv, subsets,
+                           customdata = "Cohort",
+                           defaultvalue = "CohortX",
                            vars, guess = NULL,
-                           subsets, subsetfeat,
-                           factorx,
                            informd = system.file("help/cohort_exchange.Rmd", package = "DIVE"),
-                           addon = NULL, appdata = NULL) {
+                           appdata = NULL) {
 
   moduleServer(id, function(input, output, session) {
 
-    if(!is.null(addon)) callModule(addon, "addon")
+    reference <- dataSubsetServer(id = "ref",
+                                  dataset = refdata,
+                                  subsetv = subsetv,
+                                  subsets = subsets)
 
-    newCohort <- newDatasetServer("CohortX",
-                                  datakey = datakey,
-                                  xname = xname,
-                                  checkFun = checkCohortData,
-                                  informd = informd,
-                                  appdata = appdata)
+    newcohort <- customDatasetServer(id = "CohortX",
+                                     customdata = customdata,
+                                     defaultvalue = defaultvalue,
+                                     checkfun = checkCohortData,
+                                     informd = informd,
+                                     appdata = appdata)
 
-    # Optional cross-checking
-    crossCheck <- callModule(intermediate, "internal",
-                             data = newCohort,
-                             Fun = xCheckID)
+    # Cross-checking for internal matching where newcohort includes ids in reference
+    refcohort <- reactive({ excludePresent(data1 = newcohort(), data2 = reference()) })
 
-    reference <- refSubsetServer("ref",
-                                 refdata = refdata,
-                                 subsetfeat = subsetfeat,
-                                 subsets = subsets,
-                                 datakey = datakey,
-                                 refname = refname,
-                                 exclude = crossCheck)
 
-    parameters <- matchLinkServer("params",
-                                  refdata = reference,
-                                  setX = newCohort,
+    parameters <- matchLinkServer(id = "params",
+                                  refdata = refcohort,
+                                  inputdata = newcohort,
                                   vars = vars,
                                   guess = guess)
 
-    results <-  matchResultServer("results",
-                                  refSubset = reference,
-                                  setX = newCohort,
+    results <-  matchResultServer(id = "results",
+                                  refdata = refcohort,
+                                  inputdata = newcohort,
                                   params = parameters,
-                                  sourcecol = datakey)
+                                  sourcecol = "Cohort")
 
-    explore <- matchPlotServer("explore",
-                               s1Data = refdata,
-                               s2Data = newCohort,
-                               datakey = datakey,
-                               refname = refname,
-                               factorx = factorx,
+    explore <- matchPlotServer(id = "explore",
+                               s1data = refcohort,
+                               s2data = newcohort,
                                results = results)
 
     #-- Output tabs display logic ------------------------------------------------------------------------------------------#
@@ -121,7 +114,7 @@ matchAppServer <- function(id,
     # (vs. currently adding tab if it's the first interaction and showing/hiding for all subsequent)
     userfirst <- reactiveValues(upload = TRUE, result = TRUE)
 
-    observeEvent(newCohort(), {
+    observeEvent(newcohort(), {
       if(userfirst$upload) {
         appendTab("tabs", select = T,
                   tabPanel("Match parameters", matchLinkUI(session$ns("params"))))
@@ -134,9 +127,7 @@ matchAppServer <- function(id,
       appendTab("tabs",
                 tabPanel("Explore",
                          matchPlotUI(session$ns("explore"),
-                                     s1Label = refname, s1Data = refdata,
-                                     s2Label = xname, s2Data = newCohort,
-                                     placeholder = "(select from attributes)")))
+                                     s1label = refname, s2label = defaultvalue)))
     })
 
     observeEvent(results$matchtable, {
@@ -157,7 +148,7 @@ matchAppServer <- function(id,
 #' Wrapper to launch app at console
 #'
 #' @param ns Optional namespace for app, passed into server module.
-#' @param ... Parameters passed into server modules.
+#' @param ... Parameters passed into server module.
 #' @export
 matchApp <- function(ns = NULL, ...) {
   ui <- matchAppUI(ns)

@@ -10,8 +10,7 @@ geneVUI(id)
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 }
 \description{
-Currently, this provides options to subset genomics data using a custom list input
-or GO and Reactome annotations.
+Provides options to subset genomics data (using gene accessions)
 }
 \seealso{
 Other multiVUI module functions: 

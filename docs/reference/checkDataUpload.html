@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>General check for uploaded data — checkDataUpload • DIVE</title>
+<title>General check function for user-uploaded data — checkDataUpload • DIVE</title>
 
 
 <!-- jquery -->
@@ -39,16 +39,19 @@
 
 
 
-<meta property="og:title" content="General check for uploaded data — checkDataUpload" />
-<meta property="og:description" content="This is generally meant for dataset upload modules. Checks for (in this order):
-one ID column, which is by default converted to character
+<meta property="og:title" content="General check function for user-uploaded data — checkDataUpload" />
+<meta property="og:description" content="This is used in dataUploadServer. Checks for (in this order):
+exactly one ID column, which is by default converted to character
 actual data columns besides ID
 all data columns are numeric
-If none of the above, returns the data in result and NULL in message,
-otherwise the method witholds the data by returning NULL and
-message will be non-NULL, containing the issue noted.
-For some use cases might want return data even if there are issues
-by specifying result = data." />
+When all of the above pass without issues, the function returns a named list
+with data contained in result and NULL contained in message,
+otherwise it witholds the data by returning NULL for result and
+message will contain a character vector of the issue(s) noted.
+If the downstream use for data requires different check steps and transformations,
+this function can be replaced as long as the new one uses the same return structure.
+For some use cases, if it is desired that we return data even if there are issues,
+use result = data and rely on the message output." />
 
 
 
@@ -111,21 +114,24 @@ by specifying result = data." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>General check for uploaded data</h1>
+    <h1>General check function for user-uploaded data</h1>
     
     <div class="hidden name"><code>checkDataUpload.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This is generally meant for dataset upload modules. Checks for (in this order):</p><ol>
-<li><p>one ID column, which is by default converted to character</p></li>
+    <p>This is used in <code><a href='dataUploadServer.html'>dataUploadServer</a></code>. Checks for (in this order):</p><ol>
+<li><p>exactly one ID column, which is by default converted to character</p></li>
 <li><p>actual data columns besides ID</p></li>
 <li><p>all data columns are numeric</p></li>
-</ol><p>If none of the above, returns the data in <code>result</code> and NULL in <code>message</code>,
-otherwise the method witholds the data by returning NULL and
-message will be non-NULL, containing the issue noted.
-For some use cases might want return data even if there are issues
-by specifying <code>result = data</code>.</p>
+</ol><p>When all of the above pass without issues, the function returns a named list
+with data contained in <code>result</code> and <code>NULL</code> contained in <code>message</code>,
+otherwise it witholds the data by returning <code>NULL</code> for <code>result</code> and
+<code>message</code> will contain a character vector of the issue(s) noted.
+If the downstream use for data requires different check steps and transformations,
+this function can be replaced as long as the new one uses the same return structure.
+For some use cases, if it is desired that we return data even if there are issues,
+use <code>result = data</code> and rely on the <code>message</code> output.</p>
     </div>
 
     <pre class="usage"><span class='fu'>checkDataUpload</span>(<span class='kw'>data</span>, result = <span class='kw'>NULL</span>, idcol = <span class='st'>"ID"</span>, idchar = <span class='fl'>TRUE</span>, html = <span class='fl'>TRUE</span>)</pre>
@@ -135,29 +141,29 @@ by specifying <code>result = data</code>.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>data</th>
-      <td><p>A data.table.</p></td>
+      <td><p>A <code>data.table</code>.</p></td>
     </tr>
     <tr>
       <th>result</th>
-      <td><p>What to return in place of data if issues are found with the data.</p></td>
+      <td><p>What to return in place of data if issues are found with the data. Defaults to <code>NULL</code>.</p></td>
     </tr>
     <tr>
       <th>idcol</th>
-      <td><p>Name of ID column, defaulting to "ID".</p></td>
+      <td><p>Name of expected ID column, defaulting to "ID".</p></td>
     </tr>
     <tr>
       <th>idchar</th>
-      <td><p>Logical with default TRUE, whether to convert ID column to character.</p></td>
+      <td><p>Logical with default TRUE, for whether to convert ID column to character.</p></td>
     </tr>
     <tr>
       <th>html</th>
-      <td><p>Logical with default TRUE, whether to format message for HTML display.</p></td>
+      <td><p>Logical with default TRUE, for whether to format message with HTML for display.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list with  <code>result</code> and  <code>message</code>.</p>
+    <p>A list with <code>result</code> and <code>message</code>. See details.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

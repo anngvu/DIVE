@@ -33,11 +33,10 @@ geneVUI <- function(id) {
 #'
 #' @family multiVApp module functions
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param choices Choices for selectInput.
-#' @param prelist Optional, a named list of source files that store pre-compiled sets for convenient access.
 #' @return A vector that can be used to subset a high dimensional matrix,
-#' which should be passed in to the parameter \code{selected} in the \code{\link{multiV}} server module.
+#' which should be passed in to the parameter \code{selected} in the \code{\link{multiVServer}} module.
 #' @export
 geneVServer <- function(id,
                         choices) {

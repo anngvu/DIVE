@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shiny module UI to display a modal on click — infoOutput • DIVE</title>
+<title>Shiny module server for customized user-uploaded dataset — customDatasetServer • DIVE</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Shiny module UI to display a modal on click — infoOutput" />
-<meta property="og:description" content="Create a clickable link or button that displays a modal dialog with customizable content" />
+<meta property="og:title" content="Shiny module server for customized user-uploaded dataset — customDatasetServer" />
+<meta property="og:description" content="An extension of dataUploadServer" />
 
 
 
@@ -103,16 +103,23 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Shiny module UI to display a modal on click</h1>
+    <h1>Shiny module server for customized user-uploaded dataset</h1>
     
-    <div class="hidden name"><code>infoOutput.Rd</code></div>
+    <div class="hidden name"><code>customDatasetServer.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Create a clickable link or button that displays a modal dialog with customizable content</p>
+    <p>An extension of <code><a href='dataUploadServer.html'>dataUploadServer</a></code></p>
     </div>
 
-    <pre class="usage"><span class='fu'>infoOutput</span>(<span class='kw'>id</span>, label = <span class='st'>"req's"</span>, i = <span class='st'>"exclamation-circle"</span>, link = <span class='kw'>T</span>)</pre>
+    <pre class="usage"><span class='fu'>customDatasetServer</span>(
+  <span class='kw'>id</span>,
+  <span class='kw'>customdata</span>,
+  defaultvalue = <span class='kw'>NULL</span>,
+  checkfun = <span class='kw'>NULL</span>,
+  informd = <span class='kw'>NULL</span>,
+  appdata = <span class='kw'>NULL</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -122,22 +129,38 @@
       <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
     </tr>
     <tr>
-      <th>label</th>
-      <td><p>Label, typically for specifying type of info, defaults to "Req's".</p></td>
+      <th>customdata</th>
+      <td><p>Optional, a named list containing name/label to be used in creating the key column.</p></td>
     </tr>
     <tr>
-      <th>i</th>
-      <td><p>Font-awesome icon name to display next to label, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/icon.html'>icon</a></code>.</p></td>
+      <th>defaultvalue</th>
+      <td><p>Optional, a default value to use.</p></td>
     </tr>
     <tr>
-      <th>link</th>
-      <td><p>Whether to use link or button. Defaults to <code>actionLink</code>, set FALSE to use <code>actionButton</code>.</p></td>
+      <th>informd</th>
+      <td><p>Relative path to the Rmarkdown file, whose contents will be displayed in the modal.</p></td>
+    </tr>
+    <tr>
+      <th>appdata</th>
+      <td><p>Optional, the name (including extension) of one or more files stored in appdata that can be
+mock-uploaded. See details.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>An actionLink or actionButton that calls a modal.</p>
+    <p>A reactive <code>data.table</code> of the modified uploaded data.</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>The server extends <code><a href='dataUploadServer.html'>dataUploadServer</a></code> by appending to the uploaded data
+a custom data column with name specified by <code>customdata</code> and value filled from user input.
+This is conceptually the same as described in <code><a href='dataSubsetServer.html'>dataSubsetServer</a></code>,
+with the only difference being that <code>customdata</code> is appended to a user-uploaded
+dataset instead of an existing subsettable dataset.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p>Other customDataset functions: 
+<code><a href='customDatasetInput.html'>customDatasetInput</a>()</code></p></div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

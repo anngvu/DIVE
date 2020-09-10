@@ -4,22 +4,32 @@
 \alias{matchResultServer}
 \title{Shiny module server for generating match results output}
 \usage{
-matchResultServer(id, refSubset, setX, params, sourcecol)
+matchResultServer(id, refdata, inputdata, params, sourcecol)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{refSubset}{Reactive reference cohort subset data.table, i.e. from \code{refSubset}.}
+\item{refdata}{Reactive refdata dataset as a \code{data.table}.}
 
-\item{setX}{Reactive data.table of comparison subset, i.e from \code{newDataset} module.}
+\item{inputdata}{Reactive \code{data.table} of the comparison dataset, e.g from \code{\link{newDatasetServer}}.}
 
-\item{params}{Reactive parameters data, i.e. from \code{matchLink} module.}
+\item{params}{Reactive parameters data, e.g. from \code{\link{matchLinkServer}}.}
 
 \item{sourcecol}{Name for the source key column of the joined dataset.}
 }
 \value{
-Reactive values containing params, intermediate results, pair, and matchtable. See \code{matchPair}.
+Reactive values containing params, intermediate results, pair, and matchtable.
 }
 \description{
-Shiny module server for generating match results output
+Carries out matching and returns a match result reactive object
+}
+\details{
+The module initializes a \code{results} reactive values list containing \code{NULL} values and
+whenever new \code{inputdata} is passed in (clearing previous results).
+The matching doesn't run until a valid \code{params} reactive object is provided,
+which will call upon the underlying handler \code{matchPair}.
+If successful, the module updates and returns the \code{results} reactive values list object
+with \code{results$params} \code{results$intermediate} \code{results$pair} \code{results$matchtable}.
+Though \code{results$matchtable} is rendered in this module's UI with its own download handler,
+it and the rest are relevant data necessarily forwarded to \code{\link{matchPlotServer}}.
 }

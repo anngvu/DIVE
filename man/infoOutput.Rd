@@ -2,22 +2,22 @@
 % Please edit documentation in R/info.R
 \name{infoOutput}
 \alias{infoOutput}
-\title{Shiny module UI to display a modal with additional info}
+\title{Shiny module UI to display a modal on click}
 \usage{
 infoOutput(id, label = "req's", i = "exclamation-circle", link = T)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{label}{Label, typically for specifying type of info.}
+\item{label}{Label, typically for specifying type of info, defaults to "Req's".}
 
-\item{i}{Icon type to display next to label.}
+\item{i}{Font-awesome icon name to display next to label, see \code{shiny::\link[shiny]{icon}}.}
 
-\item{link}{Defaults to actionLink, set false for showing actionButton}
+\item{link}{Whether to use link or button. Defaults to \code{actionLink}, set FALSE to use \code{actionButton}.}
 }
 \value{
-An actionLink or actionButton to call an info module.
+An actionLink or actionButton that calls a modal.
 }
 \description{
-Shiny module UI to display a modal with additional info
+Create a clickable link or button that displays a modal dialog with customizable content
 }

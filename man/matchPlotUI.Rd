@@ -2,26 +2,32 @@
 % Please edit documentation in R/matchPlot.R
 \name{matchPlotUI}
 \alias{matchPlotUI}
-\title{Shiny module UI for attribute-by-attribute comparison of two datasets}
+\title{Shiny module UI for comparison histodot plots of attributes in two datasets}
 \usage{
-matchPlotUI(id, s1Label = "", s1Data, s2Label = "", s2Data, placeholder = "")
+matchPlotUI(
+  id,
+  s1label = NULL,
+  s2label = NULL,
+  placeholder = "(select from attributes)"
+)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{s1Label}{Optional, name or title of "source 1" dataset to display.}
+\item{s1label}{Optional, label for first selection.}
 
-\item{s1Data}{The full (non-reactive) "source 1" dataset, considered the reference dataset.}
+\item{s2label}{Optional, label for second selection.}
 
-\item{s2Label}{Optional, name or title of "source 2" dataset to display.}
-
-\item{s2Data}{Reactive "source 2" data that will be compared to the first dataset, usually coming from newDatasetInput.}
-
-\item{placeholder}{Optional, placeholder for attribute selection menus.}
+\item{placeholder}{Optional, placeholder for selection menus.}
 }
 \value{
 Menu UI for selecting attributes from s1 and s2 datasets.
 }
 \description{
-Allows comparison of two datasets (cohorts, in the original case).
+Histodot plots of two datasets side-by-side, with or without match information
 }
+\seealso{
+Other matchPlot functions: 
+\code{\link{matchPlotServer}()}
+}
+\concept{matchPlot functions}

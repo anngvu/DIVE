@@ -2,7 +2,6 @@
 #'
 #' Creates app UI for a drilldown plot component
 #'
-#' @inherits dualDrilldownServer sections
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @export
 dualDrilldownUI <- function(id) {

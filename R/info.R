@@ -1,20 +1,24 @@
-#' Shiny module UI to display a modal with additional info
+#' Shiny module UI to display a modal on click
+#'
+#' Create a clickable link or button that displays a modal dialog with customizable content
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param label Label, typically for specifying type of info.
-#' @param i Icon type to display next to label.
-#' @param link Defaults to actionLink, set false for showing actionButton
-#' @return An actionLink or actionButton to call an info module.
+#' @param label Label, typically for specifying type of info, defaults to "Req's".
+#' @param i Font-awesome icon name to display next to label, see \code{shiny::\link[shiny]{icon}}.
+#' @param link Whether to use link or button. Defaults to \code{actionLink}, set FALSE to use \code{actionButton}.
+#' @return An actionLink or actionButton that calls a modal.
 #' @export
 infoOutput <- function(id, label = "req's", i = "exclamation-circle", link = T) {
   ns <- NS(id)
   if(link) actionLink(ns("moreInfo"), label = label, icon = icon(i)) else actionButton(ns("moreInfo"), label = label, icon = icon(i))
 }
 
-#' Server module function for displaying an info modal
+#' Server module function to display a modal on click
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param informd Relative path to the Rmarkdown info file, whose contents will be displayed in the modal.
+#' Display content from Rmarkdown file when link or button is clicked
+#'
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param informd Relative path to the Rmarkdown file, whose contents will be displayed in the modal.
 #' @export
 infoServer <- function(id, informd) {
 

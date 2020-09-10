@@ -2,7 +2,7 @@
 % Please edit documentation in R/matchLink.R
 \name{matchLinkUI}
 \alias{matchLinkUI}
-\title{Shiny module UI for interactive drag-and-drop variable harmonization of two datasets}
+\title{Shiny module UI for interactive drag-and-drop variable linkage or harmonization}
 \usage{
 matchLinkUI(id)
 }
@@ -13,5 +13,5 @@ matchLinkUI(id)
 Interactive drag-and-drop UI elements.
 }
 \description{
-Shiny module UI for interactive drag-and-drop variable harmonization of two datasets
+Shiny module UI for interactive drag-and-drop variable linkage or harmonization
 }

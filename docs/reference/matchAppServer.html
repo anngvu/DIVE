@@ -114,17 +114,15 @@
 
     <pre class="usage"><span class='fu'>matchAppServer</span>(
   <span class='kw'>id</span>,
+  refname = <span class='st'>"Reference Cohort"</span>,
   <span class='kw'>refdata</span>,
-  <span class='kw'>datakey</span>,
-  <span class='kw'>xname</span>,
-  <span class='kw'>refname</span>,
+  <span class='kw'>subsetv</span>,
+  <span class='kw'>subsets</span>,
+  customdata = <span class='st'>"Cohort"</span>,
+  defaultvalue = <span class='st'>"CohortX"</span>,
   <span class='kw'>vars</span>,
   guess = <span class='kw'>NULL</span>,
-  <span class='kw'>subsets</span>,
-  <span class='kw'>subsetfeat</span>,
-  <span class='kw'>factorx</span>,
   informd = <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"help/cohort_exchange.Rmd"</span>, package = <span class='st'>"DIVE"</span>),
-  addon = <span class='kw'>NULL</span>,
   appdata = <span class='kw'>NULL</span>
 )</pre>
 
@@ -132,67 +130,65 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>refdata</th>
-      <td><p>Data.table of reference dataset.</p></td>
-    </tr>
-    <tr>
-      <th>datakey</th>
-      <td><p>Shared grouping parameter passed to <code>refSubset</code>, <code>newDataset</code>, <code>matchResult</code>.</p></td>
-    </tr>
-    <tr>
-      <th>xname</th>
-      <td><p>Character label for the external dataset, e.g. "CohortX" or "New Site" or "Comparison Dataset".</p></td>
+      <th>id</th>
+      <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
     </tr>
     <tr>
       <th>refname</th>
-      <td><p>Character label for the reference dataset.</p></td>
+      <td><p>Name of the reference dataset, used for labels. Defaults to "Reference Cohort".</p></td>
     </tr>
     <tr>
-      <th>vars</th>
-      <td><p>Variables allowed to be used for matching within <code>refdata</code>, which will be organized and
-displayed as the given named lists.</p></td>
+      <th>refdata</th>
+      <td><p>Reference dataset that can be matched against in whole or in part, i.e. the match pool.</p></td>
     </tr>
     <tr>
-      <th>guess</th>
-      <td><p>Optional, a function for making initial guesses of matchable variables.</p></td>
+      <th>subsetv</th>
+      <td><p>Name of the subset-by variable in the data.</p></td>
     </tr>
     <tr>
       <th>subsets</th>
-      <td><p>The subsets.</p></td>
+      <td><p>Optional, a list to display groups with higher-level grouping in the selection.
+By default, the selection is composed of unique values in <code>subsetv</code>.</p></td>
     </tr>
     <tr>
-      <th>subsetfeat</th>
-      <td><p>Which variable to be used as the subset variable.</p></td>
+      <th>customdata</th>
+      <td><p>A name for the appended colum to user-uploaded input data.
+This depends on the type of data expected. "Cohort" is the provided default for cohort-matching application.
+See <code><a href='customDatasetServer.html'>customDatasetServer</a></code>.</p></td>
     </tr>
     <tr>
-      <th>factorx</th>
-      <td><p>A naming pattern for factoring variables displayed.</p></td>
+      <th>defaultvalue</th>
+      <td><p>Default attribute value to append to user-uploaded input data.
+"CohortX" is the provided default for cohort-matching application. See <code><a href='customDatasetServer.html'>customDatasetServer</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>vars</th>
+      <td><p>A named list of a variable set (or sets) in the data that is allowed for matching. See details.</p></td>
+    </tr>
+    <tr>
+      <th>guess</th>
+      <td><p>Optional, name of the function to call for initial guessing of harmonized variables. See details.</p></td>
     </tr>
     <tr>
       <th>informd</th>
-      <td><p>Optional, link to a help file that can be called with the info module.</p></td>
-    </tr>
-    <tr>
-      <th>addon</th>
-      <td><p>Optional, a self-contained module that doesn't interact with others,
-e.g. for extra summary plots. Needs to be passed in as name of the server module function.</p></td>
+      <td><p>Relative path to the Rmarkdown file, whose contents will be displayed in the modal.</p></td>
     </tr>
     <tr>
       <th>appdata</th>
-      <td><p>Optional, a path to example application data (for demonstration purposes).</p></td>
-    </tr>
-    <tr>
-      <th>input, output, session</th>
-      <td><p>Standard <code>shiny</code> boilerplate.</p></td>
+      <td><p>Optional, the name (including extension) of one or more files stored in appdata that can be
+mock-uploaded. See details.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>This server function puts together a number of modular components to
-implement the whole interaction of the matching application. Though originally composed for
-matching patient cohorts, this matching application can be used with data in different domains.
-The composition of this module allows inserting a addon-written module.</p>
+    <p>This server function puts together modular components to
+implement the whole interaction of the matching application with several defaults
+to facilitate quick startup.
+Though originally conceived for matching and exploration of patient cohort datasets,
+this could be adapted to matchable data in other domains, such as geographic sampling sites, etc.
+This app module can also be viewed as a starting template to help
+compose a new matching app with a sufficiently different layout or functionality.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

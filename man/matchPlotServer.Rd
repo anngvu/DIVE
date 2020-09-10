@@ -2,25 +2,31 @@
 % Please edit documentation in R/matchPlot.R
 \name{matchPlotServer}
 \alias{matchPlotServer}
-\title{Shiny module server for generating comparative histodot plots of attributes in two datasets}
+\title{Shiny module server for comparison histodot plots of attributes in two datasets}
 \usage{
-matchPlotServer(id, s1Data, s2Data, datakey, refname, results, factorx)
+matchPlotServer(id, s1data, s2data, results)
 }
 \arguments{
-\item{s1Data}{The full "source 1" dataset, considered the reference dataset.}
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{s2Data}{Reactive "source 2" data that will be compared to the first dataset, usually coming from newDatasetInput.}
+\item{s1data}{Reactive data from source #1 (often the reference dataset).}
 
-\item{results}{The reactive values return of \code{matchResult}.}
+\item{s2data}{Reactive data from source #2, such as from \code{\link{newDatasetServer}}.}
 
-\item{factorx}{Attribute name suffix/pattern to indicate which should be plotted as factors.}
-
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
-}
-\value{
-Histodot plots for comparing composition and matches between s1Data and s2Data.
+\item{results}{Optional, reactive return value of \code{\link{matchResultServer}}.}
 }
 \description{
-Compare the composition between two datasets. In the cohort matching use case, if there is match data,
-the plots show which subsets are matched and provides a means of visualizing the match results.
+Histodot plots of two datasets side-by-side, with or without match information
 }
+\details{
+The module was implemented to compare two cohort datasets but can also allow comparison
+of other types of datasets that are conceptually similiar.
+For the original cohort matching use case, if there happens to be match return values
+from \code{\link{matchResultServer}} passed to \code{results},
+the plots will add color-coding to visualize which individuals are matched.
+}
+\seealso{
+Other matchPlot functions: 
+\code{\link{matchPlotUI}()}
+}
+\concept{matchPlot functions}

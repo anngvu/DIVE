@@ -2,12 +2,10 @@
 % Please edit documentation in R/checks.R
 \name{checkCohortData}
 \alias{checkCohortData}
-\title{Check match data
-Checks that data has an ID column and that data is numeric/numeric factors}
+\title{Check cohort data}
 \usage{
 checkCohortData(cohdata, message = NULL, result = NULL)
 }
 \description{
-Check match data
-Checks that data has an ID column and that data is numeric/numeric factors
+Check that data has an ID column and that data is numeric/numeric factors
 }

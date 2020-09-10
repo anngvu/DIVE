@@ -40,7 +40,7 @@
 
 
 <meta property="og:title" content="Shiny module server for generating match results output — matchResultServer" />
-<meta property="og:description" content="Shiny module server for generating match results output" />
+<meta property="og:description" content="Carries out matching and returns a match result reactive object" />
 
 
 
@@ -109,10 +109,10 @@
     </div>
 
     <div class="ref-description">
-    <p>Shiny module server for generating match results output</p>
+    <p>Carries out matching and returns a match result reactive object</p>
     </div>
 
-    <pre class="usage"><span class='fu'>matchResultServer</span>(<span class='kw'>id</span>, <span class='kw'>refSubset</span>, <span class='kw'>setX</span>, <span class='kw'>params</span>, <span class='kw'>sourcecol</span>)</pre>
+    <pre class="usage"><span class='fu'>matchResultServer</span>(<span class='kw'>id</span>, <span class='kw'>refdata</span>, <span class='kw'>inputdata</span>, <span class='kw'>params</span>, <span class='kw'>sourcecol</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -122,16 +122,16 @@
       <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
     </tr>
     <tr>
-      <th>refSubset</th>
-      <td><p>Reactive reference cohort subset data.table, i.e. from <code>refSubset</code>.</p></td>
+      <th>refdata</th>
+      <td><p>Reactive refdata dataset as a <code>data.table</code>.</p></td>
     </tr>
     <tr>
-      <th>setX</th>
-      <td><p>Reactive data.table of comparison subset, i.e from <code>newDataset</code> module.</p></td>
+      <th>inputdata</th>
+      <td><p>Reactive <code>data.table</code> of the comparison dataset, e.g from <code>newDatasetServer</code>.</p></td>
     </tr>
     <tr>
       <th>params</th>
-      <td><p>Reactive parameters data, i.e. from <code>matchLink</code> module.</p></td>
+      <td><p>Reactive parameters data, e.g. from <code><a href='matchLinkServer.html'>matchLinkServer</a></code>.</p></td>
     </tr>
     <tr>
       <th>sourcecol</th>
@@ -141,7 +141,17 @@
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Reactive values containing params, intermediate results, pair, and matchtable. See <code>matchPair</code>.</p>
+    <p>Reactive values containing params, intermediate results, pair, and matchtable.</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>The module initializes a <code>results</code> reactive values list containing <code>NULL</code> values and
+whenever new <code>inputdata</code> is passed in (clearing previous results).
+The matching doesn't run until a valid <code>params</code> reactive object is provided,
+which will call upon the underlying handler <code>matchPair</code>.
+If successful, the module updates and returns the <code>results</code> reactive values list object
+with <code>results$params</code> <code>results$intermediate</code> <code>results$pair</code> <code>results$matchtable</code>.
+Though <code>results$matchtable</code> is rendered in this module's UI with its own download handler,
+it and the rest are relevant data necessarily forwarded to <code><a href='matchPlotServer.html'>matchPlotServer</a></code>.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

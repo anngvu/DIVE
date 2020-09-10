@@ -9,7 +9,7 @@ matchApp(ns = NULL, ...)
 \arguments{
 \item{ns}{Optional namespace for app, passed into server module.}
 
-\item{...}{Parameters passed into server modules.}
+\item{...}{Parameters passed into server module.}
 }
 \description{
 Wrapper to launch app at console

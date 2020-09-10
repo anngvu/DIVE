@@ -1,56 +1,56 @@
-#' Shiny module UI for attribute-by-attribute comparison of two datasets
+#' Shiny module UI for comparison histodot plots of attributes in two datasets
 #'
-#' Allows comparison of two datasets (cohorts, in the original case).
+#' Histodot plots of two datasets side-by-side, with or without match information
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param s1Label Optional, name or title of "source 1" dataset to display.
-#' @param s1Data The full (non-reactive) "source 1" dataset, considered the reference dataset.
-#' @param s2Label Optional, name or title of "source 2" dataset to display.
-#' @param s2Data Reactive "source 2" data that will be compared to the first dataset, usually coming from newDatasetInput.
-#' @param placeholder Optional, placeholder for attribute selection menus.
+#' @param s1label Optional, label for first selection.
+#' @param s2label Optional, label for second selection.
+#' @param placeholder Optional, placeholder for selection menus.
 #' @return Menu UI for selecting attributes from s1 and s2 datasets.
+#' @family matchPlot functions
 #' @export
-matchPlotUI <- function(id, s1Label = "", s1Data, s2Label = "", s2Data, placeholder = "") {
+matchPlotUI <- function(id, s1label = NULL, s2label = NULL, placeholder = "(select from attributes)") {
   ns <- NS(id)
   renderjs <- I("{ option: function(item, escape) {
                    return '<div class=\"unused covariate\">' + escape(item.value) + '</div><br>' }
                 }")
-  tags$div(id = "matchPlotUI",
-    fluidRow(
-      column(6, div(id = "s2Attributes",
-                    h4(s2Label),
-                    selectizeInput(ns("s2Attrs"), "", choices = c("", removeID(names(s2Data()))), selected = character(0),
-                                   options = list(placeholder = placeholder, render = renderjs))
-      )),
-      column(6, div(id = "s1Attributes",
-                    h4(s1Label),
-                    selectizeInput(ns("s1Attrs"), "", choices = c("", removeID(names(s1Data))), selected = character(0),
-                                   options = list(placeholder = placeholder,
-                                   render = renderjs))
-      ))
-    ),
-    fluidRow(align = "center",
-     plotOutput(ns("plot"), width = "90%")
-    )
+  tags$div(class = "match-plot-ui", id = ns("match-plot-ui"),
+    tags$div(id = ns("s2-select-container"),
+             selectizeInput(ns("s2_select"), s2label, choices = "", selected = "",
+                            options = list(placeholder = placeholder, render = renderjs))),
+    tags$div(id = ns("s1-select-container"),
+             selectizeInput(ns("s1_select"), s1label, choices = "", selected = "",
+                            options = list(placeholder = placeholder, render = renderjs))),
+    tags$div(plotOutput(ns("plot")))
   )
 }
 
-#' Shiny module server for generating comparative histodot plots of attributes in two datasets
+#' Shiny module server for comparison histodot plots of attributes in two datasets
 #'
-#' Compare the composition between two datasets. In the cohort matching use case, if there is match data,
-#' the plots show which subsets are matched and provides a means of visualizing the match results.
+#' Histodot plots of two datasets side-by-side, with or without match information
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param s1Data The full "source 1" dataset, considered the reference dataset.
-#' @param s2Data Reactive "source 2" data that will be compared to the first dataset, usually coming from newDatasetInput.
-#' @param results The reactive values return of \code{matchResult}.
-#' @param factorx Attribute name suffix/pattern to indicate which should be plotted as factors.
-#' @return Histodot plots for comparing composition and matches between s1Data and s2Data.
+#' The module was implemented to compare two cohort datasets but can also allow comparison
+#' of other types of datasets that are conceptually similiar.
+#' For the original cohort matching use case, if there happens to be match return values
+#' from \code{\link{matchResultServer}} passed to \code{results},
+#' the plots will add color-coding to visualize which individuals are matched.
+#'
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param s1data Reactive data from source #1 (often the reference dataset).
+#' @param s2data Reactive data from source #2, such as from \code{\link{newDatasetServer}}.
+#' @param results Optional, reactive return value of \code{\link{matchResultServer}}.
+#' @family matchPlot functions
 #' @export
 matchPlotServer <- function(id,
-                            s1Data, s2Data, datakey, refname, results, factorx) {
+                            s1data, s2data,
+                            results) {
 
   moduleServer(id, function(input, output, session) {
+
+    observe({
+      updateSelectizeInput(session, "s2_select", choices = c("", removeID(names(s2data()))))
+      updateSelectizeInput(session, "s1_select", choices = c("", removeID(names(s1data()))))
+    })
 
     renderjs <- I("{ option: function(item, escape) {
                        return item.optgroup == 'Matched'?
@@ -60,81 +60,94 @@ matchPlotServer <- function(id,
 
     # Update select menu to partition attributes that were used for matching from "Other" non-matching attributes
     observeEvent(results$params, {
-      refli <- list(Matched = names(results$params), Other = removeID(setdiff(names(s1Data), names(results$params))))
-      extli <- list(Matched = unname(results$params), Other = removeID(setdiff(names(s2Data()), results$params)))
-      updateSelectizeInput(session, "s1Attrs", "", choices = refli,
+      s1list <- list(Matched = names(results$params), Other = removeID(setdiff(names(s1data()), names(results$params))))
+      s2list <- list(Matched = unname(results$params), Other = removeID(setdiff(names(s2data()), results$params)))
+      updateSelectizeInput(session, "s1_select", "", choices = s1list,
                            selected = character(0), server = T,
-                           options = list(placeholder = "(data attributes)",
-                                          render = renderjs))
-      updateSelectizeInput(session, "s2Attrs", "", choices = extli,
+                           options = list(placeholder = "(data attributes)", render = renderjs))
+      updateSelectizeInput(session, "s2_select", "", choices = s2list,
                            selected = character(0), server = T,
                            options = list(placeholder = "(data attributes)", render = renderjs))
     })
 
-    # Plotting
-    s1Plot <- reactiveValues(data = NULL, p = NULL)
-    s2Plot <- reactiveValues(data = NULL, p = NULL)
+    # Plots
+    s1Plot <- reactiveVal(NULL)
+    s2Plot <- reactiveVal(NULL)
+
+    # Appends column Matched (used for fill color) whenever results$matchtable is non-null
+    s1_localdata <- reactive({
+      data <- as.data.frame(s1data())
+      if(!is.null(results$matchtable)) {
+        matches <- results$matchtable$ID
+        data$Matched <- ifelse(data$ID %in% matches, "matched", "un-matched")
+      } else {
+        data$Matched <- "un-matched"
+      }
+      data
+    })
+
+    s2_localdata <- reactive({
+      data <- as.data.frame(s2data())
+      if(!is.null(results$matchtable)) {
+        matches <- results$matchtable$match.ID
+        data$Matched <- ifelse(data$ID %in% matches, "matched", "un-matched")
+      } else {
+        data$Matched <- "un-matched"
+      }
+      data
+    })
 
     plotMatched <- function(y) {
       data <- as.data.frame(results$intermediate)
-      data$Matched <- factor(ifelse(is.na(results$pair), "un-matched", "matched"), levels = c("un-matched", "matched"))
-      p <- cohistPlot(data, y = y, factorx = factorx)
-      s1Plot$data <- data
-      s1Plot$p <- p
-      s2Plot$data <- s2Plot$p <- NULL
+      data$Matched <- ifelse(is.na(results$pair), "un-matched", "matched")
+      p <- cohistPlot(data, y = y)
+      s1Plot(p)
+      s2Plot(NULL)
     }
 
-    plotS1 <- function(y) {
-      data <- copy(s1Data)
-      data[, c(datakey) := refname]
-      matches <- as.numeric(results$matchtable$ID)
-      data$Matched <- factor(ifelse(data$ID %in% matches, "matched", "un-matched"), levels = c("un-matched", "matched"))
-      p <- cohistPlot(data, y = y, factorx = factorx)
-      s1Plot$data <- data
-      s1Plot$p <- p
+    plotS1 <- function(data = s1_localdata(), y) {
+      p <- cohistPlot(data = s1_localdata(), y = y)
+      s1Plot(p)
     }
 
-    plotS2 <- function(y) {
-      data <- as.data.frame(s2Data())
-      matches <- results$matchtable$match.ID
-      data$Matched <- factor(ifelse(data$ID %in% matches, "matched", "un-matched"), levels = c("un-matched", "matched"))
-      p <- cohistPlot(data, y = y, factorx = factorx)
-      s2Plot$data <- data
-      s2Plot$p <- p
+    plotS2 <- function(data = s2_localdata(), y) {
+      p <- cohistPlot(data, y = y)
+      s2Plot(p)
     }
 
-    observeEvent(input$s1Attrs, {
+    s1_obs <- observeEvent(input$s1_select, {
       # Plot on same scale automatically for matched attributes
-      if(input$s1Attrs %in% names(results$params)) {
-        updateSelectInput(session, "s2Attrs", selected = results$params[names(results$params) == input$s1Attrs])
-        plotMatched(input$s1Attrs)
+      if(input$s1_select %in% names(results$params)) {
+        updateSelectizeInput(session, "s2_select", selected = results$params[names(results$params) == input$s1_select])
+        plotMatched(input$s1_select)
       } else {
-        if(input$s1Attrs == "") return()
-        plotS1(input$s1Attrs)
-        if(input$s2Attrs != "") plotS2(input$s2Attrs)
+        if(input$s1_select == "") return()
+        plotS1(y = input$s1_select)
+        if(input$s2_select != "") plotS2(y = input$s2_select)
       }
     })
 
-    observeEvent(input$s2Attrs, {
-      if(input$s2Attrs %in% results$params) {
-        y <- names(results$params)[input$s2Attrs == results$params]
-        updateSelectInput(session, "s1Attrs", selected = y)
+    s2_obs <- observeEvent(input$s2_select, {
+      if(input$s2_select %in% results$params) {
+        y <- names(results$params)[input$s2_select == results$params]
+        updateSelectizeInput(session, "s1_select", selected = y) # plotMatched will run under s1_obs
       } else {
-        if(input$s2Attrs == "") return()
-        plotS2(input$s2Attrs)
-        if(input$s1Attrs != "") plotS1(input$s1Attrs)
+        if(input$s2_select == "") return()
+        plotS2(y = input$s2_select)
+        if(input$s1_select != "") plotS1(y = input$s1_select)
       }
     })
 
     output$plot <- renderPlot({
-      if(length(s1Plot$p) & length(s2Plot$p)) {
-        gridExtra::grid.arrange(grobs = list(s2Plot$p, s1Plot$p), ncols = 2, nrow = 1)
-      } else if (length(s2Plot$p)) {
-        s2Plot$p
+      if(length(s1Plot()) && length(s2Plot())) {
+        gridExtra::grid.arrange(grobs = list(s2Plot(), s1Plot()), ncols = 2, nrow = 1)
+      } else if (length(s2Plot())) {
+        s2Plot()
       } else {
-        s1Plot$p
+        s1Plot()
       }
     })
+
   })
 
 }
@@ -144,8 +157,7 @@ matchPlotServer <- function(id,
 removeID <- function(x) Filter(function(f) f != "ID", x)
 
 # A custom comparison histodot plot
-cohistPlot <- function(data, x = "Cohort", y, fill = "Matched", factorx) {
-  if(grepl(factorx, y)) data[[y]] <- factor(data[[y]])
+cohistPlot <- function(data, x = "Cohort", y, fill = "Matched") {
   p <- ggplot(data, aes_string(x = x, y = y, fill = fill)) +
     geom_dotplot(method = "histodot", stackdir = "center", binaxis = "y") +
     scale_fill_manual(values = c(`un-matched` = "gray", `matched` = "palegreen")) +

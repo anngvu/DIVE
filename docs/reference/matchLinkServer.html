@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Server module function for interactive drag-and-drop variable harmonization of two datasets — matchLinkServer • DIVE</title>
+<title>Shiny server module for interactive drag-and-drop variable linkage or harmonization — matchLinkServer • DIVE</title>
 
 
 <!-- jquery -->
@@ -39,16 +39,11 @@
 
 
 
-<meta property="og:title" content="Server module function for interactive drag-and-drop variable harmonization of two datasets — matchLinkServer" />
-<meta property="og:description" content="Given two datasets, a &quot;reference&quot; and a &quot;comparison&quot; dataset, the module implements an interface
-that allows users to interactively harmonize variables to be used for matching;
-the output is used as inputs to the module matchResult:
-params$matchOpts contains all the possible variables that could be used between the two datasets,
-params$matchOn contains variables that are actually chosen for matching, and
-params$run reactively transmits the &quot;finalized&quot; params/triggers the matchResult module.
-The drag-and-drop interface allows the user to harmonize variables manually, e.g. the &quot;gender&quot; label
-can be dropped next to the &quot;sex&quot; label to say that these mean the same thing. Which variables
-the user can interact with is determined by the vars parameter." />
+<meta property="og:title" content="Shiny server module for interactive drag-and-drop variable linkage or harmonization — matchLinkServer" />
+<meta property="og:description" content="Given two datasets, a &quot;reference&quot; and an &quot;external&quot; or &quot;comparison&quot; dataset,
+both presumably containing at least some of the same variables,
+this module implements a drag-and-drop interface that allows users to
+interactively harmonize variables (pair them) as parameters for matching." />
 
 
 
@@ -111,27 +106,22 @@ the user can interact with is determined by the vars parameter." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Server module function for interactive drag-and-drop variable harmonization of two datasets</h1>
+    <h1>Shiny server module for interactive drag-and-drop variable linkage or harmonization</h1>
     
     <div class="hidden name"><code>matchLinkServer.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Given two datasets, a "reference" and a "comparison" dataset, the module implements an interface
-that allows users to interactively harmonize variables to be used for matching;
-the output is used as inputs to the module <code>matchResult</code>:
-<code>params$matchOpts</code> contains all the possible variables that could be used between the two datasets,
-<code>params$matchOn</code> contains variables that are actually chosen for matching, and
-<code>params$run</code> reactively transmits the "finalized" params/triggers the <code>matchResult</code> module.
-The drag-and-drop interface allows the user to harmonize variables manually, e.g. the "gender" label
-can be dropped next to the "sex" label to say that these mean the same thing. Which variables
-the user can interact with is determined by the vars parameter.</p>
+    <p>Given two datasets, a "reference" and an "external" or "comparison" dataset,
+both presumably containing at least some of the same variables,
+this module implements a drag-and-drop interface that allows users to
+interactively harmonize variables (pair them) as parameters for matching.</p>
     </div>
 
     <pre class="usage"><span class='fu'>matchLinkServer</span>(
   <span class='kw'>id</span>,
   <span class='kw'>refdata</span>,
-  <span class='kw'>setX</span>,
+  <span class='kw'>inputdata</span>,
   <span class='kw'>vars</span>,
   guess = <span class='kw'>NULL</span>,
   informd = <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"help/matching_methods.Rmd"</span>, package = <span class='st'>"DIVE"</span>)
@@ -146,11 +136,11 @@ the user can interact with is determined by the vars parameter.</p>
     </tr>
     <tr>
       <th>refdata</th>
-      <td><p>Reactive subsetted reference data.table.</p></td>
+      <td><p>Reactive reference <code>data.table</code>.</p></td>
     </tr>
     <tr>
-      <th>setX</th>
-      <td><p>Reactive data.table dataset, which typically comes from the <code>newCohortInput</code> module.</p></td>
+      <th>inputdata</th>
+      <td><p>Reactive <code>data.table</code>, typically provided by <code>newDatasetServer</code>.</p></td>
     </tr>
     <tr>
       <th>vars</th>
@@ -162,30 +152,33 @@ the user can interact with is determined by the vars parameter.</p>
     </tr>
     <tr>
       <th>informd</th>
-      <td><p>Optional, relative path to an info Rmarkdown file that will be pulled up in a modal.
+      <td><p>Optional, relative path to an info Rmarkdown file that will be pulled up in a help modal.
 Recommend using for providing methods details of the matching algorithm.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Reactive list of parameter values with <code>run</code>, <code>matchOpts</code> and <code>matchOn</code>. See details.</p>
-    <h2 class="hasAnchor" id="variables-list"><a class="anchor" href="#variables-list"></a>Variables List</h2>
+    <p>The returned reactive list is intended to be used as inputs to <code><a href='matchResultServer.html'>matchResultServer</a></code>:</p><ol>
+<li><p><code>params$matchOpts</code> contains all the possible variables that could be used between the two datasets</p></li>
+<li><p><code>params$matchOn</code> contains variables that were actually paired up for matching</p></li>
+<li><p><code>params$run</code> transmits the "finalized" params/triggers <code><a href='matchResultServer.html'>matchResultServer</a></code></p></li>
+</ol>
 
-    
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-<p>This should be a list such as</p><pre><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(Variables = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"age"</span>, <span class='st'>"sex"</span>, <span class='st'>"BMI"</span>, <span class='st'>"biomarkerLevel"</span>))</pre><p>or</p><pre><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(Demographic = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"age"</span>, <span class='st'>"sex"</span>), Clinical = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"BMI"</span>, <span class='st'>"biomarkerLevel"</span>))</pre><p>.
-This format allows visually grouping the variables in the display only and has no effect on matching.</p>
-    <h2 class="hasAnchor" id="guess-function"><a class="anchor" href="#guess-function"></a>Guess Function</h2>
-
-    
-
+    <p>The drops are initialized with the specified <code>vars</code> in <code>refdata</code>,
+and then a "variable bank" is initialized when given <code>inputdata</code>.
+<code>vars</code> should be provided as a list such as <code><a href='https://rdrr.io/r/base/list.html'>list(Variables = c("age", "sex", "BMI", "biomarkerLevel"))</a></code> or
+<code><a href='https://rdrr.io/r/base/list.html'>list(Demographic = c("age", "sex"), Clinical = c("BMI", "biomarkerLevel"))</a></code>.</p>
 <p>A guess function can be provided to attempt guessing which variables are actually the same between the datasets,
-which will run before the user does manual harmonization of variables. The guess function is specific
-to the dataset and the domain. For example, it knows that "sex" is a matchable variable in the reference dataset
-and can try to look for variables called "sex" or "gender" in the incoming dataset so that the user doesn't
-have to specify this manually. It should also be consistent with what is specified as matchable variables,
-so that its return (a list) should contain a list item for all vars.</p>
+which will run and pre-populate the pairs before the user does manual linkage of variables
+The guess function should be specific to the dataset and the domain.
+For example, if we can expect demographic-type datasets, the function can look for "sex" or "gender"
+in the incoming dataset to be matched with "sex" in the reference data,
+so that the user doesn't have to specify this manually.
+Its return should contain a list with all matchable variables in <code>refdata</code> and
+the match in <code>inputdata</code>, or <code>NULL</code> if no match.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

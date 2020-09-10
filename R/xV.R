@@ -1,10 +1,9 @@
 #' Shiny module UI for presenting high dimensional data with other features in multi-column view
 #'
-#' The UI is based on the idea of a "visual spreadsheet" or "line up" view. See associated
-#' server function \code{\link{multiV}} for details of the implementation.
+#' UI based on "visual spreadsheet" or "line up" view
 #'
 #' The original use case presumes the high dimensional data to be expression data, e.g.
-#' gene or protein expression matrices.
+#' gene or protein expression matrices. See \code{\link{xVServer}} for details.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @export
@@ -36,12 +35,15 @@ xVUI <- function(id) {
 #'
 #' This module attempts to integratively visualize one or more
 #' high-dimensional gene/protein/methylation datasets with phenotype or clinical features.
+#' Data objects here can be compared to common Bioconductor data classes,
+#' where \code{hdata} corresponds to the ExpressionMatrix object and
+#' \code{cdata} corresponds to the \code{pdata} (phenotype data) object.
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param hdata A numeric matrix with row and column names for heatmap.
-#' @param cdata Optional, a data.table that can be joined to hdata. See details.
-#' @param key Name of key column for cdata, currently defaults to "ID".
-#' @param selected A reactive vector used to subset the "features" (cols) of hdata.
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param hdata A numeric matrix with row and column names for heatmap representation.
+#' @param cdata Optional, a \code{data.table} that can be joined to hdata. See details.
+#' @param key Name of key column for \code{cdata}, currently defaults to "ID".
+#' @param selected A reactive vector used to subset the features (cols) of \code{hdata}.
 #' @export
 xVServer <- function(id,
                      hdata, cdata = reactive(NULL), key = "ID",

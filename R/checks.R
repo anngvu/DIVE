@@ -1,7 +1,9 @@
 # These are all the data check functions used internally
 
-#' Check match data
-#' Checks that data has an ID column and that data is numeric/numeric factors
+#' Check cohort data
+#'
+#' Check that data has an ID column and that data is numeric/numeric factors
+#' @keywords internal
 checkCohortData <- function(cohdata, message = NULL, result = NULL) {
   hasID <- "ID" %in% names(cohdata)
   if(!hasID) message <- "<strong>There is no ID column.</strong><br>"
@@ -11,56 +13,52 @@ checkCohortData <- function(cohdata, message = NULL, result = NULL) {
                                        paste("<strong>These columns must be numeric (encode categorical data):</strong><br>",
                                              paste(notID[!isNumeric], collapse = "<br>")))
   if(is.null(message)) result <- cohdata
-  return(list(message = message, result = result))
+  return(list(result = result, message = message))
 }
 
-#' xCheckID
-#' Also used for match module
-#' Returns a list of IDs found in reference list
-#' #' Tells user that internal matches have been found
-xCheckID <- function(data, ref = cdata$ID) {
-  IDs <- data$ID[which(data$ID %in% ref)]
-  return(IDs)
-}
 
-#' General check for uploaded data
+#' General check function for user-uploaded data
 #'
-#' This is generally meant for dataset upload modules. Checks for (in this order):
+#' This is used in \code{\link{dataUploadServer}}. Checks for (in this order):
 #' \enumerate{
-#'   \item one ID column, which is by default converted to character
+#'   \item exactly one ID column, which is by default converted to character
 #'   \item actual data columns besides ID
 #'   \item all data columns are numeric
 #' }
-#' If none of the above, returns the data in \code{result} and NULL in \code{message},
-#' otherwise the method witholds the data by returning NULL and
-#' message will be non-NULL, containing the issue noted.
-#' For some use cases might want return data even if there are issues
-#' by specifying \code{result = data}.
+#' When all of the above pass without issues, the function returns a named list
+#' with data contained in \code{result} and \code{NULL} contained in \code{message},
+#' otherwise it witholds the data by returning \code{NULL} for \code{result} and
+#' \code{message} will contain a character vector of the issue(s) noted.
+#' If the downstream use for data requires different check steps and transformations,
+#' this function can be replaced as long as the new one uses the same return structure.
+#' For some cases, if it is desired that we return data even if there are issues,
+#' use \code{result = data} and rely on the \code{message} output.
 #'
-#' @param data A data.table.
-#' @param result What to return in place of data if issues are found with the data.
-#' @param idcol Name of ID column, defaulting to "ID".
-#' @param idchar Logical with default TRUE, whether to convert ID column to character.
-#' @param html Logical with default TRUE, whether to format message for HTML display.
-#' @return A list with  \code{result} and  \code{message}.
+#' @param data A \code{data.table}.
+#' @param result What to return in place of data if issues are found with the data. Defaults to \code{NULL}.
+#' @param idcol Name of expected ID column, defaulting to "ID".
+#' @param idchar Logical with default TRUE, for whether to convert ID column to character.
+#' @param html (Not used) Logical with default TRUE, for whether to format message with HTML for display.
+#' @return A list with \code{result} and \code{message}. See details.
 #' @export
-checkDataUpload <- function(data, result = NULL,
-                      idcol = "ID", idchar = TRUE, html = TRUE) {
+checkDataUpload <- function(data,
+                            result = NULL,
+                            idcol = "ID", idchar = TRUE, html = TRUE) {
   message <- NULL
   whichID <- which(idcol %in% names(data))
   if(length(whichID) != 1) {
-    message <- paste("Need to have exactly one column with ids called", idcol)
-  } else {
-    if(idchar) data[[idcol]] <- as.character(data[[idcol]])
-    if(length(data[, !..whichID])) {
-      notNumeric <- sapply(data[, !..whichID], function(x) !is.numeric(x))
-      nn <- length(which(notNumeric))
-      if(nn) message <- c(message, "All data columns should be numeric/numeric factor.")
+    message <- paste("Need to have exactly one column with IDs called", idcol)
+  }
+  if(length(data[, !..whichID])) {
+      notnumeric <- sapply(data[, !..whichID], function(x) !is.numeric(x))
+      if(length(which(notnumeric))) message <- c(message, "All data columns should be numeric/numeric factor.")
     } else {
       message <- c(message, "Data columns appear to be missing.")
-    }
   }
-  if(is.null(message)) result <- data
+  if(is.null(message)) {
+    if(idchar) data[[idcol]] <- as.character(data[[idcol]])
+    result <- data
+  }
   return(list(result = result, message = message))
 }
 

@@ -20,21 +20,32 @@ matchResultOutput <- function(id) {
 
 #' Shiny module server for generating match results output
 #'
+#' Carries out matching and returns a match result reactive object
+#'
+#' The module initializes a \code{results} reactive values list containing \code{NULL} values and
+#' whenever new \code{inputdata} is passed in (clearing previous results).
+#' The matching doesn't run until a valid \code{params} reactive object is provided,
+#' which will call upon the underlying handler \code{matchPair}.
+#' If successful, the module updates and returns the \code{results} reactive values list object
+#' with \code{results$params} \code{results$intermediate} \code{results$pair} \code{results$matchtable}.
+#' Though \code{results$matchtable} is rendered in this module's UI with its own download handler,
+#' it and the rest are relevant data necessarily forwarded to \code{\link{matchPlotServer}}.
+#'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param refSubset Reactive reference cohort subset data.table, i.e. from \code{refSubset}.
-#' @param setX Reactive data.table of comparison subset, i.e from \code{newDataset} module.
-#' @param params Reactive parameters data, i.e. from \code{matchLink} module.
+#' @param refdata Reactive refdata dataset as a \code{data.table}.
+#' @param inputdata Reactive \code{data.table} of the comparison dataset, e.g from \code{\link{newDatasetServer}}.
+#' @param params Reactive parameters data, e.g. from \code{\link{matchLinkServer}}.
 #' @param sourcecol Name for the source key column of the joined dataset.
-#' @return Reactive values containing params, intermediate results, pair, and matchtable. See \code{matchPair}.
+#' @return Reactive values containing params, intermediate results, pair, and matchtable.
 #' @export
 matchResultServer <- function(id,
-                              refSubset, setX, params, sourcecol) {
+                              refdata, inputdata, params, sourcecol) {
 
   moduleServer(id, function(input, output, session) {
 
     results <- reactiveValues(params = NULL, intermediate = NULL, pair = NULL, matchtable = NULL)
 
-    observeEvent(setX(), {
+    observeEvent(inputdata(), {
       results$params <- results$intermediate <- results$pair <- results$matchtable <- NULL
     })
 
@@ -43,7 +54,7 @@ matchResultServer <- function(id,
       withProgress({
         tryCatch({
           # Create fused dataset with required structure, then do match
-          intermediate <- dataFusion(d1 = refSubset(), d2 = setX(),
+          intermediate <- dataFusion(d1 = refdata(), d2 = inputdata(),
                                      fuseon = params$matchOn, sourcecol = sourcecol)
           matchpairs <- matchPair(data = intermediate, groupcol = sourcecol, params$matchOn)
           # Update result reactive vals
@@ -51,10 +62,8 @@ matchResultServer <- function(id,
           results$intermediate <- intermediate
           results$pair <- matchpairs$pair
           results$matchtable <- matchpairs$matchtable
-        },
-          error = function(e) meh()
-        )
-      }, value = 0.5, message = "Running...")
+        }, error = function(e) meh()
+      )}, value = 0.5, message = "Getting matches...")
     })
 
     output$table <- renderTable({
@@ -71,7 +80,7 @@ matchResultServer <- function(id,
       }
     )
 
-    # The intermediate table is the fused dataset in long format
+    # The intermediate table is the fused dataset in long format from dataFusion
     output$save_intermediate <- downloadHandler(
       filename = function() {
         "match_intermediate.csv"
@@ -88,10 +97,10 @@ matchResultServer <- function(id,
 
 #-- Helper functions -----------------------------------------------------------------------------------#
 
-#' Fusing two datasets based on harmonized variable names
+#' Fuse two datasets based on harmonized variable names
 #'
-#' Given two datasets and information on which columns are the same, the two datasets
-#' are concatenated, with any NAs removed and keeping only the specified columns in the result.
+#' Concatenate two datasets given information on which columns are the same,
+#' removing NA values and keeping only the specified columns in the result
 #'
 #' @param d1 A data.frame of the first dataset.
 #' @param d2 A data.frame of the second dataset.
@@ -115,12 +124,13 @@ dataFusion <- function(d1, d2, fuseon, sourcecol) {
 
 #' Matching main function
 #'
-#' Calls \code{\link[optmatch]{pairmatch}} to perform matching using the desired parameters.
+#' Calls \code{\link[optmatch]{pairmatch}} to perform matching and formats results
 #'
 #' @param data The data.
 #' @param groupcol Name of the column containing groups to match between.
 #' @param matchon Features to match on.
-#' @return A list containing result and a table where each row corresponds to a matched pair.
+#' @return A list containing result and a table where each row corresponds to a matched pair:
+#' \code{list(pair = pair, matchtable = matchtable)}
 #' @export
 matchPair <- function(data, groupcol, matchon) {
   dataset <- as.data.frame(data)
