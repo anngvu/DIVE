@@ -35,9 +35,9 @@ xVUI <- function(id) {
 #'
 #' This module attempts to integratively visualize one or more
 #' high-dimensional gene/protein/methylation datasets with phenotype or clinical features.
-#' Data objects here can be compared to common Bioconductor data classes,
-#' where \code{hdata} corresponds to the ExpressionMatrix object and
-#' \code{cdata} corresponds to the \code{pdata} (phenotype data) object.
+#' Data objects here can be compared to the context of Biobase \code{ExpressionSet} objects,
+#' where \code{hdata} corresponds to a (transposed) \code{exprs} in the \code{assayData} slot and
+#' \code{cdata} corresponds to the data in the \code{phenoData} slot.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param hdata A numeric matrix with row and column names for heatmap representation.

@@ -47,28 +47,24 @@ multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE) {
 #' feature that one usually tries to correlate with expression data and can be numeric or categorical.
 #' The module handles upload of phenotype/clinical data,
 #' using a mutable version of \code{cdata} that appends user uploaded data.
-#' By default, character columns as well as ones matching \code{factorx} in \code{cdata}
-#' will be converted to factors.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param cdata Data.table of phenotype or clinical data.
 #' @param hdlist A list of matrices representing high dimensional datasets; the names are used for \code{choices}.
-#' @param choices Names referencing datasets in \code{hdlist} to be used in selection menu,
-#' taken from the names in \code{hdlist} by default. However, when dataset selection should be displayed under different groups,
-#' one can pass in a list formatted accordingly for \code{\link[shiny]{selectizeInput}}.
-#' @param key Name of column that contains IDs in \code{cdata} that link to samples in \code{hdlist} datasets. Defaults to "ID".
-#' @param checkFun Optional, a check function used for checking data uploads.
-#' @param factorx If not \code{NULL}, the given name pattern will be used for recognizing and converting columns in cdata to factor. See details.
+#' @param choices A list of choices to populate selection menu, defaults to names of datasets in \code{hdlist}.
+#' When dataset selection should be displayed under different groups,
+#' one can pass in a list formatted accordingly for \code{shiny::\link[shiny]{selectizeInput}}.
+#' @param key Name of column that contains IDs in \code{cdata} matching sample IDs in \code{hdlist} datasets. Defaults to "ID".
 #' @param preselect Optional, pre-selected phenotype or clinical variables from \code{cdata}.
-#' @param infoRmd Optional link to an Rmarkdown document containing description and/or instructions for data upload option.
+#' @inheritParams dataUploadServer
 #' @return A reactive values list containing the data matrix for the parameter \preformatted{hdata} of the \code{\link{multiV}} module,
 #' as well as parameters for \code{\link{geneV}} and \code{\link{selectV}}.
 #' @export
 multiVCtrlServer <- function(id,
-                             cdata, hdlist, choices = names(hdlist),
+                             cdata,
+                             hdlist, choices = names(hdlist),
                              key = "ID",
                              checkFun = NULL,
-                             factorx = NULL,
                              preselect = NULL,
                              infoRmd = system.file("help/ht_upload.Rmd", package = "DIVE")) {
 
@@ -85,8 +81,7 @@ multiVCtrlServer <- function(id,
       if(!is.null(query[["dataset"]])) updateSelectInput(session, "dataset", selected = query[["dataset"]])
     })
 
-
-    # Handle dataset selection or de-selection
+    # Handle dataset selection or de-selection ------------------------------------------------------------------#
     observe({
       if(!length(input$dataset)) { # everything has been cleared from the global dataset selection
         dataset <- setNames(object = list(NULL), # set return to NULL
@@ -108,72 +103,60 @@ multiVCtrlServer <- function(id,
     })
 
     # -- handling user-uploaded data --------------------------------------------------------------------------#
-    observeEvent(input$upload, {
-      showModal(
-        modalDialog(dataUploadUI(session$ns("upload"), label = "<strong>Upload my data</strong>"),
-                    includeMarkdown(infoRmd),
-                    footer = modalButton("Cancel"))
-      )
-    })
 
     udata <- dataUploadServer("upload")
 
+    observeEvent(input$upload, {
+      showModal(modalDialog(
+          dataUploadUI(session$ns("upload"), label = "<strong>Upload my data</strong>"),
+          includeMarkdown(infoRmd),
+          footer = modalButton("Cancel")
+      ))
+    })
+
     observeEvent(udata(), {
-      # check which type of data
-      data <- udata()
+      data <- udata() # check which type of data
       if(key %in% names(data)) {
-        # low-throughput processing: check and modify column names if necessary
+        # low-throughput data -> check and modify column names if necessary
         data <- merge(cdata, data, by = key, all = T)
-        if(!is.null(factorx)) for(i in grep(factorx, names(data))) data[[i]] <- factor(data[[i]])
         view$cdata <- data
         removeModal()
       } else {
         # high-throughput processing
         filename <- attr(data, "filename")
-        # If the filename is the same as something currently in the selection,
-        # the uploaded data will replace the current object (!), which we currently disallow
-        if(filename %in% names(view$hdlist)) {
-          showNotification("Dataset with same file name already exists (overwrites not allowed).
-                           To upload a different version, change file name to reflect the version.",
-                           type = "warning", duration = NULL)
-        } else {
-          hdata <- as.matrix(data, rownames = 1)
-          hdata <- t(hdata)
-          hdata <- setNames(list(hdata), filename)
-          view$hdlist <- c(view$hdlist, hdata)
-          choices$Uploaded <<- c(choices$Uploaded, list(filename))
-          updateSelectizeInput(session, "dataset", choices = choices, selected = c(input$dataset, filename))
-          removeModal()
-        }
+        # If filename is same as something in the selection, upload will replace that object (!)
+        filename <- paste0("userdata_", filename)
+        hdata <- as.matrix(data, rownames = 1)
+        hdata <- t(hdata)
+        hdata <- setNames(list(hdata), filename)
+        view$hdlist <- c(view$hdlist, hdata)
+        choices$Uploaded <<- c(choices$Uploaded, list(filename))
+        updateSelectizeInput(session, "dataset", choices = choices, selected = c(input$dataset, filename))
+        removeModal()
       }
     })
 
     # -- handling GEO data -----------------------------------------------------------------------------------#
-    observeEvent(input$getGEO, {
-      showModal(
-        modalDialog(title = "Get data from GEO",
-                    getGEOInput(session$ns("GEO")),
-                    footer = modalButton("Cancel"))
-      )
-    })
 
     GEOdata <- getGEOServer("GEO")
+
+    observeEvent(input$getGEO, {
+      showModal(modalDialog(title = "Get data from GEO",
+                    getGEOInput(session$ns("GEO")),
+                    footer = modalButton("Cancel")
+               ))
+    })
 
     # When GEO data is pulled successfully, GEOdata$call changes from NULL to 1
     observeEvent(GEOdata$call, {
       hdata <- t(GEOdata$eset)
-      # showModal(
-      #   modalDialog(title = "Status",
-      #               )
-      # )
       hdata <- setNames(list(hdata), GEOdata$accession)
       view$hdlist <- c(view$hdlist, hdata)
       choices$GEO <- c(choices$GEO, list(GEOdata$accession))
       if(!is.null(GEOdata$pData)) {
         pData <- GEOdata$pData
-        # add key column to pData so we can merge; the samples can be totally
-        # unrelated and there might not be anything to merge upon;
-        # tell user results of ID and annotation checks
+        # add key column to pData for merge even though the samples can be
+        # unrelated and there might not be anything to merge upon
         for(col in names(pData)) pData[[col]] <- factor(pData[[col]])
         pData[[key]] <- rownames(pData)
         data <- merge(cdata, pData, by = key, all = T)
@@ -194,7 +177,7 @@ multiVCtrlServer <- function(id,
 # TO-DO
 # Check fun, returns notification message
 xpMatrixCheck <- function() {
-  # check that IDs are nPOD IDs
+  # check that IDs are same as main IDs
   "Detected that at least some are not nPOD samples."
   "Detected that expression values are not annotated to gene Entrez IDs.
   Please use the Custom Selection when filtering with your data.
