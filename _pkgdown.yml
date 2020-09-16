@@ -4,32 +4,37 @@ template:
     bootswatch: flatly
 reference:
 - title: "matrixApp"
-  desc: "Module functions for creating matrixApp"
+  desc: "Module functions for composing matrixApp"
 - contents:
   - starts_with("matrix")
-  - dualDrilldownUI
-  - dualDrilldownServer
+  - starts_with("dualDrilldown")
 - title: "matchApp"
-  desc: "Module functions for creating matchApp"
+  desc: "Module functions for composing matchApp"
 - contents:
   - starts_with("match")
+  - starts_with("dataSubset")
+  - starts_with("customDataset")
 - contents:
 - title: "multiVApp"
-  desc: "Module functions for creating multiVApp"
+  desc: "Module functions for composing multiVApp"
 - contents:
   - starts_with("multiV")
   - ends_with("VUI")
   - ends_with("VServer")
 - title: "dataHelper"
-  desc: "Module functions for creating dataHelperApp"
+  desc: "Module functions for composing dataHelperApp"
 - contents:
 - title: "Common-use components"
-  desc: "Utility components that appear as part of other modules"
+  desc: "Building block components typically extended by something else, part of multiple things"
 - contents:
   - starts_with("dataUpload")
   - starts_with("getLink")
   - starts_with("info")
   - starts_with("meh")
+  - consortUI
+- title: "Internal functions"
+  desc: "Important internal functions with no associated UI"
   - starts_with("check")
+  - data2cor
 
 

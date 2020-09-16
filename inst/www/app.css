@@ -42,6 +42,9 @@ body {
   left: calc(50%);
 }
 
+.status-update {
+ font-style: italic;
+}
 
 /* Theming Overrides ----------------------------------------------------------------*/
 

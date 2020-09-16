@@ -3,7 +3,7 @@
 #' Assembles the UI of various module components, i.e. \code{\link{xVUI}}, \code{\link{geneVUI}},
 #' into a working one-page application
 #'
-#' @family multiVUI module functions
+#' @family multiV functions
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
@@ -38,44 +38,43 @@ multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
 
 #' Shiny app server module for multi-views
 #'
-#' This assembles the logic of various module components into a working one-page application.
-#' First, the module calls \code{\link{multiVCtrl}},
-#' which returns a named list object which either contains data or NULL.
-#' A section is either dynamically added for data or removed for NULL,
-#' using the name of the object, which is something like "i1" and corresponds to the
-#' index of the stored global datasets. Thus, a section with id containing "-i1" corresponds to
-#' a representation of the first dataset. Each section is rendered by \code{\link{xV}}.
+#' Assemble various module components into a working one-page application for expression data
 #'
-#' While \code{\link{multiVCtrl}} is a global control that calls one or more sections into
-#' existence on the page, there are two other types of global controls that affect
-#' the sections present. These are the \code{\link{geneV}} and \code{\link{selectV}} controls,
-#' which function as global filters for attributes that should be present in all or most of the data
+#' First, the server function calls \code{\link{multiVCtrlServer}},
+#' which returns a named list object which either contains data or \code{NULL}.
+#' If there is data, a \code{\link{xVServer}} is dynamically initiated to render data in its own container.
+#' If \code{NULL}, the function removes the appropriate container using the name of the object,
+#' which is something like "i1" and corresponds to the index of the stored global datasets.
+#'
+#' While \code{\link{multiVCtrlServer}} is a global control that controls which datasets are displayed at all,
+#' the \code{\link{geneVServer}} and \code{\link{selectVServer}} modules are global controls
+#' that modify the display of any displayed datasets through applying global filters on attributes
+#' that should be present in all or most of the data
 #' (for expression matrix data, this means gene/protein and attributes corresponding to samples).
-#' Thus, each \code{\link{xV}} section component listens to
-#' \code{\link{geneV}} and \code{\link{selectV}} outputs.
+#' Thus, each \code{\link{xVServer}} component necessarily listens to
+#' \code{\link{geneVServer}} and \code{\link{selectVServer}}, but each can also have its own
+#' indepedent local controls, which takes precedence if enabled.
 #'
-#' However, each section also has its own local options that control display of only that section,
-#' as seen in \code{\link{xVUI}}.
+#' @family multiVUI functions
 #'
-#' @family multiVUI module functions
-#'
-#' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @inheritParams multiVCtrlServer
+#' @inheritParams selectVServer
+#' @inheritParams geneVServer
 #' @export
 multiVServer <- function(id,
-                         hdata = NULL,
-                         hcat = NULL,
+                         hdlist = NULL,
+                         choices = NULL,
                          cdata = NULL,
-                         factorx = NULL,
-                         genes = DIVE::gene_symbols,
-                         preselect = NULL) {
+                         preselect = NULL,
+                         genes = DIVE::gene_symbols) {
 
   moduleServer(id, function(input, output, session) {
 
     view <- multiVCtrlServer("ctrl",
+                             hdlist = hdlist,
+                             choices = choices,
                              cdata = cdata,
-                             hdlist = hdata,
-                             choices = hcat,
-                             factorx = factorx,
                              preselect = preselect)
 
     # controls clinical/phenotype/other variable selection for all xVUI components

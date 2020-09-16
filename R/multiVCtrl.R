@@ -49,11 +49,11 @@ multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE) {
 #' using a mutable version of \code{cdata} that appends user uploaded data.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param cdata Data.table of phenotype or clinical data.
 #' @param hdlist A list of matrices representing high dimensional datasets; the names are used for \code{choices}.
 #' @param choices A list of choices to populate selection menu, defaults to names of datasets in \code{hdlist}.
 #' When dataset selection should be displayed under different groups,
 #' one can pass in a list formatted accordingly for \code{shiny::\link[shiny]{selectizeInput}}.
+#' @param cdata A \code{data.table} of characteristics data, commonly phenotype or clinical data.
 #' @param key Name of column that contains IDs in \code{cdata} matching sample IDs in \code{hdlist} datasets. Defaults to "ID".
 #' @param preselect Optional, pre-selected phenotype or clinical variables from \code{cdata}.
 #' @inheritParams dataUploadServer
@@ -61,8 +61,8 @@ multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE) {
 #' as well as parameters for \code{\link{geneV}} and \code{\link{selectV}}.
 #' @export
 multiVCtrlServer <- function(id,
-                             cdata,
                              hdlist, choices = names(hdlist),
+                             cdata,
                              key = "ID",
                              checkFun = NULL,
                              preselect = NULL,
@@ -70,8 +70,8 @@ multiVCtrlServer <- function(id,
 
   moduleServer(id, function(input, output, session) {
 
-    inview <- c()
     view <- reactiveValues(cdata = cdata, hdlist = hdlist, hdata = NULL, vselect = preselect)
+    inview <- c()
 
     updateSelectizeInput(session, "dataset", choices = choices, selected = NULL)
 
@@ -88,19 +88,29 @@ multiVCtrlServer <- function(id,
                             nm = paste0("i", which(names(view$hdlist) %in% inview)))
         inview <<- c()
       } else {
-        hdname <- setdiff(input$dataset, inview)
-        if(length(hdname)) { # a new dataset needs to be added to view
-          dataset <- setNames(object = view$hdlist[hdname],
-                              paste0("i", which(names(view$hdlist) %in% hdname)))
+        dsname <- setdiff(input$dataset, inview)
+        if(length(dsname)) { # if more in selection than in view, view needs to add new dataset
+          dataset <- setNames(object = view$hdlist[dsname],
+                              paste0("i", which(names(view$hdlist) %in% dsname)))
         } else {  # a dataset needs to be removed from view
-          hdname <- setdiff(inview, input$dataset)
+          dsname <- setdiff(inview, input$dataset)
           dataset <- setNames(object = list(NULL),
-                              paste0("i", which(names(view$hdlist) %in% hdname)))
+                              paste0("i", which(names(view$hdlist) %in% dsname)))
         }
         inview <<- isolate(input$dataset)
       }
       view$hdata <- dataset
     })
+
+    # -- packaging dataset/adding to selection -----------------------------------------------------------------#
+
+    addDataToSelection <- function(dataset, label, selectgroup) {
+      dataset <- t(dataset)
+      dataset <- setNames(list(dataset), label)
+      view$hdlist <- c(view$hdlist, dataset)
+      choices[[selectgroup]] <<- c(choices[[selectgroup]], list(label))
+      updateSelectizeInput(session, "dataset", choices = choices, selected = c(input$dataset, label))
+    }
 
     # -- handling user-uploaded data --------------------------------------------------------------------------#
 
@@ -115,26 +125,23 @@ multiVCtrlServer <- function(id,
     })
 
     observeEvent(udata(), {
-      data <- udata() # check which type of data
-      if(key %in% names(data)) {
-        # low-throughput data -> check and modify column names if necessary
-        data <- merge(cdata, data, by = key, all = T)
-        view$cdata <- data
+      dataset <- udata() # check whether uploaded expression data or phenodata
+       if(key %in% names(dataset)) {
+        # phenodata -> check and modify column names if necessary
+        dataset <- merge(cdata, dataset, by = key, all = T)
+        view$cdata <- dataset
         removeModal()
       } else {
         # high-throughput processing
-        filename <- attr(data, "filename")
+        filename <- attr(dataset, "filename")
         # If filename is same as something in the selection, upload will replace that object (!)
         filename <- paste0("userdata_", filename)
-        hdata <- as.matrix(data, rownames = 1)
-        hdata <- t(hdata)
-        hdata <- setNames(list(hdata), filename)
-        view$hdlist <- c(view$hdlist, hdata)
-        choices$Uploaded <<- c(choices$Uploaded, list(filename))
-        updateSelectizeInput(session, "dataset", choices = choices, selected = c(input$dataset, filename))
+        dataset <- as.matrix(dataset, rownames = 1)
+        addDataToSelection(dataset, label = filename, selectgroup = "Uploaded")
         removeModal()
       }
     })
+
 
     # -- handling GEO data -----------------------------------------------------------------------------------#
 
@@ -142,17 +149,14 @@ multiVCtrlServer <- function(id,
 
     observeEvent(input$getGEO, {
       showModal(modalDialog(title = "Get data from GEO",
-                    getGEOInput(session$ns("GEO")),
-                    footer = modalButton("Cancel")
+                            getGEOInput(session$ns("GEO")),
+                            footer = modalButton("Cancel")
                ))
     })
 
-    # When GEO data is pulled successfully, GEOdata$call changes from NULL to 1
-    observeEvent(GEOdata$call, {
-      hdata <- t(GEOdata$eset)
-      hdata <- setNames(list(hdata), GEOdata$accession)
-      view$hdlist <- c(view$hdlist, hdata)
-      choices$GEO <- c(choices$GEO, list(GEOdata$accession))
+    # When GEO data is pulled successfully, GEOdata$return changes from NULL to TRUE
+    observeEvent(GEOdata$return, {
+      addDataToSelection(GEOdata$eset, label = GEOdata$accession, selectgroup = "GEO")
       if(!is.null(GEOdata$pData)) {
         pData <- GEOdata$pData
         # add key column to pData for merge even though the samples can be
@@ -166,7 +170,6 @@ multiVCtrlServer <- function(id,
         view$vselect <- NULL
       }
       updateSelectizeInput(session, "dataset", choices = choices, selected = GEOdata$accession)
-      removeModal()
     })
 
     return(view)

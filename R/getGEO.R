@@ -3,13 +3,14 @@
 #' Interactively import GEO data with step-by-step process using a series of modals
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param informd Optional path to Rmarkdown file containing help-text or similar to displayed.
 #' @export
 getGEOInput <- function(id, informd = system.file("help/GEO_module.Rmd", package = "DIVE")) {
   ns <- NS(id)
   tags$div(id = ns("get-GEO-input"),
            div(class = "ui-inline", textInput(ns("GSE"), label = "Enter a GEO accession, e.g. 'GSE72492'")),
            div(class = "ui-inline", br(), actionButton(ns("get"), "", icon = icon("arrow-right"))),
-           includeMarkdown(informd)
+           if(!is.null(informd)) includeMarkdown(informd)
            )
 }
 
@@ -23,13 +24,12 @@ getGEOInput <- function(id, informd = system.file("help/GEO_module.Rmd", package
 #'   \item Import characteristics data selectively according to user.
 #'   \item Import the feature annotation according to user.
 #' }
-#' Returns a reactive values object containing \code{$accession},
-#' \code{$eset}, \code{$pData} and \code{$return}.
-#' \code{$return} is an internal status flag for use by \code{\link{multiVCtrlServer}}
-#' to know when new GEO dataset has been processed completely through the annotation step.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @return GEOdata as reactive values object. See details.
+#' @return \code{GEOdata} reactive values list object containing
+#' \code{$accession}, \code{$eset}, \code{$pData} and \code{$return}.
+#' \code{$return} is an internal status flag for use by \code{\link{multiVCtrlServer}}
+#' to know when a new GEO dataset has been processed completely through the annotation step.
 #' @export
 getGEOServer <- function(id) {
 
@@ -42,30 +42,27 @@ getGEOServer <- function(id) {
     # (Step 1) Pull GEO with given GSE
     observeEvent(input$get, {
       withProgress(value = 0.2, message = "downloading...", expr = {
-        gse <- try(GEOquery::getGEO(trimws(input$GSE)))
-        if(class(gse) == "try-error") {
-          showNotification("Something went wrong. Try again later or let us know which accession failed.",
-                           duration = NULL, type = "error")
-        } else {
-          setProgress(value = 0.3, message = "extracting data...")
+        tryCatch({
+          accession <- trimws(input$GSE)
+          gse <- try(GEOquery::getGEO(accession)) # !potential error here
+          if(inherits(gse, "try-error")) stop("Download failed. Check accession, connection, or try again later.", call. = FALSE)
+
+          setProgress(value = 0.5, message = "checking data...")
           eset <- gse[[1]]
-          meta <- Biobase::otherInfo(Biobase::experimentData(eset))
+          checkGEOwrapper(eset) # !potential error here
+
+          setProgress(value = 0.8, message = "setting up data...")
           xdata <- Biobase::exprs(eset)
           pdata <- Biobase::pData(eset)
-          characteristics(pdata[, grep(":", names(pdata))])
-
-          if(nrow(xdata)) {
-            setProgress(value = 0.8, message = "processing data...")
-            GEOdata$accession <- trimws(input$GSE)
-            GEOdata$eset <- xdata
-            gpl <- GEOquery::Table(GEOquery::getGEO(Biobase::annotation(eset)))
-            if(!length(gpl)) gpl <- data.frame(gene_id = rownames(xdata)) # when no annotation, use rownames of xdata
-            GPL(gpl)
-            Step2()
-          } else {
-            showNotification("Standardized matrix data from GEO is not available.", duration = NULL, type = "error")
-          }
-        }
+          pdata <- pdata[, grep(":", names(pdata))]
+          characteristics(pdata)
+          GEOdata$accession <- accession
+          GEOdata$eset <- xdata
+          gpl <- GEOquery::Table(GEOquery::getGEO(Biobase::annotation(eset)))
+          if(!length(gpl)) gpl <- data.frame(gene_id = rownames(xdata)) # when no annotation, use rownames of xdata
+          GPL(gpl)
+          Step2()
+        }, error = function(e) meh(msg = e$message, error = e))
       })
     })
 
@@ -74,14 +71,13 @@ getGEOServer <- function(id) {
       showModal(
         modalDialog(title = "Step 2",
                     selectizeInput(session$ns("selectpdata"),
-                                   HTML("<strong>Which do you want to import as relevant phenotype/experimental data?</strong>"),
+                                   tags$strong("Which phenotype/experimental data do you optionally want to import?"),
                                    choices = names(characteristics()), selected = names(characteristics()),
-                                   multiple = T, width = "100%"),
-                    helpText("(clear all selections to import none)"),
-                    actionButton(session$ns("importChars"), "OK"),
-                    br(), br(), tags$em("Characteristics (preview)"),
-                    tableOutput(session$ns("pChars")),
-                    footer = modalButton("Cancel")
+                                   multiple = T, width = "100%",
+                                   options = list(placeholder = "none selected")),
+                    tags$em("sample characteristics data (preview)"),
+                    tags$div(style = "overflow-x: scroll", tableOutput(session$ns("pChars"))),
+                    footer = tagList(actionButton(session$ns("importChars"), "OK"), modalButton("Cancel"))
         )
       )
     }
@@ -90,14 +86,13 @@ getGEOServer <- function(id) {
     Step3 <- function() {
       showModal(
         modalDialog(title = "Step 3",
-                    selectizeInput(session$ns("annofield"),
-                                   HTML("<strong>Choose annotation field to use for lookup and filtering</strong>"),
+                    selectizeInput(session$ns("selectanno"),
+                                   tags$strong("Choose annotation field to use for lookup and filtering"),
                                    choices = names(GPL()), width = "100%"),
                     helpText("Choosing the column containing Entrez gene ID is recommended."),
-                    actionButton(session$ns("annotate"), "OK"),
-                    br(), br(), h5("Annotation table"),
-                    tableOutput(session$ns("gplTable")),
-                    footer = modalButton("Cancel")
+                    tags$em("annotation table"),
+                    tags$div(style = "overflow-x: scroll", tableOutput(session$ns("gplTable"))),
+                    footer = tagList(actionButton(session$ns("annotate"), "OK"), modalButton("Cancel"))
         )
       )
     }
@@ -107,13 +102,14 @@ getGEOServer <- function(id) {
       Step3()
     })
 
-    # Render outputs for Step 3
+    # For Step 2
     output$pChars <- renderTable({
-      head(characteristics())
+      if(length(characteristics())) head(characteristics())
     }, spacing = "xs")
 
+    # For Step 3
     output$gplTable <- renderTable({
-      head(GPL())
+      if(length(GPL())) head(GPL())
     }, spacing = "xs")
 
 
@@ -124,9 +120,10 @@ getGEOServer <- function(id) {
       probes <- rownames(GEOdata$eset)
       # A column named "ID" *should* exist in gpl table, but check and do alternative annotation otherwise
       IDcol <- "ID"
-      annrows <- GPL()[[input$annofield]][match(probes, GPL()[[IDcol]])]
+      annrows <- GPL()[[input$selectanno]][match(probes, GPL()[[IDcol]])]
       rownames(GEOdata$eset) <- annrows
       GEOdata$return <- TRUE
+      removeModal()
     })
 
     return(GEOdata)
@@ -135,30 +132,69 @@ getGEOServer <- function(id) {
 }
 
 # Helper functions -----------------------------------------------------------------------------------------------#
-checkGEO <- function(xdata, meta,
-                     supported = c("Expression profiling by array",
-                                   "Expression profiling by high throughput sequencing",
-                                   "Protein profiling by protein array",
-                                   "Methylation profiling by array",
-                                   "Methylation profiling by high throughput sequencing")
-                     ) {
 
-  if(!nrow(xdata) && grepl("sequencing", meta$type)) {
-    sra <- regmatches(meta$relation, regexpr("(https://www.ncbi.nlm.nih.gov/sra?term=)?SRP[0-9]+", meta$relation))
-    data <- getRecount(sra)
-    return(data)
-  } else {
-    return("Unfortunately, no processed data is available and we don't use non-standard supplementary file(s).")
-  }
-  # if(pdata$channel_count[1] != 1) return("Unfortunately, we don't support visualization of GEO data outside certain platforms/formats (one-channel arrays, RNA-seq).")
+#' Check GEO metadata for supported dataset type
+#'
+#' Check GEO metadata for supported dataset type
+#'
+#' For reference: https://www.ncbi.nlm.nih.gov/gds/advanced/ -> select field "Dataset Type" -> show index list
+#' @family checkGEO functions
+checkGEOmetatype <- function(eset,
+                             supported = c("Expression profiling by array",
+                                           "Expression profiling by high throughput sequencing",
+                                           "Protein profiling by protein array",
+                                           "Methylation profiling by array",
+                                           "Methylation profiling by high throughput sequencing")
+                     ) {
+  meta <- Biobase::otherInfo(Biobase::experimentData(eset))
+  if(meta$type %in% supported) TRUE else FALSE
+}
+
+#' Check the GEO series matrix file
+#'
+#' Check the GEO series matrix file
+#'
+#' Accessions may not contain data in the matrix file but in the supplement section as an Excel file,
+#' which means data cannot by imported.
+#' @family checkGEO functions
+checkGEOmatrixfile <- function(eset) {
+  if(nrow(eset)) TRUE else FALSE
+}
+
+#' Check the GEO platform
+#'
+#' Check the GEO platform
+#'
+#' Within the broad dataset types, handled by \code{\link{checkGEOmetatype}},
+#' the different types of platforms that need to be considered for compatibility.
+#' This excludes older platforms that are not one-channel array
+#' for the "Expression profiling by array" type by using information in \code{pData},
+#' though there might be a better way to do this check.
+#' @family checkGEO functions
+checkGEOplatform <- function(eset) {
+  pdata <- Biobase::pData(eset)
+  if(pdata$channel_count[1] != 1) FALSE else TRUE
 }
 
 
-fromRecount <- function() {
-  if(!is.null(recounted)) {
-    xdata <- recounted$xdata
-    characteristics(recounted$pdata)
-  }
+#' Check a GEO dataset for compatibility
+#'
+#' Check a GEO dataset for compatibility
+#'
+#' Primarily used in \code{\link{getGEOServer}}, this wraps multiple checks of varying complexity
+#' that were compartmentalized to help iteration of adaptable and reliable check steps over time.
+#' @family checkGEO functions
+checkGEOwrapper <- function(eset) {
+  assertthat::assert_that(checkGEOmetatype(eset), msg = "The accession is not of supported dataset type.")
+  assertthat::assert_that(checkGEOmatrixfile(eset), msg = "The accession does not contain a standard matrix file.")
+  assertthat::assert_that(checkGEOplatform(eset), msg = "The accession dataset is from an incompatible platform.")
+}
+
+
+attemptRecount <- function(meta) {
+  sra <- regmatches(meta$relation, regexpr("(https://www.ncbi.nlm.nih.gov/sra?term=)?SRP[0-9]+", meta$relation))
+  data <- getRecount(sra)
+  return(data)
 }
 
 getRecount <- function(sra) {
@@ -176,5 +212,12 @@ getRecount <- function(sra) {
     pdata <- recount::geo_characteristics(SummarizedExperiment::colData(rse_gene))
     rownames(pdata) <- SummarizedExperiment::colData(rse_gene)$run
     return(list(xdata = xdata, pdata = pdata))
+  }
+}
+
+fromRecount <- function() {
+  if(!is.null(recounted)) {
+    xdata <- recounted$xdata
+    characteristics(recounted$pdata)
   }
 }

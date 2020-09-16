@@ -1,31 +1,32 @@
 #' Shiny module UI for presenting high dimensional data with other features in multi-column view
 #'
-#' UI based on "visual spreadsheet" or "line up" view
+#' Integratively visualize a high-dimensional expression dataset with phenotype or clinical features
 #'
-#' The original use case presumes the high dimensional data to be expression data, e.g.
+#' The UI is based on "visual spreadsheet" or "line up" view.
+#' The original use case presumes the high-dimensional data to be expression data, e.g.
 #' gene or protein expression matrices. See \code{\link{xVServer}} for details.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @export
 xVUI <- function(id) {
   ns <- NS(id)
-  tags$div(class = "xVUI",
-           div(class = "xVUI-ctrl",
-               div(class = "ui-inline", actionButton(ns("show"), label = NULL, icon = icon("cog"))),
-               conditionalPanel(condition = "input.show%2==0", ns = ns, class = "ui-inline",
-                 div(class = "ui-inline", id = ns("local")),
-                 div(class = "ui-inline", actionLink(ns("addlocal"), "LOCAL FILTER", icon = icon("plus")),
+  tags$div(class = "xvui",
+           div(class = "xvui-ctrl",
+               conditionalPanel(condition = "input.addlocal%2==1", ns = ns, class = "ui-inline",
+                                selectizeInput(ns("localselected"), label = NULL, choices = NULL, multiple = T,
+                                    options = list(placeholder = "filter in this dataset"))
+                ),
+               div(class = "ui-inline", actionLink(ns("addlocal"), "LOCAL FILTER", icon = icon("plus")),
                      title = "Initalize local filter for this dataset **that takes precedence over the global filter**"),
-                div(class = "ui-inline", actionLink(ns("rowcluster"), "ROW CLUSTER", icon = icon("sitemap", class = "fa-rotate-270")),
+               div(class = "ui-inline", actionLink(ns("rowcluster"), "ROW CLUSTER", icon = icon("sitemap", class = "fa-rotate-270")),
                     title = "Cluster samples by **features currently in view**"),
-                div(class = "ui-inline", "show most variable:"),
-                div(style = "display: inline-block; margin-top: -5px;",
-                    numericInput(ns("hivarprct"), label = NULL, value = 100, min = 1, max = 100, step = 5, width = 50)),
-                div(style = "display: inline-block;", icon("percent"))
-              )
+               div(class = "ui-inline", "show most variable:"),
+               div(class = "ui-inline", style = "margin-top: -10px;",
+                   numericInput(ns("hivarprct"), label = NULL, value = 100, min = 1, max = 100, step = 5, width = 50)),
+               div(class = "ui-inline", icon("percent"))
           ),
           fluidRow(
-            column(9, shinycssloaders::withSpinner(plotlyOutput(ns("heatmap")))),
+            column(9, plotlyOutput(ns("heatmap"))),
             column(3, plotlyOutput(ns("cplotly")))
           )
   )
@@ -33,17 +34,22 @@ xVUI <- function(id) {
 
 #' Shiny module server for presenting high dimensional data with other features in multi-column view
 #'
-#' This module attempts to integratively visualize one or more
-#' high-dimensional gene/protein/methylation datasets with phenotype or clinical features.
-#' Data objects here can be compared to the context of Biobase \code{ExpressionSet} objects,
-#' where \code{hdata} corresponds to a (transposed) \code{exprs} in the \code{assayData} slot and
+#' Integratively visualize a high-dimensional expression dataset with phenotype or clinical features
+#'
+#' The data objects here can be compared to \code{Biobase::ExpressionSet} objects,
+#' where \code{hdata} corresponds to a (transposed) \code{exprs} matrix in the \code{assayData} slot and
 #' \code{cdata} corresponds to the data in the \code{phenoData} slot.
+#'
+#' The capabilities implemented are clustering (of samples by features only) and data subsetting of.
+#' The data subsetting of expression data works through a local selection, which takes precedence
+#' when activated, or through whatever is passed into \code{selected}.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param hdata A numeric matrix with row and column names for heatmap representation.
-#' @param cdata Optional, a \code{data.table} that can be joined to hdata. See details.
+#' @param cdata Optional, a \code{data.table} of characteristics data. See details.
 #' @param key Name of key column for \code{cdata}, currently defaults to "ID".
 #' @param selected A reactive vector used to subset the features (cols) of \code{hdata}.
+#' @param height Height for data plots.
 #' @export
 xVServer <- function(id,
                      hdata, cdata = reactive(NULL), key = "ID",
@@ -51,30 +57,25 @@ xVServer <- function(id,
 
   moduleServer(id, function(input, output, session) {
 
-    localhdata <- reactiveVal(NULL) # modified by obs_globalselect and obs_localselect
+    localhdata <- reactiveVal(NULL) # can be modified by both obs_globalselect and obs_localselect
     withcluster <- FALSE
+
+    updateSelectizeInput(session, "localselected", choices = colnames(hdata), server = T)
 
     #-- Local controls --------------------------------------------------------------------------------------------#
 
-    # Local select is dynamically rendered on user request and takes precedence over global select
+    # Local select is shown on user request and takes precedence over global select
     # To restore plot listening to global selection, the local select input must be removed from UI
     observeEvent(input$addlocal, {
       if(input$addlocal %% 2) {
-        insertUI(selector = paste0("#", session$ns("local")), immediate = T,
-                 ui = tags$div(id = session$ns("localselected"),
-                               selectizeInput(session$ns("localselected"), label = NULL,
-                                              choices = NULL, multiple = T,
-                                              options = list(placeholder = "filter in this dataset"))))
-        updateSelectizeInput(session, "localselected", choices = colnames(hdata), server = T)
         updateActionButton(session, "addlocal", "LOCAL FILTER", icon = icon("minus"))
         obs_globalselect$suspend()
         obs_localselect$resume()
       } else {
-        removeUI(selector = paste0("#", session$ns("localselected")))
+        updateSelectizeInput(session, "localselected", selected = "")
         updateActionButton(session, "addlocal", "LOCAL FILTER", icon = icon("plus"))
         obs_localselect$suspend()
         obs_globalselect$resume()
-        selected(selected())
       }
     })
 
@@ -150,12 +151,14 @@ xVServer <- function(id,
     # Update heatmap whenever matrix changes
     obs_localhdata <- observeEvent(localhdata(), {
       z <- localhdata()
+      # quirk where single values need to be double arrays, see https://stackoverflow.com/a/57013847
+      x <- if(ncol(z) == 1) list(colnames(z)) else colnames(z)
       ylabs <- rownames(z)
       yind <- 1:nrow(z)
       showticks <- !withcluster # if cluster dendogram also being displayed,  don't need labels
       plotlyProxy("heatmap", session) %>%
         plotlyProxyInvoke("update",
-                          list(z = list(z), x = list(colnames(z)), y = list(yind), height = height),
+                          list(z = list(z), x = list(x), y = list(yind), height = height),
                           list(yaxis.showticklabels = showticks, yaxis.tickvals = yind, yaxis.ticktext = ylabs),
                           1L)
     }, ignoreInit = TRUE)
