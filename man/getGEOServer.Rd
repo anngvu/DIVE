@@ -7,19 +7,22 @@
 getGEOServer(id)
 }
 \arguments{
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 }
 \value{
-GEOdata as reactive values object. See details.
+\code{GEOdata} reactive values list object containing
+\code{$accession}, \code{$eset}, \code{$pData} and \code{$return}.
+\code{$return} is an internal status flag for use by \code{\link{multiVCtrlServer}}
+to know when a new GEO dataset has been processed completely through the annotation step.
 }
 \description{
-Handles importing GEO data by guiding user through a number of modals.
+Interactively import GEO data with step-by-step process using a series of modals
 }
 \details{
-Returns a reactive values object containing \preformatted{$accession},
-\preformatted{$eset}, \preformatted{$pData} and \preformatted{$call}.
-The variable \preformatted{$call} is an internal counter for use with
-other modules that need to update when new GEO dataset has been processed
-completely through the annotation step
-(even when it has the same accession number).
+This server function implements interactive GEO data import with three main steps.
+\enumerate{
+  \item Query for accession, extract expression data and check whether of compatible type and format.
+  \item Import characteristics data selectively according to user.
+  \item Import the feature annotation according to user.
+}
 }

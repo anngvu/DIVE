@@ -2,7 +2,7 @@
 % Please edit documentation in R/geneV.R
 \name{geneVUI}
 \alias{geneVUI}
-\title{Shiny module UI for filtering high dimensional genomics data}
+\title{Shiny module UI for select-filter of genes or gene products}
 \usage{
 geneVUI(id)
 }
@@ -10,13 +10,10 @@ geneVUI(id)
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 }
 \description{
-Provides options to subset genomics data (using gene accessions)
+Augmented select-filter interface for genes
 }
 \seealso{
-Other multiVUI module functions: 
-\code{\link{multiVServer}()},
-\code{\link{multiVUIR}()},
-\code{\link{multiVUI}()},
-\code{\link{selectVServer}()}
+Other geneV functions: 
+\code{\link{geneVServer}()}
 }
-\concept{multiVUI module functions}
+\concept{geneV functions}

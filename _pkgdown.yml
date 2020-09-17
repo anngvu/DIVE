@@ -24,6 +24,7 @@ reference:
 - title: "dataHelper"
   desc: "Module functions for composing dataHelperApp"
 - contents:
+  - starts_with("dataHelper")
 - title: "Common-use components"
   desc: "Building block components typically extended by something else, part of multiple things"
 - contents:
@@ -34,6 +35,7 @@ reference:
   - consortUI
 - title: "Internal functions"
   desc: "Important internal functions with no associated UI"
+- contents:
   - starts_with("check")
   - data2cor
 

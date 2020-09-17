@@ -14,7 +14,6 @@ A basic UI for choosing columns in a dataset.
 }
 \seealso{
 Other multiVApp module functions: 
-\code{\link{geneVServer}()},
 \code{\link{subgroupVServer}()},
 \code{\link{subgroupVUI}()}
 }

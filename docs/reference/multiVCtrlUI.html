@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shiny module UI for controlling multi-column view — multiVCtrlUI • DIVE</title>
+<title>Shiny module UI for controlling multi-column views — multiVCtrlUI • DIVE</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Shiny module UI for controlling multi-column view — multiVCtrlUI" />
-<meta property="og:description" content="Shiny module UI for controlling multi-column view" />
+<meta property="og:title" content="Shiny module UI for controlling multi-column views — multiVCtrlUI" />
+<meta property="og:description" content="Shiny module UI for controlling multi-column views" />
 
 
 
@@ -103,13 +103,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Shiny module UI for controlling multi-column view</h1>
+    <h1>Shiny module UI for controlling multi-column views</h1>
     
     <div class="hidden name"><code>multiVCtrlUI.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Shiny module UI for controlling multi-column view</p>
+    <p>Shiny module UI for controlling multi-column views</p>
     </div>
 
     <pre class="usage"><span class='fu'>multiVCtrlUI</span>(<span class='kw'>id</span>, menu = <span class='fl'>TRUE</span>, upload = <span class='fl'>TRUE</span>, GEO = <span class='fl'>TRUE</span>)</pre>
@@ -123,23 +123,23 @@
     </tr>
     <tr>
       <th>menu</th>
-      <td><p>Logical flag, should there be a menu for sourcing stored datasets? See details.</p></td>
+      <td><p>Logical flag, whether to allow a menu for loading stored datasets.</p></td>
     </tr>
     <tr>
       <th>upload</th>
-      <td><p>Logical flag, should users be able to upload data? See details.</p></td>
+      <td><p>Logical flag, whether to allow data upload.</p></td>
     </tr>
     <tr>
       <th>GEO</th>
-      <td><p>Logical flag, should users be able to pull data from GEO? (beta) See details.</p></td>
+      <td><p>Logical flag, whether to allow pulling data from GEO (beta).</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Multiple high dimensional datasets can be displayed by calling separate instances of <code><a href='multiVUI.html'>multiVUI</a></code> modules,
-with the contents typically laid out in separate a row containers. This "controller" UI establishes three different ways to
-select and source the datasets:</p><ol>
+    <p>Multiple high dimensional datasets can be displayed by calling separate instances of
+<code><a href='xVUI.html'>xVUI</a></code> modules, with the contents typically laid out in row containers.
+This controller UI has three different ways to select and source the datasets:</p><ol>
 <li><p>Selecting from available pre-processed datasets.</p></li>
 <li><p>User-uploaded data.</p></li>
 <li><p>A beta (least-supported) method of retrieving datasets from GEO.</p></li>

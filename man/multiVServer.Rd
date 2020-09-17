@@ -6,43 +6,45 @@
 \usage{
 multiVServer(
   id,
-  hdata = NULL,
-  hcat = NULL,
+  hdlist = NULL,
+  choices = NULL,
   cdata = NULL,
-  factorx = NULL,
-  genes = DIVE::gene_symbols,
-  preselect = NULL
+  preselect = NULL,
+  genes = DIVE::gene_symbols
 )
 }
 \arguments{
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
+\item{hdlist}{A list of matrices representing high dimensional datasets; the names are used for \code{choices}.}
+
+\item{choices}{A list of choices to populate selection menu, defaults to names of datasets in \code{hdlist}.
+When dataset selection should be displayed under different groups,
+one can pass in a list formatted accordingly for \code{shiny::\link[shiny]{selectizeInput}}.}
+
+\item{cdata}{A \code{data.table} of characteristics data, commonly phenotype or clinical data.}
+
+\item{preselect}{Optional, pre-selected phenotype or clinical variables from \code{cdata}.}
+
+\item{genes}{Gene choices for initialization in \code{shiny::\link[shiny]{selectizeInput}}.}
 }
 \description{
-This assembles the logic of various module components into a working one-page application.
-First, the module calls \code{\link{multiVCtrl}},
-which returns a named list object which either contains data or NULL.
-A section is either dynamically added for data or removed for NULL,
-using the name of the object, which is something like "i1" and corresponds to the
-index of the stored global datasets. Thus, a section with id containing "-i1" corresponds to
-a representation of the first dataset. Each section is rendered by \code{\link{xV}}.
+Assemble various module components into a working one-page application for expression data
 }
 \details{
-While \code{\link{multiVCtrl}} is a global control that calls one or more sections into
-existence on the page, there are two other types of global controls that affect
-the sections present. These are the \code{\link{geneV}} and \code{\link{selectV}} controls,
-which function as global filters for attributes that should be present in all or most of the data
-(for expression matrix data, this means gene/protein and attributes corresponding to samples).
-Thus, each \code{\link{xV}} section component listens to
-\code{\link{geneV}} and \code{\link{selectV}} outputs.
+First, the server function calls \code{\link{multiVCtrlServer}},
+which returns a named list object which either contains data or \code{NULL}.
+If there is data, a \code{\link{xVServer}} is dynamically initiated to render data in its own container.
+If \code{NULL}, the function removes the appropriate container using the name of the object,
+which is something like "i1" and corresponds to the index of the stored global datasets.
 
-However, each section also has its own local options that control display of only that section,
-as seen in \code{\link{xVUI}}.
+While \code{\link{multiVCtrlServer}} is a global control that controls which datasets are displayed at all,
+the \code{\link{geneVServer}} and \code{\link{selectVServer}} modules are global controls
+that modify the display of any displayed datasets through applying global filters on attributes
+that should be present in all or most of the data
+(for expression matrix data, this means gene/protein and attributes corresponding to samples).
+Thus, each \code{\link{xVServer}} component necessarily listens to
+\code{\link{geneVServer}} and \code{\link{selectVServer}}, but each can also have its own
+indepedent local controls, which takes precedence if enabled.
 }
-\seealso{
-Other multiVUI module functions: 
-\code{\link{geneVUI}()},
-\code{\link{multiVUIR}()},
-\code{\link{multiVUI}()},
-\code{\link{selectVServer}()}
-}
-\concept{multiVUI module functions}
+\concept{multiVUI functions}

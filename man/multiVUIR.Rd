@@ -11,9 +11,6 @@ Shiny app launcher for multi-view module
 }
 \seealso{
 Other multiVUI module functions: 
-\code{\link{geneVUI}()},
-\code{\link{multiVServer}()},
-\code{\link{multiVUI}()},
 \code{\link{selectVServer}()}
 }
 \concept{multiVUI module functions}

@@ -40,7 +40,7 @@
 
 
 <meta property="og:title" content="Shiny module server for creating comparison plots between subgrouped data — subgroupVServer" />
-<meta property="og:description" content="This primarily allows creation of volcano plots for highthroughput datasets based on user-defined group contrasts." />
+<meta property="og:description" content="This primarily allows creation of volcano plots for highthroughput datasets based on user-defined contrast groups" />
 
 
 
@@ -109,7 +109,7 @@
     </div>
 
     <div class="ref-description">
-    <p>This primarily allows creation of volcano plots for highthroughput datasets based on user-defined group contrasts.</p>
+    <p>This primarily allows creation of volcano plots for highthroughput datasets based on user-defined contrast groups</p>
     </div>
 
     <pre class="usage"><span class='fu'>subgroupVServer</span>(<span class='kw'>id</span>, <span class='kw'>cdata</span>, <span class='kw'>hdlist</span>)</pre>
@@ -118,15 +118,15 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
+      <th>id</th>
+      <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
+    </tr>
+    <tr>
       <th>cdata</th>
       <td><p>A data.table of clinical, phenotype, or other experimental data used to define groups.</p></td>
     </tr>
     <tr>
-      <th>input, output, session</th>
-      <td><p>Standard <code>shiny</code> boilerplate.</p></td>
-    </tr>
-    <tr>
-      <th>hdata</th>
+      <th>hdlist</th>
       <td><p>A list of named high-dimensional (high-throughput datasets)</p></td>
     </tr>
     </table>
@@ -134,7 +134,6 @@
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>Other multiVApp module functions: 
-<code><a href='geneVServer.html'>geneVServer</a>()</code>,
 <code><a href='selectVUI.html'>selectVUI</a>()</code>,
 <code><a href='subgroupVUI.html'>subgroupVUI</a>()</code></p></div>
 

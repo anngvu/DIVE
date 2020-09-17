@@ -7,18 +7,17 @@
 subgroupVServer(id, cdata, hdlist)
 }
 \arguments{
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
 \item{cdata}{A data.table of clinical, phenotype, or other experimental data used to define groups.}
 
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
-
-\item{hdata}{A list of named high-dimensional (high-throughput datasets)}
+\item{hdlist}{A list of named high-dimensional (high-throughput datasets)}
 }
 \description{
-This primarily allows creation of volcano plots for highthroughput datasets based on user-defined group contrasts.
+This primarily allows creation of volcano plots for highthroughput datasets based on user-defined contrast groups
 }
 \seealso{
 Other multiVApp module functions: 
-\code{\link{geneVServer}()},
 \code{\link{selectVUI}()},
 \code{\link{subgroupVUI}()}
 }

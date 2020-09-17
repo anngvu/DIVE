@@ -40,8 +40,7 @@
 
 
 <meta property="og:title" content="Modal Error Handling — meh" />
-<meta property="og:description" content="Brings up a generic modal for application errors
-Shows error if dev_mode" />
+<meta property="og:description" content="Bring up a modal dialog for application errors" />
 
 
 
@@ -110,13 +109,44 @@ Shows error if dev_mode" />
     </div>
 
     <div class="ref-description">
-    <p>Brings up a generic modal for application errors
-Shows error if dev_mode</p>
+    <p>Bring up a modal dialog for application errors</p>
     </div>
 
-    <pre class="usage"><span class='fu'>meh</span>(msg = <span class='kw'>NULL</span>, error = <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>meh</span>(
+ 
+    msg = <span class='st'>"Sorry, something went wrong.&lt;br&gt;&lt;br&gt;Try again later or let us know about the issue.&lt;br&gt;"</span>,
+  error = <span class='kw'>NULL</span>,
+  footer = <span class='fu'><a href='https://rdrr.io/r/base/options.html'>getOption</a></span>(<span class='st'>"DIVE.error.modal.footer"</span>)
+)</pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>msg</th>
+      <td><p>User-facing message that can contain HTML for formatting.</p></td>
+    </tr>
+    <tr>
+      <th>error</th>
+      <td><p>Forwarded error messsage to be shown depending on <code>dev_mode</code> option.</p></td>
+    </tr>
+    <tr>
+      <th>footer</th>
+      <td><p>Bottom part of the modal dialog, which by default contains nothing unless
+set with <code><a href='https://rdrr.io/r/base/options.html'>base::options(DIVE.error.modal.footer = ui)</a></code>. See details for intended uses.</p></td>
+    </tr>
+    </table>
 
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>Internally, errors in module code summon a dialog when execution fails or
+when something is not allowed, etc.
+Indeed, this defaults to a generic "something went wrong" message,
+but the caller can provide more specific verbiage.
+When the <code>dev_mode</code> option is set, the original error will also be displayed.
+The footer can optionally contain a link to where the user can file issues,
+set globally for all error modals with <code><a href='https://rdrr.io/r/base/options.html'>base::options(DIVE.error.modal.footer = ui)</a></code>,
+or the caller can pass in custom ui.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

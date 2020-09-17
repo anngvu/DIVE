@@ -4,9 +4,31 @@
 \alias{meh}
 \title{Modal Error Handling}
 \usage{
-meh(msg = NULL, error = NULL)
+meh(
+ 
+    msg = "Sorry, something went wrong.<br><br>Try again later or let us know about the issue.<br>",
+  error = NULL,
+  footer = getOption("DIVE.error.modal.footer")
+)
+}
+\arguments{
+\item{msg}{User-facing message that can contain HTML for formatting.}
+
+\item{error}{Forwarded error messsage to be shown depending on \code{dev_mode} option.}
+
+\item{footer}{Bottom part of the modal dialog, which by default contains nothing unless
+set with \code{base::options(DIVE.error.modal.footer = ui)}. See details for intended uses.}
 }
 \description{
-Brings up a generic modal for application errors
-Shows error if dev_mode
+Bring up a modal dialog for application errors
+}
+\details{
+Internally, errors in module code summon a dialog when execution fails or
+when something is not allowed, etc.
+Indeed, this defaults to a generic "something went wrong" message,
+but the caller can provide more specific verbiage.
+When the \code{dev_mode} option is set, the original error will also be displayed.
+The footer can optionally contain a link to where the user can file issues,
+set globally for all error modals with \code{base::options(DIVE.error.modal.footer = ui)},
+or the caller can pass in custom ui.
 }

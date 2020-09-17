@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shiny module server for controlling multi-column view — multiVCtrlServer • DIVE</title>
+<title>Shiny module server for controlling multi-column views — multiVCtrlServer • DIVE</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,9 @@
 
 
 
-<meta property="og:title" content="Shiny module server for controlling multi-column view — multiVCtrlServer" />
-<meta property="og:description" content="multiVCtrl is the control hub that provides data and parameters for multiVUI,
-geneV and selectV." />
+<meta property="og:title" content="Shiny module server for controlling multi-column views — multiVCtrlServer" />
+<meta property="og:description" content="Control hub that provides data and parameters for xVServer,
+geneVServer and selectServer" />
 
 
 
@@ -104,24 +104,23 @@ geneV and selectV." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Shiny module server for controlling multi-column view</h1>
+    <h1>Shiny module server for controlling multi-column views</h1>
     
     <div class="hidden name"><code>multiVCtrlServer.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p><code>multiVCtrl</code> is the control hub that provides data and parameters for <code><a href='multiVUI.html'>multiVUI</a></code>,
-<code>geneV</code> and <code>selectV</code>.</p>
+    <p>Control hub that provides data and parameters for <code><a href='xVServer.html'>xVServer</a></code>,
+<code><a href='geneVServer.html'>geneVServer</a></code> and <code>selectServer</code></p>
     </div>
 
     <pre class="usage"><span class='fu'>multiVCtrlServer</span>(
   <span class='kw'>id</span>,
-  <span class='kw'>cdata</span>,
   <span class='kw'>hdlist</span>,
   choices = <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='kw'>hdlist</span>),
+  <span class='kw'>cdata</span>,
   key = <span class='st'>"ID"</span>,
   checkFun = <span class='kw'>NULL</span>,
-  factorx = <span class='kw'>NULL</span>,
   preselect = <span class='kw'>NULL</span>,
   infoRmd = <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"help/ht_upload.Rmd"</span>, package = <span class='st'>"DIVE"</span>)
 )</pre>
@@ -130,8 +129,8 @@ geneV and selectV." />
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>cdata</th>
-      <td><p>Data.table of phenotype or clinical data.</p></td>
+      <th>id</th>
+      <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
     </tr>
     <tr>
       <th>hdlist</th>
@@ -139,33 +138,26 @@ geneV and selectV." />
     </tr>
     <tr>
       <th>choices</th>
-      <td><p>Names referencing datasets in <code>hdlist</code> to be used in selection menu,
-taken from the names in <code>hdlist</code> by default. However, when dataset selection should be displayed under different groups,
-one can pass in a list formatted accordingly for <code><a href='https://shiny.rstudio.com/reference/shiny/latest/selectInput.html'>selectizeInput</a></code>.</p></td>
+      <td><p>A list of choices to populate selection menu, defaults to names of datasets in <code>hdlist</code>.
+When dataset selection should be displayed under different groups,
+one can pass in a list formatted accordingly for <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/selectInput.html'>selectizeInput</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>cdata</th>
+      <td><p>A <code>data.table</code> of characteristics data, commonly phenotype or clinical data.</p></td>
     </tr>
     <tr>
       <th>key</th>
-      <td><p>Name of column that contains IDs in <code>cdata</code> that link to samples in <code>hdlist</code> datasets. Defaults to "ID".</p></td>
+      <td><p>Name of column that contains IDs in <code>cdata</code> matching sample IDs in <code>hdlist</code> datasets. Defaults to "ID".</p></td>
     </tr>
     <tr>
       <th>checkFun</th>
-      <td><p>Optional, a check function used for checking data uploads.</p></td>
-    </tr>
-    <tr>
-      <th>factorx</th>
-      <td><p>If not NULL, the given name pattern will be used for recognizing and converting columns in cdata to factor. See details.</p></td>
+      <td><p>Optional, a custom check function for an additional layer of checking/modifying uploaded data.
+It should return a list containing message and result (result should be <code>NULL</code> when data fails checks).</p></td>
     </tr>
     <tr>
       <th>preselect</th>
       <td><p>Optional, pre-selected phenotype or clinical variables from <code>cdata</code>.</p></td>
-    </tr>
-    <tr>
-      <th>infoRmd</th>
-      <td><p>Optional link to an Rmarkdown document containing description and/or instructions for data upload option.</p></td>
-    </tr>
-    <tr>
-      <th>input, output, session</th>
-      <td><p>Standard <code>shiny</code> boilerplate.</p></td>
     </tr>
     </table>
 
@@ -179,12 +171,10 @@ as well as parameters for <code>geneV</code> and <code>selectV</code>.</p>
 <li><p>Selecting from available pre-processed datasets.</p></li>
 <li><p>User-uploaded data.</p></li>
 <li><p>A beta (least-supported) method of retrieving datasets from GEO.</p></li>
-</ol><p>The module also handles upload of phenotype/clinical data. The module is instantiated with whatever is
-passed into the parameter <code>cdata</code> and uses a mutable version of <code>cdata</code> that
-appends user uploads. The data in <code>cdata</code> is supposed to be a phenotype or clinical
+</ol><p>The data in <code>cdata</code> is supposed to be a phenotype or clinical
 feature that one usually tries to correlate with expression data and can be numeric or categorical.
-By default, character columns as well as ones matching <code>factorx</code> in <code>cdata</code>
-will be converted to factors.</p>
+The module handles upload of phenotype/clinical data,
+using a mutable version of <code>cdata</code> that appends user uploaded data.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

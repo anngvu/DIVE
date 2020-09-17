@@ -40,13 +40,7 @@
 
 
 <meta property="og:title" content="Shiny app server module for multi-views — multiVServer" />
-<meta property="og:description" content="This assembles the logic of various module components into a working one-page application.
-First, the module calls multiVCtrl,
-which returns a named list object which either contains data or NULL.
-A section is either dynamically added for data or removed for NULL,
-using the name of the object, which is something like &quot;i1&quot; and corresponds to the
-index of the stored global datasets. Thus, a section with id containing &quot;-i1&quot; corresponds to
-a representation of the first dataset. Each section is rendered by xV." />
+<meta property="og:description" content="Assemble various module components into a working one-page application for expression data" />
 
 
 
@@ -115,52 +109,64 @@ a representation of the first dataset. Each section is rendered by xV." />
     </div>
 
     <div class="ref-description">
-    <p>This assembles the logic of various module components into a working one-page application.
-First, the module calls <code>multiVCtrl</code>,
-which returns a named list object which either contains data or NULL.
-A section is either dynamically added for data or removed for NULL,
-using the name of the object, which is something like "i1" and corresponds to the
-index of the stored global datasets. Thus, a section with id containing "-i1" corresponds to
-a representation of the first dataset. Each section is rendered by <code>xV</code>.</p>
+    <p>Assemble various module components into a working one-page application for expression data</p>
     </div>
 
     <pre class="usage"><span class='fu'>multiVServer</span>(
   <span class='kw'>id</span>,
-  hdata = <span class='kw'>NULL</span>,
-  hcat = <span class='kw'>NULL</span>,
+  hdlist = <span class='kw'>NULL</span>,
+  choices = <span class='kw'>NULL</span>,
   cdata = <span class='kw'>NULL</span>,
-  factorx = <span class='kw'>NULL</span>,
-  genes = <span class='kw'>DIVE</span>::<span class='kw'>gene_symbols</span>,
-  preselect = <span class='kw'>NULL</span>
+  preselect = <span class='kw'>NULL</span>,
+  genes = <span class='kw'>DIVE</span>::<span class='kw'>gene_symbols</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>input, output, session</th>
-      <td><p>Standard <code>shiny</code> boilerplate.</p></td>
+      <th>id</th>
+      <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>hdlist</th>
+      <td><p>A list of matrices representing high dimensional datasets; the names are used for <code>choices</code>.</p></td>
+    </tr>
+    <tr>
+      <th>choices</th>
+      <td><p>A list of choices to populate selection menu, defaults to names of datasets in <code>hdlist</code>.
+When dataset selection should be displayed under different groups,
+one can pass in a list formatted accordingly for <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/selectInput.html'>selectizeInput</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>cdata</th>
+      <td><p>A <code>data.table</code> of characteristics data, commonly phenotype or clinical data.</p></td>
+    </tr>
+    <tr>
+      <th>preselect</th>
+      <td><p>Optional, pre-selected phenotype or clinical variables from <code>cdata</code>.</p></td>
+    </tr>
+    <tr>
+      <th>genes</th>
+      <td><p>Gene choices for initialization in <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/selectInput.html'>selectizeInput</a></code>.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>While <code>multiVCtrl</code> is a global control that calls one or more sections into
-existence on the page, there are two other types of global controls that affect
-the sections present. These are the <code>geneV</code> and <code>selectV</code> controls,
-which function as global filters for attributes that should be present in all or most of the data
+    <p>First, the server function calls <code><a href='multiVCtrlServer.html'>multiVCtrlServer</a></code>,
+which returns a named list object which either contains data or <code>NULL</code>.
+If there is data, a <code><a href='xVServer.html'>xVServer</a></code> is dynamically initiated to render data in its own container.
+If <code>NULL</code>, the function removes the appropriate container using the name of the object,
+which is something like "i1" and corresponds to the index of the stored global datasets.</p>
+<p>While <code><a href='multiVCtrlServer.html'>multiVCtrlServer</a></code> is a global control that controls which datasets are displayed at all,
+the <code><a href='geneVServer.html'>geneVServer</a></code> and <code><a href='selectVServer.html'>selectVServer</a></code> modules are global controls
+that modify the display of any displayed datasets through applying global filters on attributes
+that should be present in all or most of the data
 (for expression matrix data, this means gene/protein and attributes corresponding to samples).
-Thus, each <code>xV</code> section component listens to
-<code>geneV</code> and <code>selectV</code> outputs.</p>
-<p>However, each section also has its own local options that control display of only that section,
-as seen in <code><a href='xVUI.html'>xVUI</a></code>.</p>
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
-
-    <div class='dont-index'><p>Other multiVUI module functions: 
-<code><a href='geneVUI.html'>geneVUI</a>()</code>,
-<code><a href='multiVUIR.html'>multiVUIR</a>()</code>,
-<code><a href='multiVUI.html'>multiVUI</a>()</code>,
-<code><a href='selectVServer.html'>selectVServer</a>()</code></p></div>
+Thus, each <code><a href='xVServer.html'>xVServer</a></code> component necessarily listens to
+<code><a href='geneVServer.html'>geneVServer</a></code> and <code><a href='selectVServer.html'>selectVServer</a></code>, but each can also have its own
+indepedent local controls, which takes precedence if enabled.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

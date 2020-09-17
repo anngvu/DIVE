@@ -2,26 +2,26 @@
 % Please edit documentation in R/multiVCtrl.R
 \name{multiVCtrlUI}
 \alias{multiVCtrlUI}
-\title{Shiny module UI for controlling multi-column view}
+\title{Shiny module UI for controlling multi-column views}
 \usage{
 multiVCtrlUI(id, menu = TRUE, upload = TRUE, GEO = TRUE)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{menu}{Logical flag, should there be a menu for sourcing stored datasets? See details.}
+\item{menu}{Logical flag, whether to allow a menu for loading stored datasets.}
 
-\item{upload}{Logical flag, should users be able to upload data? See details.}
+\item{upload}{Logical flag, whether to allow data upload.}
 
-\item{GEO}{Logical flag, should users be able to pull data from GEO? (beta) See details.}
+\item{GEO}{Logical flag, whether to allow pulling data from GEO (beta).}
 }
 \description{
-Shiny module UI for controlling multi-column view
+Shiny module UI for controlling multi-column views
 }
 \details{
-Multiple high dimensional datasets can be displayed by calling separate instances of \code{\link{multiVUI}} modules,
-with the contents typically laid out in separate a row containers. This "controller" UI establishes three different ways to
-select and source the datasets:
+Multiple high dimensional datasets can be displayed by calling separate instances of
+\code{\link{xVUI}} modules, with the contents typically laid out in row containers.
+This controller UI has three different ways to select and source the datasets:
 \enumerate{
   \item Selecting from available pre-processed datasets.
   \item User-uploaded data.

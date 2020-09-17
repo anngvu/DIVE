@@ -2,48 +2,44 @@
 % Please edit documentation in R/multiVCtrl.R
 \name{multiVCtrlServer}
 \alias{multiVCtrlServer}
-\title{Shiny module server for controlling multi-column view}
+\title{Shiny module server for controlling multi-column views}
 \usage{
 multiVCtrlServer(
   id,
-  cdata,
   hdlist,
   choices = names(hdlist),
+  cdata,
   key = "ID",
   checkFun = NULL,
-  factorx = NULL,
   preselect = NULL,
   infoRmd = system.file("help/ht_upload.Rmd", package = "DIVE")
 )
 }
 \arguments{
-\item{cdata}{Data.table of phenotype or clinical data.}
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
 \item{hdlist}{A list of matrices representing high dimensional datasets; the names are used for \code{choices}.}
 
-\item{choices}{Names referencing datasets in \code{hdlist} to be used in selection menu,
-taken from the names in \code{hdlist} by default. However, when dataset selection should be displayed under different groups,
-one can pass in a list formatted accordingly for \code{\link[shiny]{selectizeInput}}.}
+\item{choices}{A list of choices to populate selection menu, defaults to names of datasets in \code{hdlist}.
+When dataset selection should be displayed under different groups,
+one can pass in a list formatted accordingly for \code{shiny::\link[shiny]{selectizeInput}}.}
 
-\item{key}{Name of column that contains IDs in \code{cdata} that link to samples in \code{hdlist} datasets. Defaults to "ID".}
+\item{cdata}{A \code{data.table} of characteristics data, commonly phenotype or clinical data.}
 
-\item{checkFun}{Optional, a check function used for checking data uploads.}
+\item{key}{Name of column that contains IDs in \code{cdata} matching sample IDs in \code{hdlist} datasets. Defaults to "ID".}
 
-\item{factorx}{If not NULL, the given name pattern will be used for recognizing and converting columns in cdata to factor. See details.}
+\item{checkFun}{Optional, a custom check function for an additional layer of checking/modifying uploaded data.
+It should return a list containing message and result (result should be \code{NULL} when data fails checks).}
 
 \item{preselect}{Optional, pre-selected phenotype or clinical variables from \code{cdata}.}
-
-\item{infoRmd}{Optional link to an Rmarkdown document containing description and/or instructions for data upload option.}
-
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
 }
 \value{
 A reactive values list containing the data matrix for the parameter \preformatted{hdata} of the \code{\link{multiV}} module,
 as well as parameters for \code{\link{geneV}} and \code{\link{selectV}}.
 }
 \description{
-\code{multiVCtrl} is the control hub that provides data and parameters for \code{\link{multiVUI}},
-\code{\link{geneV}} and \code{\link{selectV}}.
+Control hub that provides data and parameters for \code{\link{xVServer}},
+\code{\link{geneVServer}} and \code{\link{selectServer}}
 }
 \details{
 The server logic handles sourcing of large expression datasets with three different methods:
@@ -52,10 +48,8 @@ The server logic handles sourcing of large expression datasets with three differ
   \item User-uploaded data.
   \item A beta (least-supported) method of retrieving datasets from GEO.
 }
-The module also handles upload of phenotype/clinical data. The module is instantiated with whatever is
-passed into the parameter \code{cdata} and uses a mutable version of \code{cdata} that
-appends user uploads. The data in \code{cdata} is supposed to be a phenotype or clinical
+The data in \code{cdata} is supposed to be a phenotype or clinical
 feature that one usually tries to correlate with expression data and can be numeric or categorical.
-By default, character columns as well as ones matching \code{factorx} in \code{cdata}
-will be converted to factors.
+The module handles upload of phenotype/clinical data,
+using a mutable version of \code{cdata} that appends user uploaded data.
 }

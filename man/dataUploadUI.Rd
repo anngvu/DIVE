@@ -10,7 +10,7 @@ dataUploadUI(id, ...)
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
 \item{...}{Named list of params passed to \code{shiny::\link[shiny]{fileInput}}.
-Note that \preformatted{multiple = FALSE} (the default) must be kept.}
+Note that \code{multiple = FALSE} (the default) must not be overridden.}
 }
 \value{
 UI components.

@@ -49,9 +49,6 @@ e.g. "phenotypeX (15)", calculated by intersections with a vector of IDs.
 }
 \seealso{
 Other multiVUI module functions: 
-\code{\link{geneVUI}()},
-\code{\link{multiVServer}()},
-\code{\link{multiVUIR}()},
-\code{\link{multiVUI}()}
+\code{\link{multiVUIR}()}
 }
 \concept{multiVUI module functions}

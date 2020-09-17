@@ -15,11 +15,4 @@ multiVUI(id, CSS = system.file("www/", "app.css", package = "DIVE"))
 Assembles the UI of various module components, i.e. \code{\link{xVUI}}, \code{\link{geneVUI}},
 into a working one-page application
 }
-\seealso{
-Other multiVUI module functions: 
-\code{\link{geneVUI}()},
-\code{\link{multiVServer}()},
-\code{\link{multiVUIR}()},
-\code{\link{selectVServer}()}
-}
-\concept{multiVUI module functions}
+\concept{multiV functions}

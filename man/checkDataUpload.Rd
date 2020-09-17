@@ -15,7 +15,7 @@ checkDataUpload(data, result = NULL, idcol = "ID", idchar = TRUE, html = TRUE)
 
 \item{idchar}{Logical with default TRUE, for whether to convert ID column to character.}
 
-\item{html}{Logical with default TRUE, for whether to format message with HTML for display.}
+\item{html}{(Not used) Logical with default TRUE, for whether to format message with HTML for display.}
 }
 \value{
 A list with \code{result} and \code{message}. See details.
@@ -33,6 +33,6 @@ otherwise it witholds the data by returning \code{NULL} for \code{result} and
 \code{message} will contain a character vector of the issue(s) noted.
 If the downstream use for data requires different check steps and transformations,
 this function can be replaced as long as the new one uses the same return structure.
-For some use cases, if it is desired that we return data even if there are issues,
+For some cases, if it is desired that we return data even if there are issues,
 use \code{result = data} and rely on the \code{message} output.
 }

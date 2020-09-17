@@ -2,28 +2,41 @@
 % Please edit documentation in R/geneV.R
 \name{geneVServer}
 \alias{geneVServer}
-\title{Shiny module server for filtering high dimensional genomics data}
+\title{Shiny module server for select-filter of genes or gene products}
 \usage{
-geneVServer(id, choices)
+geneVServer(id, genes = NULL)
 }
 \arguments{
-\item{choices}{Choices for selectInput.}
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
-
-\item{prelist}{Optional, a named list of source files that store pre-compiled sets for convenient access.}
+\item{genes}{Gene choices for initialization in \code{shiny::\link[shiny]{selectizeInput}}.}
 }
 \value{
-A vector that can be used to subset a high dimensional matrix,
-which should be passed in to the parameter \code{selected} in the \code{\link{multiV}} server module.
+A vector of standard gene symbols.
 }
 \description{
-Provides options to subset genomics data (using gene accessions)
+Implement augmented select-filter interface for genes powered by \code{\link{mygene}}
+}
+\details{
+With the help of the \code{\link{mygene}} API, this provides an interface for reasonably
+flexible ways to get select some subset of genes. The first problem for a simple selection is that
+genomics data often requires mapping across different database IDs and accessions,
+e.g. between NCBI gene IDs, HUGO gene symbols, Ensembl, or to a protein product (Uniprot accessions),
+all of which are constantly being updated so that IDs become deprecated/obsolete.
+The second problem is that, aside from being able to use any database ID, one might want to use
+genomic coordinates or even Gene Ontology references.
+The end return should be whatever gene IDs the application requires, but what should be provided to
+the user to make their selection? This implements three entryways:
+\itemize{
+  \item The main select loads the preferred gene IDs stored locally by the application.
+  \item A query field powered by the \code{\link{mygene}} API to do translations using the most current data.
+  \item A gene list upload option to upload a gene list (one gene per line).
+}
+
+The return can be passed in to the parameter \code{selected} in the \code{\link{multiVServer}} module.
 }
 \seealso{
-Other multiVApp module functions: 
-\code{\link{selectVUI}()},
-\code{\link{subgroupVServer}()},
-\code{\link{subgroupVUI}()}
+Other geneV functions: 
+\code{\link{geneVUI}()}
 }
-\concept{multiVApp module functions}
+\concept{geneV functions}

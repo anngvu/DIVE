@@ -40,7 +40,7 @@
 
 
 <meta property="og:title" content="Shiny module UI for importing data from GEO — getGEOInput" />
-<meta property="og:description" content="Shiny module UI for importing data from GEO" />
+<meta property="og:description" content="Interactively import GEO data with step-by-step process using a series of modals" />
 
 
 
@@ -109,7 +109,7 @@
     </div>
 
     <div class="ref-description">
-    <p>Shiny module UI for importing data from GEO</p>
+    <p>Interactively import GEO data with step-by-step process using a series of modals</p>
     </div>
 
     <pre class="usage"><span class='fu'>getGEOInput</span>(<span class='kw'>id</span>, informd = <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"help/GEO_module.Rmd"</span>, package = <span class='st'>"DIVE"</span>))</pre>
@@ -120,6 +120,10 @@
     <tr>
       <th>id</th>
       <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>informd</th>
+      <td><p>Optional path to Rmarkdown file containing help-text or similar to displayed.</p></td>
     </tr>
     </table>
 

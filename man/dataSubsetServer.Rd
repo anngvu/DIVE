@@ -23,8 +23,7 @@ dataSubsetServer(
 \item{subsets}{Optional, a list to display groups with higher-level grouping in the selection.
 By default, the selection is composed of unique values in \code{subsetv}.}
 
-\item{customdata}{Optional, a length-one character vector of data column to append.
-See details.}
+\item{customdata}{Optional, a length-one character vector of data column to append. See details.}
 
 \item{informd}{Relative path to the Rmarkdown file, whose contents will be displayed in the modal.}
 }
@@ -50,9 +49,7 @@ and \code{c(Source="S2")} for the second.
 Alternatively, \code{customdata} can be useful for appending custom data
 such as \code{c(Color="red")}, perhaps to use in plotting of the subsetted data.
 
-\subsection{
 Note: currently, multi-selection is a non-configurable default.
-}
 }
 \seealso{
 Other dataSubset functions: 

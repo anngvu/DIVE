@@ -14,17 +14,27 @@ xVServer(
 )
 }
 \arguments{
-\item{hdata}{A numeric matrix with row and column names for heatmap.}
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{cdata}{Optional, a data.table that can be joined to hdata. See details.}
+\item{hdata}{A numeric matrix with row and column names for heatmap representation.}
 
-\item{key}{Name of key column for cdata, currently defaults to "ID".}
+\item{cdata}{Optional, a \code{data.table} of characteristics data. See details.}
 
-\item{selected}{A reactive vector used to subset the "features" (cols) of hdata.}
+\item{key}{Name of key column for \code{cdata}, currently defaults to "ID".}
 
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
+\item{selected}{A reactive vector used to subset the features (cols) of \code{hdata}.}
+
+\item{height}{Height for data plots.}
 }
 \description{
-This module attempts to integratively visualize one or more
-high-dimensional gene/protein/methylation datasets with phenotype or clinical features.
+Integratively visualize a high-dimensional expression dataset with phenotype or clinical features
+}
+\details{
+The data objects here can be compared to \code{Biobase::ExpressionSet} objects,
+where \code{hdata} corresponds to a (transposed) \code{exprs} matrix in the \code{assayData} slot and
+\code{cdata} corresponds to the data in the \code{phenoData} slot.
+
+The capabilities implemented are clustering (of samples by features only) and data subsetting of.
+The data subsetting of expression data works through a local selection, which takes precedence
+when activated, or through whatever is passed into \code{selected}.
 }

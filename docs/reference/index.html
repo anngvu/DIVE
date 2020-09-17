@@ -117,7 +117,7 @@
       <tr>
         <th colspan="2">
           <h2 id="section-matrixapp" class="hasAnchor"><a href="#section-matrixapp" class="anchor"></a>matrixApp</h2>
-          <p class="section-desc"><p>Module functions for creating matrixApp</p></p>
+          <p class="section-desc"><p>Module functions for composing matrixApp</p></p>
         </th>
       </tr>
       
@@ -194,21 +194,21 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="dualDrilldownUI.html">dualDrilldownUI()</a></code> </p>
-        </td>
-        <td><p>Shiny module UI for data drilldown interaction</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="dualDrilldownServer.html">dualDrilldownServer()</a></code> </p>
         </td>
         <td><p>Server module server for data drilldown interaction</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="dualDrilldownUI.html">dualDrilldownUI()</a></code> </p>
+        </td>
+        <td><p>Shiny module UI for data drilldown interaction</p></td>
       </tr>
     </tbody><tbody>
       <tr>
         <th colspan="2">
           <h2 id="section-matchapp" class="hasAnchor"><a href="#section-matchapp" class="anchor"></a>matchApp</h2>
-          <p class="section-desc"><p>Module functions for creating matchApp</p></p>
+          <p class="section-desc"><p>Module functions for composing matchApp</p></p>
         </th>
       </tr>
       
@@ -276,6 +276,30 @@
           <p><code><a href="matchResultServer.html">matchResultServer()</a></code> </p>
         </td>
         <td><p>Shiny module server for generating match results output</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="dataSubsetInput.html">dataSubsetInput()</a></code> </p>
+        </td>
+        <td><p>Shiny module UI for selecting a subsetted dataset</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="dataSubsetServer.html">dataSubsetServer()</a></code> </p>
+        </td>
+        <td><p>Shiny server module for returning a subsetted dataset</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="customDatasetInput.html">customDatasetInput()</a></code> </p>
+        </td>
+        <td><p>Shiny module UI for customized user-uploaded dataset</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="customDatasetServer.html">customDatasetServer()</a></code> </p>
+        </td>
+        <td><p>Shiny module server for customized user-uploaded dataset</p></td>
       </tr>
     </tbody><tbody>
       
@@ -285,7 +309,7 @@
       <tr>
         <th colspan="2">
           <h2 id="section-multivapp" class="hasAnchor"><a href="#section-multivapp" class="anchor"></a>multiVApp</h2>
-          <p class="section-desc"><p>Module functions for creating multiVApp</p></p>
+          <p class="section-desc"><p>Module functions for composing multiVApp</p></p>
         </th>
       </tr>
       
@@ -298,13 +322,13 @@
         <td>
           <p><code><a href="multiVCtrlServer.html">multiVCtrlServer()</a></code> </p>
         </td>
-        <td><p>Shiny module server for controlling multi-column view</p></td>
+        <td><p>Shiny module server for controlling multi-column views</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="multiVCtrlUI.html">multiVCtrlUI()</a></code> </p>
         </td>
-        <td><p>Shiny module UI for controlling multi-column view</p></td>
+        <td><p>Shiny module UI for controlling multi-column views</p></td>
       </tr><tr>
         
         <td>
@@ -328,7 +352,7 @@
         <td>
           <p><code><a href="geneVUI.html">geneVUI()</a></code> </p>
         </td>
-        <td><p>Shiny module UI for filtering high dimensional genomics data</p></td>
+        <td><p>Shiny module UI for select-filter of genes or gene products</p></td>
       </tr><tr>
         
         <td>
@@ -352,7 +376,7 @@
         <td>
           <p><code><a href="geneVServer.html">geneVServer()</a></code> </p>
         </td>
-        <td><p>Shiny module server for filtering high dimensional genomics data</p></td>
+        <td><p>Shiny module server for select-filter of genes or gene products</p></td>
       </tr><tr>
         
         <td>
@@ -376,7 +400,7 @@
       <tr>
         <th colspan="2">
           <h2 id="section-datahelper" class="hasAnchor"><a href="#section-datahelper" class="anchor"></a>dataHelper</h2>
-          <p class="section-desc"><p>Module functions for creating dataHelperApp</p></p>
+          <p class="section-desc"><p>Module functions for composing dataHelperApp</p></p>
         </th>
       </tr>
       
@@ -384,12 +408,24 @@
     </tbody><tbody>
       
       
-      
+      <tr>
+        
+        <td>
+          <p><code><a href="dataHelperServer.html">dataHelperServer()</a></code> </p>
+        </td>
+        <td><p>Shiny module server function for simple interactions between two relational tables</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="dataHelperUI.html">dataHelperUI()</a></code> </p>
+        </td>
+        <td><p>Shiny app UI for simple interactions between two relational tables</p></td>
+      </tr>
     </tbody><tbody>
       <tr>
         <th colspan="2">
           <h2 id="section-common-use-components" class="hasAnchor"><a href="#section-common-use-components" class="anchor"></a>Common-use components</h2>
-          <p class="section-desc"><p>Utility components that appear as part of other modules</p></p>
+          <p class="section-desc"><p>Building block components typically extended by something else, part of multiple things</p></p>
         </th>
       </tr>
       
@@ -412,6 +448,18 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="getLinkInput.html">getLinkInput()</a></code> </p>
+        </td>
+        <td><p>Shiny module UI for retrieving internal data with action buttons/links</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="getLinkServer.html">getLinkServer()</a></code> </p>
+        </td>
+        <td><p>Shiny module server for retrieving internal data with action buttons/links</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="infoOutput.html">infoOutput()</a></code> </p>
         </td>
         <td><p>Shiny module UI to display a modal on click</p></td>
@@ -430,10 +478,23 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="checkCohortData.html">checkCohortData()</a></code> </p>
+          <p><code><a href="consortUI.html">consortUI()</a></code> </p>
         </td>
-        <td><p>Check cohort data</p></td>
-      </tr><tr>
+        <td><p>Connected Sort UI</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-internal-functions" class="hasAnchor"><a href="#section-internal-functions" class="anchor"></a>Internal functions</h2>
+          <p class="section-desc"><p>Important internal functions with no associated UI</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
         
         <td>
           <p><code><a href="checkDataUpload.html">checkDataUpload()</a></code> </p>
@@ -445,6 +506,36 @@
           <p><code><a href="checkForID.html">checkForID()</a></code> </p>
         </td>
         <td><p>Check and make character ID column</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="checkGEOmatrixfile.html">checkGEOmatrixfile()</a></code> </p>
+        </td>
+        <td><p>Check the GEO series matrix file</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="checkGEOmetatype.html">checkGEOmetatype()</a></code> </p>
+        </td>
+        <td><p>Check GEO metadata for supported dataset type</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="checkGEOplatform.html">checkGEOplatform()</a></code> </p>
+        </td>
+        <td><p>Check the GEO platform</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="checkGEOwrapper.html">checkGEOwrapper()</a></code> </p>
+        </td>
+        <td><p>Check a GEO dataset for compatibility</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="data2cor.html">data2cor()</a></code> </p>
+        </td>
+        <td><p>Get correlation matrix and observations used</p></td>
       </tr>
     </tbody>
     </table>

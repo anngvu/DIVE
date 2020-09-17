@@ -40,7 +40,7 @@
 
 
 <meta property="og:title" content="Shiny module server for importing data from GEO — getGEOServer" />
-<meta property="og:description" content="Handles importing GEO data by guiding user through a number of modals." />
+<meta property="og:description" content="Interactively import GEO data with step-by-step process using a series of modals" />
 
 
 
@@ -109,7 +109,7 @@
     </div>
 
     <div class="ref-description">
-    <p>Handles importing GEO data by guiding user through a number of modals.</p>
+    <p>Interactively import GEO data with step-by-step process using a series of modals</p>
     </div>
 
     <pre class="usage"><span class='fu'>getGEOServer</span>(<span class='kw'>id</span>)</pre>
@@ -118,21 +118,25 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>input, output, session</th>
-      <td><p>Standard <code>shiny</code> boilerplate.</p></td>
+      <th>id</th>
+      <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>GEOdata as reactive values object. See details.</p>
+    <p><code>GEOdata</code> reactive values list object containing
+<code>$accession</code>, <code>$eset</code>, <code>$pData</code> and <code>$return</code>.
+<code>$return</code> is an internal status flag for use by <code><a href='multiVCtrlServer.html'>multiVCtrlServer</a></code>
+to know when a new GEO dataset has been processed completely through the annotation step.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Returns a reactive values object containing</p><pre>$accession</pre><p>,</p><pre>$eset</pre><p>,</p><pre>$pData</pre><p>and</p><pre>$call</pre><p>.
-The variable</p><pre>$call</pre><p>is an internal counter for use with
-other modules that need to update when new GEO dataset has been processed
-completely through the annotation step
-(even when it has the same accession number).</p>
+    <p>This server function implements interactive GEO data import with three main steps.</p><ol>
+<li><p>Query for accession, extract expression data and check whether of compatible type and format.</p></li>
+<li><p>Import characteristics data selectively according to user.</p></li>
+<li><p>Import the feature annotation according to user.</p></li>
+</ol>
+
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

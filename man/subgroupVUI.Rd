@@ -8,17 +8,12 @@ subgroupVUI(id)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
-
-\item{hdchoices}{List of high throughput datasets.}
-
-\item{cchoices}{Data that can be used to define groups.}
 }
 \description{
-UI for user to define groups for volcano plots.
+UI for user to define groups for volcano plots
 }
 \seealso{
 Other multiVApp module functions: 
-\code{\link{geneVServer}()},
 \code{\link{selectVUI}()},
 \code{\link{subgroupVServer}()}
 }

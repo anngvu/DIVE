@@ -40,8 +40,7 @@
 
 
 <meta property="og:title" content="Shiny module server for presenting high dimensional data with other features in multi-column view — xVServer" />
-<meta property="og:description" content="This module attempts to integratively visualize one or more
-high-dimensional gene/protein/methylation datasets with phenotype or clinical features." />
+<meta property="og:description" content="Integratively visualize a high-dimensional expression dataset with phenotype or clinical features" />
 
 
 
@@ -110,8 +109,7 @@ high-dimensional gene/protein/methylation datasets with phenotype or clinical fe
     </div>
 
     <div class="ref-description">
-    <p>This module attempts to integratively visualize one or more
-high-dimensional gene/protein/methylation datasets with phenotype or clinical features.</p>
+    <p>Integratively visualize a high-dimensional expression dataset with phenotype or clinical features</p>
     </div>
 
     <pre class="usage"><span class='fu'>xVServer</span>(
@@ -127,27 +125,39 @@ high-dimensional gene/protein/methylation datasets with phenotype or clinical fe
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
+      <th>id</th>
+      <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
+    </tr>
+    <tr>
       <th>hdata</th>
-      <td><p>A numeric matrix with row and column names for heatmap.</p></td>
+      <td><p>A numeric matrix with row and column names for heatmap representation.</p></td>
     </tr>
     <tr>
       <th>cdata</th>
-      <td><p>Optional, a data.table that can be joined to hdata. See details.</p></td>
+      <td><p>Optional, a <code>data.table</code> of characteristics data. See details.</p></td>
     </tr>
     <tr>
       <th>key</th>
-      <td><p>Name of key column for cdata, currently defaults to "ID".</p></td>
+      <td><p>Name of key column for <code>cdata</code>, currently defaults to "ID".</p></td>
     </tr>
     <tr>
       <th>selected</th>
-      <td><p>A reactive vector used to subset the "features" (cols) of hdata.</p></td>
+      <td><p>A reactive vector used to subset the features (cols) of <code>hdata</code>.</p></td>
     </tr>
     <tr>
-      <th>input, output, session</th>
-      <td><p>Standard <code>shiny</code> boilerplate.</p></td>
+      <th>height</th>
+      <td><p>Height for data plots.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>The data objects here can be compared to <code><a href='https://rdrr.io/pkg/Biobase/man/class.ExpressionSet.html'>Biobase::ExpressionSet</a></code> objects,
+where <code>hdata</code> corresponds to a (transposed) <code>exprs</code> matrix in the <code>assayData</code> slot and
+<code>cdata</code> corresponds to the data in the <code>phenoData</code> slot.</p>
+<p>The capabilities implemented are clustering (of samples by features only) and data subsetting of.
+The data subsetting of expression data works through a local selection, which takes precedence
+when activated, or through whatever is passed into <code>selected</code>.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

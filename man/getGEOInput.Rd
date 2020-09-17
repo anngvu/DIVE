@@ -8,7 +8,9 @@ getGEOInput(id, informd = system.file("help/GEO_module.Rmd", package = "DIVE"))
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
+\item{informd}{Optional path to Rmarkdown file containing help-text or similar to displayed.}
 }
 \description{
-Shiny module UI for importing data from GEO
+Interactively import GEO data with step-by-step process using a series of modals
 }

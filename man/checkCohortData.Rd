@@ -9,3 +9,4 @@ checkCohortData(cohdata, message = NULL, result = NULL)
 \description{
 Check that data has an ID column and that data is numeric/numeric factors
 }
+\keyword{internal}
