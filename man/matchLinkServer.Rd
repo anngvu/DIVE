@@ -10,7 +10,7 @@ matchLinkServer(
   inputdata,
   vars,
   guess = NULL,
-  informd = system.file("help/matching_methods.Rmd", package = "DIVE")
+  informd = system.file("info/matching_methods.Rmd", package = "DIVE")
 )
 }
 \arguments{
@@ -18,7 +18,7 @@ matchLinkServer(
 
 \item{refdata}{Reactive reference \code{data.table}.}
 
-\item{inputdata}{Reactive \code{data.table}, typically provided by \code{\link{newDatasetServer}}.}
+\item{inputdata}{Reactive \code{data.table}, typically provided by \code{\link{customDatasetServer}}.}
 
 \item{vars}{A named list of a variable set (or sets) in the data that is allowed for matching. See details.}
 

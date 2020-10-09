@@ -7,11 +7,11 @@
 consortSet(varset, matchOpts, sessionNS)
 }
 \arguments{
+\item{varset}{The subset of variables in the reference dataset used for matching.}
+
 \item{matchOpts}{Optional list of guessed pairs of harmonized variables for external and reference dataset.}
 
-\item{sessionNS}{Namespace function, i.e. \code{shiny::\link[shiny]{session$ns}}, important for a namespaced context.}
-
-\item{vars}{The subset of variables in the reference dataset used for matching.}
+\item{sessionNS}{Namespace function, i.e. \code{shiny::\link[shiny]{NS}}, important for a namespaced context.}
 }
 \value{
 A \code{shiny::\link[shiny]{tagList}} ui for drag-n-drop variables.

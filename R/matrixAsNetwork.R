@@ -6,6 +6,8 @@
 #' meant to implement an alternative view of data as a graph.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param height Height passed to `visNetworkOutput`.
+#' @param ... Other attributes or elements to be in container.
 #' @export
 matrixAsNetworkUI <- function(id, height = "400px", ...) {
   ns <- NS(id)
@@ -18,20 +20,25 @@ matrixAsNetworkUI <- function(id, height = "400px", ...) {
 
 #' Server module server for network graph
 #'
-#' Making a network graph representation of matrix data using visNetwork.
+#' Make a network graph representation of matrix data using `visNetwork`
 #'
 #' This is a module with a visNetwork plot as its main output,
 #' meant to implement an alternative view of data as a graph.
 #' As the name of the module suggests, that data should be in matrix form;
-#' the module can use whatever is returned by the matrixCtrl module.
+#' the module can use whatever is returned by the `matrixCtrl` module.
 #' Multi-selection of nodes is set as the default interaction,
 #' so return is the currently selected nodes as a character vector node IDs
 #' (this can be changed to single select).
 #'
 #' @param id Namespace id for module.
-#' @param mdata Reactive matrix data from \code{\link{matrixCtrl}}.
+#' @param mdata Reactive matrix data from \code{\link{matrixCtrlServer}}.
 #' @param M Full matrix from which `mdata` originates.
-#' @param style Optional, a list with global styling for nodes, edges, and plot background. Defaults to visNetwork styling.
+#' @param background Optional background color for network graph.
+#' @param .nodes Node options passed to \code{visNodes}.
+#' @param .edges Edge options passed to \code{visEdges}.
+#' @param .options Options passed to \code{visOptions}.
+#' @param .interaction Interaction options passed to \code{visInteraction}. The default enables `multiselect`.
+#' @param randomSeed A seed number for reproduceable graph layout.
 #' @export
 matrixAsNetworkServer <- function(id,
                                   mdata, M,

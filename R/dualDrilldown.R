@@ -3,6 +3,7 @@
 #' Creates app UI for a drilldown plot component
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @import shiny
 #' @export
 dualDrilldownUI <- function(id) {
   ns <- NS(id)
@@ -35,12 +36,13 @@ dualDrilldownUI <- function(id) {
 #' analogous to the poor drilldown having two bosses telling it what data they want reported.
 #' Thus the "dual" describes both how the drilldown renders in two different ways
 #' as well as being able to be controlled by up to two different sources.
-#' For this component the data should actually have a default factor grouping variable
+#' For this component the data requires a default factor grouping variable
 #' to be passed into the aesthetics. If there were no default factor grouping variable,
 #' when only one variable is selected we would not be able to generate the boxplot view.
 #' It should also be possible to specify multiple variables able to be used for grouping
 #' (which the user can switch between), but this isn't implemented yet.
 #'
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param cdata A data.table. This is a reactive to allow the component to be updated with a new table of data.
 #' @param colorby A named list where name matches the (factor) variable in cdata to use for color grouping.
 #' If there is a named vector, this is passed into scale_color_manual to be used for custom color mapping, e.g.
@@ -49,7 +51,13 @@ dualDrilldownUI <- function(id) {
 #' @param factorx Optional, a function that returns a boolean for whether
 #' a variable should be plotted as factor when given the variable name.
 #' Useful when for some reason factor variables are numeric or character instead of already factor-encoded.
-#' By default, variables are merely checked using base::is.factor, which works when the data is already factor-encoded.
+#' By default, variables are merely checked using `base::is.factor`, which works when the data is already factor-encoded.
+#' @param src1 Reactive data from "source 1".
+#' @param src2 Reactive data from "source 2".
+#' @import shiny
+#' @import data.table
+#' @import ggplot2
+#' @import magrittr
 #' @export
 dualDrilldownServer <- function(id,
                                 cdata,
@@ -79,9 +87,9 @@ dualDrilldownServer <- function(id,
         p <- p + geom_point(aes_string(color = names(colorby)), size = 2, alpha = 0.5,
                             position = position_jitter(width = 0.05, height = 0.05))
       }
-      p <- suppressWarnings(ggplotly(p)) %>%
-        hide_legend() %>%
-        layout(xaxis = list(tickangle = 45)) %>%
+      p <- suppressWarnings(plotly::ggplotly(p)) %>%
+        plotly::hide_legend() %>%
+        plotly::layout(xaxis = list(tickangle = 45)) %>%
         plotly::config(displayModeBar = F)
       p$x$data[[1]]$marker$opacity <- 0 # manual specify since plotly doesn't translate this for boxplot
       p
@@ -100,7 +108,7 @@ dualDrilldownServer <- function(id,
         if(length(colorby[[1]])) p <- p + scale_colour_manual(values = colorby[[1]])
       }
       if(flipxy) p <- p + coord_flip()
-      p <- suppressWarnings(ggplotly(p)) %>% plotly::config(displayModeBar = F)
+      p <- suppressWarnings(plotly::ggplotly(p)) %>% plotly::config(displayModeBar = F)
       p
     }
 

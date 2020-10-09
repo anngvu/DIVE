@@ -23,3 +23,4 @@ Other checkGEO functions:
 \code{\link{checkGEOwrapper}()}
 }
 \concept{checkGEO functions}
+\keyword{internal}

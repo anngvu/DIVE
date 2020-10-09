@@ -32,7 +32,7 @@ matrixCtrlUI <- function(id, minN = 5) {
 #' and additional columns for each type of metadata attribute.
 #' The base UI implements interactive filters as drop-down selections.
 #' The server function returns the data with user-applied filters,
-#' i.e. the main input to be visualized with \code{\link{iMatrix}}.
+#' i.e. the main input to be visualized with \code{\link{matrixMainServer}}.
 #'
 #' @section To-do:
 #' The UI can also expand/integrate with an optional "add-on" widget
@@ -43,9 +43,11 @@ matrixCtrlUI <- function(id, minN = 5) {
 #' The server function needs to return when the widget should be called (displayed).
 #'
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param M A data matrix, e.g. a correlation matrix, which must have row and column names.
-#' @param N A matrix of the same dimensions as M to be used as a filter layer, e.g. sample size or p-values.
+#' @param N A matrix of the same dimensions as M to be used as a filter layer, e.g. sample size.
+#' @param P A matrix of the same dimensions as M to be used as a filter layer, e.g. p-values.
+#' @param cutoffP A cutoff value in `P` to be used as initial default for filtering.
 #' @param cdata The data used for generating the matrix,
 #' necessary for allowing user-uploaded data for mutable M.
 #' @param metadata Optional, a data.table with different types of metadata/annotation to be used as filters.
@@ -53,9 +55,10 @@ matrixCtrlUI <- function(id, minN = 5) {
 #' @param vkey The column in metadata that maps to row/col names in M, i.e. the key column such as VarID.
 #' If metadata is not given, should be something like "Name" because the only selection possible is by row names.
 #' @param newdata Optional, reactive data such as a user upload passed in by
-#' the \code{\link{dataUpload}} module or from some other component,
+#' the \code{\link{dataUploadServer}} module or from some other component,
 #' that is suitable for merging with \preformatted{cdata} to calculate a new M.
-#' @param widgetmod IGNORE. Optional, a widget extension module. See details.
+#' @param widgetmod Not currently implemented. Optional widget extension module.
+#' @param widgetopt Not currently implemented. Options for `widgetmod`.
 #' @return Reactive values in \code{mstate} object that keeps track of visible matrices
 #' and selected metadata and is used by the associated plotting module.
 #' @export

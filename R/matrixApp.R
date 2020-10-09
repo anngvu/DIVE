@@ -80,6 +80,8 @@ matrixAppServer <- function(id,
 #'
 #' Wrapper to launch app at console
 #'
+#' @param ns Namespace of app module.
+#' @param ... Arguments passed to \code{\link{matrixAppServer}}.
 #' @export
 matrixApp <- function(ns, ...) {
   ui <- matrixAppUI(ns)

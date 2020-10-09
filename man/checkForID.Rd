@@ -9,6 +9,8 @@ checkForID(data, message = NULL, idcol = "ID", aschar = T)
 \arguments{
 \item{data}{A table.}
 
+\item{message}{A default message for failures.}
+
 \item{idcol}{Name of ID column, defaulting to "ID".}
 
 \item{aschar}{Convert ID column to character.}
@@ -21,3 +23,4 @@ Checks for some sort of ID column, which is by default converted to character.
 Returns a message for failures.
 This is meant to work with dataset upload modules.
 }
+\keyword{internal}

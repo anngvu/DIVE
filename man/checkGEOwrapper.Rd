@@ -20,3 +20,4 @@ Other checkGEO functions:
 \code{\link{checkGEOplatform}()}
 }
 \concept{checkGEO functions}
+\keyword{internal}

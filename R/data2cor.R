@@ -17,7 +17,7 @@
 #' such as Cramer's V, eta, lambda (something like data2association)
 #' so the result will be a heterogeneous correlation/association matrix.
 #'
-#' @param cdata A data.table.
+#' @param cdata A `data.table`.
 #' @param exclude Optional, name pattern of column to exclude,
 #' e.g. columns containing IDs or other data where relationships are not calculated.
 #' The default excludes columns named "ID" and columns ending with "_SE", "_SEM", and "_SD".

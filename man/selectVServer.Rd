@@ -15,6 +15,8 @@ selectVServer(
 )
 }
 \arguments{
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
 \item{data}{A reactive data.table. See details.}
 
 \item{key}{A key column that is kept for every selected subset. Defaults to "ID".}
@@ -27,19 +29,17 @@ selectVServer(
 to generate counts in the select options. See details.}
 
 \item{maxitems}{Maximum number of items that can be selected. Defaults to 3.}
-
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
 }
 \value{
-The subsetted data table.
+A subsetted `data.table`.
 }
 \description{
 Returns the selected columns.
 }
 \details{
-This is a subcomponent intended to serve under \code{\link{multiVCtrl}}
+This is a subcomponent intended to serve under \code{\link{multiVCtrlServer}}
 but should be generic enough to be integrated with other modules.
-When data is uploaded through \code{\link{multiVCtrl}}, it can be "high-throughput"
+When data is uploaded through \code{\link{multiVCtrlServer}}, it can be "high-throughput"
 or "low-throughput" type data, the latter typically as phenotype or clinical variables.
 This module handles changes in the table of the latter data type.
 When the user adds (uploads) new data columns, the selection updates to include these new options.

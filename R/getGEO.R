@@ -4,6 +4,7 @@
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param informd Optional path to Rmarkdown file containing help-text or similar to displayed.
+#' @import shiny
 #' @export
 getGEOInput <- function(id, informd = system.file("info/GEO_module.Rmd", package = "DIVE")) {
   ns <- NS(id)
@@ -30,6 +31,7 @@ getGEOInput <- function(id, informd = system.file("info/GEO_module.Rmd", package
 #' \code{$accession}, \code{$eset}, \code{$pData} and \code{$return}.
 #' \code{$return} is an internal status flag for use by \code{\link{multiVCtrlServer}}
 #' to know when a new GEO dataset has been processed completely through the annotation step.
+#' @import shiny
 #' @export
 getGEOServer <- function(id) {
 
@@ -139,6 +141,7 @@ getGEOServer <- function(id) {
 #'
 #' For reference: https://www.ncbi.nlm.nih.gov/gds/advanced/ -> select field "Dataset Type" -> show index list
 #' @family checkGEO functions
+#' @keywords internal
 checkGEOmetatype <- function(eset,
                              supported = c("Expression profiling by array",
                                            "Expression profiling by high throughput sequencing",
@@ -157,6 +160,7 @@ checkGEOmetatype <- function(eset,
 #' Accessions may not contain data in the matrix file but in the supplement section as an Excel file,
 #' which means data cannot by imported.
 #' @family checkGEO functions
+#' @keywords internal
 checkGEOmatrixfile <- function(eset) {
   if(nrow(eset)) TRUE else FALSE
 }
@@ -171,6 +175,7 @@ checkGEOmatrixfile <- function(eset) {
 #' for the "Expression profiling by array" type by using information in \code{pData},
 #' though there might be a better way to do this check.
 #' @family checkGEO functions
+#' @keywords internal
 checkGEOplatform <- function(eset) {
   pdata <- Biobase::pData(eset)
   if(pdata$channel_count[1] != 1) FALSE else TRUE
@@ -184,6 +189,7 @@ checkGEOplatform <- function(eset) {
 #' Primarily used in \code{\link{getGEOServer}}, this wraps multiple checks of varying complexity
 #' that were compartmentalized to help iteration of adaptable and reliable check steps over time.
 #' @family checkGEO functions
+#' @keywords internal
 checkGEOwrapper <- function(eset) {
   assertthat::assert_that(checkGEOmetatype(eset), msg = "The accession is not of supported dataset type.")
   assertthat::assert_that(checkGEOmatrixfile(eset), msg = "The accession does not contain a standard matrix file.")

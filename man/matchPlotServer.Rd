@@ -11,7 +11,7 @@ matchPlotServer(id, s1data, s2data, results)
 
 \item{s1data}{Reactive data from source #1 (often the reference dataset).}
 
-\item{s2data}{Reactive data from source #2, such as from \code{\link{newDatasetServer}}.}
+\item{s2data}{Reactive data from source #2, such as from \code{\link{customDatasetServer}}.}
 
 \item{results}{Optional, reactive return value of \code{\link{matchResultServer}}.}
 }

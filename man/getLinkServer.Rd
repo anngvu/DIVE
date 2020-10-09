@@ -7,13 +7,13 @@
 getLinkServer(id, sources, readfun = readLines, ...)
 }
 \arguments{
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
 \item{sources}{A vector of source paths matching the order of labels given in \code{\link{getLinkInput}}.}
 
 \item{readfun}{A function to handle reading the source files. Defaults to \code{\link[base]{readLines}}.}
 
 \item{...}{Additional arguments for \preformatted{readfun}.}
-
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
 }
 \value{
 A data object.

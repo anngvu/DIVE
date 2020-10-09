@@ -5,6 +5,7 @@
 #' @family geneV functions
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @import shiny
 #' @export
 geneVUI <- function(id) {
   ns <- NS(id)
@@ -53,6 +54,7 @@ geneVUI <- function(id) {
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param genes Gene choices for initialization in \code{shiny::\link[shiny]{selectizeInput}}.
 #' @return A vector of standard gene symbols.
+#' @import shiny
 #' @export
 geneVServer <- function(id,
                         genes = NULL) {

@@ -7,7 +7,7 @@
 data2cor(cdata, exclude = "^ID$|_SE$|_SEM$|_SD$", type = "spearman")
 }
 \arguments{
-\item{cdata}{A data.table.}
+\item{cdata}{A `data.table`.}
 
 \item{exclude}{Optional, name pattern of column to exclude,
 e.g. columns containing IDs or other data where relationships are not calculated.

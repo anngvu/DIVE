@@ -19,9 +19,15 @@ matrixCtrlServer(
 )
 }
 \arguments{
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
 \item{M}{A data matrix, e.g. a correlation matrix, which must have row and column names.}
 
-\item{N}{A matrix of the same dimensions as M to be used as a filter layer, e.g. sample size or p-values.}
+\item{N}{A matrix of the same dimensions as M to be used as a filter layer, e.g. sample size.}
+
+\item{P}{A matrix of the same dimensions as M to be used as a filter layer, e.g. p-values.}
+
+\item{cutoffP}{A cutoff value in `P` to be used as initial default for filtering.}
 
 \item{cdata}{The data used for generating the matrix,
 necessary for allowing user-uploaded data for mutable M.}
@@ -33,12 +39,12 @@ If not given, the only filter option will be the row names in M. Column names wi
 If metadata is not given, should be something like "Name" because the only selection possible is by row names.}
 
 \item{newdata}{Optional, reactive data such as a user upload passed in by
-the \code{\link{dataUpload}} module or from some other component,
+the \code{\link{dataUploadServer}} module or from some other component,
 that is suitable for merging with \preformatted{cdata} to calculate a new M.}
 
-\item{widgetmod}{IGNORE. Optional, a widget extension module. See details.}
+\item{widgetmod}{Not currently implemented. Optional widget extension module.}
 
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
+\item{widgetopt}{Not currently implemented. Options for `widgetmod`.}
 }
 \value{
 Reactive values in \code{mstate} object that keeps track of visible matrices
@@ -54,7 +60,7 @@ The metadata should be a table that can be passed into the parameter
 and additional columns for each type of metadata attribute.
 The base UI implements interactive filters as drop-down selections.
 The server function returns the data with user-applied filters,
-i.e. the main input to be visualized with \code{\link{iMatrix}}.
+i.e. the main input to be visualized with \code{\link{matrixMainServer}}.
 }
 \section{To-do}{
 

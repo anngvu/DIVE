@@ -40,6 +40,7 @@ checkCohortData <- function(cohdata, message = NULL, result = NULL) {
 #' @param idchar Logical with default TRUE, for whether to convert ID column to character.
 #' @param html (Not used) Logical with default TRUE, for whether to format message with HTML for display.
 #' @return A list with \code{result} and \code{message}. See details.
+#' @import data.table
 #' @export
 checkDataUpload <- function(data,
                             result = NULL,
@@ -69,9 +70,11 @@ checkDataUpload <- function(data,
 #' This is meant to work with dataset upload modules.
 #'
 #' @param data A table.
+#' @param message A default message for failures.
 #' @param idcol Name of ID column, defaulting to "ID".
 #' @param aschar Convert ID column to character.
 #' @return A list with elements result with the result data and message with a message to show.
+#' @keywords internal
 checkForID <- function(data, message = NULL, idcol = "ID", aschar = T) {
   hasID <- idcol %in% names(data)
   if(!hasID) message <- "<strong>There is no ID column.</strong><br>"

@@ -12,7 +12,7 @@ multiVCtrlServer(
   key = "ID",
   checkFun = NULL,
   preselect = NULL,
-  infoRmd = system.file("help/ht_upload.Rmd", package = "DIVE")
+  informd = system.file("info/ht_upload.Rmd", package = "DIVE")
 )
 }
 \arguments{
@@ -32,14 +32,17 @@ one can pass in a list formatted accordingly for \code{shiny::\link[shiny]{selec
 It should return a list containing message and result (result should be \code{NULL} when data fails checks).}
 
 \item{preselect}{Optional, pre-selected phenotype or clinical variables from \code{cdata}.}
+
+\item{informd}{Relative path to the Rmarkdown file, whose contents will be displayed in the modal.}
 }
 \value{
-A reactive values list containing the data matrix for the parameter \preformatted{hdata} of the \code{\link{multiV}} module,
-as well as parameters for \code{\link{geneV}} and \code{\link{selectV}}.
+A reactive values list containing the data matrix
+for the parameter \preformatted{hdata} of the \code{\link{multiVServer}} module,
+as well as parameters for \code{\link{geneVServer}} and \code{\link{selectVServer}}.
 }
 \description{
 Control hub that provides data and parameters for \code{\link{xVServer}},
-\code{\link{geneVServer}} and \code{\link{selectServer}}
+\code{\link{geneVServer}} and \code{\link{selectVServer}}
 }
 \details{
 The server logic handles sourcing of large expression datasets with three different methods:

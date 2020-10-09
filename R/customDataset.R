@@ -8,6 +8,7 @@
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param label Optional, a label for the name text input field.
 #' @family customDataset functions
+#' @import shiny
 #' @export
 customDatasetInput <- function(id, label = NULL) {
   ns <- NS(id)
@@ -33,10 +34,11 @@ customDatasetInput <- function(id, label = NULL) {
 #' @inheritParams dataUploadServer
 #' @return A reactive \code{data.table} of the modified uploaded data.
 #' @family customDataset functions
+#' @import shiny
 #' @export
 customDatasetServer <- function(id,
                                 customdata, defaultvalue = NULL,
-                                checkfun = NULL, informd = NULL, appdata = NULL) {
+                                checkFun = NULL, informd = NULL, appdata = NULL) {
 
   moduleServer(id, function(input, output, session) {
 

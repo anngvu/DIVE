@@ -51,7 +51,7 @@ matchLinkUI <- function(id) {
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param refdata Reactive reference \code{data.table}.
-#' @param inputdata Reactive \code{data.table}, typically provided by \code{\link{newDatasetServer}}.
+#' @param inputdata Reactive \code{data.table}, typically provided by \code{\link{customDatasetServer}}.
 #' @param vars A named list of a variable set (or sets) in the data that is allowed for matching. See details.
 #' @param guess Optional, name of the function to call for initial guessing of harmonized variables. See details.
 #' @param informd Optional, relative path to an info Rmarkdown file that will be pulled up in a help modal.
@@ -162,9 +162,9 @@ matchLinkServer <- function(id,
 
 #' Create draggable and order-able set of elements
 #'
-#' @param vars The subset of variables in the reference dataset used for matching.
+#' @param varset The subset of variables in the reference dataset used for matching.
 #' @param matchOpts Optional list of guessed pairs of harmonized variables for external and reference dataset.
-#' @param sessionNS Namespace function, i.e. \code{shiny::\link[shiny]{session$ns}}, important for a namespaced context.
+#' @param sessionNS Namespace function, i.e. \code{shiny::\link[shiny]{NS}}, important for a namespaced context.
 #' @return A \code{shiny::\link[shiny]{tagList}} ui for drag-n-drop variables.
 consortSet <- function(varset, matchOpts, sessionNS) {
   ix <- match(varset, names(matchOpts))

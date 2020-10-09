@@ -19,20 +19,30 @@ matrixAsNetworkServer(
 \arguments{
 \item{id}{Namespace id for module.}
 
-\item{mdata}{Reactive matrix data from \code{\link{matrixCtrl}}.}
+\item{mdata}{Reactive matrix data from \code{\link{matrixCtrlServer}}.}
 
 \item{M}{Full matrix from which `mdata` originates.}
 
-\item{style}{Optional, a list with global styling for nodes, edges, and plot background. Defaults to visNetwork styling.}
+\item{background}{Optional background color for network graph.}
+
+\item{.nodes}{Node options passed to \code{visNodes}.}
+
+\item{.edges}{Edge options passed to \code{visEdges}.}
+
+\item{.options}{Options passed to \code{visOptions}.}
+
+\item{.interaction}{Interaction options passed to \code{visInteraction}. The default enables `multiselect`.}
+
+\item{randomSeed}{A seed number for reproduceable graph layout.}
 }
 \description{
-Making a network graph representation of matrix data using visNetwork.
+Make a network graph representation of matrix data using `visNetwork`
 }
 \details{
 This is a module with a visNetwork plot as its main output,
 meant to implement an alternative view of data as a graph.
 As the name of the module suggests, that data should be in matrix form;
-the module can use whatever is returned by the matrixCtrl module.
+the module can use whatever is returned by the `matrixCtrl` module.
 Multi-selection of nodes is set as the default interaction,
 so return is the currently selected nodes as a character vector node IDs
 (this can be changed to single select).

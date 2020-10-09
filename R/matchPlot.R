@@ -37,7 +37,7 @@ matchPlotUI <- function(id, s1label = NULL, s2label = NULL, placeholder = "(sele
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param s1data Reactive data from source #1 (often the reference dataset).
-#' @param s2data Reactive data from source #2, such as from \code{\link{newDatasetServer}}.
+#' @param s2data Reactive data from source #2, such as from \code{\link{customDatasetServer}}.
 #' @param results Optional, reactive return value of \code{\link{matchResultServer}}.
 #' @family matchPlot functions
 #' @export

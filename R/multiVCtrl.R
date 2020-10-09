@@ -35,7 +35,7 @@ multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE) {
 #' Shiny module server for controlling multi-column views
 #'
 #' Control hub that provides data and parameters for \code{\link{xVServer}},
-#' \code{\link{geneVServer}} and \code{\link{selectServer}}
+#' \code{\link{geneVServer}} and \code{\link{selectVServer}}
 #'
 #' The server logic handles sourcing of large expression datasets with three different methods:
 #' \enumerate{
@@ -57,8 +57,10 @@ multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE) {
 #' @param key Name of column that contains IDs in \code{cdata} matching sample IDs in \code{hdlist} datasets. Defaults to "ID".
 #' @param preselect Optional, pre-selected phenotype or clinical variables from \code{cdata}.
 #' @inheritParams dataUploadServer
-#' @return A reactive values list containing the data matrix for the parameter \preformatted{hdata} of the \code{\link{multiV}} module,
-#' as well as parameters for \code{\link{geneV}} and \code{\link{selectV}}.
+#' @return A reactive values list containing the data matrix
+#' for the parameter \preformatted{hdata} of the \code{\link{multiVServer}} module,
+#' as well as parameters for \code{\link{geneVServer}} and \code{\link{selectVServer}}.
+#' @import shiny
 #' @export
 multiVCtrlServer <- function(id,
                              hdlist, choices = names(hdlist),
@@ -66,7 +68,7 @@ multiVCtrlServer <- function(id,
                              key = "ID",
                              checkFun = NULL,
                              preselect = NULL,
-                             infoRmd = system.file("info/ht_upload.Rmd", package = "DIVE")) {
+                             informd = system.file("info/ht_upload.Rmd", package = "DIVE")) {
 
   moduleServer(id, function(input, output, session) {
 
@@ -119,7 +121,7 @@ multiVCtrlServer <- function(id,
     observeEvent(input$upload, {
       showModal(modalDialog(
           dataUploadUI(session$ns("upload"), label = "<strong>Upload my data</strong>"),
-          includeMarkdown(infoRmd),
+          includeMarkdown(informd),
           footer = modalButton("Cancel")
       ))
     })

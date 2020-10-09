@@ -8,6 +8,8 @@ matrixMainUI(id, ...)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
+\item{...}{Other attributes and child elements to pass into UI container.}
 }
 \description{
 Creates app UI for a heatmap matrix responding to reactive data that is linked to a drilldown scatterplot component.

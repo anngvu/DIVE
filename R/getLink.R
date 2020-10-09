@@ -10,6 +10,7 @@
 #' @param labels One or more character labels.
 #' @param link Logical flag to indicate whether element is an action link or button. Defaults to link.
 #' @return A div where UI is inserted.
+#' @import shiny
 #' @export
 getLinkInput <- function(id, labels, link = T) {
   ns <- NS(id)
@@ -30,11 +31,13 @@ getLinkInput <- function(id, labels, link = T) {
 #' If the data needs to be materialized another way, e.g. if the data is \code{.rda} or a web file,
 #' that can be handled with using the appropriate \code{readfun}.
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param sources A vector of source paths matching the order of labels given in \code{\link{getLinkInput}}.
 #' @param readfun A function to handle reading the source files. Defaults to \code{\link[base]{readLines}}.
 #' @param ... Additional arguments for \preformatted{readfun}.
 #' @return A data object.
+#' @import shiny
+#' @export
 getLinkServer <- function(id,
                           sources, readfun = readLines, ...) {
 

@@ -8,6 +8,10 @@ matrixAsNetworkUI(id, height = "400px", ...)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
+\item{height}{Height passed to `visNetworkOutput`.}
+
+\item{...}{Other attributes or elements to be in container.}
 }
 \description{
 Create app UI for a network graph

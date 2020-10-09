@@ -11,7 +11,7 @@ matchResultServer(id, refdata, inputdata, params, sourcecol)
 
 \item{refdata}{Reactive refdata dataset as a \code{data.table}.}
 
-\item{inputdata}{Reactive \code{data.table} of the comparison dataset, e.g from \code{\link{newDatasetServer}}.}
+\item{inputdata}{Reactive \code{data.table} of the comparison dataset, e.g from \code{\link{customDatasetServer}}.}
 
 \item{params}{Reactive parameters data, e.g. from \code{\link{matchLinkServer}}.}
 

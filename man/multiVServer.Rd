@@ -10,7 +10,7 @@ multiVServer(
   choices = NULL,
   cdata = NULL,
   preselect = NULL,
-  genes = DIVE::gene_symbols
+  genes = NULL
 )
 }
 \arguments{

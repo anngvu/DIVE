@@ -9,7 +9,13 @@ filter4j(dt, col, values, j, type)
 \arguments{
 \item{dt}{A \code{data.table}.}
 
-\item{col}{Column in \code{dt}.}
+\item{col}{Filter column in \code{dt}.}
+
+\item{values}{The filter value(s) in `col`.}
+
+\item{j}{The column of data to return for matches of `values` in `col`.}
+
+\item{type}{Type of input filter; only "range" is special and requires `values` to be a 2-element vector.}
 }
 \description{
 Get values stored in inputs created by \code{\link{sideFilterUI}}

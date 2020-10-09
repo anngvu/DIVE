@@ -30,6 +30,8 @@ Including the "one-to-one" class will create a "monogamous" consort element that
 \item{placeholder}{Placeholder text.}
 
 \item{width}{UI element width.}
+
+\item{...}{Attributes and children passed into the container `div`.}
 }
 \description{
 Create a CONnected SORT ui whose items are sortable and transferable between other elements rendered by this method

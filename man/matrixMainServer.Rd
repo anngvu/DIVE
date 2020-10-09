@@ -12,20 +12,21 @@ matrixMainServer(
 )
 }
 \arguments{
-\item{mdata}{Reactive matrix data from \code{\link{matrixCtrl}}.}
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
+\item{mdata}{Reactive matrix data from \code{\link{matrixCtrlServer}}.}
 
 \item{colorscales}{Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named coloscale
 or custom colorscale used for heatmap. If not given, two default colorscale functions are used.}
-
-\item{input, output, session}{Standard \code{shiny} boilerplate.}
 }
 \description{
 The matrix responds to reactive plot data and has a linked drilldown component.
 }
 \details{
 The module handles interactive display of a matrix linked to a scatterplot
-that accesses underlying data for a user-clicked cell. It works with \code{\link{matrixCtrl}},
-which returns the data object. Generally, this module only handles visualization of a matrix
+that accesses underlying data for a user-clicked cell.
+It works with \code{\link{matrixCtrlServer}}, which returns the data object.
+Generally, this module only handles visualization of a matrix
 while the actual matrix generation can be handled by other modules that feed into it.
 For the drilldown component that displays underlying data points,
 the statistical data type (numeric vs. ordinal) matters and may require

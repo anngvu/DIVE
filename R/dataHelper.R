@@ -7,6 +7,7 @@
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
 #' @param theme Optional, name of theme for \code{shinythemes}.
+#' @import shiny
 #' @export
 dataHelperUI <- function(id, CSS = "app.css", theme = "paper") {
 
@@ -79,6 +80,8 @@ dataHelperUI <- function(id, CSS = "app.css", theme = "paper") {
 #' Should be a list with names matching columns in \code{lhdata} to be used as filters
 #' amd elements "type" with their input widget types, "selected" for the initial selection,
 #' and "conditional" with a boolean value for whether this is a less important filter that should initially be hidden/ignored.
+#' @import shiny
+#' @export
 dataHelperServer <- function(id,
                              lhdata, lhdatakey = "ID",
                              rhdata, rhdatakey = "Source",
@@ -209,10 +212,10 @@ dataHelperServer <- function(id,
 #' Get values stored in inputs created by \code{\link{sideFilterUI}}
 #'
 #' @param dt A \code{data.table}.
-#' @param col Column in \code{dt}.
-#' @param values
-#' @param j
-#' @param type
+#' @param col Filter column in \code{dt}.
+#' @param values The filter value(s) in `col`.
+#' @param j The column of data to return for matches of `values` in `col`.
+#' @param type Type of input filter; only "range" is special and requires `values` to be a 2-element vector.
 filter4j <- function(dt, col, values, j, type) {
   if(type == "range") {
     dt[get(col) >= values[1] & get(col) <= values[2], get(j)]
@@ -243,10 +246,14 @@ filter4j <- function(dt, col, values, j, type) {
 #'
 #' The inputs have namespaced IDs "<namespace>-filter-<colname>" by applying the passed-in
 #' namespacing function \code{ns} to \code{id}. To get values in a server function, use \code{\link{filter4j}}.
+#' @param inputId The input slot that will be used to access the value.
 #' @param values Choices for the input, depends on input type.
 #' @param type One of \code{c("select", "selectize", "checkbox", "checkboxGroup", "range")}, corresponding to
 #' \code{selectInput}, \code{selectizeInput}, \code{checkboxInput}, \code{checkboxGroupInput}, or \code{sliderInput} (range).
 #' @param selected The initial selection of the input, defaulting to the first of \code{values}.
+#' @param conditional Optional. If not `NULL`, wrap element in a conditional panel with inital display given by the boolean value.
+#' @param ns Function for namespacing components, i.e. from `session$ns`.
+#' @param width Width of input elements.
 sideFilterUI <- function(inputId, values,
                          type = c("select", "selectize", "checkbox", "checkboxGroup", "range"),
                          selected = c("first", "last", "all", "none"),

@@ -10,18 +10,24 @@ Encoding: UTF-8
 LazyData: true
 biocViews:
 Depends:
+    R (>= 2.10)
+Imports:
+    utils,
+    stats,
+    grDevices,
     shiny (>= 1.5.0),
+    shinythemes,
+    data.table (>= 1.12.6),
+    magrittr,
     ggplot2,
     plotly,
-    data.table (>= 1.12.6)
-Imports:
-    shinythemes,
     Hmisc,
     igraph,
     visNetwork,
     reshape2,
     shinycssloaders,
     shinyWidgets,
+    htmltools,
     r2d3,
     jsonlite,
     optmatch,
@@ -29,5 +35,13 @@ Imports:
     GEOquery,
     recount,                    
     mygene,
-    limma
-RoxygenNote: 7.1.0
+    limma,
+    Biobase, 
+    SummarizedExperiment, 
+    assertthat, 
+    dendextend,
+    fastcluster, 
+    gridExtra, 
+    rlang, 
+    scales
+RoxygenNote: 7.1.1

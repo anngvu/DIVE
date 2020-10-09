@@ -3,6 +3,7 @@
 #' Creates app UI for a heatmap matrix responding to reactive data that is linked to a drilldown scatterplot component.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param ... Other attributes and child elements to pass into UI container.
 #' @export
 matrixMainUI <- function(id, ...) {
   ns <- NS(id)
@@ -18,15 +19,16 @@ matrixMainUI <- function(id, ...) {
 #' The matrix responds to reactive plot data and has a linked drilldown component.
 #'
 #' The module handles interactive display of a matrix linked to a scatterplot
-#' that accesses underlying data for a user-clicked cell. It works with \code{\link{matrixCtrl}},
-#' which returns the data object. Generally, this module only handles visualization of a matrix
+#' that accesses underlying data for a user-clicked cell.
+#' It works with \code{\link{matrixCtrlServer}}, which returns the data object.
+#' Generally, this module only handles visualization of a matrix
 #' while the actual matrix generation can be handled by other modules that feed into it.
 #' For the drilldown component that displays underlying data points,
 #' the statistical data type (numeric vs. ordinal) matters and may require
 #' specifying aesthetic parameters for best representation and consistency across modules.
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
-#' @param mdata Reactive matrix data from \code{\link{matrixCtrl}}.
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param mdata Reactive matrix data from \code{\link{matrixCtrlServer}}.
 #' @param colorscales Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named coloscale
 #' or custom colorscale used for heatmap. If not given, two default colorscale functions are used.
 #' @export
@@ -46,10 +48,10 @@ matrixMainServer <- function(id,
     # Generate meta marginal plots
     metamargin <- function(x, y, z, name = "Group", text, colorscale = "Portland") {
       axis <- list(title = "", showgrid = F, showticklabels = F, ticks = "")
-      plot_ly(type = "heatmap", x = x, y = y, z = z,
+      plotly::plot_ly(type = "heatmap", x = x, y = y, z = z,
               name = name, text = text, hovertemplate = "<b>%{text}</b>",
               showscale = FALSE, colorscale = colorscale) %>%
-        layout(xaxis = axis, yaxis = axis)
+        plotly::layout(xaxis = axis, yaxis = axis)
     }
 
     #-- Main matrix plot -----------------------------------------------------------------------------------------------------#
@@ -60,7 +62,7 @@ matrixMainServer <- function(id,
       if(is.null(M)) {
         plotly_empty()
       } else if(nrow(M) == 0 || ncol(M) == 0) {
-        plotly_empty() %>% layout(title = "no result with selected filters")
+        plotly_empty() %>% plotly::layout(title = "no result with selected filters")
       } else {
         # bug? plot not displayed if height is less than 100px; minpx = 5
         px <- 1200/ncol(M)
@@ -70,11 +72,11 @@ matrixMainServer <- function(id,
         axis <- list(title = "", showgrid = F, automargin = TRUE, showticklabels = nrow(M) <= 30, # show labels when not too crowded
                      ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T)
 
-        plot_ly(type = "heatmap", x = colnames(M), y = rownames(M), z = M, name = "Exploratory\nMap",
+        plotly::plot_ly(type = "heatmap", x = colnames(M), y = rownames(M), z = M, name = "Exploratory\nMap",
                      colorscale = colorz, zmin = colorscales[[input$colorscale]]$zmin, zmax = colorscales[[input$colorscale]]$zmax,
                      hovertemplate = "row: <b>%{y}</b><br>col: <b>%{x}</b><br>corr: <b>%{z}</b>",
                      height = height, colorbar = list(thickness = 8)) %>%
-          layout(xaxis = axis, yaxis = axis, plot_bgcolor = colorscales[[input$colorscale]]$bgcolor) %>%
+          plotly::layout(xaxis = axis, yaxis = axis, plot_bgcolor = colorscales[[input$colorscale]]$bgcolor) %>%
           event_register("plotly_click")
       }
     })
@@ -103,9 +105,9 @@ matrixMainServer <- function(id,
       if(is.null(rowmeta()) && is.null(colmeta())) {
         main <- matrixheatmap()
       } else if(is.null(colmeta())) {
-        main <- subplot(matrixheatmap(), rowmeta(), nrows = 1, shareY = T, margin = 0.01, widths = c(0.97, 0.03))
+        main <- plotly::subplot(matrixheatmap(), rowmeta(), nrows = 1, shareY = T, margin = 0.01, widths = c(0.97, 0.03))
       } else {
-        main <- subplot(colmeta(), plotly_empty(), matrixheatmap(), rowmeta(),
+        main <- plotly::subplot(colmeta(), plotly_empty(), matrixheatmap(), rowmeta(),
                         nrows = 2, shareX = T, shareY = T, margin = 0.01,
                         widths = c(0.97, 0.03), heights = c(0.03, 0.97))
       }
@@ -142,6 +144,17 @@ colorscale_named <- function(pal = c("RdBu", "BrBG", "PiYG", "PRGn", "PuOr", "Rd
   return(colorfun)
 }
 
+#' Create custom colorscale for `plotly` heatmap
+#'
+#' Pass in a custom palette to generate custom colorscale data required by `plotly`
+#'
+#' This simply calls an internal function which relies on `scales::rescale`.
+#' @param palette A custom palette.
+#' @export
+colorscale_heatmap_custom <- function(palette) {
+  function(z) colorscale_heatmap_manual(z, palette = palette)
+}
+
 # Colorscale function for color mapping values
 # Palettes:
 # Using a symmetric palette for sign-agnostic coloring focuses only on the magnitude of values
@@ -156,13 +169,8 @@ colorscale_heatmap_manual <- function(z, domain = c(-1, 1), palette = c("#EF3202
   return(colorz)
 }
 
-#' @export
-colorscale_heatmap_custom <- function(palette) {
-  function(z) colorscale_heatmap_manual(z, palette = palette)
-}
-
 
 colorscale_heatmap_absolute <- function(z) {
-  colorscale_heatmap_manual(z, palette = c(hcl.colors(10, "YlOrRd", rev = TRUE), hcl.colors(10, "YlOrRd")))
+  colorscale_heatmap_manual(z, palette = c(grDevices::hcl.colors(10, "YlOrRd", rev = TRUE), grDevices::hcl.colors(10, "YlOrRd")))
 }
 

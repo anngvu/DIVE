@@ -15,7 +15,7 @@
 #' @param error Forwarded error messsage to be shown depending on \code{dev_mode} option.
 #' @param footer Bottom part of the modal dialog, which by default contains nothing unless
 #' set with \code{base::options(DIVE.error.modal.footer = ui)}. See details for intended uses.
-meh <- function(msg = "Sorry, something went wrong.<br><br>Try again later or let us know about the issue.<br>",
+meh <- function(msg = "Sorry, something went wrong.<br>Try again later or let us know about the issue.",
                 error = NULL,
                 footer = getOption("DIVE.error.modal.footer")) {
   showModal(modalDialog(

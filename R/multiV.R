@@ -67,7 +67,7 @@ multiVServer <- function(id,
                          choices = NULL,
                          cdata = NULL,
                          preselect = NULL,
-                         genes = DIVE::gene_symbols) {
+                         genes = NULL) {
 
   moduleServer(id, function(input, output, session) {
 
@@ -84,7 +84,7 @@ multiVServer <- function(id,
                             countby = reactive(view$hdata))
 
     # controls gene selection for all xVUI components
-    gselect <- geneVServer("gene", choices = genes)
+    gselect <- geneVServer("gene", genes = genes)
 
     # each dataset gets its own section with its own xVUI local module options
     obs_view <- observeEvent(view$hdata, {
@@ -122,6 +122,8 @@ multiVServer <- function(id,
 #'
 #' @family multiVUI module functions
 #'
+#' @param ns Namespace of app module.
+#' @param ... Arguments passed to \code{\link{multiVServer}}.
 #' @export
 multiVUIR <- function(ns, ...) {
   ui <- multiVUI(ns)

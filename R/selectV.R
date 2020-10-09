@@ -5,6 +5,7 @@
 #' @family multiVApp module functions
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @import shiny
 #' @export
 selectVUI <- function(id) {
   ns <- NS(id)
@@ -17,9 +18,9 @@ selectVUI <- function(id) {
 #'
 #' Returns the selected columns.
 #'
-#' This is a subcomponent intended to serve under \code{\link{multiVCtrl}}
+#' This is a subcomponent intended to serve under \code{\link{multiVCtrlServer}}
 #' but should be generic enough to be integrated with other modules.
-#' When data is uploaded through \code{\link{multiVCtrl}}, it can be "high-throughput"
+#' When data is uploaded through \code{\link{multiVCtrlServer}}, it can be "high-throughput"
 #' or "low-throughput" type data, the latter typically as phenotype or clinical variables.
 #' This module handles changes in the table of the latter data type.
 #' When the user adds (uploads) new data columns, the selection updates to include these new options.
@@ -29,7 +30,7 @@ selectVUI <- function(id) {
 #'
 #' @family multiVUI module functions
 #'
-#' @param input,output,session Standard \code{shiny} boilerplate.
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param data A reactive data.table. See details.
 #' @param key A key column that is kept for every selected subset. Defaults to "ID".
 #' @param label Label for variable select input.
@@ -37,7 +38,9 @@ selectVUI <- function(id) {
 #' @param countby A vector of IDs, which are intersected with the key (IDs) in data
 #' to generate counts in the select options. See details.
 #' @param maxitems Maximum number of items that can be selected. Defaults to 3.
-#' @return The subsetted data table.
+#' @return A subsetted `data.table`.
+#' @import shiny
+#' @import data.table
 #' @export
 selectVServer <- function(id,
                           data = reactive({ NULL }), key = "ID",

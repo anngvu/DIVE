@@ -14,6 +14,7 @@
 #' @param refname Optional, name of the reference dataset.
 #' @param addonUI Optional, ui module function to display addon components.
 #' @param addontab If addonUI is given, should also give a name for the tab hosting addon ui components.
+#' @import shiny
 #' @export
 matchAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"),
                        refname = NULL, addonUI = NULL, addontab = "") {
@@ -61,6 +62,7 @@ matchAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"
 #' @inheritParams matchLinkServer
 #' @inheritParams matchResultServer
 #' @inheritParams matchPlotServer
+#' @import shiny
 #' @export
 matchAppServer <- function(id,
                            refname = "Reference Cohort",
@@ -82,7 +84,7 @@ matchAppServer <- function(id,
     newcohort <- customDatasetServer(id = "CohortX",
                                      customdata = customdata,
                                      defaultvalue = defaultvalue,
-                                     checkfun = checkCohortData,
+                                     checkFun = checkCohortData,
                                      informd = informd,
                                      appdata = appdata)
 

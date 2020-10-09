@@ -7,6 +7,7 @@
 #' @param i Font-awesome icon name to display next to label, see \code{shiny::\link[shiny]{icon}}.
 #' @param link Whether to use link or button. Defaults to \code{actionLink}, set FALSE to use \code{actionButton}.
 #' @return An actionLink or actionButton that calls a modal.
+#' @import shiny
 #' @export
 infoOutput <- function(id, label = "req's", i = "exclamation-circle", link = T) {
   ns <- NS(id)
@@ -19,6 +20,7 @@ infoOutput <- function(id, label = "req's", i = "exclamation-circle", link = T) 
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param informd Relative path to the Rmarkdown file, whose contents will be displayed in the modal.
+#' @import shiny
 #' @export
 infoServer <- function(id, informd) {
 

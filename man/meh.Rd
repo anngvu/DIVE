@@ -6,7 +6,7 @@
 \usage{
 meh(
  
-    msg = "Sorry, something went wrong.<br><br>Try again later or let us know about the issue.<br>",
+    msg = "Sorry, something went wrong.<br><br>\\n                Try again later or let us know about the issue.<br>",
   error = NULL,
   footer = getOption("DIVE.error.modal.footer")
 )

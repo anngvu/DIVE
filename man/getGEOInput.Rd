@@ -4,7 +4,7 @@
 \alias{getGEOInput}
 \title{Shiny module UI for importing data from GEO}
 \usage{
-getGEOInput(id, informd = system.file("help/GEO_module.Rmd", package = "DIVE"))
+getGEOInput(id, informd = system.file("info/GEO_module.Rmd", package = "DIVE"))
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}

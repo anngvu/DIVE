@@ -6,6 +6,11 @@
 \usage{
 matrixApp(ns, ...)
 }
+\arguments{
+\item{ns}{Namespace of app module.}
+
+\item{...}{Arguments passed to \code{\link{matrixAppServer}}.}
+}
 \description{
 Wrapper to launch app at console
 }

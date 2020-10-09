@@ -14,6 +14,8 @@ dualDrilldownServer(
 )
 }
 \arguments{
+\item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
 \item{cdata}{A data.table. This is a reactive to allow the component to be updated with a new table of data.}
 
 \item{colorby}{A named list where name matches the (factor) variable in cdata to use for color grouping.
@@ -24,7 +26,11 @@ or `list(MyGroupingVar = NULL)` if custom color scaling isn't necessary. See als
 \item{factorx}{Optional, a function that returns a boolean for whether
 a variable should be plotted as factor when given the variable name.
 Useful when for some reason factor variables are numeric or character instead of already factor-encoded.
-By default, variables are merely checked using base::is.factor, which works when the data is already factor-encoded.}
+By default, variables are merely checked using `base::is.factor`, which works when the data is already factor-encoded.}
+
+\item{src1}{Reactive data from "source 1".}
+
+\item{src2}{Reactive data from "source 2".}
 }
 \description{
 Drilldown component with two different modes of disply and linked up to two different inputs
@@ -39,7 +45,7 @@ that can update this component's \code{selectInput},
 analogous to the poor drilldown having two bosses telling it what data they want reported.
 Thus the "dual" describes both how the drilldown renders in two different ways
 as well as being able to be controlled by up to two different sources.
-For this component the data should actually have a default factor grouping variable
+For this component the data requires a default factor grouping variable
 to be passed into the aesthetics. If there were no default factor grouping variable,
 when only one variable is selected we would not be able to generate the boxplot view.
 It should also be possible to specify multiple variables able to be used for grouping

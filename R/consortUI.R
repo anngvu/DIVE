@@ -17,6 +17,9 @@
 #' Including the "one-to-one" class will create a "monogamous" consort element that will only take one item (see details).
 #' @param placeholder Placeholder text.
 #' @param width UI element width.
+#' @param ... Attributes and children passed into the container `div`.
+#' @import shiny
+#' @import htmltools
 #' @export
 consortUI <- function(inputId, label, items = NULL,
                       item_class = NULL, classes = NULL, placeholder = "n/a", width = "300px", ...) {

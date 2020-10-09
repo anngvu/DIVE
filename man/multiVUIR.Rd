@@ -6,6 +6,11 @@
 \usage{
 multiVUIR(ns, ...)
 }
+\arguments{
+\item{ns}{Namespace of app module.}
+
+\item{...}{Arguments passed to \code{\link{multiVServer}}.}
+}
 \description{
 Shiny app launcher for multi-view module
 }

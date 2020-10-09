@@ -7,6 +7,7 @@
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @return Results UI consisting of a table and data download interface.
+#' @import shiny
 #' @export
 matchResultOutput <- function(id) {
   ns <- NS(id)
@@ -33,10 +34,11 @@ matchResultOutput <- function(id) {
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param refdata Reactive refdata dataset as a \code{data.table}.
-#' @param inputdata Reactive \code{data.table} of the comparison dataset, e.g from \code{\link{newDatasetServer}}.
+#' @param inputdata Reactive \code{data.table} of the comparison dataset, e.g from \code{\link{customDatasetServer}}.
 #' @param params Reactive parameters data, e.g. from \code{\link{matchLinkServer}}.
 #' @param sourcecol Name for the source key column of the joined dataset.
 #' @return Reactive values containing params, intermediate results, pair, and matchtable.
+#' @import shiny
 #' @export
 matchResultServer <- function(id,
                               refdata, inputdata, params, sourcecol) {
@@ -76,7 +78,7 @@ matchResultServer <- function(id,
         "match_result.csv"
       },
       content = function(file) {
-        write.csv(results$matchtable, file, row.names = F)
+        utils::write.csv(results$matchtable, file, row.names = F)
       }
     )
 
@@ -86,7 +88,7 @@ matchResultServer <- function(id,
         "match_intermediate.csv"
       },
       content = function(file) {
-        write.csv(results$intermediate, file, row.names = F)
+        utils::write.csv(results$intermediate, file, row.names = F)
       }
     )
 

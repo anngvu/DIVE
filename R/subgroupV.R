@@ -5,6 +5,7 @@
 #' @family multiVApp module functions
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @import shiny
 #' @export
 subgroupVUI <- function(id) {
 
@@ -17,7 +18,7 @@ subgroupVUI <- function(id) {
            div(class = "ui-inline", style = "height: 100px", uiOutput(ns("select2"))),
            div(class = "ui-inline", style = "height: 100px", uiOutput(ns("by2"))),
            div(style = "padding-bottom: 20px;", actionButton(ns("go"), "View")),
-           shinycssloaders::withSpinner(color = "gray", size = 0.5, plotlyOutput(ns("plot")))
+           shinycssloaders::withSpinner(color = "gray", size = 0.5, plotly::plotlyOutput(ns("plot")))
   )
 }
 
@@ -30,6 +31,7 @@ subgroupVUI <- function(id) {
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param cdata A data.table of clinical, phenotype, or other experimental data used to define groups.
 #' @param hdlist A list of named high-dimensional (high-throughput datasets)
+#' @import shiny
 #' @export
 subgroupVServer <- function(id,
                             cdata, hdlist) {
@@ -37,7 +39,7 @@ subgroupVServer <- function(id,
   moduleServer(id, function(input, output, session) {
 
     # updateSelectizeInput(session, "hdataset0", choices = LETTERS[1:5], selected = NULL)
-    plotOut <- reactiveVal(plotly_empty())
+    plotOut <- reactiveVal(plotly::plotly_empty())
 
     output$selecthd <- renderUI({
       selectInput(session$ns("hdataset"), "HT dataset", choices = names(hdlist))
@@ -115,8 +117,8 @@ subgroupVServer <- function(id,
       disjoint <- !length(intersect(group1(), group2()))
       if(!okgroupsize | !disjoint) {
         message <- if(!okgroupsize) "One or both groups contain fewer than two samples." else "Comparisons only allowed for disjoint groups."
-        p <- plotly_empty() %>%
-          layout(title = message, font = list(color = "gray"))
+        p <- plotly::plotly_empty()() %>%
+          plotly::layout(title = message, font = list(color = "gray"))
       } else {
       # do fit, return data frame with (A) p-values, (B) fold difference, (C) color
         xm <- t(hdlist[[input$hdataset]])
@@ -140,15 +142,15 @@ subgroupVServer <- function(id,
                 hoverinfo = "text", text = paste("<br>-log(adjusted p): ", neglogAdjP, "<br>Difference: ", diffx),
                 color = sigcolor, colors = c(significant = "deeppink", `not significant` = "gray"),
                 showlegend = T) %>%
-          layout(xaxis = list(title = "Fold Change Difference [Group 1 - Group 2]"), yaxis = list(title = "-log(adjusted p-value)"),
+          plotly::layout(xaxis = list(title = "Fold Change Difference [Group 1 - Group 2]"), yaxis = list(title = "-log(adjusted p-value)"),
                  legend = list(orientation = "h", y = 1.02, yanchor = "bottom"))
       }
       plotOut(p)
     })
 
-    output$plot <- renderPlotly({
+    output$plot <- plotly::renderPlotly({
       plotOut() %>%
-        config(displayModeBar = F)
+        plotly::config(displayModeBar = F)
     })
 
     observeEvent(input$remove, {

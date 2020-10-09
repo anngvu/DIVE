@@ -7,6 +7,7 @@
 #' gene or protein expression matrices. See \code{\link{xVServer}} for details.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @import shiny
 #' @export
 xVUI <- function(id) {
   ns <- NS(id)
@@ -26,8 +27,8 @@ xVUI <- function(id) {
                div(class = "ui-inline", icon("percent"))
           ),
           fluidRow(
-            column(9, plotlyOutput(ns("heatmap"))),
-            column(3, plotlyOutput(ns("cplotly")))
+            column(9, plotly::plotlyOutput(ns("heatmap"))),
+            column(3, plotly::plotlyOutput(ns("cplotly")))
           )
   )
 }
@@ -50,6 +51,7 @@ xVUI <- function(id) {
 #' @param key Name of key column for \code{cdata}, currently defaults to "ID".
 #' @param selected A reactive vector used to subset the features (cols) of \code{hdata}.
 #' @param height Height for data plots.
+#' @import shiny
 #' @export
 xVServer <- function(id,
                      hdata, cdata = reactive(NULL), key = "ID",
@@ -115,11 +117,11 @@ xVServer <- function(id,
     #-- Expression matrix heatmap ---------------------------------------------------------------------------#
 
     # Initialize heatmap with empty left-hand subplot for dendrogram / most subsequent mods use plotlyProxy
-    output$heatmap <- renderPlotly({
+    output$heatmap <- plotly::renderPlotly({
       axis_ <- list(showgrid = FALSE, zeroline = FALSE, ticks = "")
-      d <- plot_ly(type = "scatter", mode = "markers", x = NULL, y = 1:nrow(hdata)) %>%
-        layout(xaxis = c(axis_, showticklabels = FALSE), yaxis = axis_)
-      subplot(d, expHeatmap(hdata, height), shareY = TRUE, widths = c(0, 1)) %>%
+      d <- plotly::plot_ly(type = "scatter", mode = "markers", x = NULL, y = 1:nrow(hdata)) %>%
+        plotly::layout(xaxis = c(axis_, showticklabels = FALSE), yaxis = axis_)
+      plotly::subplot(d, expHeatmap(hdata, height), shareY = TRUE, widths = c(0, 1)) %>%
         plotly::config(displayModeBar = F)
     })
 
@@ -134,8 +136,8 @@ xVServer <- function(id,
         localhdata(z) # obs_localhdata will then take care of updating heatmap trace 1L
         lines <- lineShapes(rowclusts)
         labels <- rowclusts$labels[rowclusts$order]
-        plotlyProxy("heatmap", session) %>%
-          plotlyProxyInvoke("update",
+        plotly::plotlyProxy("heatmap", session) %>%
+          plotly::plotlyProxyInvoke("update",
                             list(type = "scatter", mode = "markers+text",
                                  x = list(rep(0, length(labels))), y = list(1:length(labels)),
                                  text = list(labels), textposition="middle right", hoverinfo = "text",
@@ -156,8 +158,8 @@ xVServer <- function(id,
       ylabs <- rownames(z)
       yind <- 1:nrow(z)
       showticks <- !withcluster # if cluster dendogram also being displayed,  don't need labels
-      plotlyProxy("heatmap", session) %>%
-        plotlyProxyInvoke("update",
+      plotly::plotlyProxy("heatmap", session) %>%
+        plotly::plotlyProxyInvoke("update",
                           list(z = list(z), x = list(x), y = list(yind), height = height),
                           list(yaxis.showticklabels = showticks, yaxis.tickvals = yind, yaxis.ticktext = ylabs),
                           1L)
@@ -173,8 +175,8 @@ xVServer <- function(id,
       z <- localhdata()[crows, , drop = F]
       # Main matrix can only be ordered by one source at a time! remove cluster plot when cdata() applies
       withcluster <<- FALSE
-      plotlyProxy("heatmap", session) %>%
-        plotlyProxyInvoke("update",
+      plotly::plotlyProxy("heatmap", session) %>%
+        plotly::plotlyProxyInvoke("update",
                           list(y = list(1:nrow(z)), text = NULL),
                           list(xaxis.domain = c(0, 0), xaxis2.domain = c(0, 1), shapes = NULL),
                           0L)
@@ -201,17 +203,17 @@ xVServer <- function(id,
 
       if(length(cplotcat) && length(cplotnum)) {
         # To look best numeric plots need more width allocated, use widths below for now
-        subplot(subplot(cplotcat, shareY = T, titleX = T), subplot(cplotnum, shareY = T, titleX = T),
+        plotly::subplot(plotly::subplot(cplotcat, shareY = T, titleX = T), plotly::subplot(cplotnum, shareY = T, titleX = T),
                 titleX = T, shareY = T, widths = c(0.3, 0.7)) %>%
           plotly::config(displayModeBar = F)
       } else {
-         subplot(c(cplotcat, cplotnum), shareY = T, titleX = T) %>%
-          layout(margin = list(t = 0.071 * height, b = 0.077 * height)) %>% # https://github.com/plotly/plotly.js/issues/4583
+         plotly::subplot(c(cplotcat, cplotnum), shareY = T, titleX = T) %>%
+          plotly::layout(margin = list(t = 0.071 * height, b = 0.077 * height)) %>% # https://github.com/plotly/plotly.js/issues/4583
           plotly::config(displayModeBar = F)
       }
     })
 
-    output$cplotly <- renderPlotly({
+    output$cplotly <- plotly::renderPlotly({
       cplot()
     })
 
@@ -230,12 +232,12 @@ expHeatmap <- function(z, height) {
   # only show labels when readable
   showticklabs <- if(ncol(z) <= 50) TRUE else FALSE
 
-  plot_ly(z = z, x = xlabs, y = yind, name = "Expression\nMatrix",
+  plotly::plot_ly(z = z, x = xlabs, y = yind, name = "Expression\nMatrix",
           type = "heatmap", colors = colorscale, height = height,
           # text = matrix(rep(ylabs, each = ncol(z)), ncol = ncol(z), byrow = T),
           # hovertemplate = "feature: <b>%{x}</b><br>expression: <b>%{z}</b>",
           colorbar = list(title = "relative\nexpression", thickness = 10, x = -0.09)) %>%
-    layout(xaxis = list(type = "category", showgrid = FALSE, ticks = "", showticklabels = showticklabs),
+    plotly::layout(xaxis = list(type = "category", showgrid = FALSE, ticks = "", showticklabels = showticklabs),
            yaxis = list(ticks = "", tickvals = yind, ticktext = ylabs))
 }
 
@@ -268,10 +270,10 @@ vcatplotly <- function(vt, vu, vx, y, height = NULL) {
   z <- vx %>% factor(levels = zdomain) %>% as.integer() %>% as.matrix()
   colorscale <- if(length(zdomain) < 4) "Viridis" else "Portland"
   text <- matrix(paste(y, "|", "value =", vx))
-  plot_ly(x = vt, y = y, z = z, name = vt, type = "heatmap", height = height,
+  plotly::plot_ly(x = vt, y = y, z = z, name = vt, type = "heatmap", height = height,
           text = text, hoverinfo = "text", showscale = FALSE,
           colorscale = colorscale, zmin = 1, zmax = length(zdomain)) %>%
-    layout(xaxis = list(title = vt, zeroline = FALSE, showline = FALSE,
+    plotly::layout(xaxis = list(title = vt, zeroline = FALSE, showline = FALSE,
                         showticklabels = FALSE, showgrid = FALSE, type = "category"),
            yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
 }
@@ -283,11 +285,11 @@ vnumplotly <- function(vt, vx, y, height = NULL) {
   hoverx <- paste(y, "|", sapply(x, function(i) if(is.na(i)) "NA" else as.character(i)))
   NAtext <- ifelse(is.na(x), "  NA", "")
   x[is.na(x)] <- 0
-  plot_ly(x = x, y = y, customdata = hoverx, name = vt, type = "bar",
+  plotly::plot_ly(x = x, y = y, customdata = hoverx, name = vt, type = "bar",
           orientation = "h", showlegend = F, height = height,
           text = hoverx, hoverinfo = "text") %>%
-    add_text(text = NAtext, textposition = "right", textfont = list(color = toRGB("red"))) %>%
-    layout(xaxis = list(title = vt, showgrid = FALSE),
+    plotly::add_text(text = NAtext, textposition = "right", textfont = list(color = toRGB("red"))) %>%
+    plotly::layout(xaxis = list(title = vt, showgrid = FALSE),
            yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
 }
 

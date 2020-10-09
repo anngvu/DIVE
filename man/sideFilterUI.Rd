@@ -15,12 +15,20 @@ sideFilterUI(
 )
 }
 \arguments{
+\item{inputId}{The input slot that will be used to access the value.}
+
 \item{values}{Choices for the input, depends on input type.}
 
 \item{type}{One of \code{c("select", "selectize", "checkbox", "checkboxGroup", "range")}, corresponding to
 \code{selectInput}, \code{selectizeInput}, \code{checkboxInput}, \code{checkboxGroupInput}, or \code{sliderInput} (range).}
 
 \item{selected}{The initial selection of the input, defaulting to the first of \code{values}.}
+
+\item{conditional}{Optional. If not `NULL`, wrap element in a conditional panel with inital display given by the boolean value.}
+
+\item{ns}{Function for namespacing components, i.e. from `session$ns`.}
+
+\item{width}{Width of input elements.}
 }
 \description{
 Convenient creation of a set of filters using selected inputs

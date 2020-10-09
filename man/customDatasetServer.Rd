@@ -8,7 +8,7 @@ customDatasetServer(
   id,
   customdata,
   defaultvalue = NULL,
-  checkfun = NULL,
+  checkFun = NULL,
   informd = NULL,
   appdata = NULL
 )
@@ -19,6 +19,9 @@ customDatasetServer(
 \item{customdata}{Optional, a named list containing name/label to be used in creating the key column.}
 
 \item{defaultvalue}{Optional, a default value to use.}
+
+\item{checkFun}{Optional, a custom check function for an additional layer of checking/modifying uploaded data.
+It should return a list containing message and result (result should be \code{NULL} when data fails checks).}
 
 \item{informd}{Relative path to the Rmarkdown file, whose contents will be displayed in the modal.}
 

@@ -1,8 +1,0 @@
----
-title: "ID list"
-output: html_document
----
-
-**Uploading an ID list**
-
-Your file should be a text file with one nPOD case ID per line. 
