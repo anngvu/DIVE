@@ -37,7 +37,7 @@ matrixAppServer <- function(id,
                             cdata, metadata, vkey,
                             factorx, colorby,
                             colorscales = list(default = list(colorscale_named(pal = "RdBu"), zmin = -1, zmax = 1)),
-                            informd = system.file("help/interactive_matrix.Rmd", package = "DIVE"),
+                            informd = system.file("info/interactive_matrix.Rmd", package = "DIVE"),
                             appdata = NULL) {
 
   moduleServer(id, function(input, output, session) {

@@ -69,7 +69,7 @@ matchAppServer <- function(id,
                            customdata = "Cohort",
                            defaultvalue = "CohortX",
                            vars, guess = NULL,
-                           informd = system.file("help/cohort_exchange.Rmd", package = "DIVE"),
+                           informd = system.file("info/cohort_exchange.Rmd", package = "DIVE"),
                            appdata = NULL) {
 
   moduleServer(id, function(input, output, session) {

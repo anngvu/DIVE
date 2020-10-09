@@ -66,7 +66,7 @@ matchLinkUI <- function(id) {
 matchLinkServer <- function(id,
                             refdata, inputdata,
                             vars, guess = NULL,
-                            informd = system.file("help/matching_methods.Rmd", package = "DIVE")) {
+                            informd = system.file("info/matching_methods.Rmd", package = "DIVE")) {
 
   moduleServer(id, function(input, output, session) {
 

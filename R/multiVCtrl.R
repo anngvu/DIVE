@@ -66,7 +66,7 @@ multiVCtrlServer <- function(id,
                              key = "ID",
                              checkFun = NULL,
                              preselect = NULL,
-                             infoRmd = system.file("help/ht_upload.Rmd", package = "DIVE")) {
+                             infoRmd = system.file("info/ht_upload.Rmd", package = "DIVE")) {
 
   moduleServer(id, function(input, output, session) {
 

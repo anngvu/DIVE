@@ -59,7 +59,7 @@ geneVServer <- function(id,
 
   moduleServer(id, function(input, output, session) {
 
-    infoServer("querytips", informd = system.file("help/query_api.Rmd", package = "DIVE"))
+    infoServer("querytips", informd = system.file("info/query_api.Rmd", package = "DIVE"))
 
     selected <- reactiveVal(genes)
     querystatus <- reactiveVal("")

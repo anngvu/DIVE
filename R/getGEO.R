@@ -5,7 +5,7 @@
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param informd Optional path to Rmarkdown file containing help-text or similar to displayed.
 #' @export
-getGEOInput <- function(id, informd = system.file("help/GEO_module.Rmd", package = "DIVE")) {
+getGEOInput <- function(id, informd = system.file("info/GEO_module.Rmd", package = "DIVE")) {
   ns <- NS(id)
   tags$div(id = ns("get-GEO-input"),
            div(class = "ui-inline", textInput(ns("GSE"), label = "Enter a GEO accession, e.g. 'GSE72492'")),
