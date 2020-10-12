@@ -4,9 +4,13 @@
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
+#' @import shiny
+#' @import magrittr
 #' @export
 matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
   ns <- NS(id)
+  ns.graph <- paste(ns("graph"), "network-ui", sep = "-")
+  ns.matrix <- paste(ns("matrix"), "matrix-ui", sep = "-")
   fluidPage(theme = shinythemes::shinytheme("paper"),
             if(!is.null(CSS)) includeCSS(CSS),
             # Filter controls and data input
@@ -14,10 +18,22 @@ matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
                      column(9, matrixCtrlUI(ns("ctrl"))),
                      column(3, dataUploadUI(ns("upload")))
             ),
+            tags$div(class = "btn-group", style = "margin-bottom: 30px;",
+                     actionButton("viewgraph", "Graph view") %>%
+                       tagAppendAttributes(class = "btn-sm", onclick = sprintf("{ $('#%s').hide();
+                                                 $('#%s').trigger('hidden');
+                                                 $('#%s').show();
+                                                 $('#%s').trigger('shown'); }", ns.matrix, ns.matrix, ns.graph, ns.graph)),
+                     actionButton("viewmatrix", "Matrix view") %>%
+                       tagAppendAttributes(class = "btn-sm", onclick = sprintf("{ $('#%s').hide();
+                                                 $('#%s').trigger('hidden');
+                                                 $('#%s').show();
+                                                 $('#%s').trigger('shown'); }", ns.graph, ns.graph, ns.matrix, ns.matrix))
+            ),
             tags$div(style = "display: flex; align-items: flex-start;",
-                     dualDrilldownUI("dd"),
-                     matrixMainUI(ns("matrix")),
-                     matrixAsNetworkUI(ns("graph"), height = "1000px", style = "flex: 4 0 75vw; display: none;")
+                     dualDrilldownUI(ns("dd")),
+                     matrixMainUI(ns("matrix"), style = "flex: 4 0 70vw;"),
+                     matrixAsNetworkUI(ns("graph"), height = "1000px", style = "flex: 4 0 70vw; display: none;")
             )
   )
 }
@@ -31,6 +47,7 @@ matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
 #' @inheritParams matrixMainServer
 #' @inheritParams matrixAsNetworkServer
 #' @inheritParams dualDrilldownServer
+#' @import shiny
 #' @export
 matrixAppServer <- function(id,
                             M, N, P,
