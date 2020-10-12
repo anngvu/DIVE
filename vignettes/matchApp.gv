@@ -1,0 +1,19 @@
+digraph { compound=true;
+
+    node [ shape=box style="filled,rounded" fillcolor=lightseagreen color=lightseagreen
+    fontname="Lucida Console" fontcolor=white fontsize=14 margin=0.3]
+    edge [ color=dimgray ]
+    
+        label="matchApp"; 
+        
+        subgraph cluster_head {
+            label = "head"; fontname="Helvetica"; fontsize=24; color=lightseagreen
+            dataUpload [fillcolor=gray color=gray]; 
+            { rank=same;  dataUpload -> customDataset [arrowhead=diamond] }
+            { rank=same; customDataset ; dataSubset }
+        }
+        dataSubset -> matchLink -> matchResult -> matchPlot ;
+        dataSubset -> matchPlot ;
+        customDataset -> { matchPlot ; matchLink }
+      
+}

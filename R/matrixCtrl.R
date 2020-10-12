@@ -8,7 +8,7 @@
 matrixCtrlUI <- function(id, minN = 5) {
   ns <- NS(id)
   tags$div(id = "matrixCtrlUI",
-           div(class = "ui-inline", numericInput(ns("minN"), "mininum N", val = 5, min = minN, step = 1, width = "80px")),
+           div(class = "ui-inline", numericInput(ns("minN"), "mininum N", value = 5, min = minN, step = 1, width = "80px")),
            div(class = "ui-inline", br(), checkboxInput(ns("cutoffP"), "P < 0.05 ", value = FALSE, width = "80px")),
            div(class = "ui-inline",
                div(class = "ui-inline", selectInput(ns("optrowgroup"), "Filter type", choices = "", width = "120px")),
@@ -45,18 +45,18 @@ matrixCtrlUI <- function(id, minN = 5) {
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param M A data matrix, e.g. a correlation matrix, which must have row and column names.
-#' @param N A matrix of the same dimensions as M to be used as a filter layer, e.g. sample size.
-#' @param P A matrix of the same dimensions as M to be used as a filter layer, e.g. p-values.
-#' @param cutoffP A cutoff value in `P` to be used as initial default for filtering.
+#' @param N A matrix of the same dimensions as `M` to be used as a filter layer, e.g. sample size.
+#' @param P A matrix of the same dimensions as `M` to be used as a filter layer, e.g. p-values.
+#' @param cutoffP A cutoff value for `P` to be used as initial default for filtering.
 #' @param cdata The data used for generating the matrix,
-#' necessary for allowing user-uploaded data for mutable M.
-#' @param metadata Optional, a data.table with different types of metadata/annotation to be used as filters.
+#' necessary for allowing user-uploaded data for mutable `M`.
+#' @param metadata Optional, a `data.table` with different types of metadata/annotation to be used as filters.
 #' If not given, the only filter option will be the row names in M. Column names will be the names of the filter group.
 #' @param vkey The column in metadata that maps to row/col names in M, i.e. the key column such as VarID.
 #' If metadata is not given, should be something like "Name" because the only selection possible is by row names.
 #' @param newdata Optional, reactive data such as a user upload passed in by
 #' the \code{\link{dataUploadServer}} module or from some other component,
-#' that is suitable for merging with \preformatted{cdata} to calculate a new M.
+#' and which is suitable for merging with \preformatted{cdata} to calculate a new `M`.
 #' @param widgetmod Not currently implemented. Optional widget extension module.
 #' @param widgetopt Not currently implemented. Options for `widgetmod`.
 #' @return Reactive values in \code{mstate} object that keeps track of visible matrices

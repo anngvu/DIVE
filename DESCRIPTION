@@ -45,3 +45,8 @@ Imports:
     rlang, 
     scales
 RoxygenNote: 7.1.1
+Suggests: 
+    knitr,
+    rmarkdown,
+    DiagrammeR
+VignetteBuilder: knitr

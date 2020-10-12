@@ -1,0 +1,20 @@
+digraph { compound=true;
+
+    node [ shape=box style="filled,rounded" fillcolor=indigo color=indigo 
+    fontname=Helvetica fontcolor=white fontsize=14 margin=0.3]
+   edge [ color=dimgray ]
+    
+        label="matrixApp";
+        
+        subgraph cluster_matrixCtrl {
+            label="matrixCtrl"; fontname="Helvetica"; fontsize=24; fontcolor=blueviolet;
+            color=blueviolet; 
+             
+             dataUpload [fillcolor=gray color=gray];
+            { rank=same; matrixCtrl -> dataUpload [dir=back arrowtail=diamond] }
+        }
+      
+      matrixCtrl -> matrixMain -> dualDrilldown; 
+      matrixCtrl -> matrixAsNetwork -> dualDrilldown;
+      
+}

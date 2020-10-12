@@ -137,14 +137,14 @@ dataFusion <- function(d1, d2, fuseon, sourcecol) {
 matchPair <- function(data, groupcol, matchon) {
   dataset <- as.data.frame(data)
   dataset[[groupcol]] <- as.integer(dataset[[groupcol]]) - 1
-  matchformula <- as.formula(paste(groupcol, "~", paste(names(matchon), collapse = " + ")))
+  matchformula <- stats::as.formula(paste(groupcol, "~", paste(names(matchon), collapse = " + ")))
   result <- optmatch::pairmatch(matchformula, data = dataset)
   pair <- result
-  result <- na.omit(result)
+  result <- stats::na.omit(result)
   result <- split(as.numeric(names(result)), f = result)
   index1 <- sapply(result, `[[`, 1) # ref
   index2 <- sapply(result, `[[`, 2)  # ext
-  matchtable <- setNames(data[index2, c(groupcol, "ID", names(matchon)), with = F],
+  matchtable <- stats::setNames(data[index2, c(groupcol, "ID", names(matchon)), with = F],
                        paste0("match.", c(groupcol, "ID", names(matchon))))
   matchtable <- cbind(data[index1, c(groupcol, "ID", names(matchon)), with = F], matchtable)
   return(list(pair = pair, matchtable = matchtable))

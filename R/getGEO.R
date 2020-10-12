@@ -106,12 +106,12 @@ getGEOServer <- function(id) {
 
     # For Step 2
     output$pChars <- renderTable({
-      if(length(characteristics())) head(characteristics())
+      if(length(characteristics())) utils::head(characteristics())
     }, spacing = "xs")
 
     # For Step 3
     output$gplTable <- renderTable({
-      if(length(GPL())) head(GPL())
+      if(length(GPL())) utils::head(GPL())
     }, spacing = "xs")
 
 

@@ -19,7 +19,7 @@ dualDrilldownUI <- function(id) {
                           options = list(maxItems = 2, placeholder = "select variable(s)")),
            conditionalPanel("input.drilldown != ''", ns = ns,
                             div(class = "ui-inline", br(), actionLink(ns("flipxy"), "flip XY", icon = icon("refresh"))),
-                            plotlyOutput(ns("scatter")))
+                            plotly::plotlyOutput(ns("scatter")))
   )
 }
 
@@ -130,7 +130,7 @@ dualDrilldownServer <- function(id,
       if(length(input$drilldown) == 2) { #-> do scatter plot 2-variable view ----------------------#
         var2 <- input$drilldown[2]
         datasubset <- cdata[, c(..var1, ..var2, ..colorgroup)]
-        datasubset <- datasubset[complete.cases(datasubset)]
+        datasubset <- datasubset[stats::complete.cases(datasubset)]
         drillplot2(datasubset, var1, var2, colorby[colorgroup], factorx, input$flipxy %% 2)
 
       } else { #-> do boxplot 1-variable view ----------------------------------------------------#

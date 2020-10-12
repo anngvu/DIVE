@@ -1,0 +1,33 @@
+digraph { compound=true;
+
+    node [ shape=box style="filled,rounded" fillcolor=mediumvioletred color=mediumvioletred 
+    fontname="Lucida Console" fontcolor=white fontsize=14 margin=0.3];
+    edge [ color=dimgray ]
+    
+        label="multiVRApp"; 
+         dataUpload [fillcolor=gray color=gray]; 
+        
+        subgraph cluster_data { 
+          label="Data Selection"; fontname="Helvetica"; fontsize=24;
+          color=mediumvioletred;
+          { rank=same; 
+            multiVCtrl -> dataUpload [dir=back arrowtail=diamond] 
+          }
+          { rank=same; 
+            getGEO -> multiVCtrl [arrowhead=diamond]
+          }
+        
+        }
+        
+        subgraph cluster_datatools {
+          label="Data Tools"; color=mediumvioletred; fontname="Helvetica"; fontsize=24;
+          subgroupV; pathwayPCA;
+        
+        }
+        
+        
+        multiVCtrl -> iVUI;
+        multiVCtrl -> geneV -> iVUI;
+        multiVCtrl -> selectV -> iVUI;
+      
+}

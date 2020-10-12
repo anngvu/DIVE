@@ -14,7 +14,7 @@ matrixAsNetworkUI <- function(id, height = "400px", ...) {
   tags$div(class = "network-ui", id = ns("network-ui"), ... ,
            conditionalPanel("!output.network", ns = ns, class = "dive-loader", id = ns("loader"), "loading..."),
            uiOutput(ns("add_nodes_btn")),
-           visNetworkOutput(ns("network"), height = height)
+           visNetwork::visNetworkOutput(ns("network"), height = height)
   )
 }
 
@@ -53,19 +53,21 @@ matrixAsNetworkServer <- function(id,
 
     #-- Main graph output ------------------------------------------------------------------------------------------------------#
 
-    output$network <- renderVisNetwork({
+    output$network <- visNetwork::renderVisNetwork({
       req(mdata$filM)
       m <- mdata$filM
       # cat("nodes: ", length(allnodes), "edges :", nrow(ind))
       gdata <- dtNodesEdges(m)
-      graph <- visNetwork(nodes = gdata$nodes, edges = gdata$edges, background = background) %>%
-        visEvents(selectNode = sprintf("function(nodes) { Shiny.onInputChange('%s', nodes.nodes); }", session$ns("network_selectednodes")),
-                  deselectNode = sprintf("function(nodes) { Shiny.onInputChange('%s', nodes.nodes); }", session$ns("network_selectednodes")))
-      graph <- rlang::exec(visNodes, graph = graph, !!!.nodes)
-      graph <- rlang::exec(visEdges, graph = graph, !!!.edges)
-      graph <- rlang::exec(visOptions, graph = graph, !!!.options)
-      graph <- rlang::exec(visInteraction, graph = graph, !!!.interaction)
-      graph <- visIgraphLayout(graph, randomSeed = randomSeed)
+      graph <- visNetwork::visNetwork(nodes = gdata$nodes, edges = gdata$edges, background = background) %>%
+        visNetwork::visEvents(selectNode = sprintf("function(nodes) { Shiny.onInputChange('%s', nodes.nodes); }",
+                                                   session$ns("network_selectednodes")),
+                  deselectNode = sprintf("function(nodes) { Shiny.onInputChange('%s', nodes.nodes); }",
+                                         session$ns("network_selectednodes")))
+      graph <- rlang::exec(visNetwork::visNodes, graph = graph, !!!.nodes)
+      graph <- rlang::exec(visNetwork::visEdges, graph = graph, !!!.edges)
+      graph <- rlang::exec(visNetwork::visOptions, graph = graph, !!!.options)
+      graph <- rlang::exec(visNetwork::visInteraction, graph = graph, !!!.interaction)
+      graph <- visNetwork::visIgraphLayout(graph, randomSeed = randomSeed)
     })
 
     #-- Graph interactives -----------------------------------------------------------------------------------------------------#
@@ -78,7 +80,7 @@ matrixAsNetworkServer <- function(id,
 
     # Create input$network_nodes via visGetNodes
     observeEvent(input$add_nodes, {
-      visNetworkProxy(session$ns("network")) %>% visGetNodes()
+      visNetwork::visNetworkProxy(session$ns("network")) %>% visNetwork::visGetNodes()
     })
 
     # Get and set new (connected) nodes
@@ -97,10 +99,10 @@ matrixAsNetworkServer <- function(id,
         y <- node_data$y + sin(theta) * 150
         new_nodes <- data.frame(id = n.connected, label = names(n.connected), x = x, y = y)
 
-        visNetworkProxy("network") %>%
-          visUpdateEdges(new_edges) %>%
-          visUpdateNodes(new_nodes) %>%
-          visSelectNodes(id = n.input)
+        visNetwork::visNetworkProxy("network") %>%
+          visNetwork::visUpdateEdges(new_edges) %>%
+          visNetwork::visUpdateNodes(new_nodes) %>%
+          visNetwork::visSelectNodes(id = n.input)
       }
 
     })

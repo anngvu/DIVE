@@ -86,17 +86,17 @@ multiVCtrlServer <- function(id,
     # Handle dataset selection or de-selection ------------------------------------------------------------------#
     observe({
       if(!length(input$dataset)) { # everything has been cleared from the global dataset selection
-        dataset <- setNames(object = list(NULL), # set return to NULL
+        dataset <- stats::setNames(object = list(NULL), # set return to NULL
                             nm = paste0("i", which(names(view$hdlist) %in% inview)))
         inview <<- c()
       } else {
         dsname <- setdiff(input$dataset, inview)
         if(length(dsname)) { # if more in selection than in view, view needs to add new dataset
-          dataset <- setNames(object = view$hdlist[dsname],
+          dataset <- stats::setNames(object = view$hdlist[dsname],
                               paste0("i", which(names(view$hdlist) %in% dsname)))
         } else {  # a dataset needs to be removed from view
           dsname <- setdiff(inview, input$dataset)
-          dataset <- setNames(object = list(NULL),
+          dataset <- stats::setNames(object = list(NULL),
                               paste0("i", which(names(view$hdlist) %in% dsname)))
         }
         inview <<- isolate(input$dataset)
@@ -108,7 +108,7 @@ multiVCtrlServer <- function(id,
 
     addDataToSelection <- function(dataset, label, selectgroup) {
       dataset <- t(dataset)
-      dataset <- setNames(list(dataset), label)
+      dataset <- stats::setNames(list(dataset), label)
       view$hdlist <- c(view$hdlist, dataset)
       choices[[selectgroup]] <<- c(choices[[selectgroup]], list(label))
       updateSelectizeInput(session, "dataset", choices = choices, selected = c(input$dataset, label))

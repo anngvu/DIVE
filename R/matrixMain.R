@@ -77,7 +77,7 @@ matrixMainServer <- function(id,
                      hovertemplate = "row: <b>%{y}</b><br>col: <b>%{x}</b><br>corr: <b>%{z}</b>",
                      height = height, colorbar = list(thickness = 8)) %>%
           plotly::layout(xaxis = axis, yaxis = axis, plot_bgcolor = colorscales[[input$colorscale]]$bgcolor) %>%
-          event_register("plotly_click")
+          plotly::event_register("plotly_click")
       }
     })
 
@@ -119,7 +119,7 @@ matrixMainServer <- function(id,
     #-- Return -----------------------------------------------------------------------------------------------------#
 
     ss <- reactive({
-      s <- event_data("plotly_click", source = session$ns("main"))
+      s <- plotly::event_data("plotly_click", source = session$ns("main"))
       if(is.null(s)) return()
       v1 <- s[["x"]]
       v2 <- s[["y"]]
