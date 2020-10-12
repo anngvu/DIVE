@@ -10,7 +10,7 @@ matrixMainUI <- function(id, ...) {
   tags$div(class = "matrix-ui", id = ns("matrix-ui"), ... ,
            conditionalPanel("!output.main", ns = ns, class = "dive-loader", id = ns("loader"), "loading..."),
            div(class = "matrix-options", uiOutput(ns("palettes"))),
-           div(plotlyOutput(ns("main")))
+           div(plotly::plotlyOutput(ns("main")))
   )
 }
 
@@ -31,6 +31,7 @@ matrixMainUI <- function(id, ...) {
 #' @param mdata Reactive matrix data from \code{\link{matrixCtrlServer}}.
 #' @param colorscales Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named coloscale
 #' or custom colorscale used for heatmap. If not given, two default colorscale functions are used.
+#' @import magrittr
 #' @export
 matrixMainServer <- function(id,
                              mdata,
@@ -60,9 +61,9 @@ matrixMainServer <- function(id,
       req(input$colorscale)
       M <- mdata$filM
       if(is.null(M)) {
-        plotly_empty()
+        plotly::plotly_empty()
       } else if(nrow(M) == 0 || ncol(M) == 0) {
-        plotly_empty() %>% plotly::layout(title = "no result with selected filters")
+        plotly::plotly_empty() %>% plotly::layout(title = "no result with selected filters")
       } else {
         # bug? plot not displayed if height is less than 100px; minpx = 5
         px <- 1200/ncol(M)
@@ -100,14 +101,14 @@ matrixMainServer <- function(id,
     })
 
     # Plot compose
-    output$main <- renderPlotly({
+    output$main <- plotly::renderPlotly({
       # plot_bgcolor can't be independent for individual plots in subplot, adjust layout based on whether metadata exists
       if(is.null(rowmeta()) && is.null(colmeta())) {
         main <- matrixheatmap()
       } else if(is.null(colmeta())) {
         main <- plotly::subplot(matrixheatmap(), rowmeta(), nrows = 1, shareY = T, margin = 0.01, widths = c(0.97, 0.03))
       } else {
-        main <- plotly::subplot(colmeta(), plotly_empty(), matrixheatmap(), rowmeta(),
+        main <- plotly::subplot(colmeta(), plotly::plotly_empty(), matrixheatmap(), rowmeta(),
                         nrows = 2, shareX = T, shareY = T, margin = 0.01,
                         widths = c(0.97, 0.03), heights = c(0.03, 0.97))
       }
@@ -165,7 +166,7 @@ colorscale_heatmap_manual <- function(z, domain = c(-1, 1), palette = c("#EF3202
   z <- unique(scales::rescale(z, domain = domain))
   orderz <- order(z)
   colors <- scales::col_numeric(palette, domain = NULL)(z)
-  colorz <- setNames(data.frame(z[orderz], colors[orderz]), NULL)
+  colorz <- stats::setNames(data.frame(z[orderz], colors[orderz]), NULL)
   return(colorz)
 }
 

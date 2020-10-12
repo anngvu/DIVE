@@ -196,13 +196,14 @@ checkGEOwrapper <- function(eset) {
   assertthat::assert_that(checkGEOplatform(eset), msg = "The accession dataset is from an incompatible platform.")
 }
 
-
+#' @keywords internal
 attemptRecount <- function(meta) {
   sra <- regmatches(meta$relation, regexpr("(https://www.ncbi.nlm.nih.gov/sra?term=)?SRP[0-9]+", meta$relation))
   data <- getRecount(sra)
   return(data)
 }
 
+#' @keywords internal
 getRecount <- function(sra) {
   link <- NULL
   try(link <- recount::download_study(sra, download = F), silent = T)
@@ -221,9 +222,4 @@ getRecount <- function(sra) {
   }
 }
 
-fromRecount <- function() {
-  if(!is.null(recounted)) {
-    xdata <- recounted$xdata
-    characteristics(recounted$pdata)
-  }
-}
+

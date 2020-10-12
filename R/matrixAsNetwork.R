@@ -39,6 +39,7 @@ matrixAsNetworkUI <- function(id, height = "400px", ...) {
 #' @param .options Options passed to \code{visOptions}.
 #' @param .interaction Interaction options passed to \code{visInteraction}. The default enables `multiselect`.
 #' @param randomSeed A seed number for reproduceable graph layout.
+#' @import magrittr
 #' @export
 matrixAsNetworkServer <- function(id,
                                   mdata, M,

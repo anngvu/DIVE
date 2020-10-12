@@ -59,7 +59,7 @@ selectVServer <- function(id,
       if(length(ids)) {
         counts <- colSums(!is.na(data()[get(key) %in% ids, choices, with = F]))
         counts <- sort(counts, decreasing = T)
-        choices <- setNames(names(counts), paste0(names(counts), " (", counts, ")"))
+        choices <- stats::setNames(names(counts), paste0(names(counts), " (", counts, ")"))
       }
       tags$div(
         div(class = "forceInline",

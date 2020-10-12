@@ -32,6 +32,7 @@ subgroupVUI <- function(id) {
 #' @param cdata A data.table of clinical, phenotype, or other experimental data used to define groups.
 #' @param hdlist A list of named high-dimensional (high-throughput datasets)
 #' @import shiny
+#' @import magrittr
 #' @export
 subgroupVServer <- function(id,
                             cdata, hdlist) {
@@ -65,7 +66,7 @@ subgroupVServer <- function(id,
           selectizeInput(session$ns("s1"), "factor level(s)", choices = choices, multiple = T, width = 200)
         )
       } else {
-        x <- na.omit(cdata[ID %in% rownames(hdlist[[input$hdataset]]), get(input$groupby1)])
+        x <- stats::na.omit(cdata[ID %in% rownames(hdlist[[input$hdataset]]), get(input$groupby1)])
         if(length(x)) {
           sliderInput(session$ns("s1"), label = "range",
                       min = min(x), max = max(x), value = c(min(x), max(x)),
@@ -130,7 +131,7 @@ subgroupVServer <- function(id,
         fit <- fitDesign(xm, group = group)
         fit2 <- fitContrast(fit, contrast = "g1-g2")
       # A
-        adjP <- p.adjust(fit2$p.value, method = "fdr")
+        adjP <- stats::p.adjust(fit2$p.value, method = "fdr")
         neglogAdjP <- -log(adjP)
       # B
         means1 <- rowMeans(xm[, sampIDs %in% group1()])
@@ -138,7 +139,7 @@ subgroupVServer <- function(id,
         diffx <- means1-means2
       # C
         sigcolor <- ifelse(adjP < 0.05, "significant", "not significant")
-        p <- plot_ly(x = diffx, y = neglogAdjP, type = "scatter", mode = "markers",
+        p <- plotly::plot_ly(x = diffx, y = neglogAdjP, type = "scatter", mode = "markers",
                 hoverinfo = "text", text = paste("<br>-log(adjusted p): ", neglogAdjP, "<br>Difference: ", diffx),
                 color = sigcolor, colors = c(significant = "deeppink", `not significant` = "gray"),
                 showlegend = T) %>%
@@ -162,12 +163,13 @@ subgroupVServer <- function(id,
 }
 
 fitDesign <- function(matrix, group) {
-  design <- model.matrix(~0 + group)
+  design <- stats::model.matrix(~0 + group)
   colnames(design) <- gsub("group", "", colnames(design))
   fit <- limma::lmFit(matrix, design)
   return(fit)
 }
 
+#' @import magrittr
 fitContrast <- function(fit, contrast) {
   cont.matrix <- limma::makeContrasts(contrasts = contrast, levels = fit$design)
   fit2 <- limma::contrasts.fit(fit, cont.matrix) %>% limma::eBayes()

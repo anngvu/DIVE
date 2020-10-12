@@ -23,16 +23,16 @@ matrixCtrlServer(
 
 \item{M}{A data matrix, e.g. a correlation matrix, which must have row and column names.}
 
-\item{N}{A matrix of the same dimensions as M to be used as a filter layer, e.g. sample size.}
+\item{N}{A matrix of the same dimensions as `M` to be used as a filter layer, e.g. sample size.}
 
-\item{P}{A matrix of the same dimensions as M to be used as a filter layer, e.g. p-values.}
+\item{P}{A matrix of the same dimensions as `M` to be used as a filter layer, e.g. p-values.}
 
-\item{cutoffP}{A cutoff value in `P` to be used as initial default for filtering.}
+\item{cutoffP}{A cutoff value for `P` to be used as initial default for filtering.}
 
 \item{cdata}{The data used for generating the matrix,
-necessary for allowing user-uploaded data for mutable M.}
+necessary for allowing user-uploaded data for mutable `M`.}
 
-\item{metadata}{Optional, a data.table with different types of metadata/annotation to be used as filters.
+\item{metadata}{Optional, a `data.table` with different types of metadata/annotation to be used as filters.
 If not given, the only filter option will be the row names in M. Column names will be the names of the filter group.}
 
 \item{vkey}{The column in metadata that maps to row/col names in M, i.e. the key column such as VarID.
@@ -40,7 +40,7 @@ If metadata is not given, should be something like "Name" because the only selec
 
 \item{newdata}{Optional, reactive data such as a user upload passed in by
 the \code{\link{dataUploadServer}} module or from some other component,
-that is suitable for merging with \preformatted{cdata} to calculate a new M.}
+and which is suitable for merging with \preformatted{cdata} to calculate a new `M`.}
 
 \item{widgetmod}{Not currently implemented. Optional widget extension module.}
 

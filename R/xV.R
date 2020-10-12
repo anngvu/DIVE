@@ -52,6 +52,7 @@ xVUI <- function(id) {
 #' @param selected A reactive vector used to subset the features (cols) of \code{hdata}.
 #' @param height Height for data plots.
 #' @import shiny
+#' @import magrittr
 #' @export
 xVServer <- function(id,
                      hdata, cdata = reactive(NULL), key = "ID",
@@ -188,7 +189,7 @@ xVServer <- function(id,
     # Plot product representing cdata(), which contains one to several plots of each var in subplot
     cplot <- reactive({
       if(is.null(cdata())) return(NULL)
-      dtorder <- as.data.table(setNames(list(rownames(localhdata())), key))
+      dtorder <- as.data.table(stats::setNames(list(rownames(localhdata())), key))
       plotdata <- merge(dtorder, cdata(), by = key, all.x = T, sort = FALSE)
       plotdata <- plotdata[!duplicated(get(key))] # in case cdata() isn't well-cleaned
       y <- plotdata[[key]] %>% paste()
@@ -246,7 +247,7 @@ expHeatmap <- function(z, height) {
 rowCluster <- function(data) {
   withProgress(value = 0.2, message = "creating distance matrix...",
                expr = {
-                 clusts <- dist(data)
+                 clusts <- stats::dist(data)
                  setProgress(value = 0.7, message = "clustering...")
                  clusts <- fastcluster::hclust(clusts)
                  return(clusts)
@@ -255,7 +256,7 @@ rowCluster <- function(data) {
 
 # Get line segments list from a cluster object, which can be passed into plotly shapes
 lineShapes <- function(cluster, horiz = TRUE) {
-  dendata <- dendextend::as.ggdend(as.dendrogram(cluster))
+  dendata <- dendextend::as.ggdend(stats::as.dendrogram(cluster))
   segments <- dendata$segments
   names(segments) <- if(horiz) c("y0", "x0", "y1", "x1") else c("x0", "y0", "x1", "y1")
   linetype <- list(line = list(color = "gray", width = 2), type = "line", xref = "x", yref = "y")
@@ -288,7 +289,7 @@ vnumplotly <- function(vt, vx, y, height = NULL) {
   plotly::plot_ly(x = x, y = y, customdata = hoverx, name = vt, type = "bar",
           orientation = "h", showlegend = F, height = height,
           text = hoverx, hoverinfo = "text") %>%
-    plotly::add_text(text = NAtext, textposition = "right", textfont = list(color = toRGB("red"))) %>%
+    plotly::add_text(text = NAtext, textposition = "right", textfont = list(color = plotly::toRGB("red"))) %>%
     plotly::layout(xaxis = list(title = vt, showgrid = FALSE),
            yaxis = list(type = "category", categoryorder = "array", categoryarray = y))
 }

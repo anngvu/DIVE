@@ -122,7 +122,7 @@ dualDrilldownServer <- function(id,
       updateSelectizeInput(session, "drilldown", selected = src2())
     }, ignoreInit = TRUE)
 
-    output$scatter <- renderPlotly({
+    output$scatter <- plotly::renderPlotly({
       req(input$drilldown != "")
       var1 <- input$drilldown[1]
       colorgroup <- names(colorby)[1]

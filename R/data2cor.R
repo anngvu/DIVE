@@ -36,5 +36,5 @@ data2cor <- function(cdata, exclude = "^ID$|_SE$|_SEM$|_SD$", type = "spearman")
 
 
 # Convenience function to use with Filter, removes data with 0 variance
-rem0Var <- function(dt) Filter(function(x) sd(na.omit(x)) != 0, dt)
+rem0Var <- function(dt) Filter(function(x) stats::sd(stats::na.omit(x)) != 0, dt)
 
