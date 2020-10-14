@@ -5,27 +5,19 @@
 #' @export
 matchLinkUI <- function(id) {
   ns <- NS(id)
-  tags$div(id = "matchLinkUI",
-           fluidRow(
-             column(3,
-                    infoOutput(ns("help"), label = "Method details", i = "question-circle"),
-                    br(), br(),
-                    htmlOutput(ns("matchOn")), # user feedback on current match parameters
-                    htmlOutput(ns("matchN")), # user feedback on current match subsets
-                    uiOutput(ns("btnRun")) # dynamically rendered when there is enough user input
+  tags$div(id = ns("matchLinkUI"),
+           div(class = "input-panel", style = "width: 300px;",
+               infoOutput(ns("help"), label = "Method details", i = "question-circle"),
+               br(), br(),
+               htmlOutput(ns("matchOn")), # user feedback on current match parameters
+               htmlOutput(ns("matchN")), # user feedback on current match subsets
+               uiOutput(ns("btnRun")) # dynamically rendered when there is enough user input
              ),
-             column(1),
-             column(8,
-                    fluidRow(div(id = "matchVars",
-                      column(6, div(id = "matchVarBank",
-                             uiOutput(ns("varBank")))
-                      ),
-                      column(6, div(id = "matchVarLinked",
-                             uiOutput(ns("varSets")))
-                      )
-                    ))
-            )
-  ))
+           div(class = "ui-inline",
+              div(class = "varBank", uiOutput(ns("varBank"))),
+              div(class = "varSets", uiOutput(ns("varSets")))
+           )
+  )
 }
 
 #' Shiny server module for interactive drag-and-drop variable linkage or harmonization

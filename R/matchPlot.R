@@ -14,11 +14,11 @@ matchPlotUI <- function(id, s1label = NULL, s2label = NULL, placeholder = "(sele
   renderjs <- I("{ option: function(item, escape) {
                    return '<div class=\"unused covariate\">' + escape(item.value) + '</div><br>' }
                 }")
-  tags$div(class = "match-plot-ui", id = ns("match-plot-ui"),
-    tags$div(id = ns("s2-select-container"),
+  tags$div(class = "matchPlot-ui", id = ns("matchPlot-ui"),
+    tags$div(id = ns("s2-select-container"), class = "input-panel",
              selectizeInput(ns("s2_select"), s2label, choices = "", selected = "",
                             options = list(placeholder = placeholder, render = renderjs))),
-    tags$div(id = ns("s1-select-container"),
+    tags$div(id = ns("s1-select-container"), class = "input-panel",
              selectizeInput(ns("s1_select"), s1label, choices = "", selected = "",
                             options = list(placeholder = placeholder, render = renderjs))),
     tags$div(plotOutput(ns("plot")))
@@ -39,17 +39,19 @@ matchPlotUI <- function(id, s1label = NULL, s2label = NULL, placeholder = "(sele
 #' @param s1data Reactive data from source #1 (often the reference dataset).
 #' @param s2data Reactive data from source #2, such as from \code{\link{customDatasetServer}}.
 #' @param results Optional, reactive return value of \code{\link{matchResultServer}}.
+#' @param ignore Optional, a character vector of variables such as IDs to exclude from selection for plotting.
 #' @family matchPlot functions
 #' @export
 matchPlotServer <- function(id,
                             s1data, s2data,
-                            results) {
+                            results, ignore = NULL) {
 
   moduleServer(id, function(input, output, session) {
 
+
     observe({
-      updateSelectizeInput(session, "s2_select", choices = c("", removeID(names(s2data()))))
-      updateSelectizeInput(session, "s1_select", choices = c("", removeID(names(s1data()))))
+      updateSelectizeInput(session, "s2_select", choices = c("", removeID(names(s2data()), c("ID", ignore))) )
+      updateSelectizeInput(session, "s1_select", choices = c("", removeID(names(s1data()), c("ID", ignore))) )
     })
 
     renderjs <- I("{ option: function(item, escape) {
@@ -60,12 +62,12 @@ matchPlotServer <- function(id,
 
     # Update select menu to partition attributes that were used for matching from "Other" non-matching attributes
     observeEvent(results$params, {
-      s1list <- list(Matched = names(results$params), Other = removeID(setdiff(names(s1data()), names(results$params))))
-      s2list <- list(Matched = unname(results$params), Other = removeID(setdiff(names(s2data()), results$params)))
-      updateSelectizeInput(session, "s1_select", "", choices = s1list,
+      s1list <- list(Matched = names(results$params), Other = removeID(setdiff(names(s1data()), names(results$params)), c("ID", ignore)) )
+      s2list <- list(Matched = unname(results$params), Other = removeID(setdiff(names(s2data()), results$params), c("ID", ignore)) )
+      updateSelectizeInput(session, "s1_select", choices = s1list,
                            selected = character(0), server = T,
                            options = list(placeholder = "(data attributes)", render = renderjs))
-      updateSelectizeInput(session, "s2_select", "", choices = s2list,
+      updateSelectizeInput(session, "s2_select", choices = s2list,
                            selected = character(0), server = T,
                            options = list(placeholder = "(data attributes)", render = renderjs))
     })
@@ -154,13 +156,15 @@ matchPlotServer <- function(id,
 
 # -- Helpers ---------------------------------------------------------------------------------------------------------#
 
-removeID <- function(x) Filter(function(f) f != "ID", x)
-
-# A custom comparison histodot plot
+#' A custom comparison histodot plot
+#'
+#' @keywords internal
 cohistPlot <- function(data, x = "Cohort", y, fill = "Matched") {
+  # Need two separate geom_dotplot layers to ensure that matched points are always on top
   p <- ggplot(data, aes_string(x = x, y = y, fill = fill)) +
-    geom_dotplot(method = "histodot", stackdir = "center", binaxis = "y") +
-    scale_fill_manual(values = c(`un-matched` = "gray", `matched` = "palegreen")) +
-    theme_bw()
+    geom_dotplot(data = data[data[[fill]] == "un-matched", ], method = "histodot", stackdir = "center", binaxis = "y") +
+    geom_dotplot(data = data[data[[fill]] == "matched", ], method = "histodot", stackdir = "center", binaxis = "y") +
+    scale_fill_manual(values = c(`matched` = "palegreen", `un-matched` = "gray")) +
+    theme_bw(base_size = 20)
   p
 }

@@ -12,9 +12,9 @@
 #' @export
 customDatasetInput <- function(id, label = NULL) {
   ns <- NS(id)
-  tags$div(id = ns("new-dataset-input"),
-           textInput(ns("datavalue"), label = label, width = 200),
-           dataUploadUI(ns("upload"))
+  tags$div(id = ns("customDatasetInput"),
+           div(class = "ui-inline", textInput(ns("datavalue"), label = label, width = 100)),
+           div(class = "ui-inline", dataUploadUI(ns("upload"), label = NULL, placeholder = "  no file selected"))
   )
 }
 

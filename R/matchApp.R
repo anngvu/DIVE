@@ -25,10 +25,11 @@ matchAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"
 
     fluidRow(class = "matchAppUI-panel",
              column(1),
-             column(4, div(class = "card-panel", div(class = "panel-header", "External set"), customDatasetInput(ns("CohortX")))),
-             column(4, div(class = "card-panel", div(class = "panel-header", "Reference set"), dataSubsetInput(ns("ref"), label = refname)))
+             column(11,
+                    div(class = "card-panel input-panel", div(class = "panel-header", "External set"), customDatasetInput(ns("CohortX"))),
+                    div(class = "card-panel input-panel", div(class = "panel-header", "Reference set"), dataSubsetInput(ns("ref"), label = refname)))
              ),
-    fluidRow(style="margin-top:50px; margin-bottom:50px; margin-right:100px",
+    fluidRow(style = "margin-top: 50px; margin-bottom: 100px;",
              column(1),
              column(10,
                     if(is.null(addonUI)) { tabsetPanel(id = ns("tabs")) }
@@ -103,12 +104,13 @@ matchAppServer <- function(id,
                                   refdata = refcohort,
                                   inputdata = newcohort,
                                   params = parameters,
-                                  sourcecol = "Cohort")
+                                  sourcecol = customdata)
 
     explore <- matchPlotServer(id = "explore",
                                s1data = refcohort,
                                s2data = newcohort,
-                               results = results)
+                               results = results,
+                               ignore = customdata)
 
     #-- Output tabs display logic ------------------------------------------------------------------------------------------#
 
