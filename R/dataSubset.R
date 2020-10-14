@@ -3,15 +3,16 @@
 #' Create a selection input that subsets a dataset
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param label Optional, a label for the dataset.
+#' @param label Optional, a label for the datase;
+#' currently this goes into the placeholder rather than as input label
 #' @return A \code{shiny::\link[shiny]{tagList}} for UI to subset a dataset.
 #' @export
 #' @family dataSubset functions
-dataSubsetInput <- function(id, label = NULL) {
+dataSubsetInput <- function(id, label = NULL, name = NULL) {
   ns <- NS(id)
   tags$div(class = "data-subset-input", id = ns("data-subset-input"),
-    tags$div(selectizeInput(ns("selectsubset"), label = label, choices = c(), selected = c(),
-                            multiple = T, options = list(placeholder = "(one or more types)"))),
+    tags$div(selectizeInput(ns("selectsubset"), label = NULL, choices = c(), selected = c(),
+                            multiple = T, options = list(placeholder = paste("choose from", label)))),
     tags$div(uiOutput(ns("info")))
   )
 }

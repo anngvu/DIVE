@@ -23,9 +23,10 @@ matchAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"
   fluidPage(theme = shinythemes::shinytheme("paper"),
             if(!is.null(CSS)) includeCSS(CSS),
 
-    fluidRow(class = "match-cohorts", style="margin-top:30px; margin-bottom:50px; margin-right:100px",
-             column(6, customDatasetInput(ns("CohortX"))),
-             column(6, dataSubsetInput(ns("ref"), label = refname))
+    fluidRow(class = "matchAppUI-panel",
+             column(1),
+             column(4, div(class = "card-panel", div(class = "panel-header", "External set"), customDatasetInput(ns("CohortX")))),
+             column(4, div(class = "card-panel", div(class = "panel-header", "Reference set"), dataSubsetInput(ns("ref"), label = refname)))
              ),
     fluidRow(style="margin-top:50px; margin-bottom:50px; margin-right:100px",
              column(1),

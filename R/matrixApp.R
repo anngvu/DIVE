@@ -14,9 +14,9 @@ matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
   fluidPage(theme = shinythemes::shinytheme("paper"),
             if(!is.null(CSS)) includeCSS(CSS),
             # Filter controls and data input
-            fluidRow(style="margin-top:30px; margin-bottom:20px;",
-                     column(9, matrixCtrlUI(ns("ctrl"))),
-                     column(3, dataUploadUI(ns("upload")))
+            fluidRow(class = "top-panel matrixAppUI-panel",
+                     column(9, tags$div(class = "input-panel", matrixCtrlUI(ns("ctrl")))),
+                     column(3, tags$div(class = "input-panel", dataUploadUI(ns("upload"))))
             ),
             tags$div(class = "btn-group", style = "margin-bottom: 30px;",
                      actionButton("viewgraph", "Graph view") %>%

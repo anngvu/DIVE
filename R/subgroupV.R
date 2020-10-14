@@ -84,7 +84,7 @@ subgroupVServer <- function(id,
           selectizeInput(session$ns("s2"), label = "factor level(s)", choices = choices, multiple = T, width = 200)
         )
       } else {
-        x <- na.omit(cdata[ID %in% rownames(hdlist[[input$hdataset]]), get(input$groupby2)])
+        x <- stats::na.omit(cdata[ID %in% rownames(hdlist[[input$hdataset]]), get(input$groupby2)])
         if(length(x)) {
           sliderInput(session$ns("s2"), label = "range",
                       min = min(x), max = max(x), value = c(min(x), max(x)),

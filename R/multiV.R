@@ -13,22 +13,34 @@ multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
   ns <- NS(id)
   fluidPage(theme = shinythemes::shinytheme("paper"),
             if(!is.null(CSS)) includeCSS(CSS),
-            shinyWidgets::chooseSliderSkin("Flat"),
-
-            fluidRow(class = "multiVUI-ctrl-head", id = ns("multiVUI-ctrl-head"),
-              tags$div(style = "margin-top: 50px; margin-left: 50px;",
-              column(1, br(), h4("DATA SOURCES")),
-              column(7, multiVCtrlUI(ns("ctrl"))),
-              column(1, br(), h4("DATA TOOLS")),
-              column(3, br(), br(),
-                     div(class = "forceInline",
-                         actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup"))),
-                     div(class = "forceInline",
-                         actionButton(ns("ML"), "Learn", icon = icon("cog")))
-              )
-            )),
+            # shinyWidgets::chooseSliderSkin("Flat"),
+            fluidRow(class = "top-panel multiVUI-panel", id = ns("multiVUI"),
+                     column(12,
+                            div(class = "input-panel",
+                                span("Data Sources"), div(class = "ui-inline", multiVCtrlUI(ns("ctrl")))),
+                            div(class = "input-panel",
+                                span("Data Tools"),
+                                div(class = "ui-inline",  br(),
+                                  div(class = "ui-inline", actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup"))),
+                                  div(class = "ui-inline", actionButton(ns("ML"), "Learn", icon = icon("cog")))
+                                )
+                              )
+                     )
+              ),
             fluidRow(absolutePanel(style = "z-index: 10;", tags$div(id = "views"), draggable = T)),
-            fluidRow(style = "padding-top: 50px;",
+            # div(class = "top-panel multiVUI-panel", id = ns("multiVUI"),
+            #     tags$div(class = "input-panel", style = "margin-top: 50px; margin-left: 50px;",
+            #         span("Data Sources"),
+            #         div(class = "ui-inline", multiVCtrlUI(ns("ctrl")))
+            #     ),
+            #   tags$div(class = "input-panel",
+            #         span("Data Tools"),
+            #         div(class = "ui-inline", br(), actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup"))),
+            #         div(class = "ui-inline", br(), actionButton(ns("ML"), "Learn", icon = icon("cog")))
+            #   )
+            # ),
+            # absolutePanel(style = "z-index: 10;", tags$div(id = "views"), draggable = T),
+            fluidRow(style = "padding-top: 30px;",
                     column(9, geneVUI(ns("gene"))),
                     column(3, selectVUI(ns("cdata")))
             ),

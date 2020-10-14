@@ -29,8 +29,9 @@ dataUploadUI <- function(id, ...) {
       script     = "app.js"
     )
   )
-  tagList(dep, tags$div(id = ns("dataUploadUI"),
-      tags$div(class = "ui-inline", style="margin-top:-5px;",
+  tagList(dep,
+          tags$div(id = ns("dataUploadUI"), class = "dataUploadUI-panel",
+          tags$div(class = "ui-inline", style="margin-top:-5px;",
                tags$div(id = ns("main"),
                         tags$div(class = "ui-inline",
                                  if(length(list(...))) fileInput(ns("upload"), ...) else
@@ -39,7 +40,7 @@ dataUploadUI <- function(id, ...) {
                                            buttonLabel = "Data", placeholder = "  no file selected", width = 275))
                         )
               ),
-      tags$div(class = "ui-inline", br(), uiOutput(ns("info")))
+          tags$div(class = "ui-inline", uiOutput(ns("info")))
     )
   )
 }

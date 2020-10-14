@@ -20,15 +20,13 @@
 #' @export
 multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE) {
   ns <- NS(id)
-  tags$div(class = "multiVCtrlUI", id = ns("multiVCtrlUI"),
-           if(menu) div(class = "forceInline", style = "margin-right: 40px;",
+  tags$div(class = "multiVCtrlUI-panel", id = ns("multiVCtrlUI"),
+           if(menu) div(class = "ui-inline",
                         selectizeInput(ns("dataset"), HTML("<strong>Available datasets</strong>"),
                                        choices = NULL, selected = NULL, multiple = T,
                                        options = list(placeholder = "select one or more to view"))),
-           if(upload) div(class = "forceInline", style = "margin-right: 40px;", br(),
-                          actionButton(ns("upload"), "Upload my data")),
-           if(GEO) div(class = "forceInline", style = "margin-right: 40px;", br(),
-                       actionButton(ns("getGEO"), HTML("Source from GEO <sup>beta</sup>")))
+           if(upload) div(class = "ui-inline", br(), actionButton(ns("upload"), "Upload my data")),
+           if(GEO) div(class = "ui-inline", br(), actionButton(ns("getGEO"), HTML("Source from GEO <sup>beta</sup>")))
   )
 }
 

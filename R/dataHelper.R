@@ -19,14 +19,14 @@ dataHelperUI <- function(id, CSS = "app.css", theme = "paper") {
                      div(class = "ui-inline",
                          # Filter panel
                          conditionalPanel("input.show % 2 == 0", ns = ns, class = "ui-inline",
-                           div(class ="ui-inline card-1 data-helper-filter",
+                           div(class ="ui-inline card-panel data-helper-filter",
                                uiOutput(ns("lhfilter"))),
                            icon("arrow-right", "fa-3x")
                          )
                       ),
 
                      # Left-hand panel
-                     div(class ="ui-inline card-1", icon("id-card", "fa-2x"), style = "width: 20vw",
+                     div(class ="ui-inline card-panel", icon("id-card", "fa-2x"), style = "width: 20vw",
                          div(class ="ui-inline",
                            selectizeInput(ns("lhselect"), label = NULL, choices = "", multiple = TRUE, width = "100%",
                                           options = list(placeholder = "no results")),
@@ -44,7 +44,7 @@ dataHelperUI <- function(id, CSS = "app.css", theme = "paper") {
                                                         title = "reverse the direction of search")),
 
                      # Right-hand panel
-                     div(class = "ui-inline card-1", icon("folder", "fa-2x"), style = "width: 50vw",
+                     div(class = "ui-inline card-panel", icon("folder", "fa-2x"), style = "width: 50vw",
                          selectizeInput(ns("rhselect"), label = NULL, choices = "", multiple = TRUE, width = "100%"),
                          uiOutput(ns("rhtableopts")),
                          DT::DTOutput(ns("rhtable"))

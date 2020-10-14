@@ -7,7 +7,7 @@
 #' @export
 matrixCtrlUI <- function(id, minN = 5) {
   ns <- NS(id)
-  tags$div(id = "matrixCtrlUI",
+  tags$div(id = ns("matrixCtrlUI"), class = "matrixCtrlUI-panel",
            div(class = "ui-inline", numericInput(ns("minN"), "mininum N", value = 5, min = minN, step = 1, width = "80px")),
            div(class = "ui-inline", br(), checkboxInput(ns("cutoffP"), "P < 0.05 ", value = FALSE, width = "80px")),
            div(class = "ui-inline",

@@ -5,46 +5,6 @@ body {
   overflow-x: hidden;
 }
 
-.forceInline {
-  display: inline-block;
-  vertical-align: top;
-  margin-right: 10px;
-}
-
-.ui-inline {
-  display: inline-block;
-  vertical-align: top;
-  margin-right: 10px;
-}
-
-.card {
-  position: fixed;
-  z-index: 999;
-  background-color: white;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
-  padding: 30px;
-}
-
-.card2 {
-  position: fixed;
-  background-color: white;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
-  padding: 30px;
-}
-
-.firm-feedback {
-  font-weight: bold;
-}
-
-.dive-loader{
-  position: fixed;
-  top: calc(50%);
-  left: calc(50%);
-}
-
-.status-update {
- font-style: italic;
-}
 
 /* Theming Overrides ----------------------------------------------------------------*/
 
@@ -61,7 +21,37 @@ body {
 
 /* Custom Components ----------------------------------------------------------------*/
 
-#cellpackpanel {
+/* Panels ------*/
+.top-panel {
+  background-color: WhiteSmoke;
+  margin-top: -50px;
+  margin-left: -50px;
+  margin-right: -50px;
+}
+
+.input-panel {
+  display: inline-block;
+  vertical-align: top;
+  min-height: 100px;
+  padding: 40px 40px 30px 40px;
+  margin-right: 20px;
+}
+
+.card-panel {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  padding: 30px;
+  margin-left: 30px;
+  background: white;
+  min-height: 150px;
+}
+
+.panel-header {
+  color: gray;
+  font-size: 12px;
+  margin-bottom: 15px;
+}
+
+.cellpack-panel {
   border: 1px solid lightgray;
   border-radius: 4px;
   background-color: white;
@@ -72,19 +62,30 @@ body {
 	box-shadow: 0 2px 1px lightgray;
 }
 
+/* Display ------*/
+.ui-inline {
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 10px;
+}
+
+.firm-feedback {
+  font-weight: bold;
+}
+
+.dive-loader{
+  position: fixed;
+  top: calc(50%);
+  left: calc(50%);
+}
+
+.status-update {
+ font-style: italic;
+}
+
+
 /* Matrix Module --------------------------------------------------------------------*/
 
-.iMatrixUI {
-  position: relative;
-   margin-top: 20px;
-  -ms-box-orient: horizontal;
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -moz-flex;
-  display: -webkit-flex;
-  display: flex;
-}
 
 .matrix-output {
   flex: 4 0 75vw;
@@ -193,18 +194,6 @@ body {
 
 /* MutiVUI Module -----------------------------------------------------------------------*/
 
-.multiVUI-ctrl-head {
-  background-color: WhiteSmoke;
-  margin-top: -50px;
-  margin-left: -50px;
-  margin-right: -50px;
-}
-
-.multiVCtrlUI {
-  margin-top: 30px;
-  margin-bottom: 20px;
-  margin-right: 100px;
-}
 
 .xV-container {
   margin-bottom: 30px;
@@ -217,6 +206,7 @@ body {
 .xVUI-ctrl {
   margin-bottom: 10px;
 }
+
 
 .subgroups-panel {
   background-color: WhiteSmoke;
