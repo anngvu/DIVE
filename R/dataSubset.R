@@ -8,7 +8,7 @@
 #' @return A \code{shiny::\link[shiny]{tagList}} for UI to subset a dataset.
 #' @export
 #' @family dataSubset functions
-dataSubsetInput <- function(id, label = NULL, name = NULL) {
+dataSubsetInput <- function(id, label = NULL) {
   ns <- NS(id)
   tags$div(class = "data-subset-input", id = ns("data-subset-input"),
     tags$div(selectizeInput(ns("selectsubset"), label = NULL, choices = c(), selected = c(),

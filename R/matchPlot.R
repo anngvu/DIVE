@@ -39,19 +39,20 @@ matchPlotUI <- function(id, s1label = NULL, s2label = NULL, placeholder = "(sele
 #' @param s1data Reactive data from source #1 (often the reference dataset).
 #' @param s2data Reactive data from source #2, such as from \code{\link{customDatasetServer}}.
 #' @param results Optional, reactive return value of \code{\link{matchResultServer}}.
-#' @param ignore Optional, a character vector of variables such as IDs to exclude from selection for plotting.
+#' @param ignorev Optional, a character vector of variables such as IDs to exclude from selection for plotting.
 #' @family matchPlot functions
 #' @export
 matchPlotServer <- function(id,
                             s1data, s2data,
-                            results, ignore = NULL) {
+                            results,
+                            ignorev = NULL) {
 
   moduleServer(id, function(input, output, session) {
 
 
     observe({
-      updateSelectizeInput(session, "s2_select", choices = c("", removeID(names(s2data()), c("ID", ignore))) )
-      updateSelectizeInput(session, "s1_select", choices = c("", removeID(names(s1data()), c("ID", ignore))) )
+      updateSelectizeInput(session, "s2_select", choices = c("", removeID(names(s2data()), c("ID", ignorev))) )
+      updateSelectizeInput(session, "s1_select", choices = c("", removeID(names(s1data()), c("ID", ignorev))) )
     })
 
     renderjs <- I("{ option: function(item, escape) {
@@ -62,8 +63,8 @@ matchPlotServer <- function(id,
 
     # Update select menu to partition attributes that were used for matching from "Other" non-matching attributes
     observeEvent(results$params, {
-      s1list <- list(Matched = names(results$params), Other = removeID(setdiff(names(s1data()), names(results$params)), c("ID", ignore)) )
-      s2list <- list(Matched = unname(results$params), Other = removeID(setdiff(names(s2data()), results$params), c("ID", ignore)) )
+      s1list <- list(Matched = names(results$params), Other = removeID(setdiff(names(s1data()), names(results$params)), c("ID", ignorev)) )
+      s2list <- list(Matched = unname(results$params), Other = removeID(setdiff(names(s2data()), results$params), c("ID", ignorev)) )
       updateSelectizeInput(session, "s1_select", choices = s1list,
                            selected = character(0), server = T,
                            options = list(placeholder = "(data attributes)", render = renderjs))
