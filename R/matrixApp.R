@@ -9,8 +9,8 @@
 #' @export
 matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE")) {
   ns <- NS(id)
-  ns.graph <- paste(ns("graph"), "network-ui", sep = "-")
-  ns.matrix <- paste(ns("matrix"), "matrix-ui", sep = "-")
+  ns.graph <- paste(ns("graph"), "asNetwork", sep = "-")
+  ns.matrix <- paste(ns("matrix"), "matrixMain", sep = "-")
   fluidPage(theme = shinythemes::shinytheme("paper"),
             if(!is.null(CSS)) includeCSS(CSS),
             # Filter controls and data input

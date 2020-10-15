@@ -28,18 +28,6 @@ multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
                      )
               ),
             fluidRow(absolutePanel(style = "z-index: 10;", tags$div(id = "views"), draggable = T)),
-            # div(class = "top-panel multiVUI-panel", id = ns("multiVUI"),
-            #     tags$div(class = "input-panel", style = "margin-top: 50px; margin-left: 50px;",
-            #         span("Data Sources"),
-            #         div(class = "ui-inline", multiVCtrlUI(ns("ctrl")))
-            #     ),
-            #   tags$div(class = "input-panel",
-            #         span("Data Tools"),
-            #         div(class = "ui-inline", br(), actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup"))),
-            #         div(class = "ui-inline", br(), actionButton(ns("ML"), "Learn", icon = icon("cog")))
-            #   )
-            # ),
-            # absolutePanel(style = "z-index: 10;", tags$div(id = "views"), draggable = T),
             fluidRow(style = "padding-top: 30px;",
                     column(9, geneVUI(ns("gene"))),
                     column(3, selectVUI(ns("cdata")))
@@ -67,7 +55,7 @@ multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
 #' \code{\link{geneVServer}} and \code{\link{selectVServer}}, but each can also have its own
 #' indepedent local controls, which takes precedence if enabled.
 #'
-#' @family multiVUI functions
+#' @family multiV functions
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @inheritParams multiVCtrlServer

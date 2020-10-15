@@ -70,6 +70,8 @@ multiVCtrlServer <- function(id,
 
   moduleServer(id, function(input, output, session) {
 
+    # cdata key should be character for later merging with hdata
+    cdata[[key]] <- as.character(cdata[[key]])
     view <- reactiveValues(cdata = cdata, hdlist = hdlist, hdata = NULL, vselect = preselect)
     inview <- c()
 
@@ -170,7 +172,7 @@ multiVCtrlServer <- function(id,
         view$vselect <- NULL
       }
       updateSelectizeInput(session, "dataset", choices = choices, selected = GEOdata$accession)
-    })
+    }, ignoreInit = TRUE)
 
     return(view)
   })

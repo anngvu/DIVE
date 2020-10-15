@@ -13,8 +13,7 @@ selectVUI(id)
 A basic UI for choosing columns in a dataset.
 }
 \seealso{
-Other multiVApp module functions: 
-\code{\link{subgroupVServer}()},
-\code{\link{subgroupVUI}()}
+Other selectV module functions: 
+\code{\link{selectVServer}()}
 }
-\concept{multiVApp module functions}
+\concept{selectV module functions}

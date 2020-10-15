@@ -7,19 +7,26 @@
 dataFusion(d1, d2, fuseon, sourcecol)
 }
 \arguments{
-\item{d1}{A data.frame of the first dataset.}
+\item{d1}{A \code{data.frame} for the first dataset.}
 
-\item{d2}{A data.frame of the second dataset.}
+\item{d2}{A \code{data.frame} for the second dataset.}
 
 \item{fuseon}{A named vector of the harmonized features,
 where the names are the features in d1 and elements are features in d2.}
 
-\item{sourcecol}{The key column used to identify the row sources after the two datasets are fused.}
+\item{sourcecol}{Character name of key column used to identify the row sources
+(whether the row came from \code{d1} or \code{d2}) after the two datasets are fused.}
 }
 \value{
-A data.table of the fused data.
+A \code{data.table} of the fused data.
 }
 \description{
 Concatenate two datasets given information on which columns are the same,
-removing NA values and keeping only the specified columns in the result
+removing any \code{NA} values and keeping only the specified columns in the result
+}
+\details{
+The datasets can have different names and dimensions, with \code{fuseon} acting
+as the map. The implementation uses \code{data.table} and will output \code{data.table}.
+This also doesn't check for same data type and will simply coerce as necessary.
+A created \code{sourcecol} is conceptually the same as and uses \code{idcol}.
 }

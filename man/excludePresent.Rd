@@ -4,9 +4,10 @@
 \alias{excludePresent}
 \title{Exclude values in dataset #2 that are present in dataset #1}
 \usage{
-excludePresent(x = "ID", data1, data2)
+excludePresent(x = "ID", data1 = NULL, data2 = NULL)
 }
 \description{
-Exclude values in dataset #2 that are present in dataset #1
+Return a version of dataset #2 that doesn't contain records in dataset #1,
+assuming records are in an "ID" column
 }
 \keyword{internal}

@@ -11,7 +11,7 @@
 #' @export
 matrixAsNetworkUI <- function(id, height = "400px", ...) {
   ns <- NS(id)
-  tags$div(class = "network-ui", id = ns("network-ui"), ... ,
+  tags$div(class = "asNetwork", id = ns("asNetwork"), ... ,
            conditionalPanel("!output.network", ns = ns, class = "dive-loader", id = ns("loader"), "loading..."),
            uiOutput(ns("add_nodes_btn")),
            visNetwork::visNetworkOutput(ns("network"), height = height)

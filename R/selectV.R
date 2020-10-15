@@ -2,16 +2,14 @@
 #'
 #' A basic UI for choosing columns in a dataset.
 #'
-#' @family multiVApp module functions
+#' @family selectV module functions
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @import shiny
 #' @export
 selectVUI <- function(id) {
   ns <- NS(id)
-  tags$div(class = "selectVUI",
-           uiOutput(ns("select"))
-           )
+  tags$div(class = "selectVUI", uiOutput(ns("select")))
 }
 
 #' Shiny module server for selecting columns from a data table
@@ -22,31 +20,31 @@ selectVUI <- function(id) {
 #' but should be generic enough to be integrated with other modules.
 #' When data is uploaded through \code{\link{multiVCtrlServer}}, it can be "high-throughput"
 #' or "low-throughput" type data, the latter typically as phenotype or clinical variables.
-#' This module handles changes in the table of the latter data type.
+#' This module handles the latter data type.
 #' When the user adds (uploads) new data columns, the selection updates to include these new options.
 #' When the user selects specific columns from the menu, a column-subsetted table is returned.
-#' The most recent modification involves adding parenthesized counts for each variable option,
+#' The most recent modification added parenthesized counts for each variable option,
 #' e.g. "phenotypeX (15)", calculated by intersections with a vector of IDs.
 #'
-#' @family multiVUI module functions
+#' @family selectV module functions
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param data A reactive data.table. See details.
+#' @param data A reactive \code{data.table}. See details.
 #' @param key A key column that is kept for every selected subset. Defaults to "ID".
 #' @param label Label for variable select input.
 #' @param selected Optional, initial selection.
 #' @param countby A vector of IDs, which are intersected with the key (IDs) in data
 #' to generate counts in the select options. See details.
 #' @param maxitems Maximum number of items that can be selected. Defaults to 3.
-#' @return A subsetted `data.table`.
+#' @return A subsetted \code{data.table}.
 #' @import shiny
 #' @import data.table
 #' @export
 selectVServer <- function(id,
-                          data = reactive({ NULL }), key = "ID",
+                          data = reactive(NULL), key = "ID",
                           label = HTML("<strong>Phenotype/Experimental variable(s)</strong>"),
-                          selected = reactive({ NULL }),
-                          countby = reactive({ NULL }),
+                          selected = reactive(NULL),
+                          countby = reactive(NULL),
                           maxitems = 3)  {
 
   moduleServer(id, function(input, output, session) {
@@ -54,7 +52,7 @@ selectVServer <- function(id,
     Vdata <- reactiveVal(NULL)
 
     output$select <- renderUI({
-      choices <- names(data())[names(data()) != key]
+      choices <- removeID(names(data()), key)
       ids <- rownames(countby()[[1]])
       if(length(ids)) {
         counts <- colSums(!is.na(data()[get(key) %in% ids, choices, with = F]))
@@ -72,6 +70,7 @@ selectVServer <- function(id,
         )
     })
 
+    # Set Vdata as subset containing key and whatever is selected
     observeEvent(data(), {
       if(!is.null(selected())) Vdata( data()[, c(key, selected()), with = F] )
     })

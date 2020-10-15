@@ -14,7 +14,6 @@ UI for user to define groups for volcano plots
 }
 \seealso{
 Other multiVApp module functions: 
-\code{\link{selectVUI}()},
 \code{\link{subgroupVServer}()}
 }
 \concept{multiVApp module functions}

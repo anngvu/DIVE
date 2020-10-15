@@ -9,7 +9,8 @@ dataSubsetInput(id, label = NULL)
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{label}{Optional, a label for the dataset.}
+\item{label}{Optional, a label for the datase;
+currently this goes into the placeholder rather than as input label}
 }
 \value{
 A \code{shiny::\link[shiny]{tagList}} for UI to subset a dataset.

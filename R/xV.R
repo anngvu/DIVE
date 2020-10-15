@@ -11,8 +11,8 @@
 #' @export
 xVUI <- function(id) {
   ns <- NS(id)
-  tags$div(class = "xvui",
-           div(class = "xvui-ctrl",
+  tags$div(id = ns("xVUI"),
+           div(id = ns("xVUI-ctrl-panel"), class = "xVUI-ctrl-panel",
                conditionalPanel(condition = "input.addlocal%2==1", ns = ns, class = "ui-inline",
                                 selectizeInput(ns("localselected"), label = NULL, choices = NULL, multiple = T,
                                     options = list(placeholder = "filter in this dataset"))

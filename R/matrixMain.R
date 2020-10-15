@@ -7,9 +7,9 @@
 #' @export
 matrixMainUI <- function(id, ...) {
   ns <- NS(id)
-  tags$div(class = "matrix-ui", id = ns("matrix-ui"), ... ,
+  tags$div(class = "matrixMain", id = ns("matrixMain"), ... ,
            conditionalPanel("!output.main", ns = ns, class = "dive-loader", id = ns("loader"), "loading..."),
-           div(class = "matrix-options", uiOutput(ns("palettes"))),
+           div(class = "matrixMain-options", uiOutput(ns("palettes"))),
            div(plotly::plotlyOutput(ns("main")))
   )
 }

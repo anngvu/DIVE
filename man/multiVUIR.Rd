@@ -14,8 +14,4 @@ multiVUIR(ns, ...)
 \description{
 Shiny app launcher for multi-view module
 }
-\seealso{
-Other multiVUI module functions: 
-\code{\link{selectVServer}()}
-}
 \concept{multiVUI module functions}

@@ -6,18 +6,18 @@
 \usage{
 selectVServer(
   id,
-  data = reactive({     NULL }),
+  data = reactive(NULL),
   key = "ID",
   label = HTML("<strong>Phenotype/Experimental variable(s)</strong>"),
-  selected = reactive({     NULL }),
-  countby = reactive({     NULL }),
+  selected = reactive(NULL),
+  countby = reactive(NULL),
   maxitems = 3
 )
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{data}{A reactive data.table. See details.}
+\item{data}{A reactive \code{data.table}. See details.}
 
 \item{key}{A key column that is kept for every selected subset. Defaults to "ID".}
 
@@ -31,7 +31,7 @@ to generate counts in the select options. See details.}
 \item{maxitems}{Maximum number of items that can be selected. Defaults to 3.}
 }
 \value{
-A subsetted `data.table`.
+A subsetted \code{data.table}.
 }
 \description{
 Returns the selected columns.
@@ -41,14 +41,14 @@ This is a subcomponent intended to serve under \code{\link{multiVCtrlServer}}
 but should be generic enough to be integrated with other modules.
 When data is uploaded through \code{\link{multiVCtrlServer}}, it can be "high-throughput"
 or "low-throughput" type data, the latter typically as phenotype or clinical variables.
-This module handles changes in the table of the latter data type.
+This module handles the latter data type.
 When the user adds (uploads) new data columns, the selection updates to include these new options.
 When the user selects specific columns from the menu, a column-subsetted table is returned.
-The most recent modification involves adding parenthesized counts for each variable option,
+The most recent modification added parenthesized counts for each variable option,
 e.g. "phenotypeX (15)", calculated by intersections with a vector of IDs.
 }
 \seealso{
-Other multiVUI module functions: 
-\code{\link{multiVUIR}()}
+Other selectV module functions: 
+\code{\link{selectVUI}()}
 }
-\concept{multiVUI module functions}
+\concept{selectV module functions}

@@ -7,13 +7,13 @@
 #' @export
 dualDrilldownUI <- function(id) {
   ns <- NS(id)
-  tags$div(class = "drilldown-ui", id = ns("drilldown-ui"),
+  tags$div(class = "dualDrilldown", id = ns("dualDrilldown"),
            tags$script(sprintf('$("#%s").draggable({ start: function(event, ui) {
                                      console.log("moving to:" + event.pageY + " " + event.pageX);
                                      $(this).css({ position: "absolute", top: event.pageY + "px", left: event.pageX + "px"});
                                      window.dispatchEvent(new Event("resize"));
                                     }
-                                   });', ns("drilldown-output"))),
+                                   });', ns("dualDrilldown"))),
            selectizeInput(ns("drilldown"), "Drill down to data for", width = "500px",
                           choices = "", selected = "",
                           options = list(maxItems = 2, placeholder = "select variable(s)")),

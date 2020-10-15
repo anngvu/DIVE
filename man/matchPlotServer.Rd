@@ -4,7 +4,7 @@
 \alias{matchPlotServer}
 \title{Shiny module server for comparison histodot plots of attributes in two datasets}
 \usage{
-matchPlotServer(id, s1data, s2data, results)
+matchPlotServer(id, s1data, s2data, results, ignorev = NULL)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
@@ -14,6 +14,8 @@ matchPlotServer(id, s1data, s2data, results)
 \item{s2data}{Reactive data from source #2, such as from \code{\link{customDatasetServer}}.}
 
 \item{results}{Optional, reactive return value of \code{\link{matchResultServer}}.}
+
+\item{ignorev}{Optional, a character vector of variables such as IDs to exclude from selection for plotting.}
 }
 \description{
 Histodot plots of two datasets side-by-side, with or without match information

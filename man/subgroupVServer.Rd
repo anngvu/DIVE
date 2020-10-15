@@ -18,7 +18,6 @@ This primarily allows creation of volcano plots for highthroughput datasets base
 }
 \seealso{
 Other multiVApp module functions: 
-\code{\link{selectVUI}()},
 \code{\link{subgroupVUI}()}
 }
 \concept{multiVApp module functions}

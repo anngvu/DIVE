@@ -47,4 +47,8 @@ Thus, each \code{\link{xVServer}} component necessarily listens to
 \code{\link{geneVServer}} and \code{\link{selectVServer}}, but each can also have its own
 indepedent local controls, which takes precedence if enabled.
 }
-\concept{multiVUI functions}
+\seealso{
+Other multiV functions: 
+\code{\link{multiVUI}()}
+}
+\concept{multiV functions}
