@@ -86,7 +86,7 @@ matrixAppServer <- function(id,
                                   randomSeed = 42)
 
     dualDrilldownServer("dd",
-                        cdata = mdata$cdata,
+                        cdata = reactive(mdata$cdata),
                         colorby = colorby,
                         src1 = src1, src2 = src2)
 
