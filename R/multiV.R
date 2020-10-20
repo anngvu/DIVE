@@ -16,23 +16,14 @@ multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
             # shinyWidgets::chooseSliderSkin("Flat"),
             fluidRow(class = "top-panel multiVUI-panel", id = ns("multiVUI"),
                      column(12,
-                            div(class = "input-panel",
-                                span("Data Sources"), div(class = "ui-inline", multiVCtrlUI(ns("ctrl")))),
-                            div(class = "input-panel",
-                                span("Data Tools"),
-                                div(class = "ui-inline",  br(),
-                                  div(class = "ui-inline", actionButton(ns("newSubgroupVUI"), " Subgroup view", icon = icon("object-ungroup"))),
-                                  div(class = "ui-inline", actionButton(ns("ML"), "Learn", icon = icon("cog")))
-                                )
-                              )
-                     )
-              ),
-            fluidRow(absolutePanel(style = "z-index: 10;", tags$div(id = "views"), draggable = T)),
-            fluidRow(style = "padding-top: 30px;",
-                    column(9, geneVUI(ns("gene"))),
-                    column(3, selectVUI(ns("cdata")))
+                            div(class = "input-panel", span(class = "panel-label", "Data Sources"),
+                                div(class = "ui-inline", multiVCtrlUI(ns("ctrl")))))
             ),
-            div(id = "displaytrack")
+            div(class = "custom-sticky", span("Data Tools")),
+            fluidRow(column(9, geneVUI(ns("gene"))),
+                     column(3, selectVUI(ns("cdata")))
+            ),
+            div(id = ns("displaytrack"), class = "displaytrack")
   )
 }
 
@@ -87,40 +78,53 @@ multiVServer <- function(id,
     gselect <- geneVServer("gene", genes = genes)
 
     # each dataset gets its own section with its own xVUI local module options
-    obs_view <- observeEvent(view$hdata, {
+    datarep <- reactiveValues(localhdata = NULL, localcdata = NULL)
+
+    obs_x <- observeEvent(view$hdata, {
         trackID <- session$ns(names(view$hdata))
         trackdata <- view$hdata[[1]]
         if(!is.null(trackdata)) {
           height <- if(nrow(trackdata) <=10) { 400 } else { 25 * nrow(trackdata) } # used across plots, tracks
-          insertUI(selector = "#displaytrack", immediate = T,
+          insertUI(selector = paste0("#", session$ns("displaytrack")), immediate = T,
                    ui = tags$div(id = trackID, class = "xV-container", style = paste0("min-height: ", height+30, "px ;"),
                                  xVUI(id = trackID)))
           xVServer(id = names(view$hdata),
                    hdata = trackdata,
                    cdata = vselect,
                    selected = gselect,
-                   height = height)
+                   height = height,
+                   returndata = datarep)
         } else {
           removeUI(selector = paste0("#", trackID))
         }
     }, ignoreInit = TRUE)
 
-    # data tools
-    observeEvent(input$newSubgroupVUI, {
-      N <- input$newSubgroupVUI
-      insertUI(paste0("#views"),
-               ui = subgroupVUI(id = session$ns(paste0("panel", N))))
-      subgroupVServer(id = paste0("panel", N),
-                      cdata = view$cdata,
-                      hdlist = view$hdlist)
+    # Data tools --------------------------------------------------------------------#
+
+    observeEvent(datarep$localcdata, {
+      showModal(
+        modalDialog(
+          # reset modal content on close to not show previous plot
+          HTML('<button id = "closeContrast" type="button" class="close action-button" data-dismiss="modal">x</button>'),
+          contrastVUI(session$ns("new-contrast"), choices = names(datarep$localcdata)),
+          easyClose = FALSE, footer = NULL))
     })
+
+    contrastVServer("new-contrast",
+                    cdata = reactive(datarep$localcdata),
+                    selected_dataset = reactive(datarep$localhdata))
+
+    # Not ideal, but this clears previous plot whenever modal is closed so that new modals have clean display
+    outputOptions(output, "new-contrast-plot", suspendWhenHidden = F)
+    observeEvent(input$closeContrast, { datarep$localhdata <- NULL })
+
   })
 
 }
 
 #' Shiny app launcher for multi-view module
 #'
-#' @family multiVUI module functions
+#' @family multiV module functions
 #'
 #' @param ns Namespace of app module.
 #' @param ... Arguments passed to \code{\link{multiVServer}}.

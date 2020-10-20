@@ -41,12 +41,13 @@ If metadata is not given, should be something like "Name" because the only selec
 \item{factorx}{Optional, a function that returns a boolean for whether
 a variable should be plotted as factor when given the variable name.
 Useful when for some reason factor variables are numeric or character instead of already factor-encoded.
-By default, variables are merely checked using `base::is.factor`, which works when the data is already factor-encoded.}
+By default, variables are merely checked using \code{base::is.factor},
+which works when the data is already factor-encoded.}
 
-\item{colorby}{A named list where name matches the (factor) variable in cdata to use for color grouping.
-If there is a named vector, this is passed into scale_color_manual to be used for custom color mapping, e.g.
+\item{colorby}{A named list where name matches the (factor) variable in \code{cdata} to use for color grouping.
+If there is a named vector, this is passed into \code{scale_color_manual} to be used for custom color mapping, e.g.
 `list(MyGroupingVar = c(A = "red", B = "blue"))` (useful for enforcing a consistent/meaningful color scheme),
-or `list(MyGroupingVar = NULL)` if custom color scaling isn't necessary. See also details.}
+or use `list(MyGroupingVar = NULL)` if custom color scaling isn't necessary. See also details.}
 
 \item{colorscales}{Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named coloscale
 or custom colorscale used for heatmap. If not given, two default colorscale functions are used.}

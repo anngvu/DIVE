@@ -9,7 +9,7 @@
 #' @export
 geneVUI <- function(id) {
   ns <- NS(id)
-  tags$div(class = "geneVUI",
+  tags$div(class = "geneVUI-panel input-panel theme-border", id = ns("geneVUI"),
            div(class = "ui-inline",
                selectizeInput(ns("IDs"), tags$strong("Genes/gene products of interest"),
                               choices = NULL, selected = NULL,

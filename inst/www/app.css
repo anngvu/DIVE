@@ -33,7 +33,7 @@ body {
   display: inline-block;
   vertical-align: top;
   min-height: 100px;
-  padding: 40px 40px 30px 40px;
+  padding: 30px 40px 30px 40px;
   margin-right: 20px;
 }
 
@@ -73,7 +73,7 @@ body {
   font-weight: bold;
 }
 
-.dive-loader{
+.dive-loader {
   position: fixed;
   top: calc(50%);
   left: calc(50%);
@@ -81,6 +81,17 @@ body {
 
 .status-update {
  font-style: italic;
+}
+
+.theme-border {
+  border-top:3px solid lightgray;
+}
+
+.panel-label {
+  padding: 5px;
+  font-family: Oxygen;
+  margin-right: 10px;
+  font-size: 20px;
 }
 
 
@@ -173,10 +184,14 @@ body {
 
 /* Shift top controls closer to plot, cancel out excessive default padding --*/
 .xVUI-ctrl-panel {
-  margin-bottom: -20px;
+  position: relative;
+  margin-bottom: -30px;
+  z-index: 5;
 }
 
-.subgroups-panel {
+/*
+.subgroupVUI-panel {
+  z-index: 10;
   background-color: white;
   display: inline-block;
   width: 600px;
@@ -186,3 +201,4 @@ body {
   margin: 5px;
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 }
+--*/

@@ -9,7 +9,7 @@
 #' @export
 selectVUI <- function(id) {
   ns <- NS(id)
-  tags$div(class = "selectVUI", uiOutput(ns("select")))
+  tags$div(class = "selectVUI-panel input-panel theme-border", uiOutput(ns("select")))
 }
 
 #' Shiny module server for selecting columns from a data table

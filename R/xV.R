@@ -1,30 +1,44 @@
-#' Shiny module UI for presenting high dimensional data with other features in multi-column view
+#' Shiny module UI for cross-view of multidimensional data
 #'
-#' Integratively visualize a high-dimensional expression dataset with phenotype or clinical features
+#' Create UI to integratively visualize an expression dataset with phenotype or clinical features
 #'
-#' The UI is based on "visual spreadsheet" or "line up" view.
+#' The UI is based on a "visual spreadsheet" or "line up" view.
 #' The original use case presumes the high-dimensional data to be expression data, e.g.
-#' gene or protein expression matrices. See \code{\link{xVServer}} for details.
+#' gene or protein expression matrices. The module's primary task is simply
+#' to combine these two data types and \emph{visualize} them together
+#' with some basic clustering and filtering options; see \code{\link{xVServer}} for more details.
+#' However, after the initial visualization many users will want to
+#' \emph{analyze} the data, which is a task that is handled by other modules.
+#' The module can contain links to call these other modules,
+#' which are conditionally rendered in the control panel depending on the parameter \code{extension}.
+#' If the extension is rendered, \code{returndata} should be specified for the server function
+#' so that the module can pass the current data to these other modules.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param extension Whether to include UI with extra links for calling external modules. See details.
 #' @import shiny
 #' @export
-xVUI <- function(id) {
+xVUI <- function(id, extension = TRUE) {
   ns <- NS(id)
   tags$div(id = ns("xVUI"),
-           div(id = ns("xVUI-ctrl-panel"), class = "xVUI-ctrl-panel",
+           div(id = ns("xVUI-ctrl"), class = "xVUI-ctrl-panel",
                conditionalPanel(condition = "input.addlocal%2==1", ns = ns, class = "ui-inline",
                                 selectizeInput(ns("localselected"), label = NULL, choices = NULL, multiple = T,
                                     options = list(placeholder = "filter in this dataset"))
                 ),
                div(class = "ui-inline", actionLink(ns("addlocal"), "LOCAL FILTER", icon = icon("plus")),
                      title = "Initalize local filter for this dataset **that takes precedence over the global filter**"),
-               div(class = "ui-inline", actionLink(ns("rowcluster"), "ROW CLUSTER", icon = icon("sitemap", class = "fa-rotate-270")),
-                    title = "Cluster samples by **features currently in view**"),
                div(class = "ui-inline", "show most variable:"),
                div(class = "ui-inline", style = "margin-top: -10px;",
                    numericInput(ns("hivarprct"), label = NULL, value = 100, min = 1, max = 100, step = 5, width = 50)),
-               div(class = "ui-inline", icon("percent"))
+               div(class = "ui-inline", icon("percent")),
+               div(class = "ui-inline", actionLink(ns("rowcluster"), "ROW CLUSTER", icon = icon("sitemap", class = "fa-rotate-270")),
+                   title = "Cluster samples by **features currently in view**"),
+               if(extension)
+                 div(class = "tool-box ui-inline",
+                     span("Extensions:"),
+                     div(class = "ui-inline", actionLink(ns("contrast"), "CONTRAST GROUPS", icon = tags$i(class="fas fa-object-group")))
+                   )
           ),
           fluidRow(
             column(9, plotly::plotlyOutput(ns("heatmap"))),
@@ -33,15 +47,16 @@ xVUI <- function(id) {
   )
 }
 
-#' Shiny module server for presenting high dimensional data with other features in multi-column view
+#' Shiny module server for cross-view of multidimensional data
 #'
 #' Integratively visualize a high-dimensional expression dataset with phenotype or clinical features
+#' through clustering, selection, and cross-comparison
 #'
-#' The data objects here can be compared to \code{Biobase::ExpressionSet} objects,
-#' where \code{hdata} corresponds to a (transposed) \code{exprs} matrix in the \code{assayData} slot and
-#' \code{cdata} corresponds to the data in the \code{phenoData} slot.
+#' The data objects here can be compared to \code{Biobase::\link[Biobase]{ExpressionSet}} objects,
+#' where \code{hdata} corresponds to a (transposed) \code{exprs} matrix in the \code{assayData} slot
+#' and \code{cdata} corresponds to the data in the \code{phenoData} slot.
 #'
-#' The capabilities implemented are clustering (of samples by features only) and data subsetting of.
+#' The capabilities implemented are clustering (of samples by features only) and data subsetting.
 #' The data subsetting of expression data works through a local selection, which takes precedence
 #' when activated, or through whatever is passed into \code{selected}.
 #'
@@ -51,12 +66,14 @@ xVUI <- function(id) {
 #' @param key Name of key column for \code{cdata}, currently defaults to "ID".
 #' @param selected A reactive vector used to subset the features (cols) of \code{hdata}.
 #' @param height Height for data plots.
+#' @param returndata A reactive object that can be used to return the local version of data in this module.
 #' @import shiny
 #' @import magrittr
 #' @export
 xVServer <- function(id,
                      hdata, cdata = reactive(NULL), key = "ID",
-                     selected = reactive(NULL), height = 500) {
+                     selected = reactive(NULL), height = 500,
+                     returndata = NULL) {
 
   moduleServer(id, function(input, output, session) {
 
@@ -181,18 +198,23 @@ xVServer <- function(id,
                           list(y = list(1:nrow(z)), text = NULL),
                           list(xaxis.domain = c(0, 0), xaxis2.domain = c(0, 1), shapes = NULL),
                           0L)
-      localhdata(z)
+      localhdata(z) # sync matrix data
 
     }, ignoreInit = T) # on init, cplot ordered by matrixplot rather than matrixplot ordered by cdata()
 
+    localcdata <- reactive({
+      if(is.null(cdata())) return(NULL)
+      dtorder <- as.data.table(stats::setNames(list(rownames(localhdata())), key))
+      localdata <- merge(dtorder, cdata(), by = key, all.x = T, sort = FALSE)
+      localdata <- localdata[!duplicated(get(key))] # in case cdata() isn't well-cleaned and somehow contains dups
+      localdata
+    })
 
     # Plot product representing cdata(), which contains one to several plots of each var in subplot
     cplot <- reactive({
-      if(is.null(cdata())) return(NULL)
-      dtorder <- as.data.table(stats::setNames(list(rownames(localhdata())), key))
-      plotdata <- merge(dtorder, cdata(), by = key, all.x = T, sort = FALSE)
-      plotdata <- plotdata[!duplicated(get(key))] # in case cdata() isn't well-cleaned
-      y <- plotdata[[key]] %>% paste()
+      req(localcdata())
+      plotdata <- localcdata()
+      y <- plotdata[[key]] %>% paste() # should be character
       notID <- names(cdata()) != key
       vcat <- sapply(cdata(), function(v) class(v) == "character" || class(v) == "factor")
 
@@ -216,6 +238,11 @@ xVServer <- function(id,
 
     output$cplotly <- plotly::renderPlotly({
       cplot()
+    })
+
+    observeEvent(input$contrast, {
+      returndata$localhdata <- localhdata()
+      returndata$localcdata <- localcdata()
     })
 
   })
@@ -266,6 +293,8 @@ lineShapes <- function(cluster, horiz = TRUE) {
 
 # Simple plot of a vector of categorical variables
 # vt is the variable name used in plot title; vu is the un-subsetted vec; vx is the subsetted vec
+# Both vu and vx are required to keep color mapping of factors consistent across independent modules
+# without explicit manual custom scaling
 vcatplotly <- function(vt, vu, vx, y, height = NULL) {
   zdomain <- vu %>% factor() %>% levels()  # keep colors consistent across xVUIs
   z <- vx %>% factor(levels = zdomain) %>% as.integer() %>% as.matrix()

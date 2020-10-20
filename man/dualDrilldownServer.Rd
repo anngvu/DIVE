@@ -6,9 +6,10 @@
 \usage{
 dualDrilldownServer(
   id,
-  cdata,
+  cdata = reactive(NULL),
   colorby,
-  factorx = function(x) is.factor(cdata[[x]]),
+  factorx = function(x) is.factor(cdata()[[x]]),
+  ignorev = "ID",
   src1 = reactive(NULL),
   src2 = reactive(NULL)
 )
@@ -16,17 +17,21 @@ dualDrilldownServer(
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{cdata}{A data.table. This is a reactive to allow the component to be updated with a new table of data.}
+\item{cdata}{A \code{data.table} of the data. This is a reactive to allow the component to be updated with new data.}
 
-\item{colorby}{A named list where name matches the (factor) variable in cdata to use for color grouping.
-If there is a named vector, this is passed into scale_color_manual to be used for custom color mapping, e.g.
+\item{colorby}{A named list where name matches the (factor) variable in \code{cdata} to use for color grouping.
+If there is a named vector, this is passed into \code{scale_color_manual} to be used for custom color mapping, e.g.
 `list(MyGroupingVar = c(A = "red", B = "blue"))` (useful for enforcing a consistent/meaningful color scheme),
-or `list(MyGroupingVar = NULL)` if custom color scaling isn't necessary. See also details.}
+or use `list(MyGroupingVar = NULL)` if custom color scaling isn't necessary. See also details.}
 
 \item{factorx}{Optional, a function that returns a boolean for whether
 a variable should be plotted as factor when given the variable name.
 Useful when for some reason factor variables are numeric or character instead of already factor-encoded.
-By default, variables are merely checked using `base::is.factor`, which works when the data is already factor-encoded.}
+By default, variables are merely checked using \code{base::is.factor},
+which works when the data is already factor-encoded.}
+
+\item{ignorev}{A character vector of variables such as IDs to exclude from selection for plotting.
+Defaults to "ID".}
 
 \item{src1}{Reactive data from "source 1".}
 
@@ -40,14 +45,14 @@ The drilldown component is, at its simplest, a \code{selectInput} through which
 variables can be selected for adaptive visualization as a boxplot or scatterplot output
 (depending on whether one or two variables are selected, respectively).
 However, optional complexity can be added to the component by making it listen to
-two other sources -- there can be two independent higher-level components
+two other sources -- two independent higher-level components
 that can update this component's \code{selectInput},
 analogous to the poor drilldown having two bosses telling it what data they want reported.
 Thus the "dual" describes both how the drilldown renders in two different ways
 as well as being able to be controlled by up to two different sources.
-For this component the data requires a default factor grouping variable
-to be passed into the aesthetics. If there were no default factor grouping variable,
-when only one variable is selected we would not be able to generate the boxplot view.
-It should also be possible to specify multiple variables able to be used for grouping
+A default factor grouping variable is required and passed into the aesthetics.
+If there were no default factor grouping variable,
+it would be unclear how to generate the boxplot view when only one variable is selected.
+It should also be possible to specify multiple variables to be used for grouping
 (which the user can switch between), but this isn't implemented yet.
 }

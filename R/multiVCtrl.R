@@ -4,14 +4,14 @@
 #'
 #' Multiple high dimensional datasets can be displayed by calling separate instances of
 #' \code{\link{xVUI}} modules, with the contents typically laid out in row containers.
-#' This controller UI has three different ways to select and source the datasets:
+#' This controller UI has three different ways to source the datasets:
 #' \enumerate{
 #'   \item Selecting from available pre-processed datasets.
 #'   \item User-uploaded data.
 #'   \item A beta (least-supported) method of retrieving datasets from GEO.
 #' }
 #' For convenience and customization, it is possible make unavailable any of the three sourcing methods,
-#' e.g. hide the GEO method by not displaying the UI.
+#' e.g. hide the GEO sourcing option by not displaying the UI.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param menu Logical flag, whether to allow a menu for loading stored datasets.
@@ -24,7 +24,7 @@ multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE) {
            if(menu) div(class = "ui-inline",
                         selectizeInput(ns("dataset"), HTML("<strong>Available datasets</strong>"),
                                        choices = NULL, selected = NULL, multiple = T,
-                                       options = list(placeholder = "select one or more to view"))),
+                                       options = list(placeholder = "select to view"))),
            if(upload) div(class = "ui-inline", br(), actionButton(ns("upload"), "Upload my data")),
            if(GEO) div(class = "ui-inline", br(), actionButton(ns("getGEO"), HTML("Source from GEO <sup>beta</sup>")))
   )
@@ -119,8 +119,8 @@ multiVCtrlServer <- function(id,
     udata <- dataUploadServer("upload")
 
     observeEvent(input$upload, {
-      showModal(modalDialog(
-          dataUploadUI(session$ns("upload"), label = "<strong>Upload my data</strong>"),
+      showModal(modalDialog(title = "Upload my data",
+          dataUploadUI(session$ns("upload"), label = NULLL),
           includeMarkdown(informd),
           footer = modalButton("Cancel")
       ))

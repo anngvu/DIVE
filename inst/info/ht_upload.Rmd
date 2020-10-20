@@ -3,16 +3,14 @@ title: "Get GEO Module"
 output: html_document
 ---
 
-**What kind of data?**
+###### What kind of data?
 
-Currently, you can upload *high-throughput* _or_ *low-throughput clinical/experimental data*. In fact, doing both will get the most out of this tool.
+Currently, you can upload high-throughput _or_ low-throughput clinical/experimental data. In fact, doing both will get the most out of this tool.
 
-For high-throughput data we currently support gene expression, protein expression, or other expression data (e.g. metabolomics) that can be represented as a normalized expression/counts matrix. where columns contain case sample IDs and rows are preferably mapped to Entrez gene IDs. In the future we may be able to expand visualization capabilities to methylation data and others. When high-throughput data is uploaded successfully, you will be able to select it from the "Available high-throughput datasets" menu.
+For high-throughput data we currently support gene expression, protein expression, or other expression data (e.g. metabolomics) that can be represented as a normalized expression/counts matrix, where columns contain case sample IDs and rows are preferably mapped to Entrez gene IDs. In the future we may be able to expand visualization capabilities to methylation data and others. If high-throughput data is uploaded successfully, you will be able to select it from the **Available datasets** menu.
 
-For low-throughput clinical/experimental data, there should be a column named "ID" containing case sample IDs, and the other column(s) containining measurements. Whether you have uploaded high-throughput or low-throughput data will be inferred using the presence of the "ID" column. When low-throughput data is uploaded successfully, you will then be able to search for it from the "Clinical/Phenotype/Experimental variable(s)" menu.
+For clinical/experimental data, there should be a column named "ID" containing case sample IDs, and the other column(s) containining measurements. Whether you have uploaded high-throughput or low-throughput data will be inferred using the presence of the "ID" column. If low-throughput data is uploaded successfully, you will then be able to search for it from the **Phenotype/Experimental variable(s)** menu.
 
-Presumably the data are associated with nPOD cases, but we don't actually require all sample IDs to be nPOD IDs. Non-nPOD data can be uploaded as well for visualization and comparison. 
+###### Data confidentiality
 
-**Data confidentiality**
-
-This DOES NOT automatically save your data within our server.
+This *DOES NOT* automatically save your data.

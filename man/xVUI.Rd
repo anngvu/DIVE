@@ -2,18 +2,28 @@
 % Please edit documentation in R/xV.R
 \name{xVUI}
 \alias{xVUI}
-\title{Shiny module UI for presenting high dimensional data with other features in multi-column view}
+\title{Shiny module UI for cross-view of multidimensional data}
 \usage{
-xVUI(id)
+xVUI(id, extension = TRUE)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
+\item{extension}{Whether to include UI with extra links for calling external modules. See details.}
 }
 \description{
-Integratively visualize a high-dimensional expression dataset with phenotype or clinical features
+Create UI to integratively visualize an expression dataset with phenotype or clinical features
 }
 \details{
-The UI is based on "visual spreadsheet" or "line up" view.
+The UI is based on a "visual spreadsheet" or "line up" view.
 The original use case presumes the high-dimensional data to be expression data, e.g.
-gene or protein expression matrices. See \code{\link{xVServer}} for details.
+gene or protein expression matrices. The module's primary task is simply
+to combine these two data types and \emph{visualize} them together
+with some basic clustering and filtering options; see \code{\link{xVServer}} for more details.
+However, after the initial visualization many users will want to
+\emph{analyze} the data, which is a task that is handled by other modules.
+The module can contain links to call these other modules,
+which are conditionally rendered in the control panel depending on the parameter \code{extension}.
+If the extension is rendered, \code{returndata} should be specified for the server function
+so that the module can pass the current data to these other modules.
 }

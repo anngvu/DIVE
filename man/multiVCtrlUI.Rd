@@ -21,12 +21,12 @@ Shiny module UI for controlling multi-column views
 \details{
 Multiple high dimensional datasets can be displayed by calling separate instances of
 \code{\link{xVUI}} modules, with the contents typically laid out in row containers.
-This controller UI has three different ways to select and source the datasets:
+This controller UI has three different ways to source the datasets:
 \enumerate{
   \item Selecting from available pre-processed datasets.
   \item User-uploaded data.
   \item A beta (least-supported) method of retrieving datasets from GEO.
 }
 For convenience and customization, it is possible make unavailable any of the three sourcing methods,
-e.g. hide the GEO method by not displaying the UI.
+e.g. hide the GEO sourcing option by not displaying the UI.
 }

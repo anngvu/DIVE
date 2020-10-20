@@ -14,4 +14,4 @@ multiVUIR(ns, ...)
 \description{
 Shiny app launcher for multi-view module
 }
-\concept{multiVUI module functions}
+\concept{multiV module functions}

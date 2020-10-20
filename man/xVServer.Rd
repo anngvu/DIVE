@@ -2,7 +2,7 @@
 % Please edit documentation in R/xV.R
 \name{xVServer}
 \alias{xVServer}
-\title{Shiny module server for presenting high dimensional data with other features in multi-column view}
+\title{Shiny module server for cross-view of multidimensional data}
 \usage{
 xVServer(
   id,
@@ -10,7 +10,8 @@ xVServer(
   cdata = reactive(NULL),
   key = "ID",
   selected = reactive(NULL),
-  height = 500
+  height = 500,
+  returndata = NULL
 )
 }
 \arguments{
@@ -25,16 +26,19 @@ xVServer(
 \item{selected}{A reactive vector used to subset the features (cols) of \code{hdata}.}
 
 \item{height}{Height for data plots.}
+
+\item{returndata}{A reactive object that can be used to return the local version of data in this module.}
 }
 \description{
 Integratively visualize a high-dimensional expression dataset with phenotype or clinical features
+through clustering, selection, and cross-comparison
 }
 \details{
-The data objects here can be compared to \code{Biobase::ExpressionSet} objects,
-where \code{hdata} corresponds to a (transposed) \code{exprs} matrix in the \code{assayData} slot and
-\code{cdata} corresponds to the data in the \code{phenoData} slot.
+The data objects here can be compared to \code{Biobase::\link[Biobase]{ExpressionSet}} objects,
+where \code{hdata} corresponds to a (transposed) \code{exprs} matrix in the \code{assayData} slot
+and \code{cdata} corresponds to the data in the \code{phenoData} slot.
 
-The capabilities implemented are clustering (of samples by features only) and data subsetting of.
+The capabilities implemented are clustering (of samples by features only) and data subsetting.
 The data subsetting of expression data works through a local selection, which takes precedence
 when activated, or through whatever is passed into \code{selected}.
 }
