@@ -87,6 +87,21 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/MatchApp.html">MatchApp Module Overview</a>
+    </li>
+    <li>
+      <a href="../articles/MatrixApp.html">MatrixApp Module Overview</a>
+    </li>
+  </ul>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -114,11 +129,11 @@
 
     <pre class="usage"><span class='fu'>selectVServer</span>(
   <span class='kw'>id</span>,
-  data = <span class='fu'>reactive</span>({     <span class='kw'>NULL</span> }),
+  data = <span class='fu'>reactive</span>(<span class='kw'>NULL</span>),
   key = <span class='st'>"ID"</span>,
   label = <span class='fu'>HTML</span>(<span class='st'>"&lt;strong&gt;Phenotype/Experimental variable(s)&lt;/strong&gt;"</span>),
-  selected = <span class='fu'>reactive</span>({     <span class='kw'>NULL</span> }),
-  countby = <span class='fu'>reactive</span>({     <span class='kw'>NULL</span> }),
+  selected = <span class='fu'>reactive</span>(<span class='kw'>NULL</span>),
+  countby = <span class='fu'>reactive</span>(<span class='kw'>NULL</span>),
   maxitems = <span class='fl'>3</span>
 )</pre>
 
@@ -126,8 +141,12 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
+      <th>id</th>
+      <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
+    </tr>
+    <tr>
       <th>data</th>
-      <td><p>A reactive data.table. See details.</p></td>
+      <td><p>A reactive <code>data.table</code>. See details.</p></td>
     </tr>
     <tr>
       <th>key</th>
@@ -150,30 +169,26 @@ to generate counts in the select options. See details.</p></td>
       <th>maxitems</th>
       <td><p>Maximum number of items that can be selected. Defaults to 3.</p></td>
     </tr>
-    <tr>
-      <th>input, output, session</th>
-      <td><p>Standard <code>shiny</code> boilerplate.</p></td>
-    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>The subsetted data table.</p>
+    <p>A subsetted <code>data.table</code>.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>This is a subcomponent intended to serve under <code>multiVCtrl</code>
+    <p>This is a subcomponent intended to serve under <code><a href='multiVCtrlServer.html'>multiVCtrlServer</a></code>
 but should be generic enough to be integrated with other modules.
-When data is uploaded through <code>multiVCtrl</code>, it can be "high-throughput"
+When data is uploaded through <code><a href='multiVCtrlServer.html'>multiVCtrlServer</a></code>, it can be "high-throughput"
 or "low-throughput" type data, the latter typically as phenotype or clinical variables.
-This module handles changes in the table of the latter data type.
+This module handles the latter data type.
 When the user adds (uploads) new data columns, the selection updates to include these new options.
 When the user selects specific columns from the menu, a column-subsetted table is returned.
-The most recent modification involves adding parenthesized counts for each variable option,
+The most recent modification added parenthesized counts for each variable option,
 e.g. "phenotypeX (15)", calculated by intersections with a vector of IDs.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p>Other multiVUI module functions: 
-<code><a href='multiVUIR.html'>multiVUIR</a>()</code></p></div>
+    <div class='dont-index'><p>Other selectV module functions: 
+<code><a href='selectVUI.html'>selectVUI</a>()</code></p></div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -190,7 +205,7 @@ e.g. "phenotypeX (15)", calculated by intersections with a vector of IDs.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

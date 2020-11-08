@@ -3,25 +3,39 @@
 \docType{package}
 \name{DIVE}
 \alias{DIVE}
+\alias{{pkgname}-package}
 \title{DIVE: Data Integration and Visual Exploration}
 \description{
-The DIVE package implements an approach to integration and interactive visual exploration
-of biological datasets with shared samples.
-It includes Shiny modules that can be run as stand-alone apps or part of a larger application.
-\url{https://github.com/avucoh/DIVE}
+The DIVE package is an approach to integration and interactive visual exploration of linked datasets
+and implements Shiny modules that can be run as stand-alone apps or part of a larger application.
 }
-\section{Matching Module}{
+\seealso{
+\href{https://github.com/avucoh/DIVE}{Package GitHub}
+\subsection{Modules}{
+\subsection{Match module}{
 
 \code{\link{matchApp}}
 }
 
-\section{Matrix Mix Module}{
+\subsection{Matrix Module}{
 
 \code{\link{matrixApp}}
 }
 
-\section{MultiVUI Module}{
+\subsection{MultiV Module}{
 
 \code{\link{multiVUIR}}
 }
 
+\subsection{Data Helper Module}{
+
+\code{\link{dataHelperServer}}
+}
+
+}
+
+\subsection{Package options}{
+
+(TO-DO)
+}
+}

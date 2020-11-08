@@ -87,6 +87,21 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/MatchApp.html">MatchApp Module Overview</a>
+    </li>
+    <li>
+      <a href="../articles/MatrixApp.html">MatrixApp Module Overview</a>
+    </li>
+  </ul>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -112,7 +127,7 @@
     <p>Implement augmented select-filter interface for genes powered by <code>mygene</code></p>
     </div>
 
-    <pre class="usage"><span class='fu'>geneVServer</span>(<span class='kw'>id</span>, genes = <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>geneVServer</span>(<span class='kw'>id</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -120,10 +135,6 @@
     <tr>
       <th>id</th>
       <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
-    </tr>
-    <tr>
-      <th>genes</th>
-      <td><p>Gene choices for initialization in <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/selectInput.html'>selectizeInput</a></code>.</p></td>
     </tr>
     </table>
 
@@ -167,7 +178,7 @@ the user to make their selection? This implements three entryways:</p><ul>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

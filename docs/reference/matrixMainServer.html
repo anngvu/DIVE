@@ -87,6 +87,21 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/MatchApp.html">MatchApp Module Overview</a>
+    </li>
+    <li>
+      <a href="../articles/MatrixApp.html">MatrixApp Module Overview</a>
+    </li>
+  </ul>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -123,25 +138,26 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
+      <th>id</th>
+      <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
+    </tr>
+    <tr>
       <th>mdata</th>
-      <td><p>Reactive matrix data from <code>matrixCtrl</code>.</p></td>
+      <td><p>Reactive matrix data from <code><a href='matrixCtrlServer.html'>matrixCtrlServer</a></code>.</p></td>
     </tr>
     <tr>
       <th>colorscales</th>
       <td><p>Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named coloscale
 or custom colorscale used for heatmap. If not given, two default colorscale functions are used.</p></td>
     </tr>
-    <tr>
-      <th>input, output, session</th>
-      <td><p>Standard <code>shiny</code> boilerplate.</p></td>
-    </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>The module handles interactive display of a matrix linked to a scatterplot
-that accesses underlying data for a user-clicked cell. It works with <code>matrixCtrl</code>,
-which returns the data object. Generally, this module only handles visualization of a matrix
+that accesses underlying data for a user-clicked cell.
+It works with <code><a href='matrixCtrlServer.html'>matrixCtrlServer</a></code>, which returns the data object.
+Generally, this module only handles visualization of a matrix
 while the actual matrix generation can be handled by other modules that feed into it.
 For the drilldown component that displays underlying data points,
 the statistical data type (numeric vs. ordinal) matters and may require
@@ -162,7 +178,7 @@ specifying aesthetic parameters for best representation and consistency across m
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

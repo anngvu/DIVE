@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shiny module server for presenting high dimensional data with other features in multi-column view — xVServer • DIVE</title>
+<title>Shiny module server for cross-view of multidimensional data — xVServer • DIVE</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,9 @@
 
 
 
-<meta property="og:title" content="Shiny module server for presenting high dimensional data with other features in multi-column view — xVServer" />
-<meta property="og:description" content="Integratively visualize a high-dimensional expression dataset with phenotype or clinical features" />
+<meta property="og:title" content="Shiny module server for cross-view of multidimensional data — xVServer" />
+<meta property="og:description" content="Integratively visualize a high-dimensional expression dataset with phenotype or clinical features
+through clustering, corss-selection and cross-comparison" />
 
 
 
@@ -87,6 +88,21 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/MatchApp.html">MatchApp Module Overview</a>
+    </li>
+    <li>
+      <a href="../articles/MatrixApp.html">MatrixApp Module Overview</a>
+    </li>
+  </ul>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -103,13 +119,14 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Shiny module server for presenting high dimensional data with other features in multi-column view</h1>
+    <h1>Shiny module server for cross-view of multidimensional data</h1>
     
     <div class="hidden name"><code>xVServer.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Integratively visualize a high-dimensional expression dataset with phenotype or clinical features</p>
+    <p>Integratively visualize a high-dimensional expression dataset with phenotype or clinical features
+through clustering, corss-selection and cross-comparison</p>
     </div>
 
     <pre class="usage"><span class='fu'>xVServer</span>(
@@ -118,7 +135,8 @@
   cdata = <span class='fu'>reactive</span>(<span class='kw'>NULL</span>),
   key = <span class='st'>"ID"</span>,
   selected = <span class='fu'>reactive</span>(<span class='kw'>NULL</span>),
-  height = <span class='fl'>500</span>
+  height = <span class='fl'>500</span>,
+  returndata = <span class='kw'>NULL</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -148,14 +166,19 @@
       <th>height</th>
       <td><p>Height for data plots.</p></td>
     </tr>
+    <tr>
+      <th>returndata</th>
+      <td><p>A reactive object that can be used to return the local version of data in this module.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The data objects here can be compared to <code><a href='https://rdrr.io/pkg/Biobase/man/class.ExpressionSet.html'>Biobase::ExpressionSet</a></code> objects,
-where <code>hdata</code> corresponds to a (transposed) <code>exprs</code> matrix in the <code>assayData</code> slot and
-<code>cdata</code> corresponds to the data in the <code>phenoData</code> slot.</p>
-<p>The capabilities implemented are clustering (of samples by features only) and data subsetting of.
+    <p>The module is geared towards bioinformatics uses;
+the data objects here can be compared to <code>Biobase::<a href='https://rdrr.io/pkg/Biobase/man/class.ExpressionSet.html'>ExpressionSet</a></code> class object
+where <code>hdata</code> corresponds to a (transposed) <code>exprs</code> matrix in the <code>assayData</code> slot
+and <code>cdata</code> corresponds to the data in the <code>phenoData</code> slot.</p>
+<p>The capabilities implemented are clustering (of samples by features only) and data subsetting.
 The data subsetting of expression data works through a local selection, which takes precedence
 when activated, or through whatever is passed into <code>selected</code>.</p>
 
@@ -174,7 +197,7 @@ when activated, or through whatever is passed into <code>selected</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

@@ -88,6 +88,21 @@ get data from a specified source." />
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/MatchApp.html">MatchApp Module Overview</a>
+    </li>
+    <li>
+      <a href="../articles/MatrixApp.html">MatrixApp Module Overview</a>
+    </li>
+  </ul>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -120,6 +135,10 @@ get data from a specified source.</p>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
+      <th>id</th>
+      <td><p>Character ID for specifying namespace, see <code>shiny::<a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>NS</a></code>.</p></td>
+    </tr>
+    <tr>
       <th>sources</th>
       <td><p>A vector of source paths matching the order of labels given in <code><a href='getLinkInput.html'>getLinkInput</a></code>.</p></td>
     </tr>
@@ -130,10 +149,6 @@ get data from a specified source.</p>
     <tr>
       <th>...</th>
       <td><p>Additional arguments for</p><pre><span class='kw'>readfun</span></pre><p>.</p></td>
-    </tr>
-    <tr>
-      <th>input, output, session</th>
-      <td><p>Standard <code>shiny</code> boilerplate.</p></td>
     </tr>
     </table>
 
@@ -162,7 +177,7 @@ that can be handled with using the appropriate <code>readfun</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

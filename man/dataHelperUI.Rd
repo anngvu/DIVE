@@ -4,7 +4,11 @@
 \alias{dataHelperUI}
 \title{Shiny app UI for simple interactions between two relational tables}
 \usage{
-dataHelperUI(id, CSS = "app.css", theme = "paper")
+dataHelperUI(
+  id,
+  CSS = system.file("www/", "app.css", package = "DIVE"),
+  theme = "paper"
+)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}

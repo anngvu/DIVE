@@ -4,14 +4,7 @@
 \alias{multiVServer}
 \title{Shiny app server module for multi-views}
 \usage{
-multiVServer(
-  id,
-  hdlist = NULL,
-  choices = NULL,
-  cdata = NULL,
-  preselect = NULL,
-  genes = NULL
-)
+multiVServer(id, hdlist = NULL, choices = NULL, cdata = NULL, preselect = NULL)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
@@ -24,9 +17,8 @@ one can pass in a list formatted accordingly for \code{shiny::\link[shiny]{selec
 
 \item{cdata}{A \code{data.table} of characteristics data, commonly phenotype or clinical data.}
 
-\item{preselect}{Optional, pre-selected phenotype or clinical variables from \code{cdata}.}
-
-\item{genes}{Gene choices for initialization in \code{shiny::\link[shiny]{selectizeInput}}.}
+\item{preselect}{Optional, pre-selected phenotype or clinical variables from \code{cdata}.
+If is \code{NULL} (not recommended for most cases), the user can dynamically render as many datasets views as they can source.}
 }
 \description{
 Assemble various module components into a working one-page application for expression data

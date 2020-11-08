@@ -24,7 +24,7 @@ sideFilterUI(
 
 \item{selected}{The initial selection of the input, defaulting to the first of \code{values}.}
 
-\item{conditional}{Optional. If not `NULL`, wrap element in a conditional panel with inital display given by the boolean value.}
+\item{conditional}{Optional, if not \code{NULL}, wrap element in a conditional panel with inital display given by the boolean value.}
 
 \item{ns}{Function for namespacing components, i.e. from `session$ns`.}
 

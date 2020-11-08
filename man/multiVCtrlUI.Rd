@@ -2,9 +2,9 @@
 % Please edit documentation in R/multiVCtrl.R
 \name{multiVCtrlUI}
 \alias{multiVCtrlUI}
-\title{Shiny module UI for controlling multi-column views}
+\title{Shiny module UI for controlling multi-dataset views}
 \usage{
-multiVCtrlUI(id, menu = TRUE, upload = TRUE, GEO = TRUE)
+multiVCtrlUI(id, menu = TRUE, upload = TRUE, GEO = TRUE, maxItems = 3L)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
@@ -14,19 +14,22 @@ multiVCtrlUI(id, menu = TRUE, upload = TRUE, GEO = TRUE)
 \item{upload}{Logical flag, whether to allow data upload.}
 
 \item{GEO}{Logical flag, whether to allow pulling data from GEO (beta).}
+
+\item{maxItems}{Integer representing the max number of tracks that can be selected (displayed).}
 }
 \description{
-Shiny module UI for controlling multi-column views
+UI for sourcing and selecting datasets
 }
 \details{
+Controls data views geared towards bioinformatics data.
 Multiple high dimensional datasets can be displayed by calling separate instances of
 \code{\link{xVUI}} modules, with the contents typically laid out in row containers.
-This controller UI has three different ways to source the datasets:
+The controller UI has three different ways to source the datasets:
 \enumerate{
   \item Selecting from available pre-processed datasets.
   \item User-uploaded data.
   \item A beta (least-supported) method of retrieving datasets from GEO.
 }
-For convenience and customization, it is possible make unavailable any of the three sourcing methods,
+For customization, it is possible make unavailable any of the three sourcing methods,
 e.g. hide the GEO sourcing option by not displaying the UI.
 }

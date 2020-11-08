@@ -4,10 +4,12 @@
 \alias{xVUI}
 \title{Shiny module UI for cross-view of multidimensional data}
 \usage{
-xVUI(id, extension = TRUE)
+xVUI(id, title = NULL, extension = TRUE)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
+
+\item{title}{Optional title or other info displayed at the top, usually the dataset title.}
 
 \item{extension}{Whether to include UI with extra links for calling external modules. See details.}
 }

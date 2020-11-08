@@ -36,3 +36,4 @@ this function can be replaced as long as the new one uses the same return struct
 For some cases, if it is desired that we return data even if there are issues,
 use \code{result = data} and rely on the \code{message} output.
 }
+\keyword{internal}

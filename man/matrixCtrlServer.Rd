@@ -14,8 +14,7 @@ matrixCtrlServer(
   metadata = NULL,
   vkey = NULL,
   newdata = reactive({ }),
-  widgetmod = NULL,
-  widgetopt = NULL
+  mfilter = NULL
 )
 }
 \arguments{
@@ -27,7 +26,7 @@ matrixCtrlServer(
 
 \item{P}{A matrix of the same dimensions as `M` to be used as a filter layer, e.g. p-values.}
 
-\item{cutoffP}{A cutoff value for `P` to be used as initial default for filtering.}
+\item{cutoffP}{A cutoff value for `P` to be used as default for filtering.}
 
 \item{cdata}{The data used for generating the matrix,
 necessary for allowing user-uploaded data for mutable `M`.}
@@ -42,9 +41,7 @@ If metadata is not given, should be something like "Name" because the only selec
 the \code{\link{dataUploadServer}} module or from some other component,
 and which is suitable for merging with \preformatted{cdata} to calculate a new `M`.}
 
-\item{widgetmod}{Not currently implemented. Optional widget extension module.}
-
-\item{widgetopt}{Not currently implemented. Options for `widgetmod`.}
+\item{mfilter}{Optional reactive object for storing filter values that need to be communicated to other modules.}
 }
 \value{
 Reactive values in \code{mstate} object that keeps track of visible matrices

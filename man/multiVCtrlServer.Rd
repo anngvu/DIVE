@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiVCtrl.R
 \name{multiVCtrlServer}
 \alias{multiVCtrlServer}
-\title{Shiny module server for controlling multi-column views}
+\title{Shiny module server for controlling multi-dataset views}
 \usage{
 multiVCtrlServer(
   id,
@@ -10,8 +10,8 @@ multiVCtrlServer(
   choices = names(hdlist),
   cdata,
   key = "ID",
-  checkFun = NULL,
   preselect = NULL,
+  checkFun = NULL,
   informd = system.file("info/ht_upload.Rmd", package = "DIVE")
 )
 }
@@ -28,10 +28,11 @@ one can pass in a list formatted accordingly for \code{shiny::\link[shiny]{selec
 
 \item{key}{Name of column that contains IDs in \code{cdata} matching sample IDs in \code{hdlist} datasets. Defaults to "ID".}
 
+\item{preselect}{Optional, pre-selected phenotype or clinical variables from \code{cdata}.
+If is \code{NULL} (not recommended for most cases), the user can dynamically render as many datasets views as they can source.}
+
 \item{checkFun}{Optional, a custom check function for an additional layer of checking/modifying uploaded data.
 It should return a list containing message and result (result should be \code{NULL} when data fails checks).}
-
-\item{preselect}{Optional, pre-selected phenotype or clinical variables from \code{cdata}.}
 
 \item{informd}{Relative path to the Rmarkdown file, whose contents will be displayed in the modal.}
 }
@@ -41,7 +42,7 @@ for the parameter \preformatted{hdata} of the \code{\link{multiVServer}} module,
 as well as parameters for \code{\link{geneVServer}} and \code{\link{selectVServer}}.
 }
 \description{
-Control hub that provides data and parameters for \code{\link{xVServer}},
+Implement control hub logic that provides data and parameters for \code{\link{xVServer}},
 \code{\link{geneVServer}} and \code{\link{selectVServer}}
 }
 \details{

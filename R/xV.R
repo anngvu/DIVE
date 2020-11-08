@@ -53,7 +53,7 @@ xVUI <- function(id, title  = NULL, extension = TRUE) {
 #' Shiny module server for cross-view of multidimensional data
 #'
 #' Integratively visualize a high-dimensional expression dataset with phenotype or clinical features
-#' through clustering, corss-selection and cross-comparison
+#' through clustering, cross-selection and cross-comparison
 #'
 #' The module is geared towards bioinformatics uses;
 #' the data objects here can be compared to \code{Biobase::\link[Biobase]{ExpressionSet}} class object
@@ -61,8 +61,11 @@ xVUI <- function(id, title  = NULL, extension = TRUE) {
 #' and \code{cdata} corresponds to the data in the \code{phenoData} slot.
 #'
 #' The capabilities implemented are clustering (of samples by features only) and data subsetting.
-#' The data subsetting of expression data works through a local selection, which takes precedence
-#' when activated, or through whatever is passed into \code{selected}.
+#' The data subsetting of expression data works through a "local" selection,
+#' which is simply created from column names of the \code{hdata} data matrix,
+#' or through an alternative/global selection, which is whatever is passed into \code{selected}.
+#' For alternative/global selection to work, the data must have an alternative index; see \code{\link{xVExprs}}.
+#' Local selection takes precedences over alternative/global selection.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param hdata A numeric matrix with row and column names for heatmap representation.

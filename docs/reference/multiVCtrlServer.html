@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shiny module server for controlling multi-column views — multiVCtrlServer • DIVE</title>
+<title>Shiny module server for controlling multi-dataset views — multiVCtrlServer • DIVE</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,9 @@
 
 
 
-<meta property="og:title" content="Shiny module server for controlling multi-column views — multiVCtrlServer" />
-<meta property="og:description" content="Control hub that provides data and parameters for xVServer,
-geneVServer and selectServer" />
+<meta property="og:title" content="Shiny module server for controlling multi-dataset views — multiVCtrlServer" />
+<meta property="og:description" content="Implement control hub logic that provides data and parameters for xVServer,
+geneVServer and selectVServer" />
 
 
 
@@ -88,6 +88,21 @@ geneVServer and selectServer" />
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/MatchApp.html">MatchApp Module Overview</a>
+    </li>
+    <li>
+      <a href="../articles/MatrixApp.html">MatrixApp Module Overview</a>
+    </li>
+  </ul>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -104,14 +119,14 @@ geneVServer and selectServer" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Shiny module server for controlling multi-column views</h1>
+    <h1>Shiny module server for controlling multi-dataset views</h1>
     
     <div class="hidden name"><code>multiVCtrlServer.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Control hub that provides data and parameters for <code><a href='xVServer.html'>xVServer</a></code>,
-<code><a href='geneVServer.html'>geneVServer</a></code> and <code>selectServer</code></p>
+    <p>Implement control hub logic that provides data and parameters for <code><a href='xVServer.html'>xVServer</a></code>,
+<code><a href='geneVServer.html'>geneVServer</a></code> and <code><a href='selectVServer.html'>selectVServer</a></code></p>
     </div>
 
     <pre class="usage"><span class='fu'>multiVCtrlServer</span>(
@@ -122,7 +137,7 @@ geneVServer and selectServer" />
   key = <span class='st'>"ID"</span>,
   checkFun = <span class='kw'>NULL</span>,
   preselect = <span class='kw'>NULL</span>,
-  infoRmd = <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"help/ht_upload.Rmd"</span>, package = <span class='st'>"DIVE"</span>)
+  informd = <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"info/ht_upload.Rmd"</span>, package = <span class='st'>"DIVE"</span>)
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -159,12 +174,17 @@ It should return a list containing message and result (result should be <code>NU
       <th>preselect</th>
       <td><p>Optional, pre-selected phenotype or clinical variables from <code>cdata</code>.</p></td>
     </tr>
+    <tr>
+      <th>informd</th>
+      <td><p>Relative path to the Rmarkdown file, whose contents will be displayed in the modal.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A reactive values list containing the data matrix for the parameter</p><pre><span class='kw'>hdata</span></pre><p>of the <code>multiV</code> module,
-as well as parameters for <code>geneV</code> and <code>selectV</code>.</p>
+    <p>A reactive values list containing the data matrix
+for the parameter</p><pre><span class='kw'>hdata</span></pre><p>of the <code><a href='multiVServer.html'>multiVServer</a></code> module,
+as well as parameters for <code><a href='geneVServer.html'>geneVServer</a></code> and <code><a href='selectVServer.html'>selectVServer</a></code>.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>The server logic handles sourcing of large expression datasets with three different methods:</p><ol>
@@ -191,7 +211,7 @@ using a mutable version of <code>cdata</code> that appends user uploaded data.</
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

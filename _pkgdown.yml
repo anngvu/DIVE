@@ -3,40 +3,43 @@ template:
   params:
     bootswatch: flatly
 reference:
-- title: "matrixApp"
-  desc: "Module functions for composing matrixApp"
+- title: matrixApp
+  desc: Module functions for composing matrixApp
 - contents:
   - starts_with("matrix")
   - starts_with("dualDrilldown")
-- title: "matchApp"
-  desc: "Module functions for composing matchApp"
+- title: matchApp
+  desc: Module functions for composing matchApp
 - contents:
   - starts_with("match")
   - starts_with("dataSubset")
   - starts_with("customDataset")
 - contents:
-- title: "multiVApp"
-  desc: "Module functions for composing multiVApp"
+- title: multiVApp
+  desc: Module functions and classes for composing multiVApp
 - contents:
   - starts_with("multiV")
   - ends_with("VUI")
   - ends_with("VServer")
-- title: "dataHelper"
-  desc: "Module functions for composing dataHelperApp"
+  - xVExprs
+- title: dataHelper
+  desc: Module functions for composing dataHelperApp
 - contents:
   - starts_with("dataHelper")
-- title: "Common-use components"
-  desc: "Building block components typically extended by something else, part of multiple things"
+- title: Common-use components
+  desc: Building block components typically extended by something else, part of multiple things
 - contents:
   - starts_with("dataUpload")
   - starts_with("getLink")
   - starts_with("info")
   - starts_with("meh")
-  - consortUI
-- title: "Internal functions"
-  desc: "Important internal functions with no associated UI"
+  - starts_with("consort")
+  - sideFilterUI
+- title: Other functions
+  desc: Functions of developer interest for customization and behavior
 - contents:
-  - starts_with("check")
-  - data2cor
+  - colorscale_heatmap_custom
+  - dev_mode
+  - filter4j
 
 

@@ -7,7 +7,7 @@
 matrixAsNetworkServer(
   id,
   mdata,
-  M,
+  mfilter,
   background = NULL,
   .nodes = NULL,
   .edges = NULL,
@@ -21,7 +21,7 @@ matrixAsNetworkServer(
 
 \item{mdata}{Reactive matrix data from \code{\link{matrixCtrlServer}}.}
 
-\item{M}{Full matrix from which `mdata` originates.}
+\item{mfilter}{Reactive filter values from \code{\link{matrixCtrlServer}}.}
 
 \item{background}{Optional background color for network graph.}
 

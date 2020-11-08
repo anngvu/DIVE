@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shiny module UI for controlling multi-column views — multiVCtrlUI • DIVE</title>
+<title>Shiny module UI for controlling multi-dataset views — multiVCtrlUI • DIVE</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Shiny module UI for controlling multi-column views — multiVCtrlUI" />
-<meta property="og:description" content="Shiny module UI for controlling multi-column views" />
+<meta property="og:title" content="Shiny module UI for controlling multi-dataset views — multiVCtrlUI" />
+<meta property="og:description" content="UI for sourcing and selecting datasets" />
 
 
 
@@ -87,6 +87,21 @@
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/MatchApp.html">MatchApp Module Overview</a>
+    </li>
+    <li>
+      <a href="../articles/MatrixApp.html">MatrixApp Module Overview</a>
+    </li>
+  </ul>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -103,13 +118,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Shiny module UI for controlling multi-column views</h1>
+    <h1>Shiny module UI for controlling multi-dataset views</h1>
     
     <div class="hidden name"><code>multiVCtrlUI.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Shiny module UI for controlling multi-column views</p>
+    <p>UI for sourcing and selecting datasets</p>
     </div>
 
     <pre class="usage"><span class='fu'>multiVCtrlUI</span>(<span class='kw'>id</span>, menu = <span class='fl'>TRUE</span>, upload = <span class='fl'>TRUE</span>, GEO = <span class='fl'>TRUE</span>)</pre>
@@ -137,14 +152,15 @@
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Multiple high dimensional datasets can be displayed by calling separate instances of
+    <p>This is geared towards bioinformatics data.
+Multiple high dimensional datasets can be displayed by calling separate instances of
 <code><a href='xVUI.html'>xVUI</a></code> modules, with the contents typically laid out in row containers.
-This controller UI has three different ways to select and source the datasets:</p><ol>
+The controller UI has three different ways to source the datasets:</p><ol>
 <li><p>Selecting from available pre-processed datasets.</p></li>
 <li><p>User-uploaded data.</p></li>
 <li><p>A beta (least-supported) method of retrieving datasets from GEO.</p></li>
 </ol><p>For convenience and customization, it is possible make unavailable any of the three sourcing methods,
-e.g. hide the GEO method by not displaying the UI.</p>
+e.g. hide the GEO sourcing option by not displaying the UI.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -161,7 +177,7 @@ e.g. hide the GEO method by not displaying the UI.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

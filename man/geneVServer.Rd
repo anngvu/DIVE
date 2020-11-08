@@ -4,12 +4,10 @@
 \alias{geneVServer}
 \title{Shiny module server for select-filter of genes or gene products}
 \usage{
-geneVServer(id, genes = NULL)
+geneVServer(id)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
-
-\item{genes}{Gene choices for initialization in \code{shiny::\link[shiny]{selectizeInput}}.}
 }
 \value{
 A vector of standard gene symbols.
