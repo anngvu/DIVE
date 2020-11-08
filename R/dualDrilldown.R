@@ -9,11 +9,10 @@ dualDrilldownUI <- function(id) {
   ns <- NS(id)
   tags$div(class = "dualDrilldown", id = ns("dualDrilldown"),
            tags$script(sprintf('$("#%s").draggable({ start: function(event, ui) {
-                                     console.log("moving to:" + event.pageY + " " + event.pageX);
-                                     $(this).css({ position: "absolute", top: event.pageY + "px", left: event.pageX + "px"});
+                                     $(this).css({ position: "absolute" });
                                      window.dispatchEvent(new Event("resize"));
                                     }
-                                   });', ns("dualDrilldown"))),
+                                   }).css({ position: "" });', ns("dualDrilldown"))), # https://bugs.jqueryui.com/ticket/9388
            selectizeInput(ns("drilldown"), "Drill down to data for", width = "500px",
                           choices = "", selected = "",
                           options = list(maxItems = 2, placeholder = "select variable(s)")),
