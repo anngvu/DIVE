@@ -35,9 +35,9 @@ dataUploadUI <- function(id, ...) {
                tags$div(id = ns("main"),
                         tags$div(class = "ui-inline",
                                  if(length(list(...))) fileInput(ns("upload"), ...) else
-                                 fileInput(ns("upload"), HTML("<strong>Upload data to compare</strong>"),
+                                 fileInput(ns("upload"), HTML("<strong>Upload custom data</strong>"),
                                            accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv"),
-                                           buttonLabel = "Data", placeholder = "  no file selected", width = 275))
+                                           buttonLabel = "Data", placeholder = "  no file selected", width = 250))
                         )
               ),
           tags$div(class = "ui-inline", uiOutput(ns("info")))
