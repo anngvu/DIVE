@@ -17,9 +17,8 @@ matrixCtrlUI <- function(id, minN = 5) {
            div(class = "ui-inline", conditionalPanel("input.optrow != ''", ns = ns,
                div(class = "ui-inline", selectInput(ns("optcolgroup"), "Filter type", choices = "", width = "120px")),
                div(class = "ui-inline", selectizeInput(ns("optcol"), "Column (to)", choices = "", multiple = T, width = "400px"))
-           )),
-           uiOutput(ns("usewidget"))
-  )
+           ))
+           )
 }
 
 #' Shiny module server functions to generate filter UI for interactive matrix
@@ -47,7 +46,7 @@ matrixCtrlUI <- function(id, minN = 5) {
 #' @param M A data matrix, e.g. a correlation matrix, which must have row and column names.
 #' @param N A matrix of the same dimensions as `M` to be used as a filter layer, e.g. sample size.
 #' @param P A matrix of the same dimensions as `M` to be used as a filter layer, e.g. p-values.
-#' @param cutoffP A cutoff value for `P` to be used as initial default for filtering.
+#' @param cutoffP A cutoff value for `P` to be used as default for filtering.
 #' @param cdata The data used for generating the matrix,
 #' necessary for allowing user-uploaded data for mutable `M`.
 #' @param metadata Optional, a `data.table` with different types of metadata/annotation to be used as filters.
@@ -57,21 +56,29 @@ matrixCtrlUI <- function(id, minN = 5) {
 #' @param newdata Optional, reactive data such as a user upload passed in by
 #' the \code{\link{dataUploadServer}} module or from some other component,
 #' and which is suitable for merging with \preformatted{cdata} to calculate a new `M`.
-#' @param widgetmod Not currently implemented. Optional widget extension module.
-#' @param widgetopt Not currently implemented. Options for `widgetmod`.
+#' @param mfilter Optional reactive object for storing filter values that need to be communicated to other modules.
 #' @return Reactive values in \code{mstate} object that keeps track of visible matrices
 #' and selected metadata and is used by the associated plotting module.
 #' @export
 matrixCtrlServer <- function(id,
-                             M = NULL, N = NULL, P = NULL, cutoffP = 0.05,
+                             M = NULL, N = NULL, P = NULL,
+                             cutoffP = 0.05,
                              cdata = NULL, metadata = NULL, vkey = NULL,
-                             newdata = reactive({ }),
-                             widgetmod = NULL, widgetopt = NULL) {
+                             newdata = reactive({}),
+                             mfilter = NULL) {
 
   moduleServer(id, function(input, output, session) {
 
     mstate <- reactiveValues(M = M, N = N, P = P, cdata = cdata, newdata = NULL, rowmeta = NULL, colmeta = NULL, filM = M)
     request <- reactiveValues(optrowgroup = NULL, optrow = NULL)
+
+    # Some applications need filter values to be passed on in addition to mstate values
+    obs_filter <- observe({
+      mfilter$N <- input$minN
+      mfilter$P <- if(input$cutoffP) cutoffP else NULL
+    }, suspended = T)
+
+    if(!is.null(mfilter)) obs_filter$resume()
 
     #-- Initialize UI --------------------------------------------------------------------------------------------------#
 
@@ -91,6 +98,7 @@ matrixCtrlServer <- function(id,
     #-- URL parameter strings ----------------------------------------------------------------------------------------#
 
     # Handles initiating a view with URL parameter string
+    # URL query is ?param1=value1&param2=value2, where param1 is a group in optrowgroup and param2 is valid selection
     observe({
       query <- parseQueryString(session$clientData$url_search)
       for(nm in names(query)) {
@@ -102,6 +110,7 @@ matrixCtrlServer <- function(id,
     }, priority = 100)
 
     # Update selected optrowgroup when using URL parameter string; has no effect if specified optrowgroup isn't valid
+    # request$optrow update is handled by input$optrowgroup observers so isn't handled here
     observeEvent(request$optrowgroup, {
       updateSelectInput(session, "optrowgroup", selected = request$optrowgroup)
     }, ignoreInit = TRUE)
@@ -110,7 +119,8 @@ matrixCtrlServer <- function(id,
 
     # Return a filtered matrix (filM)
     filterUpdate <- function(M = mstate$M, N = mstate$N, P = mstate$P,
-                             minN, cutoffP = NULL, optrows = rownames(M), optcols = colnames(M)) {
+                             minN, cutoffP = NULL,
+                             optrows = rownames(M), optcols = colnames(M)) {
       m <- M[optrows, optcols, drop = F]
       n <- N[optrows, optcols, drop = F]
       m[n < minN] <- NA # gray out entries in M that does not meet minN
@@ -152,9 +162,9 @@ matrixCtrlServer <- function(id,
     # Updating visible matrix rows according to selected row opt
     observeEvent(input$optrow, {
       if(!length(input$optrow)) {
-        mstate$filM <- mstate$M # reset
+        mstate$filM <- filterUpdate(minN = input$minN, cutoffP = if(input$cutoffP) cutoffP) # mstate$M
         mstate$rowmeta <- mstate$colmeta <- NULL
-        updateNumericInput(session, "minN", value = 5)
+        # updateNumericInput(session, "minN", value = 5) # clearing selection should not reset other filters
       } else {
         optrows <- metArrange(input$optrowgroup, input$optrow)
         mstate$filM <- filterUpdate(minN = input$minN, cutoffP = if(input$cutoffP) cutoffP, optrows = optrows[[1]])
@@ -242,26 +252,6 @@ matrixCtrlServer <- function(id,
       }
     }, ignoreInit = T, ignoreNULL = F)
 
-
-    # -- Misc widget -------------------------------------------------------------------------------------------------#
-
-    # Show widget when widget-associated optrowgroup is selected
-    # output$usewidget <- renderUI({
-    #   if(input$optrowgroup == widgetopt) {
-    #     absolutePanel(id = "cellpackpanel", draggable = T, left = 300,
-    #                   cellPackUI(session$ns("widget")))
-    #   }
-    # })
-    #
-    # if(!is.null(widgetmod)) {
-    #   callModule(widgetmod, "widget")
-    # }
-
-    # Update options when input is given via widget
-    # observeEvent(widget(), {
-    #   selected <- c(isolate(input$optrow), widget())
-    #   updateSelectizeInput(session, "optrow", choices = optrow(), selected = selected)
-    # })
 
     # -- Bookmarking ------------------------------------------------------------------------------------------------#
 
