@@ -9,7 +9,7 @@
 #' @param theme Optional, name of theme for \code{shinythemes}.
 #' @import shiny
 #' @export
-dataHelperUI <- function(id, CSS = "app.css", theme = "paper") {
+dataHelperUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"), theme = "paper") {
 
   ns <- NS(id)
   fluidPage(theme = shinythemes::shinytheme(theme),
@@ -18,11 +18,19 @@ dataHelperUI <- function(id, CSS = "app.css", theme = "paper") {
               column(12,
                      div(class = "ui-inline",
                          # Filter panel
-                         conditionalPanel("input.show % 2 == 0", ns = ns, class = "ui-inline",
-                           div(class ="ui-inline card-panel data-helper-filter",
-                               uiOutput(ns("lhfilter"))),
-                           icon("arrow-right", "fa-3x")
-                         )
+                       div(class ="ui-inline card-panel data-helper-filter", style = "width: 280px",
+                           actionLink(ns("uploadactive"), label = "Use ID batch lookup",
+                                      title = "switch between direct ID loookups or filter selection"),
+                           hr(),
+                           conditionalPanel("input.uploadactive % 2 == 0", ns = ns, class = "ui-inline",
+                             filterPanelUI(ns("lh"))
+                           ),
+
+                          conditionalPanel("input.uploadactive % 2 == 1", ns = ns,
+                            helpText("Use a .txt file with one ID per line"),
+                            dataUploadUI(ns("loadID"), label = NULL, buttonLabel = icon("upload"), width = "170px")
+                          )),
+                       icon("arrow-right", "fa-3x")
                       ),
 
                      # Left-hand panel
@@ -30,21 +38,15 @@ dataHelperUI <- function(id, CSS = "app.css", theme = "paper") {
                          div(class ="ui-inline",
                            selectizeInput(ns("lhselect"), label = NULL, choices = "", multiple = TRUE, width = "100%",
                                           options = list(placeholder = "no results")),
-                           verbatimTextOutput(ns("lhsummary")),
-                           actionLink(ns("show"), label = "Upload ID list",
-                                      title = "useful for custom lookup of a large number of IDs"),
-                           conditionalPanel("input.show % 2 == 1", ns = ns,
-                                            helpText("Use a .txt file with one ID per line"),
-                                            dataUploadUI(ns("loadID"), label = NULL, buttonLabel = icon("upload"), width = "100%")
-                           ), br(),
-                           downloadLink(ns("saveID"), "Export subset to file")
+                           textOutput(ns("lhsummary")),
+                           downloadLink(ns("saveID"), "Save records to file")
                          ),
                      ),
                      div(class ="ui-inline", actionLink(ns("right2left"), label = NULL, icon = icon("arrow-right", "fa-3x"),
                                                         title = "reverse the direction of search")),
 
                      # Right-hand panel
-                     div(class = "ui-inline card-panel", icon("folder", "fa-2x"), style = "width: 50vw",
+                     div(class = "ui-inline card-panel", icon("folder", "fa-2x"), style = "width: 45vw",
                          selectizeInput(ns("rhselect"), label = NULL, choices = "", multiple = TRUE, width = "100%"),
                          uiOutput(ns("rhtableopts")),
                          DT::DTOutput(ns("rhtable"))
@@ -95,15 +97,6 @@ dataHelperServer <- function(id,
                            options = list(placeholder = "no results"))
 
 
-      # Each filter col will have an input component to implement filtering
-      filtercols <- names(lhdata)[names(lhdata) != lhdatakey]
-      # Not all filter cols have to be used; it may be easier for user to be able to ignore certain ones
-      switchfiltercols <- sapply(filtercols, function(x) paste("usefilter", gsub(".", "", x, fixed = T), sep = "_"))
-      activefiltercols <- reactive({
-        active <- unlist(sapply(switchfiltercols, function(x) input[[x]]))
-        if(is.null(active) || all(active == F)) return(NULL) else filtercols[active]
-      })
-
       # Convert links for display
       for(col in names(rhdata)) {
         if(any(grepl("^http:", rhdata[[col]]))) {
@@ -112,67 +105,66 @@ dataHelperServer <- function(id,
         }
       }
 
+      # Input ID list option -------------------------------------------------------------#
       uploadedIDs <- dataUploadServer("loadID", asDT = F, removable = T)
 
       observeEvent(uploadedIDs(), {
         updateSelectizeInput(session, "lhselect", selected = uploadedIDs())
       }, ignoreNULL = F, ignoreInit = TRUE)
 
+      # Filter selection option ----------------------------------------------------------#
+      filteredIDs <- filterPanelServer("lh", dt = lhdata, dtkey = lhdatakey, filterconf = filterconf)
 
-      # Render filtercols inputs
-      output$lhfilter <- renderUI({
-        uilist <- lapply(filtercols,
-                         function(col) sideFilterUI(col, lhdata[[col]],
-                                                    filterconf[[col]]$input,
-                                                    filterconf[[col]]$selected,
-                                                    ns = session$ns,
-                                                    conditional = filterconf[[col]]$conditional))
-        tagList(uilist)
+      observeEvent(filteredIDs(), {
+        updateSelectizeInput(session, "lhselect", selected = filteredIDs())
       })
 
-
-      # Process filtercols inputs
-      obs_filters <- observe({
-        if(is.null(activefiltercols())) {
-          updateSelectizeInput(session, "lhselect", selected = "")
+      # Apply filter selection when switching back from upload IDs
+      observeEvent(input$uploadactive, {
+        if(input$uploadactive %% 2 == 0) {
+          updateSelectizeInput(session, "lhselect", selected = filteredIDs())
+          updateActionLink(session, "uploadactive", "Use ID batch lookup")
         } else {
-          ids <- lapply(activefiltercols(), function(col) filter4j(lhdata, col, input[[paste0("filter-", col)]],
-                                                                   lhdatakey, filterconf[[col]]$input))
-          ids <- Reduce(intersect, ids)
-          updateSelectizeInput(session, "lhselect", selected = ids)
+          updateActionLink(session, "uploadactive", "Use filters")
         }
-      })
+      }, ignoreInit = TRUE)
 
-
-      # Render left-hand summary
+      # Left-hand components -------------------------------------------------------------#
       output$lhsummary <- renderPrint({
         n <- length(input$lhselect)
         ntotal <- length(lhdata[[lhdatakey]])
         cat(n, "of", ntotal, "selected")
       })
 
+      output$saveID <- downloadHandler(
+        filename = "ID_data.tsv",
+        content = function(file) {
+          lhx <- lhdata[get(lhdatakey) %in% input$lhselect,
+                        lapply(.SD, function(x) sapply(x, function(xx) paste(xx, sep = ","))), .SDcols = names(lhdata)]
+          fwrite(lhx, file = file, sep = "\t")
+        }, contentType = "text/csv")
 
-      # Translate left-hand to matches in right-hand
-      obs_left2right <- observeEvent(input$lhselect, {
-        rhkeys <- handler[get(lhdatakey) %in% input$lhselect, get(rhdatakey)]
-        updateSelectizeInput(session, "rhselect", selected = rhkeys)
-      }, ignoreNULL = FALSE)
-
-
-      # Render column selection
-      output$rhtableopts <- renderUI({
-        if(!is.null(initcolselect)) {
-          checkboxGroupInput(session$ns("rhcols"), NULL, choices = names(rhdata), selected = initcolselect, inline = T)
-        }
-      })
-
-
+      # Right-hand components ----------------------------------------------------------#
       # Render right-hand table
       output$rhtable <- DT::renderDT({
         cols <- if(!is.null(input$rhcols)) input$rhcols else names(rhdata)
         rhdata[get(rhdatakey) %in% input$rhselect, ..cols]
       }, escape = F, rownames = F, filter = "none", options = list(dom = 'tp', pageLength = 10),
       style = "bootstrap")
+
+      # Render column display selection for table
+      output$rhtableopts <- renderUI({
+        if(!is.null(initcolselect)) {
+          checkboxGroupInput(session$ns("rhcols"), NULL, choices = names(rhdata), selected = initcolselect, inline = T)
+        }
+      })
+
+      # Translate between ------------------------------------------------------------#
+      # Translate left-hand to matches in right-hand
+      obs_left2right <- observeEvent(input$lhselect, {
+        rhkeys <- handler[get(lhdatakey) %in% input$lhselect, get(rhdatakey)]
+        updateSelectizeInput(session, "rhselect", selected = rhkeys)
+      }, ignoreNULL = FALSE)
 
 
       # Modify observers accordingly when switching from left-to-right or right-to-left
@@ -196,16 +188,67 @@ dataHelperServer <- function(id,
       }, suspended = TRUE, ignoreNULL = FALSE) # since left2right is the default on startup
 
 
-      output$saveID <- downloadHandler(
-        filename = "ID_data.tsv",
-        content = function(file) {
-          lhx <- lhdata[get(lhdatakey) %in% input$lhselect,
-                        lapply(.SD, function(x) sapply(x, function(xx) paste(xx, sep = ","))), .SDcols = names(lhdata)]
-          fwrite(lhx, file = file, sep = "\t")
-      }, contentType = "text/csv")
-
     })
 }
+
+
+filterPanelUI <- function(id) {
+   ns <- NS(id)
+   uiOutput(ns("filter"))
+}
+
+
+filterPanelServer <- function(id,
+                              dt, dtkey = "ID",
+                              filterconf) {
+
+  moduleServer(id, function(input, output, session) {
+
+    filteroutput <- reactiveVal("")
+
+    # Each filter col except the key col will have own input component to implement filtering
+    filtercols <- names(dt)[names(dt) != dtkey]
+
+    # Not all filter cols have to be shown/used on init
+    # switchfiltercols tracks switches that allow users to activate a filter, which may not exist depending on filterconf
+    switchfiltercols <- sapply(filtercols, function(x) paste("usefilter", gsub(".", "", x, fixed = T), sep = "_"))
+
+    # Names of active filter cols ("on")
+    activefiltercols <- reactive({
+      active <- unlist(sapply(switchfiltercols, function(x) input[[x]]))
+      if(is.null(active) || all(active == F)) return(NULL) else filtercols[active]
+    })
+
+    # Render filtercols inputs
+    output$filter <- renderUI({
+      uilist <- lapply(filtercols,
+                       function(col) sideFilterUI(col, dt[[col]],
+                                                  filterconf[[col]]$input,
+                                                  filterconf[[col]]$selected,
+                                                  ns = session$ns,
+                                                  conditional = filterconf[[col]]$conditional))
+      tagList(uilist)
+    })
+
+    # Process filtercols inputs
+    obs_filters <- observe({
+      if(is.null(activefiltercols())) {
+        filteroutput("")
+      } else {
+        ids <- lapply(activefiltercols(),
+                      function(col) filter4j(dt, col, input[[paste0("filter-", col)]],
+                                             dtkey, filterconf[[col]]$input))
+        ids <- Reduce(intersect, ids)
+        filteroutput(ids)
+      }
+    })
+
+    return(filteroutput)
+
+  })
+}
+
+
 
 #' Helper function for extracting inputs created with \code{\link{sideFilterUI}}
 #'
@@ -227,6 +270,7 @@ filter4j <- function(dt, col, values, j, type) {
     }
   }
 }
+
 
 #' Generate a combination of filters
 #'
@@ -251,9 +295,10 @@ filter4j <- function(dt, col, values, j, type) {
 #' @param type One of \code{c("select", "selectize", "checkbox", "checkboxGroup", "range")}, corresponding to
 #' \code{selectInput}, \code{selectizeInput}, \code{checkboxInput}, \code{checkboxGroupInput}, or \code{sliderInput} (range).
 #' @param selected The initial selection of the input, defaulting to the first of \code{values}.
-#' @param conditional Optional. If not `NULL`, wrap element in a conditional panel with inital display given by the boolean value.
+#' @param conditional Optional, if not \code{NULL}, wrap element in a conditional panel with inital display given by the boolean value.
 #' @param ns Function for namespacing components, i.e. from `session$ns`.
 #' @param width Width of input elements.
+#' @export
 sideFilterUI <- function(inputId, values,
                          type = c("select", "selectize", "checkbox", "checkboxGroup", "range"),
                          selected = c("first", "last", "all", "none"),
@@ -277,12 +322,12 @@ sideFilterUI <- function(inputId, values,
     ui <- do.call(paste0(type, "Input"), list(inputId = id, label = NULL, choices = choices, selected = selected, width = width))
   }
   if(!is.null(conditional)) {
-    actid <- paste("usefilter", gsub(".", "", id, fixed = T), sep = "_")
+    actid <- paste("usefilter", gsub(".", "", inputId, fixed = T), sep = "_")
     ui <- div(shinyWidgets::prettySwitch(ns(actid), NULL, value = conditional, slim = TRUE, inline = TRUE),
-              tags$span(id, class = "filter-label"), br(),
+              tags$span(inputId, class = "filter-label"), br(),
               conditionalPanel(paste0("input.",actid), ui, ns = ns, class = "ui-inline"))
   } else {
-    ui <- div(h5(id), ui)
+    ui <- div(h5(inputId), ui)
   }
   ui
 }
