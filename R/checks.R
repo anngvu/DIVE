@@ -1,4 +1,5 @@
-# These are all the data check functions used internally
+# These are all data check functions used **internally** by various modules
+# Other types of user-facing check functions in pChecks.R (TO-DO)
 
 #' Check cohort data
 #'
@@ -41,7 +42,7 @@ checkCohortData <- function(cohdata, message = NULL, result = NULL) {
 #' @param html (Not used) Logical with default TRUE, for whether to format message with HTML for display.
 #' @return A list with \code{result} and \code{message}. See details.
 #' @import data.table
-#' @export
+#' @keywords internal
 checkDataUpload <- function(data,
                             result = NULL,
                             idcol = "ID", idchar = TRUE, html = TRUE) {
