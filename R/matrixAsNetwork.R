@@ -12,8 +12,8 @@
 matrixAsNetworkUI <- function(id, height = "400px", ...) {
   ns <- NS(id)
   tags$div(class = "asNetwork", id = ns("asNetwork"), ... ,
-           conditionalPanel("!output.network", ns = ns, class = "dive-loader", id = ns("loader"), "loading..."),
-           uiOutput(ns("add_nodes_btn")),
+           conditionalPanel("!output.network", ns = ns, class = "dive-loader"),
+           uiOutput(ns("add_nodes_btn"), style = "position: relative;"),
            visNetwork::visNetworkOutput(ns("network"), height = height)
   )
 }
@@ -32,7 +32,7 @@ matrixAsNetworkUI <- function(id, height = "400px", ...) {
 #'
 #' @param id Namespace id for module.
 #' @param mdata Reactive matrix data from \code{\link{matrixCtrlServer}}.
-#' @param M Full matrix from which `mdata` originates.
+#' @param mfilter Reactive filter values from \code{\link{matrixCtrlServer}}.
 #' @param background Optional background color for network graph.
 #' @param .nodes Node options passed to \code{visNodes}.
 #' @param .edges Edge options passed to \code{visEdges}.
@@ -42,7 +42,8 @@ matrixAsNetworkUI <- function(id, height = "400px", ...) {
 #' @import magrittr
 #' @export
 matrixAsNetworkServer <- function(id,
-                                  mdata, M,
+                                  mdata,
+                                  mfilter,
                                   background = NULL,
                                   .nodes = NULL,
                                   .edges = NULL,
@@ -57,12 +58,13 @@ matrixAsNetworkServer <- function(id,
     output$network <- visNetwork::renderVisNetwork({
       req(mdata$filM)
       m <- mdata$filM
-      # cat("nodes: ", length(allnodes), "edges :", nrow(ind))
       gdata <- dtNodesEdges(m)
       graph <- visNetwork::visNetwork(nodes = gdata$nodes, edges = gdata$edges, background = background) %>%
-        visNetwork::visEvents(selectNode = sprintf("function(nodes) { Shiny.onInputChange('%s', nodes.nodes); }",
+        # create listener for multiple selected nodes, see return `ss`
+        visNetwork::visEvents(
+          selectNode = sprintf("function(nodes) { Shiny.onInputChange('%s', nodes.nodes); }",
                                                    session$ns("network_selectednodes")),
-                  deselectNode = sprintf("function(nodes) { Shiny.onInputChange('%s', nodes.nodes); }",
+          deselectNode = sprintf("function(nodes) { Shiny.onInputChange('%s', nodes.nodes); }",
                                          session$ns("network_selectednodes")))
       graph <- rlang::exec(visNetwork::visNodes, graph = graph, !!!.nodes)
       graph <- rlang::exec(visNetwork::visEdges, graph = graph, !!!.edges)
@@ -76,7 +78,10 @@ matrixAsNetworkServer <- function(id,
     # Show add_nodes option only when a node is selected
     output$add_nodes_btn <- renderUI({
       req(input$network_selected)
-      absolutePanel(actionButton(session$ns("add_nodes"), "expand selected"), fixed = TRUE, style = "z-index:10;")
+      absolutePanel(
+        actionButton(session$ns("add_nodes"), "EXPAND SELECTED", icon = icon("plus")),
+        style = "z-index:10; top: 50px; left: 50px;"
+      )
     })
 
     # Create input$network_nodes via visGetNodes
@@ -88,43 +93,27 @@ matrixAsNetworkServer <- function(id,
     observeEvent(input$network_nodes, {
 
       n.input <- input$network_selected
-      n.connected <- M[, n.input]
-      n.connected <- which(n.connected > 0)
-      if(length(n.connected)) {
+      n.connected <- nodeFilteredFind(n.input, mdata$N, mfilter$N, mdata$P, mfilter$P)
+      n.len <- length(n.connected)
+      showNotification(paste(n.len, "linked nodes under current filter criteria"))
+      if(n.len) {
         # new edges:
-        new_edges <- data.frame(from = n.input, to = n.connected)
+        new_edges <- data.frame(from = n.input, to = n.connected) # note that dtNodesEdges uses dimnames, not integer index
         # new nodes -- manually calc coords to arrange new nodes (visIgraphLayout doesn't work w/ NetworkProxy)
         node_data <- input$network_nodes[[n.input]]
-        theta <- seq(0, 2*pi, length.out = length(n.connected))
+        theta <- seq(0, 2*pi, length.out = n.len)
         x <- node_data$x + cos(theta) * 150
         y <- node_data$y + sin(theta) * 150
-        new_nodes <- data.frame(id = n.connected, label = names(n.connected), x = x, y = y)
+        new_nodes <- data.frame(id = n.connected, label = n.connected, x = x, y = y)
 
-        visNetwork::visNetworkProxy("network") %>%
-          visNetwork::visUpdateEdges(new_edges) %>%
+        visNetwork::visNetworkProxy(session$ns("network")) %>%
           visNetwork::visUpdateNodes(new_nodes) %>%
-          visNetwork::visSelectNodes(id = n.input)
+          visNetwork::visUpdateEdges(new_edges) %>%
+          visNetwork::visSelectNodes(id = n.input) %>%
+          visNetwork::visFocus(id = n.input)
       }
 
     })
-
-    # Return data.tables storing node and edge data, can be used for non-square matrices
-    dtNodesEdges <- function(m) {
-      m <- abs(m)
-      from <- if(!is.null(rownames(m))) rownames(m) else paste0("V", 1:nrow(m))
-      m <- as.data.table(m)
-      m[, from := from]
-      m <- melt(m, id.vars = "from", variable.name = "to", value.name = "edgewt")
-      # remove edges where diagonal, NAs, edgewts < threshold value
-      m <- m[!is.na(edgewt)][!from == to]
-      nodes <- m[, .(id = union(from, to))]
-      # define groups for nodes using metadata -- unlike with the matrix display,
-      # can really only apply color using one metadata category (group)
-      # as there is only one group column that can be specified in the node df
-      # nodes[, group := "")]
-      edges <- m[, .(from, to)]
-      return(list(nodes = nodes, edges = edges))
-    }
 
     #-- Return -----------------------------------------------------------------------------------------------------#
 
@@ -136,4 +125,32 @@ matrixAsNetworkServer <- function(id,
 
   })
 
+}
+
+
+# Return data.table storing node and edge data, can be used for non-square matrices
+dtNodesEdges <- function(m) {
+  m <- abs(m)
+  from <- if(!is.null(rownames(m))) rownames(m) else paste0("V", 1:nrow(m))
+  m <- as.data.table(m)
+  m[, from := from]
+  m <- melt(m, id.vars = "from", variable.name = "to", value.name = "edgewt")
+  # remove edges where diagonal, NAs, edgewts < threshold value
+  m <- m[!is.na(edgewt)][!from == to]
+  nodes <- m[, .(id = union(from, to))]
+  # define groups for nodes using metadata -- unlike with the matrix display,
+  # can really only apply color using one metadata category (group)
+  # as there is only one group column that can be specified in the node df, e.g.
+  # nodes[, group := "")]
+  edges <- m[, .(from, to)]
+  return(list(nodes = nodes, edges = edges))
+}
+
+nodeFilteredFind <- function(node, N, minN, P, cutoffP) {
+  n.connected <- names(which(N[, node] > minN)) # minimum n
+  if(!is.null(cutoffP)) {
+    p.connected <- names(which(P[, node] < cutoffP)) # P cutoff
+    return(intersect(n.connected, p.connected))
+  }
+  return(n.connected)
 }

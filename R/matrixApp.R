@@ -15,10 +15,10 @@ matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
             if(!is.null(CSS)) includeCSS(CSS),
             # Filter controls and data input
             fluidRow(class = "top-panel matrixAppUI-panel",
-                     column(9, tags$div(class = "input-panel", matrixCtrlUI(ns("ctrl")))),
-                     column(3, tags$div(class = "input-panel", dataUploadUI(ns("upload"))))
+                     column(12,tags$div(class = "input-panel", matrixCtrlUI(ns("ctrl"))),
+                            tags$div(class = "input-panel", dataUploadUI(ns("upload"))))
             ),
-            tags$div(class = "btn-group", style = "margin-bottom: 30px;",
+            tags$div(class = "btn-group", style = "margin-bottom: 20px;",
                      actionButton("viewgraph", "Graph view") %>%
                        tagAppendAttributes(class = "btn-sm", onclick = sprintf("{ $('#%s').hide();
                                                  $('#%s').trigger('hidden');
@@ -30,10 +30,10 @@ matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
                                                  $('#%s').show();
                                                  $('#%s').trigger('shown'); }", ns.graph, ns.graph, ns.matrix, ns.matrix))
             ),
-            tags$div(style = "display: flex; align-items: flex-start;",
-                     dualDrilldownUI(ns("dd")),
+            tags$div(style = "position:relative; display: flex; align-items: flex-start;",
                      matrixMainUI(ns("matrix"), style = "flex: 4 0 70vw;"),
-                     matrixAsNetworkUI(ns("graph"), height = "1000px", style = "flex: 4 0 70vw; display: none;")
+                     matrixAsNetworkUI(ns("graph"), height = "1000px", style = "flex: 4 0 70vw; display: none;"),
+                     dualDrilldownUI(ns("dd"))
             )
   )
 }
@@ -61,28 +61,34 @@ matrixAppServer <- function(id,
 
     upload <- dataUploadServer("upload",
                                removable = T,
-                               checkFun = DIVE::checkDataUpload,
+                               checkFun = checkDataUpload,
                                informd = informd,
                                appdata = appdata,
                                checkappdata = T)
+
+    mfilter <- reactiveValues(N = NULL, P = NULL)
 
     mdata <- matrixCtrlServer("ctrl",
                               M = M, N = N, P = P,
                               cdata = cdata,
                               metadata = metadata,
                               vkey = vkey,
-                              newdata = upload)
+                              newdata = upload,
+                              mfilter = mfilter)
 
     src1 <- matrixMainServer("matrix",
                              mdata = mdata,
                              colorscales = colorscales)
 
     src2 <- matrixAsNetworkServer("graph",
-                                  mdata, M,
+                                  mdata,
+                                  mfilter,
                                   background = "#201037",
-                                  .nodes = list(color = list(background = "lemonchiffon", border = "yellow", highlight = "white")),
+                                  .nodes = list(size = 10, color = list(background = "lemonchiffon", border = "yellow", highlight = "white"),
+                                                font = list(color = "white")),
                                   .edges = list(color = "yellow"),
-                                  .options = list(highlightNearest = TRUE, nodesIdSelection = list(enabled = TRUE, style = "display:none;")),
+                                  .options = list(highlightNearest = TRUE,
+                                                  nodesIdSelection = list(enabled = TRUE)),
                                   randomSeed = 42)
 
     dualDrilldownServer("dd",
