@@ -18,7 +18,7 @@ contrastVUI <- function(id, choices) {
            span("vs"),
            div(class = "ui-inline", uiOutput(ns("by2"))),
            div(style = "padding-bottom: 10px;", actionButton(ns("run"), "Run")),
-           shinycssloaders::withSpinner(color = "gray", size = 0.5, plotly::plotlyOutput(ns("plot")))
+           plotly::plotlyOutput(ns("plot"))
   )
 }
 

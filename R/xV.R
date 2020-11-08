@@ -15,31 +15,34 @@
 #' so that the module can pass the current data to these other modules.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param title Optional title or other info displayed at the top, usually the dataset title.
 #' @param extension Whether to include UI with extra links for calling external modules. See details.
 #' @import shiny
 #' @export
-xVUI <- function(id, extension = TRUE) {
+xVUI <- function(id, title  = NULL, extension = TRUE) {
   ns <- NS(id)
   tags$div(id = ns("xVUI"),
+           div(class = "xVUI-title", title),
            div(id = ns("xVUI-ctrl"), class = "xVUI-ctrl-panel",
                conditionalPanel(condition = "input.addlocal%2==1", ns = ns, class = "ui-inline",
                                 selectizeInput(ns("localselected"), label = NULL, choices = NULL, multiple = T,
                                     options = list(placeholder = "filter in this dataset"))
                 ),
                div(class = "ui-inline", actionLink(ns("addlocal"), "LOCAL FILTER", icon = icon("plus")),
-                     title = "Initalize local filter for this dataset **that takes precedence over the global filter**"),
+                   title = "Activate/inactivate local filter for this dataset **takes precedence over the global filter**"),
                div(class = "ui-inline", "show most variable:"),
                div(class = "ui-inline", style = "margin-top: -10px;",
                    numericInput(ns("hivarprct"), label = NULL, value = 100, min = 1, max = 100, step = 5, width = 50)),
                div(class = "ui-inline", icon("percent")),
                div(class = "ui-inline", actionLink(ns("rowcluster"), "ROW CLUSTER", icon = icon("sitemap", class = "fa-rotate-270")),
-                   title = "Cluster samples by **features currently in view**"),
+                   title = "Cluster samples **by features currently in view**"),
                if(extension)
-                 div(class = "tool-box ui-inline",
-                     span("Extensions:"),
+                 div(class = "toolbox ui-inline",
+                     span("Tools & extensions >  "),
                      div(class = "ui-inline", actionLink(ns("contrast"), "CONTRAST GROUPS", icon = tags$i(class="fas fa-object-group")))
                    )
           ),
+          conditionalPanel("!output.heatmap", ns = ns, class = "dive-loader"),
           fluidRow(
             column(9, plotly::plotlyOutput(ns("heatmap"))),
             column(3, plotly::plotlyOutput(ns("cplotly")))
@@ -50,9 +53,10 @@ xVUI <- function(id, extension = TRUE) {
 #' Shiny module server for cross-view of multidimensional data
 #'
 #' Integratively visualize a high-dimensional expression dataset with phenotype or clinical features
-#' through clustering, selection, and cross-comparison
+#' through clustering, corss-selection and cross-comparison
 #'
-#' The data objects here can be compared to \code{Biobase::\link[Biobase]{ExpressionSet}} objects,
+#' The module is geared towards bioinformatics uses;
+#' the data objects here can be compared to \code{Biobase::\link[Biobase]{ExpressionSet}} class object
 #' where \code{hdata} corresponds to a (transposed) \code{exprs} matrix in the \code{assayData} slot
 #' and \code{cdata} corresponds to the data in the \code{phenoData} slot.
 #'
@@ -103,7 +107,9 @@ xVServer <- function(id,
       if(!length(selected())) {
         localhdata(hdata)
       } else {
-        localhdata( hdata[, colnames(hdata) %in% selected(), drop = F] )
+        # global select relies on data having an interoperable alternate index
+        sel_hdata <- subsetAltJ(hdata, selected())
+        localhdata(sel_hdata)
       }
     })
 
@@ -173,13 +179,16 @@ xVServer <- function(id,
       z <- localhdata()
       # quirk where single values need to be double arrays, see https://stackoverflow.com/a/57013847
       x <- if(ncol(z) == 1) list(colnames(z)) else colnames(z)
+      ann <- if(ncol(z) == 0)
+      { list(x = 0.5, y = 0.5, xref = "paper", yref = "paper", text = "<b>feature(s) not available</b>", showarrow = F) }
+      else { NULL }
       ylabs <- rownames(z)
       yind <- 1:nrow(z)
       showticks <- !withcluster # if cluster dendogram also being displayed,  don't need labels
       plotly::plotlyProxy("heatmap", session) %>%
         plotly::plotlyProxyInvoke("update",
                           list(z = list(z), x = list(x), y = list(yind), height = height),
-                          list(yaxis.showticklabels = showticks, yaxis.tickvals = yind, yaxis.ticktext = ylabs),
+                          list(yaxis.showticklabels = showticks, yaxis.tickvals = yind, yaxis.ticktext = ylabs, annotations = list(ann)),
                           1L)
     }, ignoreInit = TRUE)
 
@@ -262,8 +271,7 @@ expHeatmap <- function(z, height) {
 
   plotly::plot_ly(z = z, x = xlabs, y = yind, name = "Expression\nMatrix",
           type = "heatmap", colors = colorscale, height = height,
-          # text = matrix(rep(ylabs, each = ncol(z)), ncol = ncol(z), byrow = T),
-          # hovertemplate = "feature: <b>%{x}</b><br>expression: <b>%{z}</b>",
+          hovertemplate = "feature: <b>%{x}</b><br>sample: <b>%{y}</b><br>expression: <b>%{z}</b>",
           colorbar = list(title = "relative\nexpression", thickness = 10, x = -0.09)) %>%
     plotly::layout(xaxis = list(type = "category", showgrid = FALSE, ticks = "", showticklabels = showticklabs),
            yaxis = list(ticks = "", tickvals = yind, ticktext = ylabs))

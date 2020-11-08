@@ -1,38 +1,41 @@
-#' Shiny module UI for controlling multi-column views
+#' Shiny module UI for controlling multi-dataset views
 #'
-#' Shiny module UI for controlling multi-column views
+#' UI for sourcing and selecting datasets
 #'
+#' Controls data views geared towards bioinformatics data.
 #' Multiple high dimensional datasets can be displayed by calling separate instances of
 #' \code{\link{xVUI}} modules, with the contents typically laid out in row containers.
-#' This controller UI has three different ways to source the datasets:
+#' The controller UI has three different ways to source the datasets:
 #' \enumerate{
 #'   \item Selecting from available pre-processed datasets.
 #'   \item User-uploaded data.
 #'   \item A beta (least-supported) method of retrieving datasets from GEO.
 #' }
-#' For convenience and customization, it is possible make unavailable any of the three sourcing methods,
+#' For customization, it is possible make unavailable any of the three sourcing methods,
 #' e.g. hide the GEO sourcing option by not displaying the UI.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param menu Logical flag, whether to allow a menu for loading stored datasets.
 #' @param upload Logical flag, whether to allow data upload.
 #' @param GEO Logical flag, whether to allow pulling data from GEO (beta).
+#' @param maxItems Integer representing the max number of tracks that can be selected (displayed).
 #' @export
-multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE) {
+multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE, maxItems = 3L) {
   ns <- NS(id)
   tags$div(class = "multiVCtrlUI-panel", id = ns("multiVCtrlUI"),
            if(menu) div(class = "ui-inline",
                         selectizeInput(ns("dataset"), HTML("<strong>Available datasets</strong>"),
-                                       choices = NULL, selected = NULL, multiple = T,
-                                       options = list(placeholder = "select to view"))),
+                                       choices = NULL, selected = NULL, multiple = T, width = "500px",
+                                       options = list(placeholder = paste("select to view (max of", maxItems, "concurrent tracks)"),
+                                                      maxItems = maxItems))),
            if(upload) div(class = "ui-inline", br(), actionButton(ns("upload"), "Upload my data")),
            if(GEO) div(class = "ui-inline", br(), actionButton(ns("getGEO"), HTML("Source from GEO <sup>beta</sup>")))
   )
 }
 
-#' Shiny module server for controlling multi-column views
+#' Shiny module server for controlling multi-dataset views
 #'
-#' Control hub that provides data and parameters for \code{\link{xVServer}},
+#' Implement control hub logic that provides data and parameters for \code{\link{xVServer}},
 #' \code{\link{geneVServer}} and \code{\link{selectVServer}}
 #'
 #' The server logic handles sourcing of large expression datasets with three different methods:
@@ -54,6 +57,7 @@ multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE) {
 #' @param cdata A \code{data.table} of characteristics data, commonly phenotype or clinical data.
 #' @param key Name of column that contains IDs in \code{cdata} matching sample IDs in \code{hdlist} datasets. Defaults to "ID".
 #' @param preselect Optional, pre-selected phenotype or clinical variables from \code{cdata}.
+#' If is \code{NULL} (not recommended for most cases), the user can dynamically render as many datasets views as they can source.
 #' @inheritParams dataUploadServer
 #' @return A reactive values list containing the data matrix
 #' for the parameter \preformatted{hdata} of the \code{\link{multiVServer}} module,
@@ -64,8 +68,8 @@ multiVCtrlServer <- function(id,
                              hdlist, choices = names(hdlist),
                              cdata,
                              key = "ID",
-                             checkFun = NULL,
                              preselect = NULL,
+                             checkFun = NULL,
                              informd = system.file("info/ht_upload.Rmd", package = "DIVE")) {
 
   moduleServer(id, function(input, output, session) {
@@ -87,7 +91,7 @@ multiVCtrlServer <- function(id,
     observe({
       if(!length(input$dataset)) { # everything has been cleared from the global dataset selection
         dataset <- stats::setNames(object = list(NULL), # set return to NULL
-                            nm = paste0("i", which(names(view$hdlist) %in% inview)))
+                                   nm = paste0("i", which(names(view$hdlist) %in% inview)))
         inview <<- c()
       } else {
         dsname <- setdiff(input$dataset, inview)

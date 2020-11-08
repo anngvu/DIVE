@@ -10,22 +10,16 @@
 geneVUI <- function(id) {
   ns <- NS(id)
   tags$div(class = "geneVUI-panel input-panel theme-border", id = ns("geneVUI"),
-           div(class = "ui-inline",
-               selectizeInput(ns("IDs"), tags$strong("Genes/gene products of interest"),
-                              choices = NULL, selected = NULL,
-                              options = list(maxItems = 50, placeholder = "globally filter across all datasets"))),
-           div(class = "ui-inline", br(),
-               actionButton(ns("qlist"), "Quick list", icon = icon("plus"))),
-           div(class = "ui-inline",
-               textInput(ns("qtext"), "", placeholder = "search query...")),
-           div(class = "ui-inline", br(),
-               actionButton(ns("query"), "Query")),
-           div(class = "ui-inline", br(),
-               infoOutput(ns("querytips"), label = "tips", i = "question-circle")),
-           div(class = "ui-inline status-update", br(),
-               textOutput(ns("querystatus"), inline = TRUE)),
-           helpText("Note: Expression values may not be available in all assays.")
+           div(class = "ui-inline", style = "width: 500px;",
+               textAreaInput(ns("qtext"), tags$strong("Genes/proteins of interest"),
+                             placeholder = "enter list of gene IDs (max 1000), genomic range, keyword, concept, ontology term, etc., to globally search across displayed datasets",
+                             width = "500px", height = "90px", resize = "none")),
+          div(class = "ui-inline",
+              infoOutput(ns("querytips"), label = "help/syntax", i = "question-circle"), br(), br(),
+              actionButton(ns("query"), "Query", icon = icon("angle-right")),
+              div(class = "status-update", textOutput(ns("querystatus")))
           )
+  )
 }
 
 #' Shiny module server for select-filter of genes or gene products
@@ -52,50 +46,55 @@ geneVUI <- function(id) {
 #' @family geneV functions
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param genes Gene choices for initialization in \code{shiny::\link[shiny]{selectizeInput}}.
 #' @return A vector of standard gene symbols.
 #' @import shiny
 #' @export
-geneVServer <- function(id,
-                        genes = NULL) {
+geneVServer <- function(id) {
 
   moduleServer(id, function(input, output, session) {
 
     infoServer("querytips", informd = system.file("info/query_api.Rmd", package = "DIVE"))
 
-    selected <- reactiveVal(genes)
+    selected <- reactiveVal(NULL)
     querystatus <- reactiveVal("")
 
-    updateSelectizeInput(session, "IDs", "Genes/proteins of interest", choices = genes,
-                         selected = character(0), options = list(maxItems = 50), server = T)
+    # -- MyGene API handlers ----------------------------------------------------------------------#
 
-    observeEvent(input$qlist, {
-      showModal(modalDialog(
-        tags$strong("Upload my custom list"),
-        helpText("Your list should be a text file with one gene per line."),
-        dataUploadUI("customlist", label = NULL),
-        size = "s", easyClose = TRUE, footer = NULL
-      ))
-    })
+    # query for "/gene" service
+    processGeneList <- function(q) {
+      q <- sub("ids=","", q)
+      result <- tryCatch({
+        mygene::getGenes(q, fields = "entrezgene", species = "human")
+      }, error = function(e) { return(NA) })
 
-    observeEvent(input$IDs, {
-      if(is.null(input$IDs)) selected(genes) else selected(input$IDs)
-    }, ignoreNULL = FALSE)
+      if(!is.na(result) && length(result$entrezgene) > 0) {
+        hits <- result$entrezgene
+        selected(result$entrezgene)
+        querystatus(paste(length(hits), "valid geneids"))
+      } else {
+        querystatus("no results")
+      }
+    }
 
-    # -- API handlers --------------------------------------------------------------------------#
+    # process query for "/query?q=<query>" service
+    processQuery <- function(q) {
+      result <- tryCatch({
+          mygene::query(input$qtext, species = "human")
+        }, error = function(e) { return(NA) })
+
+        if(!is.na(result) && result$total > 0) {
+          hits <- result$hits$entrezgene
+          selected(result$hits$entrezgene)
+          querystatus(paste(length(hits), "hits"))
+        } else {
+          querystatus("no results")
+        }
+    }
 
     observeEvent(input$query, {
       withProgress(expr = {
-        result <- tryCatch({
-          mygene::query(input$qtext, species = "human")
-        }, error = function(e) { return(NA) })
-        if(!is.na(result) && result$total > 0) {
-          selected(result$hits$entrezgene)
-          querystatus("")
-        } else {
-          querystatus("No results.")
-        }
-      }, value = 0.5, message = "querying API...")
+        if(startsWith(trimws(input$qtext), "ids=")) processGeneList(input$qtext) else processQuery(input$qtext)
+      }, value = 0.5, style = "old", message = "querying...")
     })
 
     output$querystatus <- renderText({

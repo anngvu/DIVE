@@ -19,7 +19,8 @@ multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
                             div(class = "input-panel", span(class = "panel-label", "Data Sources"),
                                 div(class = "ui-inline", multiVCtrlUI(ns("ctrl")))))
             ),
-            div(class = "custom-sticky", span("Data Tools")),
+            div(class = "linked-tip", span(class = "panel-label", "Tools & extensions"),
+                div(tags$a(href = "#", "read beta documentation"))),
             fluidRow(column(9, geneVUI(ns("gene"))),
                      column(3, selectVUI(ns("cdata")))
             ),
@@ -57,8 +58,7 @@ multiVServer <- function(id,
                          hdlist = NULL,
                          choices = NULL,
                          cdata = NULL,
-                         preselect = NULL,
-                         genes = NULL) {
+                         preselect = NULL) {
 
   moduleServer(id, function(input, output, session) {
 
@@ -75,27 +75,32 @@ multiVServer <- function(id,
                             countby = reactive(view$hdata))
 
     # controls gene selection for all xVUI components
-    gselect <- geneVServer("gene", genes = genes)
+    gselect <- geneVServer("gene")
 
-    # each dataset gets its own section with its own xVUI local module options
+    # "data representative" stores data forwarded by each xV
     datarep <- reactiveValues(localhdata = NULL, localcdata = NULL)
 
+    # each dataset gets its own section with its own xV local module options
+    # TO DO: consider non-dynamically rendered UI implementation
     obs_x <- observeEvent(view$hdata, {
         trackID <- session$ns(names(view$hdata))
         trackdata <- view$hdata[[1]]
         if(!is.null(trackdata)) {
+
           height <- if(nrow(trackdata) <=10) { 400 } else { 25 * nrow(trackdata) } # used across plots, tracks
           insertUI(selector = paste0("#", session$ns("displaytrack")), immediate = T,
                    ui = tags$div(id = trackID, class = "xV-container", style = paste0("min-height: ", height+30, "px ;"),
-                                 xVUI(id = trackID)))
+                                 xVUI(id = trackID, title = attr(trackdata, "title"))))
           xVServer(id = names(view$hdata),
                    hdata = trackdata,
                    cdata = vselect,
                    selected = gselect,
                    height = height,
                    returndata = datarep)
+          showNotification(ui = "appended new dataset view", duration = 2)
         } else {
           removeUI(selector = paste0("#", trackID))
+          showNotification(ui = "removed dataset from view", duration = 2)
         }
     }, ignoreInit = TRUE)
 
