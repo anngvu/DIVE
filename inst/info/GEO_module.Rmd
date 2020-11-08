@@ -3,7 +3,7 @@ title: "GEO Module"
 output: html_document
 ---
 
-**Note that the GEO import functionality is still in beta**
+**Please note that the GEO import functionality is still in beta.**
 
-At the moment this will allow limited types of datasets: gene expression (microarray, RNA-seq) and protein expression. The accession must have data as the standardized matrix file not exceeding our size limit. 
+Sourcing from [GEO](https://www.ncbi.nlm.nih.gov/geo/) is possible for limited types of datasets: gene expression (microarray, RNA-seq) and protein expression. The accession must have data as the standardized matrix file not exceeding the size limit. 
 

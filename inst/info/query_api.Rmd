@@ -5,18 +5,19 @@ output: html_document
 
 **How do I use the query field?**
 
-We use the [mygene.info](http://mygene.info/) API to map annotations, i.e. from ontologies, and other information to the data to make it more searchable/filterable. 
-The quick-start examples below demonstrates supported queries.
+The [mygene.info](http://mygene.info/) API is used to make the data more searchable/filterable. 
+The examples below demonstrate queries.
 
 
-Example query text      | Result
-------------------------|---------------------------------------------------------------
-`tumor suppressor`      | Search everything; get any genes/proteins that matches query.
-`name:insulin`          | Search by gene name.
-`GO:0030070`            | Get all genes/proteins annotated with the Gene Ontology term [insulin processing](http://amigo.geneontology.org/amigo/term/GO:0030070)
-`refseq:NM_001798`      | Get the gene/protein corresponding to the RNA sequence.
-`refseq:NP_439892`      | Get the gene/protein corresponding to the protein sequence.
-`chrX:151,073,054-151,383,976` | Get all genes/proteins within this chrX interval (use with or without commas). However, note that `chrX` is not recognized as a valid query to retrieva all genes on Chromosome X.  
+| Example query text      | Explanation
+|-------------------------|--------------------------------------------------------------------------------
+|`ids=1017,1018` or `ids=695,ENSG00000123374` | Use list of NCBI or ENSEMBL gene ids to select genes and corresponding proteins
+|`tumor suppressor`      | Use keyword or concept to select relevant genes/proteins
+|`name:insulin`          | Use gene name to select a gene/protein
+|`GO:0030070`            | Use Gene Ontology term [insulin processing](http://amigo.geneontology.org/amigo/term/GO:0030070) to select genes/proteins
+|`refseq:NM_001798`      | Use RNA sequence to select corresponding gene/protein
+|`refseq:NP_439892`      | Use protein sequence to select corresponding gene/protein
+|`chrX:151,073,054-151,383,976` | Use genomic range to select genes/proteins (use with or without commas). Note that `chrX` alone is not a valid query.  
 
 <br/>
 You can use AND/OR/NOT boolean operators and grouping to form complicated queries:
