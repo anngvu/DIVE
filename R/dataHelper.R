@@ -58,15 +58,17 @@ dataHelperUI <- function(id, CSS = system.file("www/", "app.css", package = "DIV
 
 #' Shiny module server function for simple interactions between two relational tables
 #'
-#' Implement ability to traverse data in "righthand" and "lefthand" tables with additional attribute filters
+#' Implement interface to traverse data in "righthand" and "lefthand" tables with additional attribute filters
 #'
-#' This implements a simple interface to alllow general browsing, filtering, subsetting of traditional tabular data,
+#' The simple interface implemented allows general browsing, filtering, subsetting of traditional tabular data,
 #' limited to two tables. The module requires these tables:
-#' The "lefthand" table of something with attributes. In the original context, this was a table
-#' of case IDs with attributes such as age and sex.
-#' The "righthand" table of something with other attributes. In the original context,
-#' this was a table of measurements with descriptions and references.
-#' The lookup table to translate relations (use for joins) between the lefthand and righthand tables.
+#' \describe{
+#'   \item{\code{lhdata}}{ "Left-hand" table of data.
+#'   Originally, this was a table of case IDs with columns for attributes such as age and sex. }
+#'   \item{\code{rhdata}}{ "Right-hand" table of data.
+#'   Originally, this was a table of studies with columns for attributes such as authors, description and reference.}
+#'   \item{\code{handler}}{ Lookup table to translate relations between the left-hand and right-hand tables. }
+#' }
 #'
 #' @family dataHelper
 #'
@@ -75,13 +77,15 @@ dataHelperUI <- function(id, CSS = system.file("www/", "app.css", package = "DIV
 #' @param lhdatakey Name of unique key column in \code{lhdata}, defaulting to "ID".
 #' @param rhdata A \code{data.table} of the dataset on the right-hand side.
 #' @param rhdatakey Name of unique key column in \code{rhdata}, defaulting to "Source".
-#' @param initcolselect Initialize column selection (with a checkbox ui) with a vector of names
-#' matching cols in \code{rhdata} to be shown. If \code{NULL}, column selection ui is not rendered.
+#' @param initcolselect Which columns in \code{rhdata} should be shown initially,
+#' as determined by a vector of names matching cols in \code{rhdata}.
+#' A checkboxgroup element for column selection will also be rendered.
+#' By default \code{NULL} so there is no selection control and all columns will be shown.
 #' @param handler A \code{data.table} used for translating keys between \code{lhdata} and \code{rhdata}.
 #' @param filterconf If given, will create filters for the left-hand dataset using \code{\link{sideFilterUI}}.
 #' Should be a list with names matching columns in \code{lhdata} to be used as filters
-#' amd elements "type" with their input widget types, "selected" for the initial selection,
-#' and "conditional" with a boolean value for whether this is a less important filter that should initially be hidden/ignored.
+#' and elements "type" with their input widget types, "selected" for the initial selection,
+#' and "conditional" with a boolean value for whether this is a filter that should initially be hidden/ignored.
 #' @import shiny
 #' @export
 dataHelperServer <- function(id,
@@ -191,13 +195,34 @@ dataHelperServer <- function(id,
     })
 }
 
-
+#' Filter panel UI
+#'
+#' A panel with a combination of filter inputs
+#'
+#' Components are actually rendered using the function \code{sideFilterUI}
+#'
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 filterPanelUI <- function(id) {
    ns <- NS(id)
    uiOutput(ns("filter"))
 }
 
-
+#' Filter server
+#'
+#' Process and return output from user interaction with corresponding ui
+#'
+#' Users are essentially filtering upon values in columns of \code{dt};
+#' the applied combination gives output \code{dtkey} entries,
+#' the calculation of which is actually delegated to the function \code{filter4j}.
+#' Because it may not make sense to use all filters,
+#' \code{filterconf} allows specifying which combination of filters should be active.
+#'
+#' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param dt A \code{data.table} of the dataset.
+#' @param dtkey Name of unique key column in \code{dt}, defaulting to "ID".
+#' @param filterconf A list with names matching columns in \code{lhdata} to be used as filters
+#' and elements "type" with their input widget types, "selected" for the initial selection,
+#' and "conditional" with a boolean value for whether this is a filter that should initially be hidden/ignored.
 filterPanelServer <- function(id,
                               dt, dtkey = "ID",
                               filterconf) {
@@ -213,7 +238,7 @@ filterPanelServer <- function(id,
     # switchfiltercols tracks switches that allow users to activate a filter, which may not exist depending on filterconf
     switchfiltercols <- sapply(filtercols, function(x) paste("usefilter", gsub(".", "", x, fixed = T), sep = "_"))
 
-    # Names of active filter cols ("on")
+    # Names of active filter cols ("on" filters)
     activefiltercols <- reactive({
       active <- unlist(sapply(switchfiltercols, function(x) input[[x]]))
       if(is.null(active) || all(active == F)) return(NULL) else filtercols[active]
@@ -272,11 +297,11 @@ filter4j <- function(dt, col, values, j, type) {
 }
 
 
-#' Generate a combination of filters
+#' Generate a combination of filter components
 #'
-#' Convenient creation of a set of filters using selected inputs
+#' Convenient creation of a set of filters with certain input types
 #'
-#' A wrapper for quick creation of Shiny inputs, though limited to certain input types.
+#' This is a wrapper for quick creation of Shiny inputs, though limited to certain input types.
 #' Inputs are intended to be used for filtering table data, e.g. each column of a table gets its
 #' own specified input component, which can be of a type enumerated in the parameter \code{type}.
 #' Generally, \code{sliderInput} (range) is appropriate for numeric columns representing continuous data.
