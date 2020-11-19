@@ -138,7 +138,7 @@ matrixCtrlServer <- function(id,
     # *column optgroup can be "" when first initialized
     metArrange <- function(optgroup, optsel) {
       if(optgroup == vkey) return(list(optsel))
-      meta <- metadata[get(optgroup) %in% optsel, c(..vkey, ..optgroup)][order(get(optgroup))]
+      meta <- metadata[get(optgroup) %in% optsel, c(vkey, optgroup), with = F][order(get(optgroup))]
       mlevels <- unique(metadata[[optgroup]])
       meta[[optgroup]] <- factor(meta[[optgroup]], levels = mlevels, exclude = NULL)
       return(meta)

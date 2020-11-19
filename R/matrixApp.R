@@ -23,12 +23,14 @@ matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
                        tagAppendAttributes(class = "btn-sm", onclick = sprintf("{ $('#%s').hide();
                                                  $('#%s').trigger('hidden');
                                                  $('#%s').show();
-                                                 $('#%s').trigger('shown'); }", ns.matrix, ns.matrix, ns.graph, ns.graph)),
+                                                 $('#%s').trigger('shown');
+                                                 $(this).addClass('active').siblings().removeClass('active'); }", ns.matrix, ns.matrix, ns.graph, ns.graph)),
                      actionButton("viewmatrix", "Matrix view") %>%
-                       tagAppendAttributes(class = "btn-sm", onclick = sprintf("{ $('#%s').hide();
+                       tagAppendAttributes(class = "btn-sm active", onclick = sprintf("{ $('#%s').hide();
                                                  $('#%s').trigger('hidden');
                                                  $('#%s').show();
-                                                 $('#%s').trigger('shown'); }", ns.graph, ns.graph, ns.matrix, ns.matrix))
+                                                 $('#%s').trigger('shown');
+                                                 $(this).addClass('active').siblings().removeClass('active'); }", ns.graph, ns.graph, ns.matrix, ns.matrix))
             ),
             tags$div(style = "position:relative; display: flex; align-items: flex-start;",
                      matrixMainUI(ns("matrix"), style = "flex: 4 0 70vw;"),

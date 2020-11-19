@@ -18,6 +18,7 @@ Imports:
     shiny (>= 1.5.0),
     shinythemes,
     data.table (>= 1.12.6),
+    dplyr,
     magrittr,
     ggplot2,
     scales,

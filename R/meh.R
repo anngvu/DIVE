@@ -2,20 +2,20 @@
 #'
 #' Bring up a modal dialog for application errors
 #'
-#' Internally, errors in module code summon a dialog when execution fails or
-#' when something is not allowed, etc.
-#' Indeed, this defaults to a generic "something went wrong" message,
-#' but the caller can provide more specific verbiage.
+#' Module code will summon a modal dialog to display an error when execution fails,
+#' something is seriously not allowed, etc.
+#' This defaults to a generic user-facing message of
+#' "Sorry, something went wrong. Try again later or let us know about the issue.",
+#' which can be configured through \code{base::options(DIVE.error.modal.mg = altmessage)}.
 #' When the \code{dev_mode} option is set, the original error will also be displayed.
-#' The footer can optionally contain a link to where the user can file issues,
-#' set globally for all error modals with \code{base::options(DIVE.error.modal.footer = ui)},
-#' or the caller can pass in custom ui.
+#' The footer can optionally contain a link to where the user can file issues, etc.,
+#' configured with \code{base::options(DIVE.error.modal.footer = ui)}.
 #'
 #' @param msg User-facing message that can contain HTML for formatting.
 #' @param error Forwarded error messsage to be shown depending on \code{dev_mode} option.
 #' @param footer Bottom part of the modal dialog, which by default contains nothing unless
 #' set with \code{base::options(DIVE.error.modal.footer = ui)}. See details for intended uses.
-meh <- function(msg = "Sorry, something went wrong.<br>Try again later or let us know about the issue.",
+meh <- function(msg =  getOption("DIVE.error.modal.msg"),
                 error = NULL,
                 footer = getOption("DIVE.error.modal.footer")) {
   showModal(modalDialog(

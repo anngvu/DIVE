@@ -51,8 +51,8 @@ checkDataUpload <- function(data,
   if(length(whichID) != 1) {
     message <- paste("Need to have exactly one column with IDs called", idcol)
   }
-  if(length(data[, !..whichID])) {
-      notnumeric <- sapply(data[, !..whichID], function(x) !is.numeric(x))
+  if(length(data[, !whichID, with = F])) {
+      notnumeric <- sapply(data[, !whichID, with = F], function(x) !is.numeric(x))
       if(length(which(notnumeric))) message <- c(message, "All data columns should be numeric/numeric factor.")
     } else {
       message <- c(message, "Data columns appear to be missing.")

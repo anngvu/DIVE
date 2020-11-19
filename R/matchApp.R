@@ -110,7 +110,7 @@ matchAppServer <- function(id,
                                s1data = refcohort,
                                s2data = newcohort,
                                results = results,
-                               ignore = customdata)
+                               ignorev = customdata)
 
     #-- Output tabs display logic ------------------------------------------------------------------------------------------#
 

@@ -88,13 +88,13 @@ contrastVServer <- function(id,
           p <- plotly::plotly_empty() %>%
             plotly::layout(title = message, font = list(color = "gray"))
         } else {
-          # do fit, return data frame with (A) fold difference, (B) p-values, (C) color based on adj.P
+          # do fit, return (A) fold difference, (B) p-values, (C) color based on adj.P
           limfit <- limmaWrapper(selected_dataset(), group1(), group2())
-          xaxis <- xFoldChange(selected_dataset(), group1(), group2()) # A
-          yaxis <- asNegLogAdjP(limfit$p.value) # B
+          xfc <- xFoldChange(selected_dataset(), group1(), group2()) # A
+          adjP <- asNegLogAdjP(limfit$p.value) # B
           sigcolor <- ifelse(adjP < 0.05, "significant", "not significant")
-          p <- plotly::plot_ly(x = diffx, y = neglogAdjP, type = "scatter", mode = "markers",
-                  hoverinfo = "text", text = paste("<br>-log(adjusted p): ", neglogAdjP, "<br>Difference: ", diffx),
+          p <- plotly::plot_ly(x = xfc, y = adjP, type = "scatter", mode = "markers",
+                  hoverinfo = "text", text = paste("<br>-log(adjusted p): ", adjP, "<br>Difference: ", xfc),
                   color = sigcolor, colors = c(significant = "deeppink", `not significant` = "gray"),
                   showlegend = T) %>%
             plotly::layout(xaxis = list(title = "Fold Change Difference [Group 1 - Group 2]"), yaxis = list(title = "-log(adjusted p-value)"),
@@ -139,6 +139,7 @@ getFilterGroup <- function(x, refids, filtercol, parentdata) {
     ids <- parentdata[which(findInterval(parentdata[[filtercol]], x, rightmost.closed = T) == 1), ID]
     intersect(ids, refids)
   } else {
+    ID <- NULL # avoid NSE NOTE for R CMD check
     ids <- parentdata[get(filtercol) %in% x, ID]
     intersect(ids, refids)
   }
@@ -190,8 +191,9 @@ limmaWrapper <- function(xdata, group1, group2) {
 #'
 #' @keywords internal
 xFoldChange <- function(xdata, group1, group2) {
-  means1 <- rowMeans(xm[, sampIDs %in% group1])
-  means2 <- rowMeans(xm[, sampIDs %in% groupp2])
+  sampIDs <- NULL # avoid NOTE due to NSE in R CMD check
+  means1 <- rowMeans(xdata[, sampIDs %in% group1])
+  means2 <- rowMeans(xdata[, sampIDs %in% group2])
   return(means1-means2)
 }
 

@@ -124,7 +124,7 @@ multiVCtrlServer <- function(id,
 
     observeEvent(input$upload, {
       showModal(modalDialog(title = "Upload my data",
-          dataUploadUI(session$ns("upload"), label = NULLL),
+          dataUploadUI(session$ns("upload"), label = NULL),
           includeMarkdown(informd),
           footer = modalButton("Cancel")
       ))

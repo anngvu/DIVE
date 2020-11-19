@@ -335,12 +335,14 @@ vnumplotly <- function(vt, vx, y, height = NULL) {
 }
 
 
-# Subset a matrix by the most variable n features (columns)
-# Need to either give n number of features or percent of data to calculate n
+#' Subset a matrix by the most variable n features (columns)
+#'
+#' Need to either give n number of features or percent of data to calculate n
+#' @keywords internal
 subsetHiVar <- function(data, n = NULL, percent) {
-  n <- round(ncol(data) * (percent/100))
-  n <- ifelse(n < 1, 1, n)
-  vars <- apply(data, 2, var)
+  n <- round(ncol(data) * (percent/100)) # determine n columns returned given %
+  n <- if(n < 1) 1 else n
+  vars <- apply(data, 2, stats::var)
   selected <- order(vars, decreasing = T)[1:n]
   return(selected)
 }

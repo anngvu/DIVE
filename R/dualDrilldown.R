@@ -132,12 +132,12 @@ dualDrilldownServer <- function(id,
 
       if(length(input$drilldown) == 2) { #-> do scatter plot 2-variable view ----------------------#
         var2 <- input$drilldown[2]
-        datasubset <- cdata()[, c(..var1, ..var2, ..colorgroup)]
+        datasubset <- cdata()[, c(var1, var2, colorgroup), with = F]
         datasubset <- datasubset[stats::complete.cases(datasubset)]
         drillplot2(datasubset, var1, var2, colorby[colorgroup], factorx, input$flipxy %% 2)
 
       } else { #-> do boxplot 1-variable view ----------------------------------------------------#
-        datasubset <- cdata()[!is.na(get(var1)), c(..var1, ..colorgroup)]
+        datasubset <- cdata()[!is.na(get(var1)), c(var1, colorgroup), with = F]
         drillplot1(datasubset, var1, colorby[colorgroup], factorx)
       }
     })

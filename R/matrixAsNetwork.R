@@ -132,6 +132,7 @@ matrixAsNetworkServer <- function(id,
 dtNodesEdges <- function(m) {
   m <- abs(m)
   from <- if(!is.null(rownames(m))) rownames(m) else paste0("V", 1:nrow(m))
+  edgewt <- to <- . <- NULL # avoid NSE NOTE from R CMD check
   m <- as.data.table(m)
   m[, from := from]
   m <- melt(m, id.vars = "from", variable.name = "to", value.name = "edgewt")
