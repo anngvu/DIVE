@@ -255,6 +255,10 @@ xVServer <- function(id,
     observeEvent(input$contrast, {
       returndata$localhdata <- localhdata()
       returndata$localcdata <- localcdata()
+      returndata$app <- "contrast"
+      returndata$event <- paste(session$ns("contrast"), input$contrast, sep = "-")
+      # need event to be some unique event name each time so outside observer will fire,
+      # but someday may be useful for tracking what apps people are running for which datasets?
     })
 
   })

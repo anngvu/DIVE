@@ -6,13 +6,14 @@
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param choices A vector corresponding to choices of grouping variables for contrast.
+#' @param xbtn Whether to include a close-modal button that also clears the plot. For use when UI is within a modal dialog (the default).
 #' @import shiny
 #' @export
-contrastVUI <- function(id, choices) {
+contrastVUI <- function(id, choices, xbtn = T) {
 
   ns <- NS(id)
   tags$div(id = ns("contrastVUI"), class = "contrastVUI-panel",
-           # selectInput(ns("hdataset"), "Dataset", choices = dataset_choices),
+           if(xbtn) HTML(sprintf('<button id = "%s" type="button" class="close action-button" data-dismiss="modal">x</button>', ns("close"))),
            selectInput(ns("groupby"), "Group by", choices = choices),
            div(class = "ui-inline", uiOutput(ns("by1"))),
            span("vs"),
@@ -44,9 +45,9 @@ contrastVServer <- function(id,
 
     plotOut <- reactiveVal(plotly::plotly_empty())
 
-    observeEvent(selected_dataset(), {
-      if(is.null(selected_dataset())) plotOut(plotly::plotly_empty())
-    }, ignoreNULL = F, ignoreInit = TRUE)
+    observeEvent(input$close, {
+      plotOut(plotly::plotly_empty())
+    }, ignoreInit = TRUE)
 
     # https://github.com/rstudio/shiny/issues/2744
     # observeEvent(cdata(), {
@@ -54,7 +55,7 @@ contrastVServer <- function(id,
     # })
 
     # When feature variable is selected, render appropriate UI used to define groups
-    # and constrain choices to levels available in selected ht dataset
+    # and constrain choices to levels available in selected dataset
     output$by1 <- renderUI({
       if(input$groupby == "") return(NULL)
       customGroupSelect(cdata()[[input$groupby]], session$ns("s1"))
@@ -91,17 +92,18 @@ contrastVServer <- function(id,
           # do fit, return (A) fold difference, (B) p-values, (C) color based on adj.P
           limfit <- limmaWrapper(selected_dataset(), group1(), group2())
           xfc <- xFoldChange(selected_dataset(), group1(), group2()) # A
-          adjP <- asNegLogAdjP(limfit$p.value) # B
-          sigcolor <- ifelse(adjP < 0.05, "significant", "not significant")
-          p <- plotly::plot_ly(x = xfc, y = adjP, type = "scatter", mode = "markers",
-                  hoverinfo = "text", text = paste("<br>-log(adjusted p): ", adjP, "<br>Difference: ", xfc),
+          yp <- asNegLogAdjP(limfit$p.value) # B
+          labels <- colnames(selected_dataset())
+          sigcolor <- ifelse(yp > 3, "significant", "not significant")
+          p <- plotly::plot_ly(x = xfc, y = yp, type = "scatter", mode = "markers",
+                  hoverinfo = "text", text = paste(labels, "<br>-log(adjusted p): ", yp, "<br>Difference: ", xfc),
                   color = sigcolor, colors = c(significant = "deeppink", `not significant` = "gray"),
                   showlegend = T) %>%
             plotly::layout(xaxis = list(title = "Fold Change Difference [Group 1 - Group 2]"), yaxis = list(title = "-log(adjusted p-value)"),
                    legend = list(orientation = "h", y = 1.02, yanchor = "bottom"))
         }
         plotOut(p)
-      }, error = meh())
+      }, error = function(e) meh(error = e))
     })
 
     output$plot <- plotly::renderPlotly({
@@ -191,9 +193,9 @@ limmaWrapper <- function(xdata, group1, group2) {
 #'
 #' @keywords internal
 xFoldChange <- function(xdata, group1, group2) {
-  sampIDs <- NULL # avoid NOTE due to NSE in R CMD check
-  means1 <- rowMeans(xdata[, sampIDs %in% group1])
-  means2 <- rowMeans(xdata[, sampIDs %in% group2])
+  sampIDs <- rownames(xdata)
+  means1 <- colMeans(xdata[sampIDs %in% group1, ])
+  means2 <- colMeans(xdata[sampIDs %in% group2, ])
   return(means1-means2)
 }
 

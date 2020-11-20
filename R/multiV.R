@@ -77,8 +77,8 @@ multiVServer <- function(id,
     # controls gene selection for all xVUI components
     gselect <- geneVServer("gene")
 
-    # "data representative" stores data forwarded by each xV
-    datarep <- reactiveValues(localhdata = NULL, localcdata = NULL)
+    # "data representative" stores data forwarded by each xV and desired application for data
+    datarep <- reactiveValues(localhdata = NULL, localcdata = NULL, app = NULL, event = NULL)
 
     # each dataset gets its own section with its own xV local module options
     # TO DO: consider non-dynamically rendered UI implementation
@@ -106,22 +106,18 @@ multiVServer <- function(id,
 
     # Data tools --------------------------------------------------------------------#
 
-    observeEvent(datarep$localcdata, {
-      showModal(
-        modalDialog(
-          # reset modal content on close to not show previous plot
-          HTML('<button id = "closeContrast" type="button" class="close action-button" data-dismiss="modal">x</button>'),
-          contrastVUI(session$ns("new-contrast"), choices = names(datarep$localcdata)),
-          easyClose = FALSE, footer = NULL))
+    observeEvent(datarep$event, {
+      if(datarep$app == "contrast") {
+        showModal(
+          modalDialog(
+            contrastVUI(session$ns("new-contrast"), choices = names(datarep$localcdata)),
+            easyClose = FALSE, footer = NULL))
+      }
     })
 
     contrastVServer("new-contrast",
                     cdata = reactive(datarep$localcdata),
                     selected_dataset = reactive(datarep$localhdata))
-
-    # Not ideal, but this clears previous plot whenever modal is closed so that new modals have clean display
-    outputOptions(output, "new-contrast-plot", suspendWhenHidden = F)
-    observeEvent(input$closeContrast, { datarep$localhdata <- NULL })
 
   })
 
