@@ -14,7 +14,7 @@ matchPlotUI <- function(id, s1label = NULL, s2label = NULL, placeholder = "(sele
   renderjs <- I("{ option: function(item, escape) {
                    return '<div class=\"unused covariate\">' + escape(item.value) + '</div><br>' }
                 }")
-  tags$div(class = "matchPlot-ui", id = ns("matchPlot-ui"),
+  tags$div(class = "matchPlotUI", id = ns("matchPlotUI"),
     tags$div(id = ns("s2-select-container"), class = "input-panel",
              selectizeInput(ns("s2_select"), s2label, choices = "", selected = "",
                             options = list(placeholder = placeholder, render = renderjs))),
@@ -35,9 +35,12 @@ matchPlotUI <- function(id, s1label = NULL, s2label = NULL, placeholder = "(sele
 #' from \code{\link{matchResultServer}} passed to \code{results},
 #' the plots will add color-coding to visualize which individuals are matched.
 #'
+#' The two datasets \code{s1data} and \code{s2data} can be dynamically passed in;
+#' in fact, \code{\link{customDatasetServer}} is designed to provide uploaded data as a sourcegit.
+#'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param s1data Reactive data from source #1 (often the reference dataset).
-#' @param s2data Reactive data from source #2, such as from \code{\link{customDatasetServer}}.
+#' @param s1data Reactive data from source #1; needs to have key column named "ID".
+#' @param s2data Reactive data from source #2; needs to have key column named "ID".
 #' @param results Optional, reactive return value of \code{\link{matchResultServer}}.
 #' @param ignorev Optional, a character vector of variables such as IDs to exclude from selection for plotting.
 #' @family matchPlot functions
@@ -53,7 +56,7 @@ matchPlotServer <- function(id,
     observe({
       updateSelectizeInput(session, "s2_select", choices = c("", removeID(names(s2data()), c("ID", ignorev))) )
       updateSelectizeInput(session, "s1_select", choices = c("", removeID(names(s1data()), c("ID", ignorev))) )
-    })
+    }, priority = 20)
 
     renderjs <- I("{ option: function(item, escape) {
                        return item.optgroup == 'Matched'?
@@ -63,15 +66,15 @@ matchPlotServer <- function(id,
 
     # Update select menu to partition attributes that were used for matching from "Other" non-matching attributes
     observeEvent(results$params, {
-      s1list <- list(Matched = names(results$params), Other = removeID(setdiff(names(s1data()), names(results$params)), c("ID", ignorev)) )
-      s2list <- list(Matched = unname(results$params), Other = removeID(setdiff(names(s2data()), results$params), c("ID", ignorev)) )
+      s1list <- list(Matched = as.list(names(results$params)), Unmatched = as.list(removeID(setdiff(names(s1data()), names(results$params)), c("ID", ignorev))) )
+      s2list <- list(Matched = as.list(unname(results$params)), Unmatched = as.list( removeID( setdiff(names(s2data()), results$params), c("ID", ignorev))) )
       updateSelectizeInput(session, "s1_select", choices = s1list,
                            selected = character(0), server = T,
                            options = list(placeholder = "(data attributes)", render = renderjs))
       updateSelectizeInput(session, "s2_select", choices = s2list,
                            selected = character(0), server = T,
                            options = list(placeholder = "(data attributes)", render = renderjs))
-    })
+    }, priority = 10)
 
     # Plots
     s1Plot <- reactiveVal(NULL)
@@ -79,6 +82,7 @@ matchPlotServer <- function(id,
 
     # Appends column Matched (used for fill color) whenever results$matchtable is non-null
     s1_localdata <- reactive({
+      validate(need(nrow(s1data()) > 0, "Dataset #1 not selected."))
       data <- as.data.frame(s1data())
       if(!is.null(results$matchtable)) {
         matches <- results$matchtable$ID
@@ -90,6 +94,7 @@ matchPlotServer <- function(id,
     })
 
     s2_localdata <- reactive({
+      validate(need(nrow(s2data()) > 0, "Dataset #2 not selected."))
       data <- as.data.frame(s2data())
       if(!is.null(results$matchtable)) {
         matches <- results$matchtable$match.ID
@@ -101,6 +106,8 @@ matchPlotServer <- function(id,
     })
 
     plotMatched <- function(y) {
+      # If results$intermediate & results$pair are somehow not available even when results$params is given,
+      # should this devolve to indiv plotS1 & plotS2?
       data <- as.data.frame(results$intermediate)
       data$Matched <- ifelse(is.na(results$pair), "un-matched", "matched")
       p <- cohistPlot(data, y = y)
@@ -122,10 +129,9 @@ matchPlotServer <- function(id,
       # Plot on same scale automatically for matched attributes
       if(input$s1_select %in% names(results$params)) {
         updateSelectizeInput(session, "s2_select", selected = results$params[names(results$params) == input$s1_select])
-        plotMatched(input$s1_select)
+        plotMatched(input$s1_select) # only s1_obs calls plotMatched
       } else {
-        if(input$s1_select == "") return()
-        plotS1(y = input$s1_select)
+        if(input$s1_select != "") plotS1(y = input$s1_select)
         if(input$s2_select != "") plotS2(y = input$s2_select)
       }
     })
@@ -135,8 +141,7 @@ matchPlotServer <- function(id,
         y <- names(results$params)[input$s2_select == results$params]
         updateSelectizeInput(session, "s1_select", selected = y) # plotMatched will run under s1_obs
       } else {
-        if(input$s2_select == "") return()
-        plotS2(y = input$s2_select)
+        if(input$s2_select != "") plotS2(y = input$s2_select)
         if(input$s1_select != "") plotS1(y = input$s1_select)
       }
     })
