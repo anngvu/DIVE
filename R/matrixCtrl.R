@@ -236,7 +236,7 @@ matrixCtrlServer <- function(id,
         mstate$newdata <- NULL
       } else {
         tryCatch({
-          withProgress(message = "adding new data", style = "old", expr = {
+          withProgress(message = "adding new data", expr = {
             newDT <- newdata()
             names(newDT) <- make.names(names(newDT))
             cdata2 <- merge(cdata, newDT, by = "ID", all.x = T, all.y = F)
@@ -244,11 +244,12 @@ matrixCtrlServer <- function(id,
             mstate$cdata <- cdata2
             mstate$filM <- mstate$M <- updated$M
             mstate$N <- updated$N
+            mstate$P <- updated$P
             mstate$rowmeta <- mstate$colmeta <- NULL
             updateSelectInput(session, "optrowgroup", selected = vkey)
             mstate$newdata <- names(newDT) # only the names of new variables need be stored, which triggers view update
           })
-        }, error = function(e) meh() )
+        }, error = function(e) meh(error = e) )
       }
     }, ignoreInit = T, ignoreNULL = F)
 
