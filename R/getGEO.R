@@ -64,7 +64,7 @@ getGEOServer <- function(id) {
           if(!length(gpl)) gpl <- data.frame(gene_id = rownames(xdata)) # when no annotation, use rownames of xdata
           GPL(gpl)
           Step2()
-        }, error = function(e) meh(msg = e$message, error = e))
+        }, error = function(e) meh(error = e))
       })
     })
 

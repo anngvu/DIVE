@@ -27,16 +27,17 @@ meh <- function(msg =  getOption("DIVE.error.modal.msg"),
   ))
 }
 
-#' Internal function for getting and setting dev mode
+#' Get and set app dev mode
 #'
 #' Control the display of error messages in \code{\link{meh}} and of certain other UI
 #'
-#' Aside from \code{\link{meh}}, some modules use this setting:
+#' Aside from \code{\link{meh}}, other modules that use this setting are:
 #' \itemize{
-#'   \item \code{\link{matchResultServer}}: intermediate results are only downloadable when ON
+#'   \item \code{\link{matchResultServer}}: intermediate results are only downloadable in dev mode
 #'}
 #'
 #' @param setting TRUE or FALSE, passed to \code{base::options} \code{DIVE.dev.mode}.
+#' @export
 dev_mode <- function(setting = NULL) {
   if(is.null(setting)) getOption("DIVE.dev.mode", default = FALSE) else { options(DIVE.dev.mode = setting) }
 }
