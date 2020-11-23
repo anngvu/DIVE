@@ -70,8 +70,7 @@ dataUploadUI <- function(id, ...) {
 #' @param removable Logical flag to indicate whether data upload will have "removable" feature. Defaults to FALSE. See details.
 #' @param checkFun Optional, a custom check function for an additional layer of checking/modifying uploaded data.
 #' It should return a list containing message and result (result should be \code{NULL} when data fails checks).
-#' @param appdata Optional, the name (including extension) of one or more files stored in appdata that can be
-#' mock-uploaded. See details.
+#' @param appdata Optional, the path of one or more files that can be mock-uploaded. See details.
 #' @param checkappdata Whether \code{checkFun} should be applied to appdata, normally FALSE.
 #' @inheritParams infoServer
 #' @return A \code{data.table} with a "filename" attribute containing the filename without extension,

@@ -38,7 +38,7 @@ checkCohortData <- function(cohdata, message = NULL, result = NULL) {
 #' @param data A \code{data.table}.
 #' @param result What to return in place of data if issues are found with the data. Defaults to \code{NULL}.
 #' @param idcol Name of expected ID column, defaulting to "ID".
-#' @param idchar Logical with default TRUE, for whether to convert ID column to character.
+#' @param idchar Logical with default \code{TRUE}, for whether to convert \code{idcol} to character.
 #' @param html (Not used) Logical with default TRUE, for whether to format message with HTML for display.
 #' @return A list with \code{result} and \code{message}. See details.
 #' @import data.table
