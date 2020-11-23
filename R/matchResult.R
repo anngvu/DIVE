@@ -11,7 +11,7 @@
 #' @export
 matchResultOutput <- function(id) {
   ns <- NS(id)
-  tags$div(id = "matchResultOutput",
+  tags$div(id = ns("matchResultOutput"),
            tableOutput(ns("table")),
            br(),
            downloadButton(ns("save"), "Match table (.csv)"),

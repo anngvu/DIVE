@@ -18,7 +18,7 @@ matrixAppUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE
                      column(12,tags$div(class = "input-panel", matrixCtrlUI(ns("ctrl"))),
                             tags$div(class = "input-panel", dataUploadUI(ns("upload"))))
             ),
-            tags$div(class = "btn-group", style = "margin-bottom: 20px;",
+            tags$div(id = ns("view-switch"), class = "btn-group", style = "margin-bottom: 20px;",
                      actionButton("viewgraph", "Graph view") %>%
                        tagAppendAttributes(class = "btn-sm", onclick = sprintf("{ $('#%s').hide();
                                                  $('#%s').trigger('hidden');
