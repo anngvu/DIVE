@@ -24,13 +24,12 @@ dataHelper2UI <- function(id, CSS = system.file("www/", "app.css", package = "DI
                                       helpText("Use a .txt file with one ID per line"),
                                       dataUploadUI(ns("loadID"), label = NULL, buttonLabel = icon("upload"), width = "170px"))
                           )),
-                      div(class = "ui-inline", icon("arrow-right", "fa-3x")),
+                icon("arrow-right", "fa-3x"),
 
                  # Left-hand panel
                  div(class ="ui-inline card-panel", icon("id-card", "fa-2x"), style = "width: 600px",
                      div(class ="ui-inline",
                        DT::DTOutput(ns("lhtable"), width = "540px"),
-                       textOutput(ns("lhsummary")),
                        downloadLink(ns("saveID"), "Save records to file")
                      ),
                  ),
@@ -133,10 +132,6 @@ dataHelper2Server <- function(id,
       output$lhtable <- DT::renderDT({
         filteredLT()
       }, escape = F, rownames = F, filter = "none", options = list(dom = 'tp', pageLength = 10, scrollX = TRUE), style = "bootstrap")
-
-      output$lhsummary <- renderPrint({
-        # paste(length(unique((filteredL()[[lhdatakey]]))), "unique")
-      })
 
       output$saveID <- downloadHandler(
         filename = "data.tsv",
@@ -344,8 +339,9 @@ filterApply <- function(dt, fs, j = NULL, res = 0) {
 #' @keywords internal
 #' @importFrom rlang .data
 colUniqueValues <- function(tbl, col) {
-  res <- dplyr::tbl %>% dplyr::distinct( .data[[col]] )
-  res %>% dplyr::pull()
+  tbl %>%
+    dplyr::distinct(.data[[col]]) %>%
+    dplyr::pull()
 }
 
 #' Return range for a column in a table
@@ -353,11 +349,15 @@ colUniqueValues <- function(tbl, col) {
 #' Return range for a column in a table
 #'
 #' This is a convenience function for reporting range/getting the selection of a Shiny range slider component.
+#'
+#' @param tbl Table of data.
+#' @param col Name of column.
 #' @keywords internal
 #' @importFrom rlang .data
 colRange <- function(tbl, col) {
-  res <- dplyr::tbl %>% dplyr::summarize(min = min( .data[[col]], na.rm = T), max = max( .data[[col]], na.rm = T))
-  res %>% dplyr::collect() %>% unlist()
+  tbl %>%
+    dplyr::summarize(min = min( .data[[col]], na.rm = T), max = max( .data[[col]], na.rm = T)) %>%
+    dplyr::collect() %>% unlist()
 }
 
 
