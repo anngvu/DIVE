@@ -2,7 +2,7 @@
 % Please edit documentation in R/meh.R
 \name{dev_mode}
 \alias{dev_mode}
-\title{Internal function for getting and setting dev mode}
+\title{Get and set app dev mode}
 \usage{
 dev_mode(setting = NULL)
 }
@@ -13,8 +13,8 @@ dev_mode(setting = NULL)
 Control the display of error messages in \code{\link{meh}} and of certain other UI
 }
 \details{
-Aside from \code{\link{meh}}, some modules use this setting:
+Aside from \code{\link{meh}}, other modules that use this setting are:
 \itemize{
-  \item \code{\link{matchResultServer}}: intermediate results are only downloadable when ON
+  \item \code{\link{matchResultServer}}: intermediate results are only downloadable in dev mode
 }
 }

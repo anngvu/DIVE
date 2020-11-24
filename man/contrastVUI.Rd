@@ -4,12 +4,14 @@
 \alias{contrastVUI}
 \title{Shiny module contrast UI}
 \usage{
-contrastVUI(id, choices)
+contrastVUI(id, choices, xbtn = T)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
 \item{choices}{A vector corresponding to choices of grouping variables for contrast.}
+
+\item{xbtn}{Whether to include a close-modal button that also clears the plot. For use when UI is within a modal dialog (the default).}
 }
 \description{
 UI for user to define contrast groups for comparison plots

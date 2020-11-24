@@ -9,7 +9,7 @@ dataHelperServer(
   lhdata,
   lhdatakey = "ID",
   rhdata,
-  rhdatakey = "Source",
+  rhdatakey = "ID",
   initcolselect = NULL,
   handler,
   filterconf
@@ -26,27 +26,31 @@ dataHelperServer(
 
 \item{rhdatakey}{Name of unique key column in \code{rhdata}, defaulting to "Source".}
 
-\item{initcolselect}{Initialize column selection (with a checkbox ui) with a vector of names
-matching cols in \code{rhdata} to be shown. If \code{NULL}, column selection ui is not rendered.}
+\item{initcolselect}{Which columns in \code{rhdata} should be shown initially,
+as determined by a vector of names matching cols in \code{rhdata}.
+A checkboxgroup element for column selection will also be rendered.
+By default \code{NULL} so there is no selection control and all columns will be shown.}
 
 \item{handler}{A \code{data.table} used for translating keys between \code{lhdata} and \code{rhdata}.}
 
 \item{filterconf}{If given, will create filters for the left-hand dataset using \code{\link{sideFilterUI}}.
 Should be a list with names matching columns in \code{lhdata} to be used as filters
-amd elements "type" with their input widget types, "selected" for the initial selection,
-and "conditional" with a boolean value for whether this is a less important filter that should initially be hidden/ignored.}
+and elements "type" with their input widget types, "selected" for the initial selection,
+and "conditional" with a boolean value for whether this is a filter that should initially be hidden/ignored.}
 }
 \description{
-Implement ability to traverse data in "righthand" and "lefthand" tables with additional attribute filters
+Implement interface to traverse data in "righthand" and "lefthand" tables with additional attribute filters
 }
 \details{
-This implements a simple interface to alllow general browsing, filtering, subsetting of traditional tabular data,
+The simple interface implemented allows general browsing, filtering, subsetting of traditional tabular data,
 limited to two tables. The module requires these tables:
-The "lefthand" table of something with attributes. In the original context, this was a table
-of case IDs with attributes such as age and sex.
-The "righthand" table of something with other attributes. In the original context,
-this was a table of measurements with descriptions and references.
-The lookup table to translate relations (use for joins) between the lefthand and righthand tables.
+\describe{
+  \item{\code{lhdata}}{ "Left-hand" table of data.
+  Originally, this was a table of case IDs with columns for attributes such as age and sex. }
+  \item{\code{rhdata}}{ "Right-hand" table of data.
+  Originally, this was a table of studies with columns for attributes such as authors, description and reference.}
+  \item{\code{handler}}{ Lookup table to translate relations between the left-hand and right-hand tables. }
+}
 }
 \seealso{
 Other dataHelper: 

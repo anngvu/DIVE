@@ -25,8 +25,7 @@ It should return a list containing message and result (result should be \code{NU
 
 \item{informd}{Relative path to the Rmarkdown file, whose contents will be displayed in the modal.}
 
-\item{appdata}{Optional, the name (including extension) of one or more files stored in appdata that can be
-mock-uploaded. See details.}
+\item{appdata}{Optional, the path of one or more files that can be mock-uploaded. See details.}
 }
 \value{
 A reactive \code{data.table} of the modified uploaded data.

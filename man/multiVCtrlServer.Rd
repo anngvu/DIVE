@@ -26,7 +26,8 @@ one can pass in a list formatted accordingly for \code{shiny::\link[shiny]{selec
 
 \item{cdata}{A \code{data.table} of characteristics data, commonly phenotype or clinical data.}
 
-\item{key}{Name of column that contains IDs in \code{cdata} matching sample IDs in \code{hdlist} datasets. Defaults to "ID".}
+\item{key}{Name of column that contains IDs in \code{cdata} matching sample IDs in \code{hdlist} datasets. Defaults to "ID".
+Note that column should already be of class character.}
 
 \item{preselect}{Optional, pre-selected phenotype or clinical variables from \code{cdata}.
 If is \code{NULL} (not recommended for most cases), the user can dynamically render as many datasets views as they can source.}

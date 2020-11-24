@@ -43,8 +43,7 @@ See \code{\link{customDatasetServer}}.}
 
 \item{informd}{Relative path to the Rmarkdown file, whose contents will be displayed in the modal.}
 
-\item{appdata}{Optional, the name (including extension) of one or more files stored in appdata that can be
-mock-uploaded. See details.}
+\item{appdata}{Optional, the path of one or more files that can be mock-uploaded. See details.}
 }
 \description{
 Shiny app server for matching and exploration of two datasets

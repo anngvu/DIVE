@@ -24,8 +24,7 @@ dataUploadServer(
 \item{checkFun}{Optional, a custom check function for an additional layer of checking/modifying uploaded data.
 It should return a list containing message and result (result should be \code{NULL} when data fails checks).}
 
-\item{appdata}{Optional, the name (including extension) of one or more files stored in appdata that can be
-mock-uploaded. See details.}
+\item{appdata}{Optional, the path of one or more files that can be mock-uploaded. See details.}
 
 \item{checkappdata}{Whether \code{checkFun} should be applied to appdata, normally FALSE.}
 

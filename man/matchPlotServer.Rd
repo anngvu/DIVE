@@ -9,9 +9,9 @@ matchPlotServer(id, s1data, s2data, results, ignorev = NULL)
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{s1data}{Reactive data from source #1 (often the reference dataset).}
+\item{s1data}{Reactive data from source #1; needs to have key column named "ID".}
 
-\item{s2data}{Reactive data from source #2, such as from \code{\link{customDatasetServer}}.}
+\item{s2data}{Reactive data from source #2; needs to have key column named "ID".}
 
 \item{results}{Optional, reactive return value of \code{\link{matchResultServer}}.}
 
@@ -26,6 +26,9 @@ of other types of datasets that are conceptually similiar.
 For the original cohort matching use case, if there happens to be match return values
 from \code{\link{matchResultServer}} passed to \code{results},
 the plots will add color-coding to visualize which individuals are matched.
+
+The two datasets \code{s1data} and \code{s2data} can be dynamically passed in;
+in fact, \code{\link{customDatasetServer}} is designed to provide uploaded data as a sourcegit.
 }
 \seealso{
 Other matchPlot functions: 

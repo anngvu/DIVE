@@ -13,7 +13,7 @@ checkDataUpload(data, result = NULL, idcol = "ID", idchar = TRUE, html = TRUE)
 
 \item{idcol}{Name of expected ID column, defaulting to "ID".}
 
-\item{idchar}{Logical with default TRUE, for whether to convert ID column to character.}
+\item{idchar}{Logical with default \code{TRUE}, for whether to convert \code{idcol} to character.}
 
 \item{html}{(Not used) Logical with default TRUE, for whether to format message with HTML for display.}
 }
