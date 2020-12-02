@@ -30,7 +30,7 @@ dataHelper2UI <- function(id, CSS = system.file("www/", "app.css", package = "DI
                  div(class ="ui-inline card-panel", icon("id-card", "fa-2x"), style = "width: 600px",
                      div(class ="ui-inline",
                        DT::DTOutput(ns("lhtable"), width = "540px"),
-                       downloadLink(ns("saveID"), "Save records to file")
+                       downloadLink(ns("saveLT"), "Save records to file")
                      ),
                  ),
 
@@ -133,10 +133,10 @@ dataHelper2Server <- function(id,
         filteredLT()
       }, escape = F, rownames = F, filter = "none", options = list(dom = 'tp', pageLength = 10, scrollX = TRUE), style = "bootstrap")
 
-      output$saveID <- downloadHandler(
-        filename = "data.tsv",
+      output$saveLT <- downloadHandler(
+        filename = "records.tsv",
         content = function(file) {
-
+          readr::write_tsv(filteredLT(), path = file)
       }, contentType = "text/csv")
 
       # Right-hand filter selection ----------------------------------------------------------#
