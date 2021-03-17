@@ -217,11 +217,12 @@ filterPanelUI <- function(id) {
 #' \code{filterconf} allows specifying which combination of filters should be active.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
-#' @param dt A \code{data.table} of the dataset.
+#' @param dt A \code{data.table}.
 #' @param dtkey Name of unique key column in \code{dt}, defaulting to "ID".
 #' @param filterconf A list with names matching columns in \code{lhdata} to be used as filters
 #' and elements "type" with their input widget types, "selected" for the initial selection,
 #' and "conditional" with a boolean value for whether this is a filter that should initially be hidden/ignored.
+#' See \code{\link{sideFilterUI}}.
 filterPanelServer <- function(id,
                               dt, dtkey = "ID",
                               filterconf) {
@@ -246,7 +247,8 @@ filterPanelServer <- function(id,
     # Render filtercols inputs
     output$filter <- renderUI({
       uilist <- lapply(filtercols,
-                       function(col) sideFilterUI(col, dt[[col]],
+                       function(col) sideFilterUI(col,
+                                                  dt[[col]],
                                                   filterconf[[col]]$input,
                                                   filterconf[[col]]$selected,
                                                   conditional = filterconf[[col]]$conditional,

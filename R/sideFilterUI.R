@@ -18,7 +18,7 @@
 #'
 #' @param inputId The input slot that will be used to access the value.
 #' @param values Choices for the input.
-#' @param type One of \code{c("select", "selectize", "checkbox", "checkboxGroup", "range")}, corresponding to
+#' @param input One of input types \code{c("select", "selectize", "checkbox", "checkboxGroup", "range")}, corresponding to
 #' \code{selectInput}, \code{selectizeInput}, \code{checkboxInput}, \code{checkboxGroupInput}, or \code{sliderInput} (range).
 #' @param selected The initial selection of the input, which defaults to "first" for the first of \code{values}, but
 #' can also be specified as "last", "all" or "none".
@@ -29,7 +29,7 @@
 #' @export
 sideFilterUI <- function(inputId,
                          values,
-                         type = c("select", "selectize", "checkbox", "checkboxGroup", "range"),
+                         input = c("select", "selectize", "checkbox", "checkboxGroup", "range"),
                          selected = NULL,
                          conditional = NULL,
                          ns = NS(NULL),
@@ -37,13 +37,13 @@ sideFilterUI <- function(inputId,
 
   id <- ns(paste0("filter-", inputId))
 
-  if(type == "range") {
+  if(input == "range") {
     ui <- sliderInput(id, NULL, min = min(values, na.rm = T), max = max(values, na.rm = T),
-                      value = c(min, max), width = width)
+                      value = values, width = width)
   } else {
     # select, selectize, checkbox, checkboxGroup
     choices <- unique(unlist(values))
-    ui <- do.call(paste0(type, "Input"), list(inputId = id, label = NULL, choices = choices, selected = selected, width = width))
+    ui <- do.call(paste0(input, "Input"), list(inputId = id, label = NULL, choices = choices, selected = selected, width = width))
   }
   if(!is.null(conditional)) {
     actid <- paste("usefilter", gsub(".", "", inputId, fixed = T), sep = "_")

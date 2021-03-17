@@ -95,10 +95,10 @@ dataHelper2UI <- function(id, CSS = system.file("www/", "app.css", package = "DI
 #' @import shiny
 #' @export
 dataHelper2Server <- function(id,
-                           dbcon = NULL,
-                           lhdata, lhdatakey = "ID", lhfilterconf,
-                           rhdata, rhdatakey = "ID", rhfilterconf,
-                           handler) {
+                              dbcon = NULL,
+                              lhdata, lhdatakey = "ID", lhfilterconf,
+                              rhdata, rhdatakey = "ID", rhfilterconf,
+                              handler) {
 
     moduleServer(id, function(input, output, session) {
 
@@ -215,23 +215,26 @@ filterPanel2UI <- function(id) {
 
 #' Filter server
 #'
-#' Process and return output from user interaction with corresponding ui
+#' Render filter ui and process output from user interaction
 #'
-#' Users are essentially filtering upon values in columns of \code{dt};
-#' the applied combination gives output \code{dtkey} entries,
-#' the calculation of which is actually delegated to the function \code{filter4j}.
-#' Because it may not make sense to use all filters,
-#' \code{filterconf} allows specifying which combination of filters should be active.
+#' The server module dynamically renders a filter ui given the specification
+#' passed in using \code{filterconf}. Because not all available filters need to be "active",
+#' \code{filterconf} allows specifying which filters should be initially active
+#' and which should be considered optional. Users can toggle which filters to apply.
+#' Each input component filters upon values of columns in the table \code{dt}.
+#' The applied combination is outputted as matching \code{dtkey} entries
+#' (not entire rows). Calculation is actually delegated to the function \code{filter4j}.
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param dt A database table.
 #' @param dtkey Name of unique key column in \code{dt}, defaulting to "ID".
-#' @param filterconf A list with matching columns in \code{dt} to be used as filters
-#' and elements "input" with their input widget types, "selected" for the initial selection,
-#' and "conditional" with a boolean value for whether this is a filter that should initially be hidden/ignored.
+#' @param filterconf A list with names of columns in \code{dt} to be used as filters,
+#' elements "input" with their input widget types, "selected" for the initial selection,
+#' and "conditional" with a boolean value for whether
+#' this is a filter that should initially be active/inactive.
 filterPanel2Server <- function(id,
-                              dt, dtkey = "ID",
-                              filterconf) {
+                               dt, dtkey = "ID",
+                               filterconf) {
 
   moduleServer(id, function(input, output, session) {
 
@@ -258,7 +261,7 @@ filterPanel2Server <- function(id,
                          values <- if(filterconf[[col]]$input == "range") colRange(tbl = dt, col) else colUniqueValues(tbl = dt, col)
                          sideFilterUI(inputId = col,
                                       values = values,
-                                      type = filterconf[[col]]$input,
+                                      input = filterconf[[col]]$input,
                                       selected = filterconf[[col]]$selected,
                                       conditional = filterconf[[col]]$conditional,
                                       ns = session$ns)
@@ -348,7 +351,7 @@ colUniqueValues <- function(tbl, col) {
 #'
 #' Return range for a column in a table
 #'
-#' This is a convenience function for reporting range/getting the selection of a Shiny range slider component.
+#' This is a convenience function for reporting range, e.g. as the selection of a Shiny range slider component.
 #'
 #' @param tbl Table of data.
 #' @param col Name of column.
