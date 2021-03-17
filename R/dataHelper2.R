@@ -136,7 +136,7 @@ dataHelper2Server <- function(id,
       output$saveLT <- downloadHandler(
         filename = "records.tsv",
         content = function(file) {
-          readr::write_tsv(filteredLT(), path = file)
+          data.table::fwrite(filteredLT(), file = file)
       }, contentType = "text/csv")
 
       # Right-hand filter selection ----------------------------------------------------------#
