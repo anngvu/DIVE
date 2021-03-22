@@ -56,7 +56,7 @@ multiVUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"))
 #' @export
 multiVServer <- function(id,
                          hdlist = NULL,
-                         choices = NULL,
+                         choices = DIVE::hdlistchoicesMake(hdlist),
                          cdata = NULL,
                          preselect = NULL) {
 

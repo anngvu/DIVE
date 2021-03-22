@@ -43,7 +43,8 @@ Imports:
     dendextend,
     fastcluster, 
     gridExtra, 
-    rlang
+    rlang,
+    purrr
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,

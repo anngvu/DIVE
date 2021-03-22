@@ -15,6 +15,6 @@ colRange(tbl, col)
 Return range for a column in a table
 }
 \details{
-This is a convenience function for reporting range/getting the selection of a Shiny range slider component.
+This is a convenience function for reporting range, e.g. as the selection of a Shiny range slider component.
 }
 \keyword{internal}

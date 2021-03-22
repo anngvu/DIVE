@@ -7,7 +7,7 @@
 sideFilterUI(
   inputId,
   values,
-  type = c("select", "selectize", "checkbox", "checkboxGroup", "range"),
+  input = c("select", "selectize", "checkbox", "checkboxGroup", "range"),
   selected = NULL,
   conditional = NULL,
   ns = NS(NULL),
@@ -19,7 +19,7 @@ sideFilterUI(
 
 \item{values}{Choices for the input.}
 
-\item{type}{One of \code{c("select", "selectize", "checkbox", "checkboxGroup", "range")}, corresponding to
+\item{input}{One of input types \code{c("select", "selectize", "checkbox", "checkboxGroup", "range")}, corresponding to
 \code{selectInput}, \code{selectizeInput}, \code{checkboxInput}, \code{checkboxGroupInput}, or \code{sliderInput} (range).}
 
 \item{selected}{The initial selection of the input, which defaults to "first" for the first of \code{values}, but

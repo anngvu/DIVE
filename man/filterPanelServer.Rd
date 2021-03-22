@@ -9,13 +9,14 @@ filterPanelServer(id, dt, dtkey = "ID", filterconf)
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{dt}{A \code{data.table} of the dataset.}
+\item{dt}{A \code{data.table}.}
 
 \item{dtkey}{Name of unique key column in \code{dt}, defaulting to "ID".}
 
 \item{filterconf}{A list with names matching columns in \code{lhdata} to be used as filters
 and elements "type" with their input widget types, "selected" for the initial selection,
-and "conditional" with a boolean value for whether this is a filter that should initially be hidden/ignored.}
+and "conditional" with a boolean value for whether this is a filter that should initially be hidden/ignored.
+See \code{\link{sideFilterUI}}.}
 }
 \description{
 Process and return output from user interaction with corresponding ui

@@ -13,17 +13,20 @@ filterPanel2Server(id, dt, dtkey = "ID", filterconf)
 
 \item{dtkey}{Name of unique key column in \code{dt}, defaulting to "ID".}
 
-\item{filterconf}{A list with matching columns in \code{dt} to be used as filters
-and elements "input" with their input widget types, "selected" for the initial selection,
-and "conditional" with a boolean value for whether this is a filter that should initially be hidden/ignored.}
+\item{filterconf}{A list with names of columns in \code{dt} to be used as filters,
+elements "input" with their input widget types, "selected" for the initial selection,
+and "conditional" with a boolean value for whether
+this is a filter that should initially be active/inactive.}
 }
 \description{
-Process and return output from user interaction with corresponding ui
+Render filter ui and process output from user interaction
 }
 \details{
-Users are essentially filtering upon values in columns of \code{dt};
-the applied combination gives output \code{dtkey} entries,
-the calculation of which is actually delegated to the function \code{filter4j}.
-Because it may not make sense to use all filters,
-\code{filterconf} allows specifying which combination of filters should be active.
+The server module dynamically renders a filter ui given the specification
+passed in using \code{filterconf}. Because not all available filters need to be "active",
+\code{filterconf} allows specifying which filters should be initially active
+and which should be considered optional. Users can toggle which filters to apply.
+Each input component filters upon values of columns in the table \code{dt}.
+The applied combination is outputted as matching \code{dtkey} entries
+(not entire rows). Calculation is actually delegated to the function \code{filter4j}.
 }

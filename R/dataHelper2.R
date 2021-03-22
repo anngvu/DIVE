@@ -134,7 +134,7 @@ dataHelper2Server <- function(id,
       }, escape = F, rownames = F, filter = "none", options = list(dom = 'tp', pageLength = 10, scrollX = TRUE), style = "bootstrap")
 
       output$saveLT <- downloadHandler(
-        filename = "records.tsv",
+        filename = "records.csv",
         content = function(file) {
           data.table::fwrite(filteredLT(), file = file)
       }, contentType = "text/csv")

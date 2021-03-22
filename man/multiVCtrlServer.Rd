@@ -7,7 +7,7 @@
 multiVCtrlServer(
   id,
   hdlist,
-  choices = names(hdlist),
+  choices = DIVE::hdlistchoicesMake(hdlist),
   cdata,
   key = "ID",
   preselect = NULL,
@@ -20,9 +20,8 @@ multiVCtrlServer(
 
 \item{hdlist}{A list of matrices representing high dimensional datasets; the names are used for \code{choices}.}
 
-\item{choices}{A list of choices to populate selection menu, defaults to names of datasets in \code{hdlist}.
-When dataset selection should be displayed under different groups,
-one can pass in a list formatted accordingly for \code{shiny::\link[shiny]{selectizeInput}}.}
+\item{choices}{Selection choices are by default created from automatic parsing of `hdlist`. However, a manual list can be given,
+which should be appropriate for passing to \code{shiny::\link[shiny]{selectizeInput}}.}
 
 \item{cdata}{A \code{data.table} of characteristics data, commonly phenotype or clinical data.}
 

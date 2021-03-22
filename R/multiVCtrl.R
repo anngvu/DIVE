@@ -51,9 +51,8 @@ multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE, maxItems = 
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param hdlist A list of matrices representing high dimensional datasets; the names are used for \code{choices}.
-#' @param choices A list of choices to populate selection menu, defaults to names of datasets in \code{hdlist}.
-#' When dataset selection should be displayed under different groups,
-#' one can pass in a list formatted accordingly for \code{shiny::\link[shiny]{selectizeInput}}.
+#' @param choices Selection choices are by default created from automatic parsing of `hdlist`. However, a manual list can be given,
+#' which should be appropriate for passing to \code{shiny::\link[shiny]{selectizeInput}}.
 #' @param cdata A \code{data.table} of characteristics data, commonly phenotype or clinical data.
 #' @param key Name of column that contains IDs in \code{cdata} matching sample IDs in \code{hdlist} datasets. Defaults to "ID".
 #' Note that column should already be of class character.
@@ -66,7 +65,8 @@ multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE, maxItems = 
 #' @import shiny
 #' @export
 multiVCtrlServer <- function(id,
-                             hdlist, choices = names(hdlist),
+                             hdlist,
+                             choices = DIVE::hdlistchoicesMake(hdlist),
                              cdata,
                              key = "ID",
                              preselect = NULL,
