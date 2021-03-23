@@ -27,6 +27,7 @@ asExprsMatrix <- function(df) {
 #' @param annodir Directory where extended annotations live (with ending slash).
 #' @param indexfile File used to select data for conversion;
 #' must have fields "Title" "DatasetID" "Ref" "Type"; other metadata ignored.
+#' @export
 hdlistMake <- function(datadir = "data/tsv/", annodir = "ext-annotation/GeneID/", indexfile = "build/xV_index.tsv") {
   index <- data.table::fread(indexfile, header = T)
   datalist <- lapply(paste0(datadir, index$DatasetID, ".tsv"), data.table::fread)
@@ -45,6 +46,7 @@ hdlistMake <- function(datadir = "data/tsv/", annodir = "ext-annotation/GeneID/"
 #' \code{\link{multiVServer}} requires passing in a list object for `choices`.
 #'
 #' @param hdlist Output of \code{\link{hdlistMake}}.
+#' @export
 hdlistchoicesMake <- function(hdlist) split(names(hdlist), sapply(hdlist, attr, "type"))
 
 #' Create master data table from a collection of datasets
@@ -70,6 +72,7 @@ hdlistchoicesMake <- function(hdlist) split(names(hdlist), sapply(hdlist, attr, 
 #' @param indexfun Optional, a function to help with namespacing.
 #' If not given, defaults to using file name. See details.
 #' @return A "master" \code{data.table}
+#' @export
 cdataMake <- function(datadir = "data/tsv",
                       files = NULL,
                       filepattern = "*",
@@ -94,6 +97,7 @@ cdataMake <- function(datadir = "data/tsv",
 #' Simple wrapper to make cordata
 #'
 #' @param cdata Output from \code{\link{cdataMake}}.
+#' @export
 cordataMake <- function(cdata) {
   data2cor(cdata)
 }
@@ -110,6 +114,7 @@ cordataMake <- function(cdata) {
 #' This should be changed if matching on something else, e.g. "Sites".
 #' @param subsetv Optional, the name of the column storing subset attribute
 #' for subsetted matching.
+#' @export
 validateRefData <- function(dataset, customdata = "Cohort", subsetv = NULL) {
   dataset <- data.table::as.data.table(dataset)
   validcustom <- customdata %in% names(dataset)
