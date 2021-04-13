@@ -85,7 +85,7 @@ multiVCtrlServer <- function(id,
     # Parse a URL request for a specific dataset
     observe({
       query <- parseQueryString(session$clientData$url_search)
-      if(!is.null(query[["dataset"]])) updateSelectInput(session, "dataset", selected = query[["dataset"]])
+      if(!is.null(query[["dataset"]])) updateSelectizeInput(session, "dataset", selected = query[["dataset"]])
     })
 
     # Handle dataset selection or de-selection ------------------------------------------------------------------#
