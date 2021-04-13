@@ -99,3 +99,80 @@ filter4j <- function(dt, col, values, j, type) {
     }
   }
 }
+
+#' Generate filter expression for filter inputs
+#'
+#' Return a quosure of the appropriate filter expression
+#' for the given input component type to use later on
+#'
+#' Most input components serve user selection/filter purposes;
+#' \code{\link{sideFilterUI}} creates these input ui while this function
+#' formulates the selection/filter expression from the input values.
+#' In order to compose the appropriate expression,
+#' we still need some info about the input component given by the parameter \code{type},
+#' e.g. whether it is "range" for a range sliderInput or something else.
+#'
+#' @param col Filter column in \code{dt}.
+#' @param values The filter value(s) in `col`.
+#' @param type Type of input filter; only "range" is special and requires `values` to be a 2-element vector.
+#'
+#' @keywords internal
+#' @importFrom rlang .data
+filterQuo <- function(col, values, type) {
+  if(type == "range") {
+    minval <- values[1] # using values[1] directly in between gives error
+    maxval <- values[2]
+    quo(between( .data[[col]], minval, maxval))
+  } else {
+    quo(.data[[col]] %in% values)
+  }
+}
+
+
+#' Apply filter expressions to data
+#'
+#' @param dt The data table.
+#' @param fs Filter expression(s) as quosure or list of quosures.
+#' @param j Optional, character name of column of data to return for matches of `values` in `col`.
+#' @param res Result/resolution type.
+#' If \code{NULL}, returns all columns for subsetted rows.
+#'
+#' @keywords internal
+filterApply <- function(dt, fs, j = NULL, res = 0) {
+  result <- dt %>% dplyr::filter(!!!fs)
+  if(!is.null(j)) {
+    result <- result %>% dplyr::select(!!j)
+  }
+  if(res == 1) result <- result %>% dplyr::collect() else result
+  return(result)
+}
+
+#' Return unique values for a column in a table
+#'
+#' Return unique values for a column in a table
+#'
+#' This is a convenience function for reporting values/getting the selection of a Shiny input component.
+#' @keywords internal
+#' @importFrom rlang .data
+colUniqueValues <- function(tbl, col) {
+  tbl %>%
+    dplyr::distinct(.data[[col]]) %>%
+    dplyr::pull()
+}
+
+#' Return range for a column in a table
+#'
+#' Return range for a column in a table
+#'
+#' This is a convenience function for reporting range, e.g. as the selection of a Shiny range slider component.
+#'
+#' @param tbl Table of data.
+#' @param col Name of column.
+#' @keywords internal
+#' @importFrom rlang .data
+colRange <- function(tbl, col) {
+  tbl %>%
+    dplyr::summarize(min = min( .data[[col]], na.rm = T), max = max( .data[[col]], na.rm = T)) %>%
+    dplyr::collect() %>% unlist()
+}
+
