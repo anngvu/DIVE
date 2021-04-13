@@ -49,11 +49,19 @@ body {
   margin-right: 20px;
 }
 
+.input-panel-flush {
+  display: inline-block;
+  vertical-align: top;
+  min-height: 100px;
+  padding: 50px 0 0 0;
+}
+
 .card-panel {
   box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
   padding: 30px;
   background: white;
   min-height: 150px;
+  z-index: 100;
 }
 
 .panel-header {
