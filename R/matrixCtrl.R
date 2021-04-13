@@ -134,7 +134,8 @@ matrixCtrlServer <- function(id,
       return(m)
     }
 
-    # Return row or columns indexes ordered by selected metadata, or just literal row/col names if no metadata
+    # Return row or columns indexes ordered by selected metadata, or literal row/col names if no metadata
+    # The first column matches row/col index names in matrix, and the second column contains factored metadata
     # *column optgroup can be "" when first initialized
     metArrange <- function(optgroup, optsel) {
       if(optgroup == vkey) return(list(optsel))
