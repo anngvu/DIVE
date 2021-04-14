@@ -2,12 +2,15 @@
 % Please edit documentation in R/dataHelper.R
 \name{dataHelperUI}
 \alias{dataHelperUI}
-\title{Shiny app UI for simple interactions between two relational tables}
+\title{Shiny app UI for simple traversal of relational tables in a database}
 \usage{
 dataHelperUI(
   id,
   CSS = system.file("www/", "app.css", package = "DIVE"),
-  theme = "paper"
+  theme = "paper",
+  oneway = FALSE,
+  lefticon = NULL,
+  righticon = NULL
 )
 }
 \arguments{
@@ -16,9 +19,16 @@ dataHelperUI(
 \item{CSS}{Optional, location to an alternate CSS stylesheet to change the look and feel of the app.}
 
 \item{theme}{Optional, name of theme for \code{shinythemes}.}
+
+\item{oneway}{Whether data traversal should be one-way (left-to-right) only, or both ways.
+Defaults to \code{FALSE}.}
+
+\item{lefticon}{Optional, an icon to represent the left-hand data.}
+
+\item{righticon}{Optional, an icon to represent the right-hand data.}
 }
 \description{
-UI to traverse data in "righthand" and "lefthand" tables with additional attribute filters
+UI to traverse data between "right-hand" and "left-hand" tables
 }
 \seealso{
 Other dataHelper: 

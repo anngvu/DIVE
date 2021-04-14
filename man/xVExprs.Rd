@@ -7,7 +7,7 @@
 xVExprs(x, title = NULL, altj = NULL, type = "transcriptomics")
 }
 \arguments{
-\item{x}{A numeric matrix that should F features as columns and S samples as rows,
+\item{x}{A numeric matrix that should have F features as columns and S samples as rows,
 with appropriate names/IDs as column names and row names.}
 
 \item{title}{Character title for the dataset.}

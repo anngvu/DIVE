@@ -2,54 +2,48 @@
 % Please edit documentation in R/dataHelper.R
 \name{dataHelperServer}
 \alias{dataHelperServer}
-\title{Shiny module server function for simple interactions between two relational tables}
+\title{Shiny module server for simple traversal of relational tables in a database}
 \usage{
 dataHelperServer(
   id,
+  dbcon = NULL,
   lhdata,
-  lhdatakey = "ID",
+  lhdatakey,
   rhdata,
-  rhdatakey = "ID",
-  initcolselect = NULL,
-  handler,
-  filterconf
+  rhdatakey,
+  handler
 )
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
 
-\item{lhdata}{A \code{data.table} of the dataset on the left-hand side.}
+\item{dbcon}{A database connection object to the database containing the required tables.}
 
-\item{lhdatakey}{Name of unique key column in \code{lhdata}, defaulting to "ID".}
+\item{lhdata}{Name of the table on the left-hand side.}
 
-\item{rhdata}{A \code{data.table} of the dataset on the right-hand side.}
+\item{lhdatakey}{Name of key column in \code{lhdata} table, which should also be a key in \code{handler}.}
 
-\item{rhdatakey}{Name of unique key column in \code{rhdata}, defaulting to "Source".}
+\item{rhdata}{Name of the table on the right-hand side.}
 
-\item{initcolselect}{Which columns in \code{rhdata} should be shown initially,
-as determined by a vector of names matching cols in \code{rhdata}.
-A checkboxgroup element for column selection will also be rendered.
-By default \code{NULL} so there is no selection control and all columns will be shown.}
+\item{rhdatakey}{Name of key column in \code{rhdata} table, which should also be a key in \code{handler}.}
 
-\item{handler}{A \code{data.table} used for translating keys between \code{lhdata} and \code{rhdata}.}
-
-\item{filterconf}{If given, will create filters for the left-hand dataset using \code{\link{sideFilterUI}}.
-Should be a list with names matching columns in \code{lhdata} to be used as filters
-and elements "type" with their input widget types, "selected" for the initial selection,
-and "conditional" with a boolean value for whether this is a filter that should initially be hidden/ignored.}
+\item{handler}{Name of table used for translating between \code{lhdata} and \code{rhdata}.}
 }
 \description{
-Implement interface to traverse data in "righthand" and "lefthand" tables with additional attribute filters
+Traverse data in "right-hand" and "left-hand" tables
 }
 \details{
-The simple interface implemented allows general browsing, filtering, subsetting of traditional tabular data,
-limited to two tables. The module requires these tables:
+Implements simple interface allowing constrained browsing, filtering, subsetting of traditional tabular data.
+The module requires these tables:
 \describe{
-  \item{\code{lhdata}}{ "Left-hand" table of data.
-  Originally, this was a table of case IDs with columns for attributes such as age and sex. }
-  \item{\code{rhdata}}{ "Right-hand" table of data.
-  Originally, this was a table of studies with columns for attributes such as authors, description and reference.}
-  \item{\code{handler}}{ Lookup table to translate relations between the left-hand and right-hand tables. }
+  \item{\code{lhdata}}{ "Left-hand" table of data. Conceptually, also known as a "dimension table".
+  For example, a table of unique patients and attributes such as age, sex, race, etc. }
+  \item{\code{rhdata}}{ "Right-hand" table of data. Conceptually, also known as a "dimension table".
+  For example, a table of unique diagnoses and attributes such as description, insurance code, etc. }
+  \item{\code{handler}}{ Lookup table to translate relations between the left-hand and right-hand tables.
+  Using current example, a table linking patient IDs to diagnosis IDs (which can be many-to-many).
+  See helpful reference for
+  \href{https://www.ibm.com/support/knowledgecenter/SSEP7J_11.1.0/com.ibm.swg.ba.cognos.ug_fm.doc/c_dyn_query_bridge_tables.html}{bridge table}}.
 }
 }
 \seealso{

@@ -12,7 +12,7 @@ matrixAsNetworkServer(
   .nodes = NULL,
   .edges = NULL,
   .options = NULL,
-  .interaction = list(multiselect = TRUE),
+  .interaction = list(multiselect = TRUE, navigationButtons = TRUE),
   randomSeed = NULL
 )
 }
