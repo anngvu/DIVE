@@ -48,7 +48,8 @@ matrixAsNetworkServer <- function(id,
                                   .nodes = NULL,
                                   .edges = NULL,
                                   .options = NULL,
-                                  .interaction = list(multiselect = TRUE),
+                                  .interaction = list(multiselect = TRUE, navigationButtons = TRUE),
+                                  # prettylabeler = getOption("prettylabeler"),
                                   randomSeed = NULL) {
 
   moduleServer(id, function(input, output, session) {
@@ -98,13 +99,19 @@ matrixAsNetworkServer <- function(id,
       showNotification(paste(n.len, "linked nodes under current filter criteria"))
       if(n.len) {
         # new edges:
-        new_edges <- data.frame(from = n.input, to = n.connected) # note that dtNodesEdges uses dimnames, not integer index
+        # note that dtNodesEdges uses dimnames, not integer index
+        new_edges <- data.frame(from = n.input, to = n.connected)
         # new nodes -- manually calc coords to arrange new nodes (visIgraphLayout doesn't work w/ NetworkProxy)
         node_data <- input$network_nodes[[n.input]]
         theta <- seq(0, 2*pi, length.out = n.len)
-        x <- node_data$x + cos(theta) * 150
-        y <- node_data$y + sin(theta) * 150
-        new_nodes <- data.frame(id = n.connected, label = n.connected, x = x, y = y)
+        # vary edge length from center focused node by x pixels to "stagger" connected nodes
+        adjlen <- stats::rnorm(n.len, mean = 50, sd = 15)
+        x <- node_data$x + (cos(theta) * (150 + adjlen))
+        y <- node_data$y + (sin(theta) * (150 + adjlen))
+        # n.labels <- if(is.function(prettylabeler)) prettylabeler(n.connected) else n.connected
+        new_nodes <- data.frame(id = n.connected,
+                                # label = n.labels,
+                                x = x, y = y)
 
         visNetwork::visNetworkProxy(session$ns("network")) %>%
           visNetwork::visUpdateNodes(new_nodes) %>%
@@ -128,21 +135,23 @@ matrixAsNetworkServer <- function(id,
 }
 
 
-# Return data.table storing node and edge data, can be used for non-square matrices
-dtNodesEdges <- function(m) {
+# Return data.table storing node and edge data; can be used for non-square matrices
+# First converts matrix values to absolute (in case of correlation matrix)
+dtNodesEdges <- function(m, prettylabeler = NULL) {
+  id <- label <- edgewt <- to <- . <- NULL # avoid NSE NOTE from R CMD check
   m <- abs(m)
   from <- if(!is.null(rownames(m))) rownames(m) else paste0("V", 1:nrow(m))
-  edgewt <- to <- . <- NULL # avoid NSE NOTE from R CMD check
   m <- as.data.table(m)
   m[, from := from]
   m <- melt(m, id.vars = "from", variable.name = "to", value.name = "edgewt")
-  # remove edges where diagonal, NAs, edgewts < threshold value
+  # remove edges where diagonal, NAs, or edgewts < threshold value
   m <- m[!is.na(edgewt)][!from == to]
   nodes <- m[, .(id = union(from, to))]
   # define groups for nodes using metadata -- unlike with the matrix display,
   # can really only apply color using one metadata category (group)
   # as there is only one group column that can be specified in the node df, e.g.
   # nodes[, group := "")]
+  if(is.function(prettylabeler)) nodes[, label := prettylabeler(id)]
   edges <- m[, .(from, to)]
   return(list(nodes = nodes, edges = edges))
 }
