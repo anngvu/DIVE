@@ -7,10 +7,14 @@
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param CSS Optional, location to an alternate CSS stylesheet to change the look and feel of the app.
 #' @param theme Optional, name of theme for \code{shinythemes}.
+#' @param oneway Whether data traversal should be one-way (left-to-right) only, or both ways.
+#' Defaults to \code{FALSE}.
+#' @param lefticon Optional, an icon to represent the left-hand data.
+#' @param righticon Optional, an icon to represent the right-hand data.
 #' @import shiny
 #' @export
 dataHelperUI <- function(id, CSS = system.file("www/", "app.css", package = "DIVE"), theme = "paper",
-                          lefticon = NULL, righticon = NULL, oneway = FALSE) {
+                         oneway = FALSE, lefticon = NULL, righticon = NULL) {
 
   ns <- NS(id)
   div(
@@ -19,14 +23,13 @@ dataHelperUI <- function(id, CSS = system.file("www/", "app.css", package = "DIV
     div(
       class = "ui-inline card-panel",
       if(!is.null(lefticon)) icon(lefticon, "fa-2x"),
-      style = "width: 600px",
       div(class = "ui-inline",
-          DT::DTOutput(ns("lhDT"), width = "540px")),
+          DT::DTOutput(ns("lhDT"))),
     ),
 
     # Directional switch
     div(
-      class = "ui-inline",
+      class = paste(c("ui-inline", if(oneway) "hidden"), collapse = " "),
       shinyWidgets::radioGroupButtons(
         inputId = ns("handler"),
         choiceNames = c(
@@ -45,11 +48,12 @@ dataHelperUI <- function(id, CSS = system.file("www/", "app.css", package = "DIV
     ),
 
     # Right-hand panel
-    div(
+    conditionalPanel(
+      "typeof input.lhDT_rows_selected  !== 'undefined' && input.lhDT_rows_selected.length > 0",
+      ns = ns,
       class = "ui-inline card-panel",
       if(!is.null(righticon)) icon(righticon, "fa-2x"),
-      style = "width: 600px",
-      DT::DTOutput(ns("rhDT"), width = "540px")
+      DT::DTOutput(ns("rhDT"))
     )
   )
 }
@@ -99,7 +103,6 @@ dataHelperServer <- function(id,
       lhdata <- dplyr::tbl(dbcon, lhdata)
       rhdata <- dplyr::tbl(dbcon, rhdata)
 
-
       # Defaults to left-to-right, so initialize with full LT
       LDT <- reactiveVal(lhdata)
       RDT <- reactiveVal(rhdata)
@@ -108,15 +111,20 @@ dataHelperServer <- function(id,
 
       output$lhDT <- DT::renderDT({
         LDT() %>% dplyr::collect()
-      }, escape = F, rownames = F, filter = "none", selection = "single",
-      options = list(dom = 'tp', pageLength = 10, scrollX = TRUE), style = "bootstrap")
+      },
+      escape = F, rownames = F, filter = "none", selection = "single",
+      options = list(dom = 'tp', pageLength = 10, scrollX = TRUE),
+      style = "bootstrap", class = "table-condensed table-hover")
 
       # Right-hand components ----------------------------------------------------------#
 
       # Render right-hand table
       output$rhDT <- DT::renderDT({
         RDT() %>% dplyr::collect()
-      }, escape = F, rownames = F, filter = "none", options = list(dom = 'tp', pageLength = 10, scrollX = TRUE), style = "bootstrap")
+      },
+      escape = F, rownames = F, filter = "none",
+      options = list(dom = 'tp', pageLength = 10, scrollX = TRUE),
+      style = "bootstrap", class = "table-condensed table-hover")
 
       # Translate between ------------------------------------------------------------#
 
@@ -125,20 +133,20 @@ dataHelperServer <- function(id,
         i <- input$lhDT_rows_selected
         if(is.null(i)) i <- 0L
         tabl <- lhdata %>%
-          dplyr::filter(row_number() %in% i) %>%
+          dplyr::filter(dplyr::row_number() %in% i) %>%
           dplyr::select(!!lhdatakey) %>%
           dplyr::inner_join(handler, by = lhdatakey) %>%
           dplyr::inner_join(rhdata, by = rhdatakey) %>%
           dplyr::select(-!!lhdatakey)
         RDT(tabl)
-      }, suspended = TRUE, ignoreNULL = FALSE)
+      }, suspended = FALSE, ignoreNULL = FALSE)
 
       # Translate right-hand to matches in left-hand; output displayed in left-hand table
       obs_right2left <- observeEvent(input$rhDT_rows_selected, {
         i <- input$rhDT_rows_selected
         if(is.null(i)) i <- 0L
         tabl <- rhdata %>%
-          dplyr::filter(row_number() %in% i) %>%
+          dplyr::filter(dplyr::row_number() %in% i) %>%
           dplyr::select(!!rhdatakey) %>%
           dplyr::inner_join(handler, by = rhdatakey) %>%
           dplyr::inner_join(lhdata, by = lhdatakey) %>%
@@ -162,8 +170,9 @@ dataHelperServer <- function(id,
       })
 
       result <- reactive({
-        if(input$handler == "left2right") RDT() %>% collect() else LDT() %>% collect()
+         if(input$handler == "left2right") RDT() %>% dplyr::collect() else LDT() %>% dplyr::collect()
       })
+
 
       return(result)
 
