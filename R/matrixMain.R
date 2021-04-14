@@ -29,7 +29,7 @@ matrixMainUI <- function(id, ...) {
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param mdata Reactive matrix data from \code{\link{matrixCtrlServer}}.
-#' @param colorscales Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named coloscale
+#' @param colorscales Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named colorscale
 #' or custom colorscale used for heatmap. If not given, two default colorscale functions are used.
 #' @import magrittr
 #' @export
@@ -70,14 +70,20 @@ matrixMainServer <- function(id,
         height <- nrow(M) * px
         height <- if(height < 400) 400 else height
         colorz <-  colorscales[[input$colorscale]][[1]](M)
-        axis <- list(title = "", showgrid = F, automargin = TRUE, showticklabels = nrow(M) <= 30, # show labels when not too crowded
+        axis <- list(title = "", showgrid = F, automargin = TRUE,
+                     showticklabels = nrow(M) <= 30, # show labels when not too crowded
                      ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T)
+        xaxis <- c(axis, tickangle = 270)
+        yaxis <- axis
 
         plotly::plot_ly(type = "heatmap", x = colnames(M), y = rownames(M), z = M, name = "Exploratory\nMap",
-                     colorscale = colorz, zmin = colorscales[[input$colorscale]]$zmin, zmax = colorscales[[input$colorscale]]$zmax,
-                     hovertemplate = "row: <b>%{y}</b><br>col: <b>%{x}</b><br>corr: <b>%{z}</b>",
-                     height = height, colorbar = list(thickness = 8)) %>%
-          plotly::layout(xaxis = axis, yaxis = axis, plot_bgcolor = colorscales[[input$colorscale]]$bgcolor) %>%
+                        colorscale = colorz,
+                        zmin = colorscales[[input$colorscale]]$zmin, zmax = colorscales[[input$colorscale]]$zmax,
+                        hovertemplate = "row: <b>%{y}</b><br>col: <b>%{x}</b><br>corr: <b>%{z}</b>",
+                        height = height, colorbar = list(thickness = 8)) %>%
+          plotly::layout(xaxis = xaxis, yaxis = yaxis,
+                         margin = list(t = 10, b = 250, r = 10, l = 10),
+                         plot_bgcolor = colorscales[[input$colorscale]]$bgcolor) %>%
           plotly::event_register("plotly_click")
       }
     })
