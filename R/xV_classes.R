@@ -27,7 +27,7 @@ new_xVExprs <- function(x, title = NULL, altj = NULL, type = "transcriptomics") 
 
 #' Helper to construct dataset object for use in \code{\link{xVServer}} module
 #'
-#' @param x A numeric matrix that should F features as columns and S samples as rows,
+#' @param x A numeric matrix that should have F features as columns and S samples as rows,
 #' with appropriate names/IDs as column names and row names.
 #' @param title Character title for the dataset.
 #' @param altj A character or integer vector matching length of features (columns),
@@ -48,5 +48,4 @@ subsetAltJ <- function(x, lookup) {
 }
 
 # TO DO
-# Convert other data to xVExpr function
-# Convert ExpressionSet function
+
