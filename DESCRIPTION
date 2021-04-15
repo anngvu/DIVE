@@ -26,8 +26,6 @@ Imports:
     Hmisc,
     igraph,
     visNetwork,
-    reshape2,
-    shinycssloaders,
     shinyWidgets,
     htmltools,
     jsonlite,
