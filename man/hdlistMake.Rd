@@ -4,25 +4,21 @@
 \alias{hdlistMake}
 \title{Wrapper to create hdlist (data object for multiV module)}
 \usage{
-hdlistMake(
-  datadir = "data/tsv/",
-  annodir = "ext-annotation/GeneID/",
-  indexfile = "build/xV_index.tsv"
-)
+hdlistMake(indexfile = "index.yml")
 }
 \arguments{
-\item{datadir}{Directory where datasets live (with ending slash).}
-
-\item{annodir}{Directory where extended annotations live (with ending slash).}
-
-\item{indexfile}{File used to select data for conversion;
-must have fields "Title" "DatasetID" "Ref" "Type"; other metadata ignored.}
+\item{indexfile}{Path to yaml configuration file used for data conversion.
+Must have fields "Title", "Ref", "Type", "DataPath", and "AnnotationPath",
+where "DataPath" contains path to the data and "AnnotationPath" contains
+path to the annotation file; other metadata are ignored.}
 }
 \description{
 Transforms data and annotation files to \code{xVExprs} class objects
 which are passed in as `hdlist` to \code{\link{multiVServer}} module,
 }
 \details{
-This requires an index file, e.g. xV_index.tsv, which indexes files and attributes
-that need conversion to \code{\link{multiVServer}} application data, then calls \code{DIVE::xVExprs} to do so.
+This reads an index yaml configuration file that
+stores files and attributes for data that
+should be converted to \code{\link{multiVServer}} application data;
+\code{DIVE::xVExprs} is called to do the conversion.
 }

@@ -41,7 +41,8 @@ Imports:
     fastcluster, 
     gridExtra, 
     rlang,
-    purrr
+    purrr,
+    yaml
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,

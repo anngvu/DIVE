@@ -20,23 +20,30 @@ asExprsMatrix <- function(df) {
 #' Transforms data and annotation files to \code{xVExprs} class objects
 #' which are passed in as `hdlist` to \code{\link{multiVServer}} module,
 #'
-#' This requires an index file, e.g. xV_index.tsv, which indexes files and attributes
-#' that need conversion to \code{\link{multiVServer}} application data, then calls \code{DIVE::xVExprs} to do so.
+#' This reads an index yaml configuration file that
+#' stores files and attributes for data that
+#' should be converted to \code{\link{multiVServer}} application data;
+#' \code{DIVE::xVExprs} is called to do the conversion.
 #'
-#' @param datadir Directory where datasets live (with ending slash).
-#' @param annodir Directory where extended annotations live (with ending slash).
-#' @param indexfile File used to select data for conversion;
-#' must have fields "Title" "DatasetID" "Ref" "Type"; other metadata ignored.
+#' @param indexfile Path to yaml configuration file used for data conversion.
+#' Must have fields "Title", "Ref", "Type", "DataPath", and "AnnotationPath",
+#' where "DataPath" contains path to the data and "AnnotationPath" contains
+#' path to the annotation file; other metadata are ignored.
 #' @export
-hdlistMake <- function(datadir = "data/tsv/", annodir = "ext-annotation/GeneID/", indexfile = "build/xV_index.tsv") {
-  index <- data.table::fread(indexfile, header = T)
-  datalist <- lapply(paste0(datadir, index$DatasetID, ".tsv"), data.table::fread)
-  extannolist <- lapply(paste0(annodir, index$DatasetID, "_GeneID.txt"), readLines)
+hdlistMake <- function(indexfile = "index.yml") {
+  index <- yaml::read_yaml(indexfile)
+  datapaths <- sapply(index, function(x) x$DataPath)
+  annopaths <- sapply(index, function(x) x$AnnotationPath)
+  datalist <- lapply(datapaths, data.table::fread)
+  annolist <- lapply(annopaths, readLines)
+  titles <- sapply(index, function(x) x$Title)
+  types <-  sapply(index, function(x) x$Type)
+  refs <- sapply(index, function(x) x$Ref)
   # annotation lines should match number of features (ignoring ID column)
-  stopifnot(lengths(datalist)-1  == lengths(extannolist))
+  stopifnot(lengths(datalist)-1  == lengths(annolist))
   datalist <- lapply(datalist, asExprsMatrix)
-  hdlist <- purrr::pmap(list(datalist, index$Title, extannolist, index$Type), DIVE::xVExprs)
-  names(hdlist) <- paste0(index$Title, " (", index$Ref, ")")
+  hdlist <- purrr::pmap(list(datalist, titles, annolist, types), DIVE::xVExprs)
+  names(hdlist) <- paste0(titles, " (", refs, ")")
   return(hdlist)
 }
 
@@ -47,50 +54,62 @@ hdlistMake <- function(datadir = "data/tsv/", annodir = "ext-annotation/GeneID/"
 #'
 #' @param hdlist Output of \code{\link{hdlistMake}}.
 #' @export
-hdlistchoicesMake <- function(hdlist) split(names(hdlist), sapply(hdlist, attr, "type"))
+hdlistchoicesMake <- function(hdlist) {
+  split(names(hdlist), sapply(hdlist, attr, "type"))
+}
+
 
 #' Create master data table from a collection of datasets
 #'
 #' Builds one large master dataset given the directory where a dataset collection lives
 #'
 #' This compiles the \code{cdata} data object from a collection of datasets.
-#' Each dataset is in the format of a uniquely named .csv/.tsv/.txt file within the specified directory.
+#' Each dataset is a uniquely named .csv|.tsv|.txt file within the specified directory.
 #' The files are read and merged together into one master \code{data.table}.
 #' Because column IDs must be unique in the table, namespaced IDs are created using the parent file name.
-#' A function can be passed into \code{indexfun} for some control of this namespace index approach.
-#' For instance, instead of using the full file name, it might make more sense to map it to a shorter form,
-#' uuid, or other external key (as long as unique IDs can still be ensured), e.g. a data feature "Var1"
-#' from file "PMID123456_Doe-2000.txt" is column named "Doe00_Var1" in the master data table.
+#' A function can be passed into \code{indexfun} for some control of this namespaced index approach.
+#' For instance, instead of using the full file name, it might be more desirable to map it to a shorter form,
+#' other uuid, or other external key (as long as unique IDs can still be ensured),
+#' e.g. a data feature "Var1" from file "PMID123456_Doe-2000.txt" is column named "Doe00_Var1"
+#' in the master data table.
 #'
 #' @param datadir Path to the collection of dataset files.
-#' @param files Character vector of file names to select in `datadir`. If NULL, uses `filepattern` to select files.
-#' @param filepattern Pattern for grep to identify qualifying files in `datadir`. Ignored if files are specified.
-#' Defaults to ".txt$|.csv$|.tsv$".
+#' @param files Character vector of file names to select in `datadir`.
+#' If NULL, uses `filepattern` to select files.
+#' @param filepattern Pattern for grep to identify qualifying files in `datadir`.
+#' Ignored if files are already specified.
 #' @param keyname Tables are merged using this key column.
-#' @param filterfun Optional, a filter function that returns columns within a file
-#' to be included the final master dataset, such as to include only numeric columns.
-#' @param indexfun Optional, a function to help with namespacing.
-#' If not given, defaults to using file name. See details.
+#' @param filterfun Optional, a filter function that returns selected columns within a file
+#' to be included in the final master dataset, such as to include only numeric columns.
+#' @param namespacefun Optional, a function to make unique namespaces.
+#' If not given, defaults to namespacing using filenames. See details.
 #' @return A "master" \code{data.table}
 #' @export
-cdataMake <- function(datadir = "data/tsv",
+cdataMake <- function(datadir,
                       files = NULL,
                       filepattern = "*",
                       keyname = "ID",
-                      filterfun = defaultColFilter,
-                      indexfun = defaultIndex) {
+                      filterfun = NULL,
+                      namespacefun = defaultIndex) {
   if(is.null(files)) files <- list.files(datadir, pattern = filepattern, full.names = TRUE)
   cdata <- lapply(files, function(x) data.table::fread(x))
   # apply filterfun
   if(!is.null(filterfun) && is.function(filterfun)) {
     cdata <- lapply(cdata, function(dt) filterfun(dt))
   }
-  # apply indexfun
+  # apply namespacefun
   ID <- NULL # avoid NOTE from non-standard evaluation
-  ns <- if(!is.null(indexfun) && is.function(indexfun)) indexfun(basename(files)) else tools::file_path_sans_ext(basename(files))
-  for(i in seq_along(cdata)) setnames(cdata[[i]], c(keyname, paste0(ns[i], "_", names(cdata[[i]])[-1])))
+  namespaces <- if(!is.null(namespacefun) && is.function(namespacefun)) {
+    namespacefun(basename(files))
+    # TO DO: check that custom namespacefun indeed generated unique namespaces
+    } else {
+      tools::file_path_sans_ext(basename(files))
+    }
+  for(i in seq_along(cdata)) {
+    setnames(cdata[[i]], c(keyname, paste0(namespaces[i], "_", names(cdata[[i]])[-1])))
+  }
   cdata <- rbindlist(cdata, use.names = T, fill = T)
-  cdata <- cdata[, lapply(.SD, colAgg), by = ID]
+  cdata <- cdata[, lapply(.SD, colAgg), by = keyname]
   return(cdata)
 }
 
@@ -147,15 +166,8 @@ colAgg <- function(x) {
 #'
 #' Create index using file names, e.g. "PMID20062967_Gianani-2010.txt" -> "Gianani10"
 #' @param filenames Character vector of names.
-#'  @keywords internal
+#' @keywords internal
 defaultIndex <- function(filenames) {
   sapply(strsplit(filenames, "_|-|\\."), function(x) paste0(x[2], substr(x[3], nchar(x[3])-1, nchar(x[3]))))
 }
 
-#' Default column filter
-#'
-#' @param dt A `data.table`.
-#' @keywords internal
-defaultColFilter <- function(dt) {
-  dt[, !grepl("_SE$|_SEM$|_SD$", names(dt)), with = F]
-}

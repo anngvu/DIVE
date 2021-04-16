@@ -7,9 +7,9 @@
 defaultIndex(filenames)
 }
 \arguments{
-\item{filenames}{Character vector of names.
-@keywords internal}
+\item{filenames}{Character vector of names.}
 }
 \description{
 Create index using file names, e.g. "PMID20062967_Gianani-2010.txt" -> "Gianani10"
 }
+\keyword{internal}

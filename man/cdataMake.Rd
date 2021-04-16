@@ -5,29 +5,30 @@
 \title{Create master data table from a collection of datasets}
 \usage{
 cdataMake(
-  datadir = "data/tsv",
+  datadir,
   files = NULL,
   filepattern = "*",
   keyname = "ID",
-  filterfun = defaultColFilter,
-  indexfun = defaultIndex
+  filterfun = NULL,
+  namespacefun = defaultIndex
 )
 }
 \arguments{
 \item{datadir}{Path to the collection of dataset files.}
 
-\item{files}{Character vector of file names to select in `datadir`. If NULL, uses `filepattern` to select files.}
+\item{files}{Character vector of file names to select in `datadir`.
+If NULL, uses `filepattern` to select files.}
 
-\item{filepattern}{Pattern for grep to identify qualifying files in `datadir`. Ignored if files are specified.
-Defaults to ".txt$|.csv$|.tsv$".}
+\item{filepattern}{Pattern for grep to identify qualifying files in `datadir`.
+Ignored if files are already specified.}
 
 \item{keyname}{Tables are merged using this key column.}
 
-\item{filterfun}{Optional, a filter function that returns columns within a file
-to be included the final master dataset, such as to include only numeric columns.}
+\item{filterfun}{Optional, a filter function that returns selected columns within a file
+to be included in the final master dataset, such as to include only numeric columns.}
 
-\item{indexfun}{Optional, a function to help with namespacing.
-If not given, defaults to using file name. See details.}
+\item{namespacefun}{Optional, a function to make unique namespaces.
+If not given, defaults to namespacing using filenames. See details.}
 }
 \value{
 A "master" \code{data.table}
@@ -37,11 +38,12 @@ Builds one large master dataset given the directory where a dataset collection l
 }
 \details{
 This compiles the \code{cdata} data object from a collection of datasets.
-Each dataset is in the format of a uniquely named .csv/.tsv/.txt file within the specified directory.
+Each dataset is a uniquely named .csv|.tsv|.txt file within the specified directory.
 The files are read and merged together into one master \code{data.table}.
 Because column IDs must be unique in the table, namespaced IDs are created using the parent file name.
-A function can be passed into \code{indexfun} for some control of this namespace index approach.
-For instance, instead of using the full file name, it might make more sense to map it to a shorter form,
-uuid, or other external key (as long as unique IDs can still be ensured), e.g. a data feature "Var1"
-from file "PMID123456_Doe-2000.txt" is column named "Doe00_Var1" in the master data table.
+A function can be passed into \code{indexfun} for some control of this namespaced index approach.
+For instance, instead of using the full file name, it might be more desirable to map it to a shorter form,
+other uuid, or other external key (as long as unique IDs can still be ensured),
+e.g. a data feature "Var1" from file "PMID123456_Doe-2000.txt" is column named "Doe00_Var1"
+in the master data table.
 }
