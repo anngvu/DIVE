@@ -25,20 +25,32 @@ asExprsMatrix <- function(df) {
 #' should be converted to \code{\link{multiVServer}} application data;
 #' \code{DIVE::xVExprs} is called to do the conversion.
 #'
-#' @param indexfile Path to yaml configuration file used for data conversion.
-#' Must have fields "Title", "Ref", "Type", "DataPath", and "AnnotationPath",
+#' @param index A data.frame containing fields
+#' "Title", "Ref", "Type", "DataPath", and "AnnotationPath",
 #' where "DataPath" contains path to the data and "AnnotationPath" contains
 #' path to the annotation file; other metadata are ignored.
+#' @param indexfile Path to a csv (index.csv) or yaml (index.yml)
+#' configuration file with the necessary fields described in `index`.
 #' @export
-hdlistMake <- function(indexfile = "index.yml") {
-  index <- yaml::read_yaml(indexfile)
-  datapaths <- sapply(index, function(x) x$DataPath)
-  annopaths <- sapply(index, function(x) x$AnnotationPath)
+hdlistMake <- function(index, indexfile) {
+  if(is.null(index)) {
+    ext <- tools::file_ext(indexfile)
+    if(ext == "csv") {
+      index <- data.table::fread(indexfile)
+    } else if(ext == "yml") {
+      index <- yaml::read_yaml(indexfile)
+      index <- data.table::rbindlist(index, fill = T)
+    } else{
+      error("Expect `indexfile` to be .csv or .yml file.")
+    }
+  }
+  datapaths <- index$DataPath
+  annopaths <- index$AnnotationPath
   datalist <- lapply(datapaths, data.table::fread)
   annolist <- lapply(annopaths, readLines)
-  titles <- sapply(index, function(x) x$Title)
-  types <-  sapply(index, function(x) x$Type)
-  refs <- sapply(index, function(x) x$Ref)
+  titles <- index$Title
+  types <-  index$Type
+  refs <- index$Ref
   # annotation lines should match number of features (ignoring ID column)
   stopifnot(lengths(datalist)-1  == lengths(annolist))
   datalist <- lapply(datalist, asExprsMatrix)
@@ -68,8 +80,8 @@ hdlistchoicesMake <- function(hdlist) {
 #' The files are read and merged together into one master \code{data.table}.
 #' Because column IDs must be unique in the table, namespaced IDs are created using the parent file name.
 #' A function can be passed into \code{indexfun} for some control of this namespaced index approach.
-#' For instance, instead of using the full file name, it might be more desirable to map it to a shorter form,
-#' other uuid, or other external key (as long as unique IDs can still be ensured),
+#' For instance, instead of using the full file name, one might need to map it to a shorter key,
+#' pre-existing uuid, or other external key (as long as unique IDs can still be ensured),
 #' e.g. a data feature "Var1" from file "PMID123456_Doe-2000.txt" is column named "Doe00_Var1"
 #' in the master data table.
 #'
