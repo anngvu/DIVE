@@ -41,7 +41,7 @@ hdlistMake <- function(index, indexfile) {
       index <- yaml::read_yaml(indexfile)
       index <- data.table::rbindlist(index, fill = T)
     } else{
-      error("Expect `indexfile` to be .csv or .yml file.")
+      stop("Expect `indexfile` to be .csv or .yml file.")
     }
   }
   datapaths <- index$DataPath
