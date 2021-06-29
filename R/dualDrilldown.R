@@ -79,11 +79,21 @@ dualDrilldownServer <- function(id,
 
     # Single-variable boxplot by default factor group
     drillplot1 <- function(datasubset, var1, colorby, factorx) {
-      p <- ggplot(datasubset, aes_string(x = names(colorby), y = var1)) +
-        geom_boxplot(outlier.color = NA) +
-        labs(title = paste("n =", nrow(datasubset))) +
-        theme_bw()
-      if(length(colorby[[1]])) p <- p + scale_colour_manual(values = colorby[[1]])
+      # handle when color by is missing manual colors ("insufficient values in manual scale")
+      # by limiting data
+      if(length(colorby[[1]])) {
+        datasubset <- datasubset[ datasubset[[names(colorby)]] %in% names(colorby[[1]]), ]
+        p <- ggplot(datasubset, aes_string(x = names(colorby), y = var1)) +
+          geom_boxplot(outlier.color = NA) +
+          labs(title = paste("n =", nrow(datasubset))) +
+          theme_bw() +
+          scale_colour_manual(values = colorby[[1]])
+      } else {
+        p <- ggplot(datasubset, aes_string(x = names(colorby), y = var1)) +
+          geom_boxplot(outlier.color = NA) +
+          labs(title = paste("n =", nrow(datasubset))) +
+          theme_bw()
+      }
       if(factorx(var1)) {
         p <- p + geom_count(aes_string(color = names(colorby)))
       } else {
@@ -100,15 +110,22 @@ dualDrilldownServer <- function(id,
 
     # Two-variable scatterplot
     drillplot2 <- function(datasubset, var1, var2, colorby, factorx, flipxy) {
-      p <- ggplot(datasubset, aes_string(x = var1, y = var2)) +
-        labs(title = paste("n =", nrow(datasubset))) +
-        theme_bw()
+      if(length(colorby[[1]])) {
+        datasubset <- datasubset[ datasubset[[names(colorby)]] %in% names(colorby[[1]]), ]
+        p <- ggplot(datasubset, aes_string(x = var1, y = var2)) +
+          labs(title = paste("n =", nrow(datasubset))) +
+          theme_bw() +
+          scale_colour_manual(values = colorby[[1]])
+      } else {
+        p <- ggplot(datasubset, aes_string(x = var1, y = var2)) +
+          labs(title = paste("n =", nrow(datasubset))) +
+          theme_bw()
+      }
       # different plot when both variables are categorical
       if(factorx(var1) && factorx(var2)) {
         p <- p + geom_count()
       } else {
         p <- p + geom_point(aes_string(color = names(colorby)), size = 2, alpha = 0.7)
-        if(length(colorby[[1]])) p <- p + scale_colour_manual(values = colorby[[1]])
       }
       if(flipxy) p <- p + coord_flip()
       p <- suppressWarnings(plotly::ggplotly(p)) %>% plotly::config(displayModeBar = F)
