@@ -79,17 +79,17 @@ hdlistchoicesMake <- function(hdlist) {
 #' Each dataset is a uniquely named .csv|.tsv|.txt file within the specified directory.
 #' The files are read and merged together into one master \code{data.table}.
 #' Because column IDs must be unique in the table, namespaced IDs are created using the parent file name.
-#' A function can be passed into \code{indexfun} for some control of this namespaced index approach.
+#' A function can be passed into \code{indexfun} for some control of this namespace index approach.
 #' For instance, instead of using the full file name, one might need to map it to a shorter key,
 #' pre-existing uuid, or other external key (as long as unique IDs can still be ensured),
 #' e.g. a data feature "Var1" from file "PMID123456_Doe-2000.txt" is column named "Doe00_Var1"
 #' in the master data table.
 #'
-#' @param datadir Path to the collection of dataset files.
-#' @param files Character vector of file names to select in `datadir`.
-#' If NULL, uses `filepattern` to select files.
-#' @param filepattern Pattern for grep to identify qualifying files in `datadir`.
-#' Ignored if files are already specified.
+#' @param datadir Directory hosting the collection of datasets. If given,
+#' this will try to use all files. For only selected files, use `files` parameter.
+#' @param files A vector of dataset file paths to read. This allows specifying
+#' a subset of files that are possibly spread throughout different directories.
+#' Must be given if `datadir` is not given, and ignored if `datadir` is given.
 #' @param keyname Tables are merged using this key column.
 #' @param filterfun Optional, a filter function that returns selected columns within a file
 #' to be included in the final master dataset, such as to include only numeric columns.
@@ -97,13 +97,16 @@ hdlistchoicesMake <- function(hdlist) {
 #' If not given, defaults to namespacing using filenames. See details.
 #' @return A "master" \code{data.table}
 #' @export
-cdataMake <- function(datadir,
+cdataMake <- function(datadir = NULL,
                       files = NULL,
                       filepattern = "*",
                       keyname = "ID",
                       filterfun = NULL,
                       namespacefun = defaultIndex) {
-  if(is.null(files)) files <- list.files(datadir, pattern = filepattern, full.names = TRUE)
+
+  if(!is.null(datadir) && dir.exists(datadir)) {
+    files <- list.files(datadir, full.names = T)
+  }
   cdata <- lapply(files, function(x) data.table::fread(x))
   # apply filterfun
   if(!is.null(filterfun) && is.function(filterfun)) {
@@ -111,12 +114,13 @@ cdataMake <- function(datadir,
   }
   # apply namespacefun
   ID <- NULL # avoid NOTE from non-standard evaluation
-  namespaces <- if(!is.null(namespacefun) && is.function(namespacefun)) {
-    namespacefun(basename(files))
-    # TO DO: check that custom namespacefun indeed generated unique namespaces
-    } else {
-      tools::file_path_sans_ext(basename(files))
-    }
+  if(!is.null(namespacefun) && is.function(namespacefun)) {
+    namespaces <- namespacefun(tools::file_path_sans_ext(basename(files)))
+    # check that custom namespacefun indeed generated unique namespaces
+    if(any(duplicated(namespaces))) warning("Custom namespaces are not unique.")
+  } else {
+    namespaces <- tools::file_path_sans_ext(basename(files))
+  }
   for(i in seq_along(cdata)) {
     setnames(cdata[[i]], c(keyname, paste0(namespaces[i], "_", names(cdata[[i]])[-1])))
   }
