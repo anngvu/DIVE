@@ -22,14 +22,19 @@
 #' e.g. columns containing IDs or other data where relationships are not calculated.
 #' The default excludes columns named "ID" and columns ending with "_SE", "_SEM", and "_SD".
 #' @param type Either "pearson" or "spearman", defaults to "spearman".
+#' @param varfilter Whether to remove zero-variance data before calculations.
 #' @return A list with M, the correlation matrix, and
 #' N, the number of observations matrix, and
 #' P, the p-values matrix. See \code{\link[Hmisc]{rcorr}}.
 #' @export
-data2cor <- function(cdata, exclude = "^ID$|_SE$|_SEM$|_SD$", type = "spearman") {
+data2cor <- function(cdata,
+                     exclude = "^ID$|_SE$|_SEM$|_SD$",
+                     type = "spearman",
+                     varfilter = FALSE) {
+
   cordata <- Filter(is.numeric, cdata) # remove nominal variables
   cordata <- cordata[, !grepl(exclude, names(cordata )), with = F] # don't do cor on _SE or whatever is specified
-  cordata <- rem0Var(cordata)
+  if(varfilter) cordata <- rem0Var(cordata)
   result <- Hmisc::rcorr(as.matrix(cordata), type = type)
   return(list(M = result$r, N = result$n, P = result$P))
 }
