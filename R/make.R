@@ -99,7 +99,6 @@ hdlistchoicesMake <- function(hdlist) {
 #' @export
 cdataMake <- function(datadir = NULL,
                       files = NULL,
-                      filepattern = "*",
                       keyname = "ID",
                       filterfun = NULL,
                       namespacefun = defaultIndex) {
