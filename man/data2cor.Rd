@@ -4,7 +4,12 @@
 \alias{data2cor}
 \title{Get correlation matrix and observations used}
 \usage{
-data2cor(cdata, exclude = "^ID$|_SE$|_SEM$|_SD$", type = "spearman")
+data2cor(
+  cdata,
+  exclude = "^ID$|_SE$|_SEM$|_SD$",
+  type = "spearman",
+  varfilter = FALSE
+)
 }
 \arguments{
 \item{cdata}{A `data.table`.}
@@ -14,6 +19,8 @@ e.g. columns containing IDs or other data where relationships are not calculated
 The default excludes columns named "ID" and columns ending with "_SE", "_SEM", and "_SD".}
 
 \item{type}{Either "pearson" or "spearman", defaults to "spearman".}
+
+\item{varfilter}{Whether to remove zero-variance data before calculations.}
 }
 \value{
 A list with M, the correlation matrix, and

@@ -4,13 +4,16 @@
 \alias{hdlistMake}
 \title{Wrapper to create hdlist (data object for multiV module)}
 \usage{
-hdlistMake(indexfile = "index.yml")
+hdlistMake(index, indexfile)
 }
 \arguments{
-\item{indexfile}{Path to yaml configuration file used for data conversion.
-Must have fields "Title", "Ref", "Type", "DataPath", and "AnnotationPath",
+\item{index}{A data.frame containing fields
+"Title", "Ref", "Type", "DataPath", and "AnnotationPath",
 where "DataPath" contains path to the data and "AnnotationPath" contains
 path to the annotation file; other metadata are ignored.}
+
+\item{indexfile}{Path to a csv (index.csv) or yaml (index.yml)
+configuration file with the necessary fields described in `index`.}
 }
 \description{
 Transforms data and annotation files to \code{xVExprs} class objects

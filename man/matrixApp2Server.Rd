@@ -44,7 +44,8 @@ If there is a named vector, this is passed into \code{scale_color_manual} to be 
 `list(MyGroupingVar = c(A = "red", B = "blue"))` (useful for enforcing a consistent/meaningful color scheme),
 or use `list(MyGroupingVar = NULL)` if custom color scaling isn't necessary. See also details.}
 
-\item{colorscales}{Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named colorscale
+\item{colorscales}{Optional, a list of custom colorscale functions
+that takes a numeric matrix and returns either a named colorscale
 or custom colorscale used for heatmap. If not given, two default colorscale functions are used.}
 
 \item{informd}{Relative path to the Rmarkdown file, whose contents will be displayed in the modal.}

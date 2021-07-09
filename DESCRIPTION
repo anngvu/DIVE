@@ -1,7 +1,7 @@
 Package: DIVE
 Type: Package
 Title: Data Integration and Visual Exploration
-Version: 0.3.0
+Version: 0.4.9999
 Author: Anh Nguyet Vu
 Maintainer: Anh Nguyet Vu <avu@coh.org>
 Description: Integrate, visually explore, and analyze connected datasets with modular Shiny applications made for biology-oriented datasets but customizable for other dataset types.

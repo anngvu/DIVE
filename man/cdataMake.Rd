@@ -5,22 +5,20 @@
 \title{Create master data table from a collection of datasets}
 \usage{
 cdataMake(
-  datadir,
+  datadir = NULL,
   files = NULL,
-  filepattern = "*",
   keyname = "ID",
   filterfun = NULL,
   namespacefun = defaultIndex
 )
 }
 \arguments{
-\item{datadir}{Path to the collection of dataset files.}
+\item{datadir}{Directory hosting the collection of datasets. If given,
+this will try to use all files. For only selected files, use `files` parameter.}
 
-\item{files}{Character vector of file names to select in `datadir`.
-If NULL, uses `filepattern` to select files.}
-
-\item{filepattern}{Pattern for grep to identify qualifying files in `datadir`.
-Ignored if files are already specified.}
+\item{files}{A vector of dataset file paths to read. This allows specifying
+a subset of files that are possibly spread throughout different directories.
+Must be given if `datadir` is not given, and ignored if `datadir` is given.}
 
 \item{keyname}{Tables are merged using this key column.}
 
@@ -41,9 +39,9 @@ This compiles the \code{cdata} data object from a collection of datasets.
 Each dataset is a uniquely named .csv|.tsv|.txt file within the specified directory.
 The files are read and merged together into one master \code{data.table}.
 Because column IDs must be unique in the table, namespaced IDs are created using the parent file name.
-A function can be passed into \code{indexfun} for some control of this namespaced index approach.
-For instance, instead of using the full file name, it might be more desirable to map it to a shorter form,
-other uuid, or other external key (as long as unique IDs can still be ensured),
+A function can be passed into \code{indexfun} for some control of this namespace index approach.
+For instance, instead of using the full file name, one might need to map it to a shorter key,
+pre-existing uuid, or other external key (as long as unique IDs can still be ensured),
 e.g. a data feature "Var1" from file "PMID123456_Doe-2000.txt" is column named "Doe00_Var1"
 in the master data table.
 }

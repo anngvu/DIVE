@@ -16,7 +16,8 @@ matrixMainServer(
 
 \item{mdata}{Reactive matrix data from \code{\link{matrixCtrlServer}}.}
 
-\item{colorscales}{Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named colorscale
+\item{colorscales}{Optional, a list of custom colorscale functions
+that takes a numeric matrix and returns either a named colorscale
 or custom colorscale used for heatmap. If not given, two default colorscale functions are used.}
 }
 \description{

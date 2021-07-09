@@ -11,7 +11,8 @@ dataHelperServer(
   lhdatakey,
   rhdata,
   rhdatakey,
-  handler
+  handler,
+  functionality = "filter"
 )
 }
 \arguments{
@@ -28,6 +29,9 @@ dataHelperServer(
 \item{rhdatakey}{Name of key column in \code{rhdata} table, which should also be a key in \code{handler}.}
 
 \item{handler}{Name of table used for translating between \code{lhdata} and \code{rhdata}.}
+
+\item{functionality}{Either "filter" or "select" for the intended behavior of module,
+defaulting to the first. See details.}
 }
 \description{
 Traverse data in "right-hand" and "left-hand" tables
@@ -45,6 +49,12 @@ The module requires these tables:
   See helpful reference for
   \href{https://www.ibm.com/support/knowledgecenter/SSEP7J_11.1.0/com.ibm.swg.ba.cognos.ug_fm.doc/c_dyn_query_bridge_tables.html}{bridge table}}.
 }
+
+There can be some nuance to the intended functionality: one table acts as a constraint filter to limit the results
+in the second table, or one table acts as an entryway to show linked results in the second table.
+The difference boils down to whether the second table shows all possible results
+if nothing is selected in the first ("filter" functionality type)
+or the second table shows nothing if nothing is selected in the first ("select" functionality type).
 }
 \seealso{
 Other dataHelper: 
