@@ -143,8 +143,8 @@ body {
   border-top: 5px solid lightgray;
   padding: 40px 20px 20px 20px;
   z-index: 10;
-  flex: 0 1 25vw;
-  max-width: 25vw;
+  flex: 0 1 40vw;
+  max-width: 40vw;
 }
 
 .dualDrilldown:hover {
