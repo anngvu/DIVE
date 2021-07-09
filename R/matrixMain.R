@@ -29,22 +29,23 @@ matrixMainUI <- function(id, ...) {
 #'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param mdata Reactive matrix data from \code{\link{matrixCtrlServer}}.
-#' @param colorscales Optional, a list of custom colorscale functions that takes a numeric matrix and returns either a named colorscale
+#' @param colorscales Optional, a list of custom colorscale functions
+#' that takes a numeric matrix and returns either a named colorscale
 #' or custom colorscale used for heatmap. If not given, two default colorscale functions are used.
 #' @import magrittr
 #' @export
 matrixMainServer <- function(id,
                              mdata,
                              colorscales = list(default = list(colorscale_named(pal = "RdBu"), zmin = -1, zmax = 1),
-                                             absolute = list(colorscale_heatmap_absolute, zmin = -1, zmax = 1))
+                                                absolute = list(colorscale_heatmap_absolute, zmin = -1, zmax = 1))
                             ) {
 
   moduleServer(id, function(input, output, session) {
 
-    output$palettes <- renderUI({
-      tags$div(radioButtons(session$ns("colorscale"), label = NULL, choices = names(colorscales), inline = TRUE),
-               title = "Select the color mapping for data")
-    })
+    # output$palettes <- renderUI({
+    #   tags$div(radioButtons(session$ns("colorscale"), label = NULL, choices = names(colorscales), inline = TRUE),
+    #            title = "Select the color mapping for data")
+    # })
 
     # Generate meta marginal plots
     metamargin <- function(x, y, z, name = "Group", text, colorscale = "Portland") {
@@ -55,10 +56,10 @@ matrixMainServer <- function(id,
         plotly::layout(xaxis = axis, yaxis = axis)
     }
 
-    #-- Main matrix plot -----------------------------------------------------------------------------------------------------#
+    #-- Main matrix plot --------------------------------------------------------------------------------------#
 
     matrixheatmap <- reactive({
-      req(input$colorscale)
+      # req(input$colorscale)
       M <- mdata$filM
       if(is.null(M)) {
         plotly::plotly_empty()
@@ -66,10 +67,11 @@ matrixMainServer <- function(id,
         plotly::plotly_empty() %>% plotly::layout(title = "no result with selected filters")
       } else {
         # bug? plot not displayed if height is less than 100px; minpx = 5
-        px <- 1200/ncol(M)
+        px <- 1000/ncol(M)
         height <- nrow(M) * px
         height <- if(height < 400) 400 else height
-        colorz <-  colorscales[[input$colorscale]][[1]](M)
+        # colorz <-  colorscales[[input$colorscale]][[1]](M)
+        colorz <-  colorscales[[mdata$layer]][[1]](M)
         axis <- list(title = "", showgrid = F, automargin = TRUE,
                      showticklabels = nrow(M) <= 30, # show labels when not too crowded
                      ticks = "", tickfont = list(color = "gray"), linecolor = "gray", mirror = T)
@@ -78,12 +80,12 @@ matrixMainServer <- function(id,
 
         plotly::plot_ly(type = "heatmap", x = colnames(M), y = rownames(M), z = M, name = "Exploratory\nMap",
                         colorscale = colorz,
-                        zmin = colorscales[[input$colorscale]]$zmin, zmax = colorscales[[input$colorscale]]$zmax,
+                        zmin = colorscales[[mdata$layer]]$zmin, zmax = colorscales[[mdata$layer]]$zmax, # colorscales[[input$colorscale]]$zmin, zmax = colorscales[[input$colorscale]]$zmax,
                         hovertemplate = "row: <b>%{y}</b><br>col: <b>%{x}</b><br>corr: <b>%{z}</b>",
                         height = height, colorbar = list(thickness = 8)) %>%
           plotly::layout(xaxis = xaxis, yaxis = yaxis,
                          margin = list(t = 10, b = 250, r = 10, l = 10),
-                         plot_bgcolor = colorscales[[input$colorscale]]$bgcolor) %>%
+                         plot_bgcolor = colorscales[[mdata$layer]]$bgcolor) %>% # colorscales[[input$colorscale]]$bgcolor) %>%
           plotly::event_register("plotly_click")
       }
     })
@@ -123,7 +125,7 @@ matrixMainServer <- function(id,
     })
 
 
-    #-- Return -----------------------------------------------------------------------------------------------------#
+    #-- Return ---------------------------------------------------------------------------------------------------#
 
     ss <- reactive({
       s <- plotly::event_data("plotly_click", source = session$ns("main"))

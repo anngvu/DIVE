@@ -2,22 +2,34 @@
 #'
 #' Interactive controls of matrix view
 #'
+#' This includes UI elements for selection and filtering
+#' of the matrix; these can be conditionally rendered.
+#'
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
+#' @param selection Whether to show selection input.
 #' @param minN Minimum number for numeric input filter.
+#' @param nfilter Whether to show the N filter input.
+#' @param pfilter Whether to show the P filter input.
 #' @export
-matrixCtrl2UI <- function(id, minN = 5) {
+matrixCtrl2UI <- function(id, minN = 4, selection = FALSE, nfilter = FALSE, pfilter = FALSE) {
   ns <- NS(id)
   tags$div(id = ns("matrixCtrlUI"), class = "matrixCtrlUI-panel",
+
            div(class = "ui-inline",
+               shinyWidgets::radioGroupButtons(ns("layer"), "Connection type",
+                                               choices = c(`Shared cases` = "N", `Association (correlation)` = "M"))
+               ),
+           div(class = if(selection) "ui-inline" else "ui-inline hidden",
                div(class = "ui-inline",
-                   selectizeInput(ns("optrow"),
-                                  label = HTML("<strong>Selected nodes</strong>"),
-                                  choices = "", selected = NULL, multiple = T, width = "500px",
-                                  options = list(placeholder = paste("select to view"))
+                     selectizeInput(ns("optrow"),
+                                    label = HTML("<strong>Selected nodes</strong>"),
+                                    choices = "", selected = NULL, multiple = T, width = "500px",
+                                    options = list(placeholder = paste("select to view"))
                                   )
-               )
+                   )
+
            ),
-           div(class = "ui-inline",
+           div(class = if(selection) "ui-inline" else "ui-inline hidden",
                conditionalPanel("input.optrow != ''", ns = ns,
                  div(class = "ui-inline", br(), icon("arrow-right", class = "fa-3x")),
                  div(class = "ui-inline",
@@ -26,14 +38,14 @@ matrixCtrl2UI <- function(id, minN = 5) {
                                     choices = "", multiple = T, width = "400px"))
                )
            ),
-           div(class = "ui-inline",
+           div(class = if(nfilter) "ui-inline" else "ui-inline hidden",
                conditionalPanel("input.optcol == ''", ns = ns,
                  numericInput(ns("minN"),
                               label = "mininum N",
-                              value = 5, min = minN, step = 1, width = "80px")
+                              value = minN, min = minN, step = 1, width = "80px")
                  )
                ),
-           div(class = "ui-inline", br(),
+           div(class = if(pfilter) "ui-inline" else "ui-inline hidden", br(),
                conditionalPanel("input.optcol == ''", ns = ns,
                  checkboxInput(ns("cutoffP"),
                                label = "P < 0.05 ",
@@ -84,10 +96,12 @@ matrixCtrl2Server <- function(id,
 
   moduleServer(id, function(input, output, session) {
 
-    mstate <- reactiveValues(M = M, N = N, P = P,
+    mstate <- reactiveValues(M = N, N = N, P = P,
+                             layer = "M",
                              cdata = cdata,
                              newdata = NULL,
                              rowmeta = NULL, colmeta = NULL, filM = M)
+
     request <- reactiveValues(optrow = NULL)
 
     # Some applications need filter values to be passed on in addition to mstate values
@@ -102,6 +116,19 @@ matrixCtrl2Server <- function(id,
     #-- Initialize UI -------------------------------------------------------------------------------#
 
     updateSelectizeInput(session, "optrow", choices = rownames(M))
+
+    #-- Observe whether layer requested is M or N ---------------------------------------------------#
+
+    observeEvent(input$layer, {
+      if(input$layer == "M") {
+        mstate$M <- M
+        mstate$layer <- "M"
+      } else {
+        mstate$M <- N
+        mstate$layer <- "N"
+      }
+      mstate$filM <- mstate$M
+    })
 
     #-- Functions -----------------------------------------------------------------------------------#
 

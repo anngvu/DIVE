@@ -18,7 +18,7 @@ matrixApp2UI <- function(id, CSS = system.file("www/", "app.css", package = "DIV
                      column(12,
                             div(class = "input-panel-flush",
                               div(style = "padding-left: 50px;",
-                                  shinyWidgets::materialSwitch(ns("lookup"), label = "DETAILED SEARCH")),
+                                  shinyWidgets::materialSwitch(ns("lookup"), label = "Data Menu")),
                               absolutePanel(id = ns("filter"),
                                             conditionalPanel("input.lookup", ns = ns,
                                               dataHelperUI("metahelper", oneway = TRUE))
@@ -43,8 +43,8 @@ matrixApp2UI <- function(id, CSS = system.file("www/", "app.css", package = "DIV
                                                  $(this).addClass('active').siblings().removeClass('active'); }", ns.graph, ns.graph, ns.matrix, ns.matrix))
             ),
             tags$div(style = "position:relative; display: flex; align-items: flex-start;",
-                     matrixMainUI(ns("matrix"), style = "flex: 4 0 70vw;"),
-                     matrixAsNetworkUI(ns("graph"), height = "1000px", style = "flex: 4 0 70vw; display: none;"),
+                     matrixMainUI(ns("matrix"), style = "flex: 4 0 50vw;"),
+                     matrixAsNetworkUI(ns("graph"), height = "800px", style = "flex: 4 0 50vw; display: none;"),
                      dualDrilldownUI(ns("dd"))
             )
   )
