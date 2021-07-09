@@ -49,7 +49,7 @@ dataHelperUI <- function(id, CSS = system.file("www/", "app.css", package = "DIV
 
     # Right-hand panel
     conditionalPanel(
-      "typeof input.lhDT_rows_selected  !== 'undefined' && input.lhDT_rows_selected.length > 0",
+      "TRUE", # "typeof input.lhDT_rows_selected  !== 'undefined' && input.lhDT_rows_selected.length > 0",
       ns = ns,
       class = "ui-inline card-panel",
       if(!is.null(righticon)) icon(righticon, "fa-2x"),
@@ -75,6 +75,11 @@ dataHelperUI <- function(id, CSS = system.file("www/", "app.css", package = "DIV
 #'   \href{https://www.ibm.com/support/knowledgecenter/SSEP7J_11.1.0/com.ibm.swg.ba.cognos.ug_fm.doc/c_dyn_query_bridge_tables.html}{bridge table}}.
 #' }
 #'
+#' There can be some nuance to the intended functionality: one table acts as a constraint filter to limit the results
+#' in the second table, or one table acts as an entryway to show linked results in the second table.
+#' The difference boils down to whether the second table shows all possible results
+#' if nothing is selected in the first ("filter" functionality type)
+#' or the second table shows nothing if nothing is selected in the first ("select" functionality type).
 #'
 #' @family dataHelper
 #'
@@ -85,21 +90,25 @@ dataHelperUI <- function(id, CSS = system.file("www/", "app.css", package = "DIV
 #' @param rhdata Name of the table on the right-hand side.
 #' @param rhdatakey Name of key column in \code{rhdata} table, which should also be a key in \code{handler}.
 #' @param handler Name of table used for translating between \code{lhdata} and \code{rhdata}.
+#' @param functionality Either "filter" or "select" for the intended behavior of module,
+#' defaulting to the first. See details.
 #'
 #' @import shiny
 #' @export
 dataHelperServer <- function(id,
-                              dbcon = NULL,
-                              lhdata, lhdatakey, # lhreact = FALSE,
-                              rhdata, rhdatakey, # rhreact = FALSE,
-                              handler) {
+                             dbcon = NULL,
+                             lhdata, lhdatakey, # lhreact = FALSE,
+                             rhdata, rhdatakey, # rhreact = FALSE,
+                             handler,
+                             functionality = "filter"
+                            ) {
 
     moduleServer(id, function(input, output, session) {
 
       handler <- dplyr::tbl(dbcon, handler)
 
-      # lhdata and/or rhdata can be reactive objects passed on by another module;
-      # do not initialize using dbcon if this is the case
+      # FUTURE: lhdata and/or rhdata can be reactive objects passed on by another module
+      # as indicated by lhreact/rhreact parameters; do not initialize with dbcon if so
       lhdata <- dplyr::tbl(dbcon, lhdata)
       rhdata <- dplyr::tbl(dbcon, rhdata)
 
@@ -112,7 +121,7 @@ dataHelperServer <- function(id,
       output$lhDT <- DT::renderDT({
         LDT() %>% dplyr::collect()
       },
-      escape = F, rownames = F, filter = "none", selection = "single",
+      escape = F, rownames = F, filter = "top", selection = "single",
       options = list(dom = 'tp', pageLength = 10, scrollX = TRUE),
       style = "bootstrap", class = "table-condensed table-hover")
 
@@ -122,7 +131,7 @@ dataHelperServer <- function(id,
       output$rhDT <- DT::renderDT({
         RDT() %>% dplyr::collect()
       },
-      escape = F, rownames = F, filter = "none",
+      escape = F, rownames = F, filter = "top", selection = "single",
       options = list(dom = 'tp', pageLength = 10, scrollX = TRUE),
       style = "bootstrap", class = "table-condensed table-hover")
 
@@ -131,20 +140,35 @@ dataHelperServer <- function(id,
       # Translate left-hand to matches in right-hand; output displayed in right-hand table
       obs_left2right <- observeEvent(input$lhDT_rows_selected, {
         i <- input$lhDT_rows_selected
-        if(is.null(i)) i <- 0L
-        tabl <- lhdata %>%
-          dplyr::filter(dplyr::row_number() %in% i) %>%
-          dplyr::select(!!lhdatakey) %>%
-          dplyr::inner_join(handler, by = lhdatakey) %>%
-          dplyr::inner_join(rhdata, by = rhdatakey) %>%
-          dplyr::select(-!!lhdatakey)
-        RDT(tabl)
+        if(is.null(i)) {
+          if(functionality == "filter") { # show all of right-hand table
+            RDT(rhdata)
+          } else { # show empty right-hand table
+            tabl <- rhdata %>% dplyr::filter(dplyr::row_number() %in% 0L)
+            RDT(tabl)
+          }
+        } else {
+          tabl <- lhdata %>%
+            dplyr::filter(dplyr::row_number() %in% i) %>%
+            dplyr::select(!!lhdatakey) %>%
+            dplyr::inner_join(handler, by = lhdatakey) %>%
+            dplyr::inner_join(rhdata, by = rhdatakey) %>%
+            dplyr::select(-!!lhdatakey)
+          RDT(tabl)
+        }
       }, suspended = FALSE, ignoreNULL = FALSE)
 
       # Translate right-hand to matches in left-hand; output displayed in left-hand table
       obs_right2left <- observeEvent(input$rhDT_rows_selected, {
         i <- input$rhDT_rows_selected
-        if(is.null(i)) i <- 0L
+        if(is.null(i)) {
+          if(functionality == "filter") {
+            LDT(lhdata)
+          } else {
+            tabl <- lhdata %>% dplyr::filter(dplyr::row_number() %in% 0L)
+            LDT(tabl)
+          }
+        } else {
         tabl <- rhdata %>%
           dplyr::filter(dplyr::row_number() %in% i) %>%
           dplyr::select(!!rhdatakey) %>%
@@ -152,6 +176,7 @@ dataHelperServer <- function(id,
           dplyr::inner_join(lhdata, by = lhdatakey) %>%
           dplyr::select(-!!rhdatakey)
         LDT(tabl)
+        }
       }, suspended = TRUE, ignoreNULL = FALSE)
 
       # Modify observers accordingly when switching from left-to-right or right-to-left
