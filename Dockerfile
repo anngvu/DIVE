@@ -20,9 +20,8 @@ RUN R -e "install.packages(c('cpp11', 'latticeExtra', 'shinythemes', 'data.table
 RUN R -e "BiocManager::install(c('mygene', 'Biobase', 'SummarizedExperiment', 'GEOquery'))" 
 
 # install package from current github source
-# RUN R -e "install.packages('shinyWidgets', dependencies=c('Depends', 'Imports'), repos='http://cran.rstudio.com/')"
 COPY . .
 RUN R -e "install.packages('.', repos = NULL)"
 
-ENTRYPOINT ["bin/bash"] 
+ENTRYPOINT ["bin/bash", "-l", "-c"] 
 
