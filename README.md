@@ -4,7 +4,7 @@ DIVE is an R/Shiny application that provides a proof-of-concept framework for in
 
 Though the components are designed to be modular and generic enough to be re-purposeable for different data collections, DIVE is optimized for the first context and demonstrate the concept with data from the [Network for Pancreatic Organ Donors (nPOD)](https://www.jdrfnpod.org/) cohort. The motivating data comprise of painstakingly curated published research on the nPOD donor samples published over the last decade. **DIVE can be configured with different instance data; when used with the nPOD data it is branded _nPOD DataView_**, which requires DIVE to be installed, and then simply calls DIVE with custom configurations and data objects. nPOD DataView is intended for researchers (biologists) who want a "friendly" data portal. **Thus, to see DIVE in action with the real data, go to [DataView](https://gitlab.com/npod/dataview).** 
 
-Others in the scientific community (developers and bioinformaticians) may be more interested in reusing or extending the code of DIVE for their own application. Thus, to learn about the general app design of DIVE from a developer perspective, see the technical [articles](https://avucoh.github.io/DIVE/reference/).
+Others in the scientific community (developers and bioinformaticians) may be more interested in reusing or extending the code of DIVE for their own application.
 
 This is still a work in progress and more details will be available as the application is finishing up on development and testing. To request a feature or file bugs: [submit an issue](https://github.com/avucoh/DIVE/issues).
 
@@ -12,7 +12,7 @@ This is still a work in progress and more details will be available as the appli
 
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
-[![R build status](https://github.com/avucoh/DIVE/workflows/R-CMD-check/badge.svg)](https://github.com/avucoh/DIVE/actions)
+[![R build status](https://github.com/avucoh/DIVE/workflows/R-CMD-check/badge.svg)](https://github.com/anngvu/DIVE/actions)
 <!-- badges: end -->
 
 ## Installation 
