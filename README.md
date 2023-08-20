@@ -6,18 +6,18 @@ Though the components are designed to be modular and generic enough to be re-pur
 
 Others in the scientific community (developers and bioinformaticians) may be more interested in reusing or extending the code of DIVE for their own application.
 
-This is still a work in progress and more details will be available as the application is finishing up on development and testing. To request a feature or file bugs: [submit an issue](https://github.com/avucoh/DIVE/issues).
+This is still a work in progress and more details will be available as the application is finishing up on development and testing. To request a feature or file bugs: [submit an issue](https://github.com/anngvu/DIVE/issues).
 
 <!-- badges: start -->
 
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
-[![R build status](https://github.com/avucoh/DIVE/workflows/R-CMD-check/badge.svg)](https://github.com/anngvu/DIVE/actions)
+[![R build status](https://github.com/anngvu/DIVE/workflows/R-CMD-check/badge.svg)](https://github.com/anngvu/DIVE/actions)
 <!-- badges: end -->
 
 ## Installation 
 
-The current version can be installed via `devtools::install_github("avucoh/DIVE")`
+The current version can be installed via `devtools::install_github("anngvu/DIVE")`
 
 
 ## Modules
