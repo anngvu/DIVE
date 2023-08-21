@@ -14,8 +14,7 @@ matrixAppServer(
   vkey,
   factorx,
   colorby,
-  colorscales = list(default = list(colorscale_named(pal = "RdBu"), zmin = -1, zmax =
-    1)),
+  colorscales = list(default = list(colorscale_named(pal = "RdBu"), zmin = -1, zmax = 1)),
   informd = system.file("info/interactive_matrix.Rmd", package = "DIVE"),
   appdata = NULL
 )

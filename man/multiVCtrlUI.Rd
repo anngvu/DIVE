@@ -4,7 +4,7 @@
 \alias{multiVCtrlUI}
 \title{Shiny module UI for controlling multi-dataset views}
 \usage{
-multiVCtrlUI(id, menu = TRUE, upload = TRUE, GEO = TRUE, maxItems = 3L)
+multiVCtrlUI(id, menu = TRUE, upload = TRUE, maxItems = 3L)
 }
 \arguments{
 \item{id}{Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.}
@@ -12,8 +12,6 @@ multiVCtrlUI(id, menu = TRUE, upload = TRUE, GEO = TRUE, maxItems = 3L)
 \item{menu}{Logical flag, whether to allow a menu for loading stored datasets.}
 
 \item{upload}{Logical flag, whether to allow data upload.}
-
-\item{GEO}{Logical flag, whether to allow pulling data from GEO (beta).}
 
 \item{maxItems}{Integer representing the max number of tracks that can be selected (displayed).}
 }

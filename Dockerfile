@@ -17,7 +17,7 @@ RUN R -e "install.packages(c('BiocManager'), dependencies=c('Depends', 'Imports'
 RUN R -e "install.packages(c('fastmap', 'htmltools', 'shiny'), dependencies=c('Depends', 'Imports'), repos='http://cran.rstudio.com/')"
 # cpp11 and latticeExtra are dependencies
 RUN R -e "install.packages(c('cpp11', 'latticeExtra', 'shinythemes', 'data.table', 'dplyr', 'ggplot2', 'scales', 'plotly', 'Hmisc', 'igraph', 'visNetwork', 'shinyWidgets', 'optmatch', 'DT', 'assertthat', 'dendextend', 'fastcluster', 'gridExtra', 'rlang', 'purrr', 'DBI', 'duckdb'), dependencies=c('Depends', 'Imports'), repos='http://cran.rstudio.com/')" 
-RUN R -e "BiocManager::install(c('mygene', 'Biobase', 'SummarizedExperiment', 'GEOquery'))" 
+RUN R -e "BiocManager::install(c('mygene'))" 
 
 # install package from current github source
 # RUN R -e "install.packages('shinyWidgets', dependencies=c('Depends', 'Imports'), repos='http://cran.rstudio.com/')"

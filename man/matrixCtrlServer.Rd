@@ -13,7 +13,8 @@ matrixCtrlServer(
   cdata = NULL,
   metadata = NULL,
   vkey = NULL,
-  newdata = reactive({ }),
+  newdata = reactive({
+ }),
   mfilter = NULL
 )
 }

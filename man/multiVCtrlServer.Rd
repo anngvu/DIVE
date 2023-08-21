@@ -50,7 +50,6 @@ The server logic handles sourcing of large expression datasets with three differ
 \enumerate{
   \item Selecting from available pre-processed datasets.
   \item User-uploaded data.
-  \item A beta (least-supported) method of retrieving datasets from GEO.
 }
 The data in \code{cdata} is supposed to be a phenotype or clinical
 feature that one usually tries to correlate with expression data and can be numeric or categorical.

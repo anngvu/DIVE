@@ -11,8 +11,10 @@ matrixCtrl2Server(
   P = NULL,
   cutoffP = 0.05,
   cdata = NULL,
-  metafilter = reactive({ }),
-  newdata = reactive({ }),
+  metafilter = reactive({
+ }),
+  newdata = reactive({
+ }),
   filtervals = NULL
 )
 }

@@ -31,11 +31,7 @@ Imports:
     jsonlite,
     optmatch,
     DT,
-    GEOquery,
     mygene,
-    limma,
-    Biobase, 
-    SummarizedExperiment, 
     assertthat, 
     dendextend,
     fastcluster, 
@@ -43,7 +39,7 @@ Imports:
     rlang,
     purrr,
     yaml
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
 Suggests: 
     knitr,
     rmarkdown,

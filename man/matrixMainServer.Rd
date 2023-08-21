@@ -7,8 +7,8 @@
 matrixMainServer(
   id,
   mdata,
-  colorscales = list(default = list(colorscale_named(pal = "RdBu"), zmin = -1, zmax =
-    1), absolute = list(colorscale_heatmap_absolute, zmin = -1, zmax = 1))
+  colorscales = list(default = list(colorscale_named(pal = "RdBu"), zmin = -1, zmax = 1),
+    absolute = list(colorscale_heatmap_absolute, zmin = -1, zmax = 1))
 )
 }
 \arguments{

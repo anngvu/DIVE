@@ -17,10 +17,9 @@
 #' @param id Character ID for specifying namespace, see \code{shiny::\link[shiny]{NS}}.
 #' @param menu Logical flag, whether to allow a menu for loading stored datasets.
 #' @param upload Logical flag, whether to allow data upload.
-#' @param GEO Logical flag, whether to allow pulling data from GEO (beta).
 #' @param maxItems Integer representing the max number of tracks that can be selected (displayed).
 #' @export
-multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE, maxItems = 3L) {
+multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, maxItems = 3L) {
   ns <- NS(id)
   tags$div(class = "multiVCtrlUI-panel", id = ns("multiVCtrlUI"),
            if(menu) div(class = "ui-inline",
@@ -28,8 +27,7 @@ multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE, maxItems = 
                                        choices = NULL, selected = NULL, multiple = T, width = "500px",
                                        options = list(placeholder = paste("select to view (max of", maxItems, "concurrent tracks)"),
                                                       maxItems = maxItems))),
-           if(upload) div(class = "ui-inline", br(), actionButton(ns("upload"), "Upload my data")),
-           if(GEO) div(class = "ui-inline", br(), actionButton(ns("getGEO"), HTML("Source from GEO <sup>beta</sup>")))
+           if(upload) div(class = "ui-inline", br(), actionButton(ns("upload"), "Upload my data"))
   )
 }
 
@@ -42,7 +40,6 @@ multiVCtrlUI <- function(id, menu = TRUE, upload = TRUE, GEO = TRUE, maxItems = 
 #' \enumerate{
 #'   \item Selecting from available pre-processed datasets.
 #'   \item User-uploaded data.
-#'   \item A beta (least-supported) method of retrieving datasets from GEO.
 #' }
 #' The data in \code{cdata} is supposed to be a phenotype or clinical
 #' feature that one usually tries to correlate with expression data and can be numeric or categorical.
@@ -148,36 +145,6 @@ multiVCtrlServer <- function(id,
         removeModal()
       }
     })
-
-
-    # -- handling GEO data -----------------------------------------------------------------------------------#
-
-    GEOdata <- getGEOServer("GEO")
-
-    observeEvent(input$getGEO, {
-      showModal(modalDialog(title = "Get data from GEO",
-                            getGEOInput(session$ns("GEO")),
-                            footer = modalButton("Cancel")
-               ))
-    })
-
-    # When GEO data is pulled successfully, GEOdata$return changes from NULL to TRUE
-    observeEvent(GEOdata$return, {
-      addDataToSelection(GEOdata$eset, label = GEOdata$accession, selectgroup = "GEO")
-      if(!is.null(GEOdata$pData)) {
-        pData <- GEOdata$pData
-        # add key column to pData for merge even though the samples can be
-        # unrelated and there might not be anything to merge upon
-        for(col in names(pData)) pData[[col]] <- factor(pData[[col]])
-        pData[[key]] <- rownames(pData)
-        data <- merge(cdata, pData, by = key, all = T)
-        view$cdata <- data
-        view$vselect <- names(pData)[1]
-      } else {
-        view$vselect <- NULL
-      }
-      updateSelectizeInput(session, "dataset", choices = choices, selected = GEOdata$accession)
-    }, ignoreInit = TRUE)
 
     return(view)
   })
